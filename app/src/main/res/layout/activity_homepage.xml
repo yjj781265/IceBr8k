@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mBubbleTab"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="app.jayang.icebr8k.Homepage">
+
+    <com.github.florent37.bubbletab.BubbleTab
+        android:id="@+id/bubbleTab"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+
+        android:background="@android:color/white"
+
+        android:clipToPadding="true"
+        android:elevation="10dp"
+        app:bubbleTab_circleColor="@color/colorAccent"
+        app:bubbleTab_circleRatio="1.2"
+        app:bubbleTab_image0="@drawable/survey_icon"
+        app:bubbleTab_image1="@drawable/users_icon"
+        app:bubbleTab_image2="@drawable/map_icon"
+        app:bubbleTab_image3="@drawable/gi_icon" />
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/homepage_viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bubbleTab"
+        android:background="@android:color/holo_blue_bright"></android.support.v4.view.ViewPager>
+
+</RelativeLayout>

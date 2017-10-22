@@ -1,0 +1,55 @@
+ {
+  "project_info": {
+    "project_number": "773225047243",
+    "firebase_url": "https://icebr8k-98675.firebaseio.com",
+    "project_id": "icebr8k-98675",
+    "storage_bucket": "icebr8k-98675.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:773225047243:android:2685d46937591762",
+        "android_client_info": {
+          "package_name": "app.jayang.icebr8k"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "773225047243-vasqlv24jrlug9rbsdtri17ibkt6e5mj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.jayang.icebr8k",
+            "certificate_hash": "c7f5676329b458fc0f5ea70bc77beb9484ac8fed"
+          }
+        },
+        {
+          "client_id": "773225047243-a6cnkkd01vh4ddkd7msvf3npin3286au.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQixnZrf_JdOL9v5SzJaPLRe1YGL5zAjo"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "773225047243-a6cnkkd01vh4ddkd7msvf3npin3286au.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
