@@ -8,9 +8,9 @@ import java.util.ArrayList;
 
 public class SurveyQ {
     private String type, question,questionId;
-    private String[] answer;
+    private ArrayList<String> answer;
 
-    public SurveyQ(String type, String question, String questionId, String[] answer) {
+    public SurveyQ(String type, String question, String questionId, ArrayList<String> answer) {
         this.type = type;
         this.question = question;
         this.questionId = questionId;
@@ -41,11 +41,11 @@ public class SurveyQ {
         this.questionId = questionId;
     }
 
-    public String[] getAnswer() {
+    public ArrayList<String> getAnswer() {
         return answer;
     }
 
-    public void setAnswer(String[] answer) {
+    public void setAnswer(ArrayList answer) {
         this.answer = answer;
     }
 }

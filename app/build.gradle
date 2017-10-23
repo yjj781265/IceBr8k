@@ -42,4 +42,5 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.2.0'
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:recyclerview-v7:26.0.0-alpha1'
+
 }
