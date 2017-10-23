@@ -21,7 +21,6 @@
 
         </activity>
         <activity android:name=".UserProfilePage"
-            android:parentActivityName=".Homepage"
             android:screenOrientation="portrait"
             />
 
@@ -50,6 +49,7 @@
             android:screenOrientation="portrait">
 
         </activity>
+
     </application>
 
 </manifest>

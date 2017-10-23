@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.SystemClock;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.widget.TextViewCompat;
@@ -21,6 +22,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -76,6 +78,7 @@ public class login_page extends AppCompatActivity implements
     private static final String TAG = "GoogleActivity";
     private static final int RC_SIGN_IN = 9001;
     private CallbackManager mCallbackManager;
+    private ProgressBar mProgressBar;
 
     // [START declare_auth]
     private FirebaseAuth mAuth;
@@ -100,8 +103,7 @@ public class login_page extends AppCompatActivity implements
         myRef = mdatabase.getReference("Users");
         usernameList = new ArrayList<>();
 
-        email = (TextView)findViewById(R.id.email);
-        username =(TextView)findViewById(R.id.username);
+
 
         try {
             PackageInfo info = getPackageManager().getPackageInfo(
@@ -120,7 +122,6 @@ public class login_page extends AppCompatActivity implements
         mAuth = FirebaseAuth.getInstance();;
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if(currentUser!=null){
-            Toast.makeText(this,"Sign in Succssfull",Toast.LENGTH_SHORT).show();
             startActivity(intent);
             finish();
         }
@@ -129,8 +130,6 @@ public class login_page extends AppCompatActivity implements
 
 // ...
 
-        // Set the dimensions of the sign-in button.
-        Button signInButton = (Button) findViewById(R.id.sign_in_button);
 
 //facebook login
         mCallbackManager = CallbackManager.Factory.create();
@@ -196,10 +195,6 @@ public class login_page extends AppCompatActivity implements
 
     public void onStart() {
         super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-
-        updateUI(currentUser);
 
     }
 
@@ -209,18 +204,22 @@ public class login_page extends AppCompatActivity implements
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
+
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result.isSuccess()) {
                 // Google Sign In was successful, authenticate with Firebase
+
                 GoogleSignInAccount account = result.getSignInAccount();
                 firebaseAuthWithGoogle(account);
+
+
 
 
 
             } else {
                 // Google Sign In failed, update UI appropriately
                 // ...
-                updateUI(null);
+
             }
         }else {
             mCallbackManager.onActivityResult(requestCode, resultCode, data);
@@ -228,31 +227,6 @@ public class login_page extends AppCompatActivity implements
     }
 
 
-    public void updateUI(FirebaseUser user){
-        if(user!=null) {
-
-
-                // Id of the provider (ex: google.com)
-                String providerId = user.getProviderId();
-
-                // UID specific to the provider
-                String uid = user.getUid();
-
-                // Name, email address, and profile photo Url
-                String name = user.getDisplayName();
-                String email = user.getEmail();
-                Uri photoUrl = user.getPhotoUrl();
-            username.setText(name);
-                Log.d("INFO",name +" "+email +"\n");
-
-
-        }else{
-            username.setText("user not found");
-            email.setText("Email here");
-
-
-        }
-    }
 
 
 
@@ -272,15 +246,14 @@ public class login_page extends AppCompatActivity implements
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            updateUI(user);
                             usernameCreateCheck();
+
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
                             Toast.makeText(getBaseContext(), task.getException().getMessage(),
                                     Toast.LENGTH_LONG).show();
-                            updateUI(null);
+
                         }
 
                         // [START_EXCLUDE]
@@ -302,7 +275,6 @@ public class login_page extends AppCompatActivity implements
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            updateUI(user);
                             updateDatabase(user);
                             usernameCreateCheck();
                         } else {
@@ -310,7 +282,7 @@ public class login_page extends AppCompatActivity implements
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
                             Toast.makeText(getBaseContext(), task.getException().getMessage(),
                                     Toast.LENGTH_LONG).show();
-                            updateUI(null);
+
                         }
 
                         // ...
@@ -337,7 +309,7 @@ public class login_page extends AppCompatActivity implements
 
                     @Override
                     public void onResult(@NonNull Status status) {
-                        updateUI(null);
+
                     }
                 });
 
@@ -353,7 +325,7 @@ public class login_page extends AppCompatActivity implements
                 new ResultCallback<Status>() {
                     @Override
                     public void onResult(@NonNull Status status) {
-                        updateUI(null);
+
                     }
                 });
     }

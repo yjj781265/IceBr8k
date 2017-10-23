@@ -5,5 +5,6 @@
     <string name="error_field_required">This field is required</string>
     <string name="error_field_nospace">No space in username</string>
     <string name="error_invalid_username">Username needs at least 5 characters</string>
+    <string name="log_out">Log out</string>
 
 </resources>

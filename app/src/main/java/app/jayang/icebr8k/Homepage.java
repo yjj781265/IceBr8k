@@ -29,12 +29,12 @@ public class Homepage extends AppCompatActivity {
         bubbleTab = findViewById(R.id.bubbleTab);
 
         viewPager =findViewById(R.id.homepage_viewpager);
-        ViewPagerAdapter vIewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
 
+        viewPagerAdapter.addFragment(new SurveyTab_Fragment());
+        viewPagerAdapter.addFragment(new Userstab_Fragment());
 
-        vIewPagerAdapter.addFragment(new Userstab_Fragment());
-
-        viewPager.setAdapter(vIewPagerAdapter);
+        viewPager.setAdapter(viewPagerAdapter);
         bubbleTab.setupWithViewPager(viewPager);
 
 

@@ -40,7 +40,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
     DatabaseReference reference;
     FirebaseUser currentUser;
     GoogleApiClient mGoogleApiClient;
-    User mUser;
+    User mUser,selfUser;
     String Uid;
 
 
@@ -52,6 +52,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
         profileToolbar =  findViewById(R.id.profileToolbar);
         setSupportActionBar(profileToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
         mImageView =  findViewById(R.id.profileButton);
         mButton =  findViewById(R.id.compareBtn);
         displayname_profile =  findViewById(R.id.displayname_profile);
@@ -75,35 +76,10 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
         Intent i = getIntent();
         mUser = (User)i.getSerializableExtra("userInfo");
-        reference = database.getReference("Usernames/"+mUser.getUsername());
-        reference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Uid = dataSnapshot.getValue(String.class);
-                Log.d("uid",Uid);
-                String currentUID = currentUser.getUid();
-                if(Uid.compareTo(currentUID)==0){
-                    mButton.setText("Logout");
-                    mButton.setBackgroundColor(getResources().getColor(R.color.holo_red_light));
-                    mButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Signout();
+        selfUser = (User)i.getSerializableExtra("selfProfile");
 
-                            Intent intent = new Intent(view.getContext(),login_page.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
 
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        }
 
 
 
@@ -114,12 +90,26 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
 
 
-    }
+
 
     @Override
     protected void onStart() {
         super.onStart();
-        updateUI(mUser);
+        if(selfUser!=null) {
+            updateUI(selfUser);
+            mButton.setText("Logout");
+            mButton.setBackgroundColor(getResources().getColor(R.color.holo_red_light));
+            mButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Signout();
+
+
+                }
+            });
+        }else{
+            updateUI(mUser);
+        }
 
 
     }
@@ -149,6 +139,9 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                         }
                     });
         }
+        Intent intent = new Intent(UserProfilePage.this,login_page.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
         finish();
     }
 
@@ -156,5 +149,11 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+       finish();
+       return  true;
     }
 }

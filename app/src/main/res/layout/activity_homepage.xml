@@ -18,7 +18,7 @@
         android:background="@android:color/white"
 
         android:clipToPadding="true"
-        android:elevation="10dp"
+        android:elevation="80dp"
         app:bubbleTab_circleColor="@color/colorAccent"
         app:bubbleTab_circleRatio="1.2"
         app:bubbleTab_image0="@drawable/survey_icon"
@@ -31,6 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/bubbleTab"
-        android:background="@android:color/holo_blue_bright"></android.support.v4.view.ViewPager>
+        android:layout_marginBottom="2dp"
+        android:background="@android:color/white"></android.support.v4.view.ViewPager>
 
 </RelativeLayout>
