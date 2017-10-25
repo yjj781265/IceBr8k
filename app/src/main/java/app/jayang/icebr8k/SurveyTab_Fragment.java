@@ -7,6 +7,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutCompat;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,8 +24,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
 import com.xw.repo.BubbleSeekBar;
 
 import org.w3c.dom.Text;
@@ -44,14 +49,14 @@ public class SurveyTab_Fragment extends Fragment {
     TextView mTextView,msubTextview;
     RadioGroup mRadioGroup;
     Button mSubmit;
-    SurveyQ Q1,Q2,Q3,Q4;
+
     ArrayList<SurveyQ> surveyQArrayList;
-    ProgressBar mProgressBar;
+    ProgressBar mProgressBar,mProgressBar2;
     Spinner mSpinner;
-    FirebaseDatabase mDatabase;
-    DatabaseReference mRef;
+    RelativeLayout mlayout;
+
+
     int index =0 ;
-    String ID;
 
 
 
@@ -64,43 +69,6 @@ public class SurveyTab_Fragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         surveyQArrayList = new ArrayList<>();
-        ID = UUID.randomUUID().toString();
-
-        ArrayList answer = new ArrayList();
-        answer.add("Yes");
-        answer.add("No");
-
-        Q1 = new SurveyQ("mc","Do you like music ?",ID,answer);
-        Q2 = new SurveyQ("mc","Do you like sport ?",ID,answer);
-
-        ArrayList answer2 = new ArrayList();
-        answer2.add("Action");
-        answer2.add("Comedy");
-        answer2.add("Adventure");
-        answer2.add("Crime");
-        answer2.add("Drama");
-        answer2.add("Fantasy");
-        answer2.add("Historical");
-        answer2.add("Science Fiction");
-
-
-
-
-        Q3 = new SurveyQ("sp"," What kind of movie do you like the most ?",ID,answer2);
-        Q4 = new SurveyQ("sc"," Scale 1 to 10, how do you like soccer ?",ID,null);
-        surveyQArrayList.add(Q1);
-        surveyQArrayList.add(Q2);
-        surveyQArrayList.add(Q3);
-        surveyQArrayList.add(Q4);
-
-
-       /* mDatabase = FirebaseDatabase.getInstance();
-        mRef = mDatabase.getReference();
-        HashMap hashMap = new HashMap();
-        hashMap.put(Q1.getQuestionId(),Q1);
-        mRef.child("Questions").updateChildren(hashMap);
-*/
-
 
 
 
@@ -118,8 +86,51 @@ public class SurveyTab_Fragment extends Fragment {
         mProgressBar = mview.findViewById(R.id.survey_progressBar);
         mSpinner=mview.findViewById(R.id.spinner_id);
         msubTextview = mview.findViewById(R.id.sub_question_id);
+        mlayout = mview.findViewById(R.id.cardView_RLayout);
+        mProgressBar2= mview.findViewById(R.id.progressBar2);
+        mProgressBar2.setVisibility(View.VISIBLE);
+        mSubmit.setVisibility(View.INVISIBLE);
 
-        updateUI(surveyQArrayList.get(index));
+        //new UploadQ().updataQdatabase(FirebaseDatabase.getInstance().getReference());
+
+        DatabaseReference mRef= FirebaseDatabase.getInstance().getReference("Questions");
+
+        mRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                surveyQArrayList.clear();
+
+                for (DataSnapshot surveySnapshot : dataSnapshot.getChildren()) {
+
+                    GenericTypeIndicator<ArrayList<String>> t = new GenericTypeIndicator<ArrayList<String>>() {};
+                    ArrayList<String> answer = surveySnapshot.child("answer").getValue(t);
+                    String q_id = surveySnapshot.child("questionId").getValue(String.class);
+                    String type = surveySnapshot.child("type").getValue(String.class);
+                    String question = surveySnapshot.child("question").getValue(String.class);
+
+                    SurveyQ  surveyQ = new SurveyQ(type,question,q_id,answer);
+                    surveyQArrayList.add(surveyQ);
+
+
+
+
+
+
+                }
+                mSubmit.setVisibility(View.VISIBLE);
+                mProgressBar2.setVisibility(View.INVISIBLE);
+                if(!surveyQArrayList.isEmpty()) {
+                    updateUI(surveyQArrayList.get(index));
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
 
 
 
@@ -135,7 +146,9 @@ public class SurveyTab_Fragment extends Fragment {
                     if(index == 0){
                         mProgressBar.setProgress(0);
                     }
-                    updateUI(surveyQArrayList.get(index));
+                    if(!surveyQArrayList.isEmpty()) {
+                        updateUI(surveyQArrayList.get(index));
+                    }
 
                 }
             }
@@ -204,7 +217,7 @@ public class SurveyTab_Fragment extends Fragment {
         if(index == surveyQArrayList.size()-1){
             mProgressBar.setProgress(100);
         }else {
-            mProgressBar.incrementProgressBy((int) Math.ceil(100 / surveyQArrayList.size()));
+            mProgressBar.incrementProgressBy( (100 / surveyQArrayList.size()));
         }
 
         if(surveyQ.getType().equals("mc")) {
@@ -213,7 +226,7 @@ public class SurveyTab_Fragment extends Fragment {
             mTextView.setText(surveyQ.getQuestion());
             for (int i = 0; i < surveyQ.getAnswer().size(); i++) {
                 RadioButton button = new RadioButton(getContext());
-                button.setText(surveyQ.getAnswer().get(i));
+                button.setText(surveyQ.getAnswer().get(i).toString());
                 mRadioGroup.addView(button);
             }
         }else if(surveyQ.getType().equals("sp")){

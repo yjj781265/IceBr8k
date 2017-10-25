@@ -10,6 +10,10 @@ public class SurveyQ {
     private String type, question,questionId;
     private ArrayList<String> answer;
 
+    public SurveyQ() {
+
+    }
+
     public SurveyQ(String type, String question, String questionId, ArrayList<String> answer) {
         this.type = type;
         this.question = question;
