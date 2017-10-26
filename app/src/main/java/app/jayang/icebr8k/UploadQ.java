@@ -26,7 +26,7 @@ public class UploadQ {
         ArrayList answer1 = new ArrayList();
         answer1.add("Yes");
         answer1.add("No");
-        SurveyQ q1 = new SurveyQ("mc","Do you like sport ?", UUID.randomUUID().toString().replace("-","_"),answer1);
+        SurveyQ q1 = new SurveyQ("mc","Do you like sport ?", UUID.randomUUID().toString(),answer1);
 
 
         ArrayList answer2 = new ArrayList();
@@ -73,7 +73,7 @@ public class UploadQ {
         ArrayList answer6 = new ArrayList();
         answer6.add("Coffee");
         answer6.add("Tea");
-        SurveyQ q6 = new SurveyQ("mc","Coffee or Tea ?", UUID.randomUUID().toString().replace("-","_"),answer6);
+        SurveyQ q6 = new SurveyQ("mc","Coffee or Tea ?", UUID.randomUUID().toString(),answer6);
 
         ArrayList answer7 = new ArrayList();
         answer7.add("Mac");
@@ -81,16 +81,20 @@ public class UploadQ {
         SurveyQ q7 = new SurveyQ("mc","Mac or PC ?", UUID.randomUUID().toString(),answer7);
 
         ArrayList answer8 = new ArrayList();
-        answer8.add("Mac");
-        answer8.add("PC");
+        answer8.add("Android");
+        answer8.add("IOS");
         SurveyQ q8 = new SurveyQ("mc","Android or IOS ?", UUID.randomUUID().toString(),answer8);
+
+
+
+
 
         ArrayList<SurveyQ> initial8 = new ArrayList<>();
 
            SurveyQ[] arr = {q1,q2,q3,q4,q5,q6,q7,q8};
         for(SurveyQ surveyQ : arr){
             initial8.add(surveyQ);
-            mRef.child("Questions").child(surveyQ.getQuestionId()).setValue(surveyQ);
+            mRef.child("Questions_8").child(surveyQ.getQuestionId()).setValue(surveyQ);
             Log.d("Qtable",surveyQ.getQuestion());
 
         }

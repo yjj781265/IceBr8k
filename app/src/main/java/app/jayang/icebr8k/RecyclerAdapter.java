@@ -34,7 +34,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<Viewholder> {
     }
 
     @Override
-    public void onBindViewHolder(Viewholder holder, final int position) {
+    public void onBindViewHolder(Viewholder holder,  int position) {
          final User mUser = userArrayList.get(position);
         holder.username .setText(mUser.getUsername());
         holder.displayname.setText(mUser.getDisplayname());

@@ -39,7 +39,9 @@ dependencies {
     compile 'com.github.bumptech.glide:glide:4.2.0'
     compile 'com.victor:lib:1.0.4'
     compile 'com.xw.repo:bubbleseekbar:3.8-lite'
+    compile 'com.github.lzyzsd:circleprogress:1.2.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.2.0'
+    compile 'com.github.javiersantos:MaterialStyledDialogs:2.1'
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:recyclerview-v7:26.0.0-alpha1'
 

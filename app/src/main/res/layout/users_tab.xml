@@ -32,6 +32,8 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:id="@+id/imageBtn"
+        android:clickable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"
 
         android:layout_marginLeft="15dp"
         android:layout_marginTop="7dp" />
