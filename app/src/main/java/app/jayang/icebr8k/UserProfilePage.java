@@ -103,29 +103,6 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
 
                }
-        mButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog = new Dialog(UserProfilePage.this);
-                dialog.setCanceledOnTouchOutside(true);
-                dialog.setContentView(R.layout.score_dialog);
-                TextView textview = dialog.findViewById(R.id.compareText);
-                textview.setText("Compare with "+ mUser.getUsername());
-                TextView cancel = dialog.findViewById(R.id.cancel_btn);
-                arcProgress = dialog.findViewById(R.id.arc_progress);
-                arcProgress.setProgress(score);
-                dialog.show();
-                cancel.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        dialog.dismiss();
-                    }
-                });
-
-
-            }
-
-        });
 
 
 
@@ -334,9 +311,35 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
                 Log.d("map2", User2QA.toString());
                 score = (int)(((double)User1QA.size()/(double)User1QArr.size())*100);
-                if(User1QArr.isEmpty() || User1QArr ==null){
-                    Toast.makeText(getBaseContext(),mUser.getDisplayname() +"  hasn't answered any questions yet",Toast.LENGTH_LONG).show();
-                }
+                mButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(User2QArr.isEmpty()){
+                            Toast.makeText(getBaseContext(),mUser.getDisplayname() +" hasn't answered any questions yet",Toast.LENGTH_LONG).show();
+
+                        }else{
+                            dialog = new Dialog(UserProfilePage.this);
+                            dialog.setCanceledOnTouchOutside(true);
+                            dialog.setContentView(R.layout.score_dialog);
+                            TextView textview = dialog.findViewById(R.id.compareText);
+                            textview.setText("Compare with "+ mUser.getUsername());
+                            TextView cancel = dialog.findViewById(R.id.cancel_btn);
+                            arcProgress = dialog.findViewById(R.id.arc_progress);
+                            arcProgress.setProgress(score);
+                            dialog.show();
+                            cancel.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    dialog.dismiss();
+                                }
+                            });
+                        }
+
+
+                    }
+
+                });
+
 /********/
 
 

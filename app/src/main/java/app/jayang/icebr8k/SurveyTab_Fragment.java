@@ -64,8 +64,9 @@ public class SurveyTab_Fragment extends Fragment {
     ArrayList<String> surveyQlist; // for comparing with userQArraylist
     ProgressBar mProgressBar,mProgressBar2;
     Spinner mSpinner;
+   RelativeLayout mRelativeLayout;
     RelativeLayout mlayout;
-    int index =0 ;
+    int index  ;
 
 
 
@@ -80,9 +81,11 @@ public class SurveyTab_Fragment extends Fragment {
         surveyQArrayList = new ArrayList<>();
         userQlist = new ArrayList<>();
         surveyQlist = new ArrayList<>();
+
+        index =0;
       //  new UploadQ().updataQdatabase(FirebaseDatabase.getInstance().getReference());
 
-        createInitQ();
+
 
 
 
@@ -103,6 +106,8 @@ public class SurveyTab_Fragment extends Fragment {
         mlayout = mview.findViewById(R.id.cardView_RLayout);
         mProgressBar2= mview.findViewById(R.id.progressBar2);
         mProgressBar2.setVisibility(View.VISIBLE);
+        mRelativeLayout = mview.findViewById(R.id.cardView_RLayout);
+
         mSubmit.setVisibility(View.INVISIBLE);
 
 
@@ -120,6 +125,7 @@ public class SurveyTab_Fragment extends Fragment {
 
             @Override
             public void onClick(View view) {
+                Toast.makeText(mview.getContext(),String.valueOf(index),Toast.LENGTH_SHORT).show();
                 if(mRadioGroup.getCheckedRadioButtonId()==-1&& mRadioGroup.getVisibility()==View.VISIBLE){
                     Toast.makeText(getContext(),"Make a selection",Toast.LENGTH_SHORT).show();
 
@@ -152,9 +158,18 @@ public class SurveyTab_Fragment extends Fragment {
         return  mview;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        createInitQ();
 
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
 
+    }
 
     public void setBelowSeekbar(){
         RelativeLayout.LayoutParams params= new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -209,7 +224,7 @@ public class SurveyTab_Fragment extends Fragment {
     public void updateUI(SurveyQ surveyQ){
         mRadioGroup.removeAllViews();
         mRadioGroup.clearCheck();
-        if(index == surveyQArrayList.size()-1){
+        if(index == surveyQArrayList.size()-1 ){
             mProgressBar.setProgress(100);
         }else {
             mProgressBar.incrementProgressBy( (100 / surveyQArrayList.size()));
@@ -241,12 +256,16 @@ public class SurveyTab_Fragment extends Fragment {
     }
     public void updateCardView(){
         index = (index + 1);
-        if(index == surveyQArrayList.size()){
+        if(index >= surveyQArrayList.size()){
             mProgressBar.setProgress(0);
             mProgressBar2.setVisibility(View.INVISIBLE);
             mSubmit.setVisibility(View.INVISIBLE);
-            mRadioGroup.setVisibility(View.INVISIBLE);
-            mTextView.setText("NO Questions Yet,check back later");
+            mRadioGroup.setVisibility(View.GONE);
+            mSpinner.setVisibility(View.INVISIBLE);
+            mSeekBar.setVisibility(View.INVISIBLE);
+            mTextView.setText("Check back later for more question");
+            index =0;
+            surveyQArrayList.clear();
 
         }else {
             updateUI(surveyQArrayList.get(index));
@@ -260,7 +279,7 @@ public void createInitQ(){
 
     DatabaseReference mRef= FirebaseDatabase.getInstance().getReference("Questions_8");
 
-    mRef.addValueEventListener(new ValueEventListener() {
+    mRef.addListenerForSingleValueEvent(new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
 
@@ -380,7 +399,8 @@ public void createUserQList(){
                     }else{ // no questions
                         mProgressBar2.setVisibility(View.INVISIBLE);
                         mSubmit.setVisibility(View.INVISIBLE);
-                        mTextView.setText("NO Questions Yet");
+                        mTextView.setText("Check back later for more questions");
+
                     }
 
                 }
