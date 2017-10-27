@@ -83,7 +83,13 @@ public class SurveyTab_Fragment extends Fragment {
         surveyQlist = new ArrayList<>();
 
         index =0;
-      //  new UploadQ().updataQdatabase(FirebaseDatabase.getInstance().getReference());
+       // new UploadQ().updataQdatabase(FirebaseDatabase.getInstance().getReference());
+        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference();
+        ArrayList<String> answers = new ArrayList();
+        answers.add("Paper towels");
+        answers.add("Hand dryer");
+        SurveyQ q8 = new SurveyQ("mc","Paper towels or Hand dryer ?", UUID.randomUUID().toString(),answers);
+        mRef.child("Questions_8").child(q8.getQuestionId()).setValue(q8);
 
 
 
