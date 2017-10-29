@@ -33,6 +33,7 @@ import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.github.javiersantos.materialstyleddialogs.enums.Style;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -66,6 +67,7 @@ public class SurveyTab_Fragment extends Fragment {
     Spinner mSpinner;
    RelativeLayout mRelativeLayout;
     RelativeLayout mlayout;
+    FirebaseUser currentUser;
     int index  ;
 
 
@@ -81,15 +83,16 @@ public class SurveyTab_Fragment extends Fragment {
         surveyQArrayList = new ArrayList<>();
         userQlist = new ArrayList<>();
         surveyQlist = new ArrayList<>();
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         index =0;
        // new UploadQ().updataQdatabase(FirebaseDatabase.getInstance().getReference());
         DatabaseReference mRef = FirebaseDatabase.getInstance().getReference();
         ArrayList<String> answers = new ArrayList();
-        answers.add("Paper towels");
-        answers.add("Hand dryer");
-        SurveyQ q8 = new SurveyQ("mc","Paper towels or Hand dryer ?", UUID.randomUUID().toString(),answers);
-        mRef.child("Questions_8").child(q8.getQuestionId()).setValue(q8);
+        answers.add("Superman");
+        answers.add("Batman");
+        SurveyQ q8 = new SurveyQ("mc","Superman or Batman ?", UUID.randomUUID().toString(),answers);
+        //mRef.child("Questions_8").child(q8.getQuestionId()).setValue(q8);
 
 
 
@@ -115,6 +118,39 @@ public class SurveyTab_Fragment extends Fragment {
         mRelativeLayout = mview.findViewById(R.id.cardView_RLayout);
 
         mSubmit.setVisibility(View.INVISIBLE);
+        createInitQ();
+
+       DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Questions_8");
+        mRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                index =0;
+                createInitQ();
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
 
 
 
@@ -167,13 +203,21 @@ public class SurveyTab_Fragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        createInitQ();
+
+
 
     }
 
     @Override
     public void onPause() {
         super.onPause();
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        createInitQ();
 
     }
 
