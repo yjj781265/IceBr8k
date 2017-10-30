@@ -418,6 +418,7 @@ public class login_page extends AppCompatActivity implements
             @Override
             public void onClick(View view) {
                 dialog.dismiss();
+                loadingdialog.dismiss();
 
                 FirebaseAuth.getInstance().getCurrentUser().delete();
                 signOut();
