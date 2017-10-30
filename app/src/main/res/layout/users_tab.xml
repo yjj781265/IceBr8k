@@ -55,11 +55,21 @@
         android:layout_below="@id/users_toolbar">
 
 
-        <android.support.v7.widget.RecyclerView
+        <com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
         android:id="@+id/recyclerView_id"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-            android:orientation="vertical"
-        android:scrollbars="vertical" />
+        android:orientation="vertical"
+        android:scrollbars="none"
+        app:fastScrollPopupBgColor="@color/colorAccent"
+        app:fastScrollPopupTextColor="@android:color/primary_text_dark"
+        app:fastScrollThumbColor="@color/colorPrimaryDark"
+        app:fastScrollAutoHide="false"
+        app:fastScrollPopupTextSize="40sp"/>
+
+
+
     </android.support.v4.widget.SwipeRefreshLayout>
+
+
     </RelativeLayout>

@@ -71,6 +71,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import dmax.dialog.SpotsDialog;
+
 
 public class login_page extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
@@ -91,6 +93,7 @@ public class login_page extends AppCompatActivity implements
     private TextInputEditText input;
     private ArrayList<String> usernameList;
     private Intent intent;
+    private  SpotsDialog loadingdialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +105,9 @@ public class login_page extends AppCompatActivity implements
         mdatabase = FirebaseDatabase.getInstance();
         myRef = mdatabase.getReference("Users");
         usernameList = new ArrayList<>();
+        loadingdialog = new SpotsDialog(this,"Signing in...");
+
+
 
 
 
@@ -122,6 +128,7 @@ public class login_page extends AppCompatActivity implements
         mAuth = FirebaseAuth.getInstance();;
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if(currentUser!=null){
+            loadingdialog.dismiss();
             startActivity(intent);
             finish();
         }
@@ -137,7 +144,7 @@ public class login_page extends AppCompatActivity implements
 
 
          //setup click Listener
-         findViewById(R.id.sign_out_button).setOnClickListener(this);
+
          findViewById(R.id.sign_in_button).setOnClickListener(this);
          Button FBloginButton=findViewById(R.id.fb_login_button);
         FBloginButton.setOnClickListener(this);
@@ -201,6 +208,7 @@ public class login_page extends AppCompatActivity implements
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        loadingdialog.show();
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
@@ -294,6 +302,7 @@ public class login_page extends AppCompatActivity implements
     private void signIn() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
+
     }
     // [END signin]
 
@@ -398,6 +407,7 @@ public class login_page extends AppCompatActivity implements
 
                     dialog.dismiss();
                     startActivity(intent);
+                    loadingdialog.dismiss();
                     finish();
 
                 }
@@ -433,6 +443,7 @@ public void usernameCreateCheck(){
 
                 Log.d("dialog", dataSnapshot.getValue().toString());
                 startActivity(intent);
+                loadingdialog.dismiss();
                 finish();
             }
         }
@@ -477,17 +488,14 @@ public void createUsernameList(){
     public void onClick(View view) {
 
         if (view.getId() == R.id.sign_in_button && mAuth.getCurrentUser()==null) {
+
                 signIn();
 
         }else if((view.getId() == R.id.sign_in_button || view.getId() == R.id.fb_login_button)&& mAuth.getCurrentUser()!=null){
 
             Toast.makeText(this,"You already sign in with "+ mAuth.getCurrentUser().getProviders(),Toast.LENGTH_LONG).show();
         }
-         if(view.getId() == R.id.sign_out_button){
-            signOut();
-             //Intent intent = new Intent(this,Homepage.class);
-             //startActivity(intent);
-        }
+       
 
         if(view.getId()==R.id.fb_login_button && mAuth.getCurrentUser()== null){
             LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("email", "public_profile"));

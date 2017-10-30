@@ -21,9 +21,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
@@ -40,6 +42,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.victor.loading.newton.NewtonCradleLoading;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created by LoLJay on 10/20/2017.
@@ -99,6 +102,7 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
 
 
 
+
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
@@ -115,6 +119,7 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                refreshLayout.setRefreshing(true);
                 populateUserList();
             }
         });
@@ -172,11 +177,17 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
                     }
 
 
+
                 }
-                mRecyclerView.setAdapter(new RecyclerAdapter(getContext(),mUserArrayList));
-                refreshLayout.setRefreshing(false);
-                newtonCradleLoading.stop();
-                newtonCradleLoading.setVisibility(view.INVISIBLE);
+                //Toast.makeText(getContext(),"Refreshed",Toast.LENGTH_SHORT).show();
+                if(mUserArrayList!=null) {
+                    Collections.sort(mUserArrayList);
+                    mRecyclerView.setAdapter(new RecyclerAdapter(getContext(), mUserArrayList));
+                    refreshLayout.setRefreshing(false);
+                    newtonCradleLoading.stop();
+                    newtonCradleLoading.setVisibility(view.INVISIBLE);
+                }
+
 
             }
 

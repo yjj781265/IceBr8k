@@ -1,6 +1,7 @@
 package app.jayang.icebr8k;
 
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import java.io.Serializable;
 
@@ -8,7 +9,7 @@ import java.io.Serializable;
  * Created by LoLJay on 10/20/2017.
  */
 
-public class User implements Serializable {
+public class User implements Serializable,Comparable<User> {
     private String displayname,username,photourl,email;
 
     public User() {
@@ -44,5 +45,12 @@ public class User implements Serializable {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+
+    @Override
+    public int compareTo(@NonNull User user) {
+        return displayname.toUpperCase().compareTo(user.getDisplayname().toUpperCase());
+
     }
 }

@@ -3,6 +3,7 @@ package app.jayang.icebr8k;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,8 @@ import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
+
 
 import java.util.ArrayList;
 
@@ -17,7 +20,7 @@ import java.util.ArrayList;
  * Created by LoLJay on 10/20/2017.
  */
 
-public class RecyclerAdapter extends RecyclerView.Adapter<Viewholder> {
+public class RecyclerAdapter extends RecyclerView.Adapter<Viewholder> implements FastScrollRecyclerView.SectionedAdapter  {
     private ArrayList<User> userArrayList = new ArrayList<>();
     private Context context;
 
@@ -54,4 +57,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<Viewholder> {
     public int getItemCount() {
         return userArrayList.size();
     }
+
+    @NonNull
+    @Override
+    public String getSectionName(int position) {
+        return userArrayList.get(position).getDisplayname().substring(0,1);
+    }
 }
+

@@ -45,6 +45,7 @@ import com.xw.repo.BubbleSeekBar;
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -89,10 +90,10 @@ public class SurveyTab_Fragment extends Fragment {
        // new UploadQ().updataQdatabase(FirebaseDatabase.getInstance().getReference());
         DatabaseReference mRef = FirebaseDatabase.getInstance().getReference();
         ArrayList<String> answers = new ArrayList();
-        answers.add("Superman");
-        answers.add("Batman");
-        SurveyQ q8 = new SurveyQ("mc","Superman or Batman ?", UUID.randomUUID().toString(),answers);
-        //mRef.child("Questions_8").child(q8.getQuestionId()).setValue(q8);
+        answers.add("Male");
+        answers.add("Female");
+        SurveyQ q8 = new SurveyQ("mc","Male or Female ?", UUID.randomUUID().toString(),answers);
+       // mRef.child("Questions_8").child(q8.getQuestionId()).setValue(q8);
 
 
 
@@ -118,30 +119,13 @@ public class SurveyTab_Fragment extends Fragment {
         mRelativeLayout = mview.findViewById(R.id.cardView_RLayout);
 
         mSubmit.setVisibility(View.INVISIBLE);
-        createInitQ();
-
-       DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Questions_8");
-        mRef.addChildEventListener(new ChildEventListener() {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Questions_8");
+        ref.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                index =0;
+            public void onDataChange(DataSnapshot dataSnapshot) {
                 createInitQ();
-
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
+                mProgressBar.setProgress(0);
+               // Toast.makeText(mview.getContext(),"Datachanged",Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -163,11 +147,16 @@ public class SurveyTab_Fragment extends Fragment {
 
 
 
+
+
+
         mSubmit.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
-                Toast.makeText(mview.getContext(),String.valueOf(index),Toast.LENGTH_SHORT).show();
+
+               // Toast.makeText(mview.getContext(),String.valueOf(index),Toast.LENGTH_SHORT).show();
+                //Toast.makeText(mview.getContext(),"SQ List "+surveyQArrayList.size(),Toast.LENGTH_SHORT).show();
                 if(mRadioGroup.getCheckedRadioButtonId()==-1&& mRadioGroup.getVisibility()==View.VISIBLE){
                     Toast.makeText(getContext(),"Make a selection",Toast.LENGTH_SHORT).show();
 
@@ -200,13 +189,7 @@ public class SurveyTab_Fragment extends Fragment {
         return  mview;
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
 
-
-
-    }
 
     @Override
     public void onPause() {
@@ -217,7 +200,7 @@ public class SurveyTab_Fragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        createInitQ();
+
 
     }
 
@@ -311,10 +294,10 @@ public class SurveyTab_Fragment extends Fragment {
             mProgressBar2.setVisibility(View.INVISIBLE);
             mSubmit.setVisibility(View.INVISIBLE);
             mRadioGroup.setVisibility(View.GONE);
+            msubTextview.setVisibility(View.GONE);
             mSpinner.setVisibility(View.INVISIBLE);
             mSeekBar.setVisibility(View.INVISIBLE);
             mTextView.setText("Check back later for more question");
-            index =0;
             surveyQArrayList.clear();
 
         }else {
@@ -324,8 +307,9 @@ public class SurveyTab_Fragment extends Fragment {
 
     }
 
-    // create initial 8 question;
+    // create initial question;
 public void createInitQ(){
+
 
     DatabaseReference mRef= FirebaseDatabase.getInstance().getReference("Questions_8");
 
@@ -334,7 +318,7 @@ public void createInitQ(){
         public void onDataChange(DataSnapshot dataSnapshot) {
 
             surveyQlist.clear();
-
+// pull all the questions from questions table just hte questions id
             for (DataSnapshot surveySnapshot : dataSnapshot.getChildren()) {
 
                /* GenericTypeIndicator<ArrayList<String>> t = new GenericTypeIndicator<ArrayList<String>>() {};
@@ -369,12 +353,14 @@ public void pushUserQA(SurveyQ marr,String answer) {
 }
 
 public void createUserQList(){
-    userQlist.clear();
+
+    // get all the questions user answered
     DatabaseReference mref = FirebaseDatabase.getInstance().getReference
             ("UserQA/"+FirebaseAuth.getInstance().getCurrentUser().getUid());
     mref.addListenerForSingleValueEvent(new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
+            userQlist.clear();
             for(DataSnapshot questionSnapchat: dataSnapshot.getChildren()){
 
                 String q_id = questionSnapchat.getKey();
@@ -416,14 +402,19 @@ public void createUserQList(){
 
 }
     public void initQuestionPool(){
-             surveyQlist.removeAll(userQlist);
+        surveyQlist.removeAll(userQlist);
+        surveyQArrayList.clear();;
+
         Log.d("debug","After Removal"+surveyQlist);
+
 
 
             DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Questions_8");
             mRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
+
+
                     for(DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
                         GenericTypeIndicator<ArrayList<String>> t = new GenericTypeIndicator<ArrayList<String>>() {};
                         ArrayList<String> answer = childSnapshot.child("answer").getValue(t);
@@ -442,13 +433,16 @@ public void createUserQList(){
 
                     }
                     Log.d("debug",String.valueOf(surveyQArrayList.size()));
-                    if(!surveyQArrayList.isEmpty()) {
+                    if(!surveyQArrayList.isEmpty() && surveyQArrayList!=null) {
+                        index =0;
+                        Collections.shuffle(surveyQArrayList);
                         mProgressBar2.setVisibility(View.INVISIBLE);
                         mSubmit.setVisibility(View.VISIBLE);
                         updateUI(surveyQArrayList.get(index));
                     }else{ // no questions
                         mProgressBar2.setVisibility(View.INVISIBLE);
                         mSubmit.setVisibility(View.INVISIBLE);
+                        msubTextview.setVisibility(View.GONE);
                         mTextView.setText("Check back later for more questions");
 
                     }
