@@ -91,9 +91,9 @@ public class SurveyTab_Fragment extends Fragment {
        // new UploadQ().updataQdatabase(FirebaseDatabase.getInstance().getReference());
         DatabaseReference mRef = FirebaseDatabase.getInstance().getReference();
         ArrayList<String> answers = new ArrayList();
-        answers.add("Male");
-        answers.add("Female");
-        SurveyQ q8 = new SurveyQ("mc","Male or Female ?", UUID.randomUUID().toString(),answers);
+        answers.add("A");
+        answers.add("B");
+        SurveyQ q8 = new SurveyQ("mc","A or B?", UUID.randomUUID().toString(),answers);
        // mRef.child("Questions_8").child(q8.getQuestionId()).setValue(q8);
 
 
@@ -120,20 +120,7 @@ public class SurveyTab_Fragment extends Fragment {
         mRelativeLayout = mview.findViewById(R.id.cardView_RLayout);
 
         mSubmit.setVisibility(View.INVISIBLE);
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Questions_8");
-        ref.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                createInitQ();
-                mProgressBar.setProgress(0);
-               // Toast.makeText(mview.getContext(),"Datachanged",Toast.LENGTH_SHORT).show();
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
 
 
 
@@ -191,6 +178,24 @@ public class SurveyTab_Fragment extends Fragment {
     }
 
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Questions_8");
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                createInitQ();
+                mProgressBar.setProgress(0);
+                Toast.makeText(mview.getContext(),"Datachanged",Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
 
     @Override
     public void onPause() {
@@ -269,7 +274,7 @@ public class SurveyTab_Fragment extends Fragment {
 
             mTextView.setText(surveyQ.getQuestion());
             for (int i = 0; i < surveyQ.getAnswer().size(); i++) {
-                RadioButton button = new RadioButton(getContext());
+                RadioButton button = new RadioButton(mview.getContext());
                 button.setText(surveyQ.getAnswer().get(i).toString());
                 mRadioGroup.addView(button);
             }
@@ -376,7 +381,7 @@ public void createUserQList(){
                 Snackbar.make(mview,"User hasn't answer any questions yet",Snackbar.LENGTH_LONG).show();
                 new MaterialStyledDialog.Builder(getContext())
                         .setTitle("IceBr8k!")
-                        .setDescription("Welcome to the IceBr8k, here are your first 8 questions")
+                        .setDescription("Welcome to the IceBr8k, here are your  8 questions")
                         .setStyle(Style.HEADER_WITH_TITLE)
                         .setPositiveText("Okay").onPositive(new MaterialDialog.SingleButtonCallback() {
                     @Override
@@ -451,6 +456,7 @@ public void createUserQList(){
                         updateUI(surveyQArrayList.get(index));
                     }else{ // no questions
                         mProgressBar2.setVisibility(View.INVISIBLE);
+                        mRadioGroup.setVisibility(View.GONE);
                         mSubmit.setVisibility(View.INVISIBLE);
                         msubTextview.setVisibility(View.GONE);
                         mTextView.setText("Check back later for more questions");
