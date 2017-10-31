@@ -61,7 +61,7 @@ public class SurveyTab_Fragment extends Fragment {
     RadioGroup mRadioGroup;
     Button mSubmit;
 
-    ArrayList<SurveyQ> surveyQArrayList; // for unpdating UI
+    ArrayList<SurveyQ> surveyQArrayList,temp; // for unpdating UI
     ArrayList<String> userQlist;
     ArrayList<String> surveyQlist; // for comparing with userQArraylist
     ProgressBar mProgressBar,mProgressBar2;
@@ -82,6 +82,7 @@ public class SurveyTab_Fragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         surveyQArrayList = new ArrayList<>();
+        temp = new ArrayList<>();
         userQlist = new ArrayList<>();
         surveyQlist = new ArrayList<>();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -427,11 +428,20 @@ public void createUserQList(){
                         Log.d("debug",surveyQlist.toString());
 
                         if(surveyQlist.contains(surveyQ.getQuestionId())) {
-                            surveyQArrayList.add(surveyQ);
+                            temp.add(surveyQ);
 
                         }
 
+
                     }
+                    /*if(temp.size()>=8){
+                        Collections.shuffle(temp);
+                        for(int i=0; i<8;i++){
+                            surveyQArrayList.add(temp.get(i));
+                        }
+                    }else{*/
+                        surveyQArrayList =temp;
+                   // }
                     Log.d("debug",String.valueOf(surveyQArrayList.size()));
                     if(!surveyQArrayList.isEmpty() && surveyQArrayList!=null) {
                         index =0;
