@@ -70,5 +70,16 @@
 
         />
 
+    <Button
+        android:id="@+id/reset"
+        android:layout_width="120dp"
+        android:layout_height="40dp"
+        android:layout_above="@+id/compareBtn"
+        android:textSize="16sp"
+
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="22dp"
+        android:text="Reset"/>
+
 
 </RelativeLayout>

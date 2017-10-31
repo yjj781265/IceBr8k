@@ -26,6 +26,7 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+
     compile 'com.github.d-max:spots-dialog:0.7@aar'
     compile 'com.facebook.android:facebook-android-sdk:[4,5)'
     compile 'com.android.support:appcompat-v7:26.+'
@@ -41,10 +42,12 @@ dependencies {
     compile 'com.victor:lib:1.0.4'
     compile 'com.xw.repo:bubbleseekbar:3.8-lite'
     compile 'com.github.lzyzsd:circleprogress:1.2.1'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.2.0'
     compile 'com.github.javiersantos:MaterialStyledDialogs:2.1'
-    testCompile 'junit:junit:4.12'
     compile 'com.android.support:recyclerview-v7:26.0.0-alpha1'
     compile 'com.simplecityapps:recyclerview-fastscroll:1.0.16'
-
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:support-compat:25.1.1'
+    compile 'com.daimajia.easing:library:2.0@aar'
+    compile 'com.daimajia.androidanimations:library:2.3@aar'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.2.0'
 }

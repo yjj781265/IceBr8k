@@ -46,7 +46,7 @@ import static android.R.id.progress;
 public class UserProfilePage extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener{
     Toolbar profileToolbar;
     ImageView mImageView;
-    Button mButton;
+    Button mButton,resetBtn;
     TextView displayname_profile, email_profile,username_profile;
 
     FirebaseDatabase database;
@@ -80,6 +80,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
         username_profile =  findViewById(R.id.username_profile);
         database = FirebaseDatabase.getInstance();
        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        resetBtn = findViewById(R.id.reset);
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
@@ -137,7 +138,19 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
                 }
             });
+            resetBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/"+currentUser.getUid());
+                    mRef.removeValue();
+                    Toast.makeText(getApplicationContext(),"Reset is done",Toast.LENGTH_SHORT).show();
+                    Intent i = new Intent(getApplicationContext(),Homepage.class);
+                    startActivity(i);
+                    finish();
+                }
+            });
         }else{
+            resetBtn.setVisibility(View.GONE);
             updateUI(mUser);
         }
 
@@ -324,12 +337,22 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                             TextView textview = dialog.findViewById(R.id.compareText);
                             textview.setText("Compare with "+ mUser.getUsername());
                             TextView cancel = dialog.findViewById(R.id.cancel_btn);
+                            TextView details = dialog.findViewById(R.id.details_btn);
                             arcProgress = dialog.findViewById(R.id.arc_progress);
                             arcProgress.setProgress(score);
                             dialog.show();
                             cancel.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
+                                    dialog.dismiss();
+                                }
+                            });
+
+                            details.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Intent i = new Intent(getApplicationContext(),ResultActivity.class);
+                                    startActivity(i);
                                     dialog.dismiss();
                                 }
                             });
