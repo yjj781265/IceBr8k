@@ -145,8 +145,10 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                     mRef.removeValue();
                     Toast.makeText(getApplicationContext(),"Reset is done",Toast.LENGTH_SHORT).show();
                     Intent i = new Intent(getApplicationContext(),Homepage.class);
+                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
                     startActivity(i);
-                    finish();
+
                 }
             });
         }else{
