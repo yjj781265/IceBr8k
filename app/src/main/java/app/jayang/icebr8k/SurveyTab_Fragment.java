@@ -350,11 +350,10 @@ public void createInitQ(){
 
 }
 // push the user survy data to the userQA doc in firebase
-public void pushUserQA(SurveyQ marr,String answer) {
+public void pushUserQA(SurveyQ surveyQ,String answer) {
     DatabaseReference mReference = FirebaseDatabase.getInstance().getReference("UserQA");
-    HashMap<String,Object> map = new HashMap<>();
-    map.put(marr.getQuestionId(),answer);
-    mReference.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).updateChildren(map);
+    UserQA userQA = new UserQA(surveyQ.getQuestionId(),answer,surveyQ.getQuestion());
+    mReference.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(userQA.getQuestionId()).setValue(userQA);
 
 }
 
@@ -369,10 +368,10 @@ public void createUserQList(){
             userQlist.clear();
             for(DataSnapshot questionSnapchat: dataSnapshot.getChildren()){
 
-                String q_id = questionSnapchat.getKey();
-                if(!q_id.isEmpty()) {
+               UserQA  userQA = questionSnapchat.getValue(UserQA.class);
+                if(!userQA.getQuestionId().isEmpty()) {
 
-                    userQlist.add(q_id);
+                    userQlist.add(userQA.getQuestionId());
 
 
                 }

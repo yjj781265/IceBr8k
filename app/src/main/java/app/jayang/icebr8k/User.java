@@ -10,7 +10,7 @@ import java.io.Serializable;
  */
 
 public class User implements Serializable,Comparable<User> {
-    private String displayname,username,photourl,email;
+    private String displayname,username,photourl,email,score;
 
     public User() {
     }
@@ -47,6 +47,13 @@ public class User implements Serializable,Comparable<User> {
         this.email = email;
     }
 
+    public String getScore() {
+        return score;
+    }
+
+    public void setScore(String score) {
+        this.score = score;
+    }
 
     @Override
     public int compareTo(@NonNull User user) {

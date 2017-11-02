@@ -43,6 +43,7 @@ import com.victor.loading.newton.NewtonCradleLoading;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 
 /**
  * Created by LoLJay on 10/20/2017.
@@ -62,6 +63,9 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
     FirebaseUser currentUser;
     GoogleApiClient mGoogleApiClient;
     ImageView profileImg;
+
+
+
     public Userstab_Fragment() {
     }
 
@@ -73,7 +77,6 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
         setHasOptionsMenu(true);
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         getCurrentUserDB(currentUser);
-
         populateUserList();
 
 
@@ -174,6 +177,7 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
                     User mUser = userSnapshot.getValue(User.class);
                     if(!mUser.getUsername().equals(currentUserDB.getUsername())) {
                         mUserArrayList.add(mUser);
+
                     }
 
 
@@ -182,6 +186,7 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
                 //Toast.makeText(getContext(),"Refreshed",Toast.LENGTH_SHORT).show();
                 if(mUserArrayList!=null) {
                     Collections.sort(mUserArrayList);
+                    mRecyclerView.setHasFixedSize(false);
                     mRecyclerView.setAdapter(new RecyclerAdapter(getContext(), mUserArrayList));
                     refreshLayout.setRefreshing(false);
                     newtonCradleLoading.stop();
@@ -248,4 +253,10 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
+
+
+
+
+
+
 }

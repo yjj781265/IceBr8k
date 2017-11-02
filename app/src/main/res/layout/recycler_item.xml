@@ -17,11 +17,11 @@
         android:layout_gravity="center"
         android:scaleType="centerCrop"/>
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="72dp"
         android:layout_marginTop="8dp"
-        android:orientation="vertical"
+
        >
 
         <TextView
@@ -40,9 +40,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="12dp"
+            android:layout_below="@id/displayname_textview"
             android:textSize="14sp"
             />
-    </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:id="@+id/score"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="30dp"
+            android:textSize="30sp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"/>
+    </RelativeLayout>
 
 
 </LinearLayout>

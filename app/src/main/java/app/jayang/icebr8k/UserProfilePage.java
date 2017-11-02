@@ -56,9 +56,9 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
     User mUser,selfUser;
     Dialog dialog;
     ArcProgress arcProgress;
-    String User1Uid, User2Uid;
-    ArrayList<String> User1QArr, User2QArr ,CommonQarr;
-    ArrayList<HashMap> User1QA, User2QA,CommonQA;
+    String User2Uid;
+    ArrayList<String> User1QArr, User2QArr;
+    ArrayList<UserQA> User1QA, User2QA;
     int score;
 
 
@@ -126,8 +126,15 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
     @Override
     protected void onStart() {
         super.onStart();
+
+
+
+
+
+
         if(selfUser!=null) {
             updateUI(selfUser);
+
             mButton.setText("Logout");
             mButton.setBackgroundColor(getResources().getColor(R.color.holo_red_light));
             mButton.setOnClickListener(new View.OnClickListener() {
@@ -203,7 +210,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
     }
 
 
- public void compareWithUser2(User user2) {
+ public int compareWithUser2(User user2) {
      DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Usernames/" + user2.getUsername());
      mRef.addListenerForSingleValueEvent(new ValueEventListener() {
          @Override
@@ -220,6 +227,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
          }
      });
+     return score;
 
  }
  public void pullUser1Q(String Uid, final ArrayList arrayList){
@@ -235,7 +243,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
              }
            User1QArr.retainAll(arrayList);
              Log.d("arr",User1QArr.toString());
-             getUser1QA(currentUser.getUid());
+             getUser1QA(FirebaseAuth.getInstance().getCurrentUser().getUid());
          }
 
          @Override
@@ -258,7 +266,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                     User2QArr.add(key);
                     Log.d("key2",key);
                 }
-                pullUser1Q(currentUser.getUid(),User2QArr);
+                pullUser1Q(FirebaseAuth.getInstance().getCurrentUser().getUid(),User2QArr);
 
 
             }
@@ -280,11 +288,8 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                 User1QA = new ArrayList<>();
                 for(DataSnapshot childSnapshot : dataSnapshot.getChildren()){
                     if(User1QArr.contains(childSnapshot.getKey())) {
-
-                        HashMap<String,Object> map =  new HashMap<String, Object>();
-
-                                map.put(childSnapshot.getKey(),childSnapshot.getValue());
-                        User1QA.add(map);
+                        UserQA user1QA = childSnapshot.getValue(UserQA.class);
+                        User1QA.add(user1QA);
 
                     }
 
@@ -313,10 +318,8 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                 for(DataSnapshot childSnapshot : dataSnapshot.getChildren()){
                     if(arr.contains(childSnapshot.getKey())) {
 
-                        HashMap<String,Object> map =  new HashMap<String, Object>();
-
-                        map.put(childSnapshot.getKey(),childSnapshot.getValue());
-                        User2QA.add(map);
+                        UserQA user2QA = childSnapshot.getValue(UserQA.class);
+                        User2QA.add(user2QA);
 
                     }
 
@@ -354,6 +357,9 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                                 @Override
                                 public void onClick(View view) {
                                     Intent i = new Intent(getApplicationContext(),ResultActivity.class);
+                                    i.putExtra("sameAnswer",User1QA);
+                                    i.putExtra("user2",mUser);
+
                                     startActivity(i);
                                     dialog.dismiss();
                                 }
@@ -377,6 +383,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
             }
         });
+
 
     }
 
