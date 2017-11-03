@@ -29,6 +29,8 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.github.javiersantos.materialstyleddialogs.enums.Style;
 import com.google.firebase.auth.FirebaseAuth;
@@ -47,6 +49,7 @@ import org.w3c.dom.Text;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.UUID;
 
 
@@ -60,10 +63,13 @@ public class SurveyTab_Fragment extends Fragment {
     TextView mTextView,msubTextview;
     RadioGroup mRadioGroup;
     Button mSubmit;
+    CardView mCardView;
+
 
     ArrayList<SurveyQ> surveyQArrayList,temp; // for unpdating UI
     ArrayList<String> userQlist;
     ArrayList<String> surveyQlist; // for comparing with userQArraylist
+
     ProgressBar mProgressBar,mProgressBar2;
     Spinner mSpinner;
    RelativeLayout mRelativeLayout;
@@ -86,6 +92,7 @@ public class SurveyTab_Fragment extends Fragment {
         userQlist = new ArrayList<>();
         surveyQlist = new ArrayList<>();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
 
         index =0;
        // new UploadQ().updataQdatabase(FirebaseDatabase.getInstance().getReference());
@@ -114,6 +121,7 @@ public class SurveyTab_Fragment extends Fragment {
         mProgressBar = mview.findViewById(R.id.survey_progressBar);
         mSpinner=mview.findViewById(R.id.spinner_id);
         msubTextview = mview.findViewById(R.id.sub_question_id);
+        mCardView =mview.findViewById(R.id.cardView);
         mlayout = mview.findViewById(R.id.cardView_RLayout);
         mProgressBar2= mview.findViewById(R.id.progressBar2);
         mProgressBar2.setVisibility(View.VISIBLE);
@@ -142,6 +150,8 @@ public class SurveyTab_Fragment extends Fragment {
 
             @Override
             public void onClick(View view) {
+
+
 
                // Toast.makeText(mview.getContext(),String.valueOf(index),Toast.LENGTH_SHORT).show();
                 //Toast.makeText(mview.getContext(),"SQ List "+surveyQArrayList.size(),Toast.LENGTH_SHORT).show();
@@ -248,9 +258,6 @@ public class SurveyTab_Fragment extends Fragment {
         params.addRule(RelativeLayout.BELOW, R.id.spinner_id);
         params.setMargins(15,15,15,15);
         mSpinner.setVisibility(View.VISIBLE);
-
-
-
         mRadioGroup.setVisibility(View.INVISIBLE);
         mSeekBar.setVisibility(View.INVISIBLE);
         msubTextview.setVisibility(View.INVISIBLE);
@@ -261,6 +268,7 @@ public class SurveyTab_Fragment extends Fragment {
     }
 
     public void updateUI(SurveyQ surveyQ){
+
         mRadioGroup.removeAllViews();
         mRadioGroup.clearCheck();
         if(index == surveyQArrayList.size()-1 ){
@@ -297,16 +305,21 @@ public class SurveyTab_Fragment extends Fragment {
         index = (index + 1);
         if(index >= surveyQArrayList.size()){
             mProgressBar.setProgress(0);
-            mProgressBar2.setVisibility(View.INVISIBLE);
+            mProgressBar2.setVisibility(View.GONE);
             mSubmit.setVisibility(View.INVISIBLE);
             mRadioGroup.setVisibility(View.GONE);
             msubTextview.setVisibility(View.GONE);
-            mSpinner.setVisibility(View.INVISIBLE);
-            mSeekBar.setVisibility(View.INVISIBLE);
+            mSpinner.setVisibility(View.GONE);
+            mSeekBar.setVisibility(View.GONE);
             mTextView.setText("Check back later for more question");
             surveyQArrayList.clear();
 
         }else {
+            YoYo.with(randomAnime())
+                    .duration(500)
+                    .repeat(0)
+                    .playOn(mCardView);
+
             updateUI(surveyQArrayList.get(index));
         }
 
@@ -377,14 +390,14 @@ public void createUserQList(){
                 }
             }
             if(userQlist.isEmpty()){
-                Snackbar.make(mview,"User hasn't answer any questions yet",Snackbar.LENGTH_LONG).show();
                 new MaterialStyledDialog.Builder(getContext())
                         .setTitle("IceBr8k!")
-                        .setDescription("Welcome to the IceBr8k, here are your  8 questions")
+                        .setDescription("Welcome to the IceBr8k, please answer some simple questions to get this wonderful journey started")
                         .setStyle(Style.HEADER_WITH_TITLE)
                         .setPositiveText("Okay").onPositive(new MaterialDialog.SingleButtonCallback() {
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+
                         dialog.dismiss();
                     }
                 })
@@ -484,6 +497,39 @@ public void createUserQList(){
 
 
     }
+
+    public  static Techniques randomAnime(){
+       ArrayList<Techniques> techniquesArrayList = new ArrayList<>();
+
+        techniquesArrayList.add(Techniques.BounceIn);
+        techniquesArrayList.add(Techniques.FadeIn);
+        techniquesArrayList.add(Techniques.FlipInX);
+        techniquesArrayList.add(Techniques.FlipInY);
+        techniquesArrayList.add(Techniques.RollIn);
+        techniquesArrayList.add(Techniques.RotateIn);
+        techniquesArrayList.add(Techniques.RubberBand);
+        techniquesArrayList.add(Techniques.Tada);
+        techniquesArrayList.add(Techniques.Swing);
+        techniquesArrayList.add(Techniques.Wave);
+        techniquesArrayList.add(Techniques.SlideInDown);
+        techniquesArrayList.add(Techniques.SlideInLeft);
+        techniquesArrayList.add(Techniques.SlideInRight);
+        techniquesArrayList.add(Techniques.SlideInUp);
+        techniquesArrayList.add(Techniques.ZoomIn);
+        techniquesArrayList.add(Techniques.ZoomInDown);
+        techniquesArrayList.add(Techniques.ZoomInLeft);
+        techniquesArrayList.add(Techniques.ZoomInRight);
+        techniquesArrayList.add(Techniques.ZoomInUp);
+        techniquesArrayList.add(Techniques.ZoomInRight);
+        techniquesArrayList.add(Techniques.DropOut);
+        techniquesArrayList.add(Techniques.Landing);
+        techniquesArrayList.add(Techniques.Pulse);
+        int index = new Random().nextInt(techniquesArrayList.size()-1);
+
+        return techniquesArrayList.get(index);
+
+    }
+
 
 
 }

@@ -6,7 +6,7 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content">
     <android.support.v7.widget.CardView
-        android:id="@+id/creamCardView"
+        android:id="@+id/commonCardView"
 
         android:clickable="true"
         android:layout_width="match_parent"
@@ -33,15 +33,17 @@
             android:layout_alignParentLeft="true"
             android:gravity="center_vertical"
             android:layout_marginLeft="10dp"
-            autofit:autoSizeMinTextSize="15sp"
-            android:textSize="23sp"/>
+            autofit:autoSizeMinTextSize="10sp"
+            android:textSize="16sp"/>
 
 
             <ImageView
                 android:id="@+id/user1_pic"
+                android:layout_marginLeft="5dp"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_marginTop="15dp"
+                android:layout_marginStart="5dp"
                 android:visibility="gone"/>
 
             <ImageView
@@ -59,9 +61,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
-                android:textSize="20sp"
+                android:textSize="13sp"
+                android:layout_centerInParent="true"
                 android:layout_toRightOf="@id/user2_pic"
-                android:layout_marginLeft="10dp"
+                android:layout_marginLeft="20dp"
                 android:layout_marginTop="15dp"
                 android:visibility="invisible"/>
         </RelativeLayout>

@@ -23,8 +23,12 @@
         app:bubbleTab_circleRatio="1.2"
         app:bubbleTab_image0="@drawable/survey_icon"
         app:bubbleTab_image1="@drawable/users_icon"
-        app:bubbleTab_image2="@drawable/map_icon"
-        app:bubbleTab_image3="@drawable/gi_icon" />
+        app:bubbleTab_image2="@drawable/message_icon"
+        app:bubbleTab_image3="@drawable/map_icon"
+        app:bubbleTab_image4="@drawable/gi_icon"
+
+
+        />
 
     <android.support.v4.view.ViewPager
         android:id="@+id/homepage_viewpager"

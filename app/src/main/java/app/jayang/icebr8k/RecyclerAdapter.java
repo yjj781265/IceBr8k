@@ -16,11 +16,15 @@ import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 
 import java.util.ArrayList;
-
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Random;
 
 
 /**
@@ -32,25 +36,31 @@ public class RecyclerAdapter extends RecyclerView.Adapter<Viewholder> implements
     private Context context;
 
 
+
     public RecyclerAdapter(Context context,ArrayList<User> userArrayList) {
         this.userArrayList = userArrayList;
         this.context=context;
 
     }
 
+
     @Override
     public Viewholder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_item,parent,false);
+
+
         return  new Viewholder(view);
     }
 
     @Override
     public void onBindViewHolder(Viewholder holder,  int position) {
+
         final User mUser = userArrayList.get(position);
         holder.username .setText(mUser.getUsername());
         holder.displayname.setText(mUser.getDisplayname());
         Glide.with(holder.image.getContext()).load(mUser.getPhotourl()).
                 apply(RequestOptions.circleCropTransform()).into(holder.image);
+
 
 
 

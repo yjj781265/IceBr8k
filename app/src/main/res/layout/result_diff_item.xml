@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:autofit="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <android.support.v7.widget.CardView
+        android:id="@+id/diffCardView"
+
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        app:cardBackgroundColor="@color/creamYellow"
+        app:cardElevation="4dp"
+
+        app:cardCornerRadius="5dp"
+        android:layout_margin="5dp">
+        <RelativeLayout
+            android:id="@+id/diff_Rlayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true">
+
+            <me.grantland.widget.AutofitTextView
+                android:id="@+id/question_diff"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:fontFamily="sans-serif"
+                android:autoSizeTextType="uniform"
+                android:maxLines="1"
+                android:layout_alignParentLeft="true"
+                android:gravity="center_vertical"
+                android:layout_marginLeft="10dp"
+                autofit:autoSizeMinTextSize="15sp"
+                android:textSize="16sp"/>
+
+
+            <ImageView
+                android:id="@+id/user1_pic_diff"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="15dp"
+                android:visibility="gone"/>
+
+            <ImageView
+                android:id="@+id/user2_pic_diff"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:gravity="center_vertical"
+                android:layout_marginLeft="5dp"
+                android:layout_toRightOf="@id/user1_pic"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:layout_marginTop="15dp"
+                android:visibility="gone"/>
+
+            <me.grantland.widget.AutofitTextView
+                android:id="@+id/answer1_diff"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:textSize="13sp"
+                android:layout_toRightOf="@id/user1_pic_diff"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="15dp"
+                android:visibility="invisible"/>
+
+            <me.grantland.widget.AutofitTextView
+                android:id="@+id/answer2_diff"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:textSize="13sp"
+                android:layout_toRightOf="@id/user2_pic_diff"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="15dp"
+                android:visibility="invisible"/>
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>

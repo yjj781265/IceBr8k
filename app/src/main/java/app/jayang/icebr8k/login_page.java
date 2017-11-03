@@ -1,27 +1,22 @@
 package app.jayang.icebr8k;
 
 import android.app.Dialog;
-import android.content.DialogInterface;
+
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
-import android.net.Uri;
-import android.os.SystemClock;
-import android.provider.ContactsContract;
+
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.widget.TextViewCompat;
-import android.support.v7.app.AlertDialog;
+
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
+
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,7 +29,7 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.facebook.login.widget.LoginButton;
+
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -45,8 +40,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
@@ -55,8 +49,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.facebook.FacebookSdk;
-import com.facebook.appevents.AppEventsLogger;
-import com.google.firebase.auth.UserInfo;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -110,7 +103,7 @@ public class login_page extends AppCompatActivity implements
 
 
 
-
+//get shai key;
         try {
             PackageInfo info = getPackageManager().getPackageInfo(
                     "app.jayang.icebr8k",
@@ -130,6 +123,7 @@ public class login_page extends AppCompatActivity implements
         if(currentUser!=null){
             loadingdialog.dismiss();
             startActivity(intent);
+            Toast.makeText(getBaseContext(),"Welcome Back",Toast.LENGTH_SHORT).show();
             finish();
         }
 
@@ -140,10 +134,7 @@ public class login_page extends AppCompatActivity implements
 
 //facebook login
         mCallbackManager = CallbackManager.Factory.create();
-
-
-
-         //setup click Listener
+        //setup click Listener
 
          findViewById(R.id.sign_in_button).setOnClickListener(this);
          Button FBloginButton=findViewById(R.id.fb_login_button);
@@ -208,10 +199,11 @@ public class login_page extends AppCompatActivity implements
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        loadingdialog.show();
+
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
+
 
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result.isSuccess()) {
@@ -245,6 +237,7 @@ public class login_page extends AppCompatActivity implements
         // [START_EXCLUDE silent]
         //showProgressDialog();
         // [END_EXCLUDE]
+        loadingdialog.show();
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
@@ -253,6 +246,7 @@ public class login_page extends AppCompatActivity implements
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
+
                             Log.d(TAG, "signInWithCredential:success");
                             usernameCreateCheck();
 

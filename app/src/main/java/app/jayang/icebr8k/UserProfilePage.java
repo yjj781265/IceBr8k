@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.daimajia.androidanimations.library.YoYo;
 import com.facebook.login.LoginManager;
 import com.github.lzyzsd.circleprogress.ArcProgress;
 import com.google.android.gms.auth.api.Auth;
@@ -50,7 +51,6 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
     TextView displayname_profile, email_profile,username_profile;
 
     FirebaseDatabase database;
-    DatabaseReference reference;
     FirebaseUser currentUser;
     GoogleApiClient mGoogleApiClient;
     User mUser,selfUser;
@@ -59,6 +59,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
     String User2Uid;
     ArrayList<String> User1QArr, User2QArr;
     ArrayList<UserQA> User1QA, User2QA;
+    ArrayList<UserQA> temp1QA,temp2QA;
     int score;
 
 
@@ -286,14 +287,17 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User1QA = new ArrayList<>();
+                temp1QA =new ArrayList<>();
                 for(DataSnapshot childSnapshot : dataSnapshot.getChildren()){
                     if(User1QArr.contains(childSnapshot.getKey())) {
                         UserQA user1QA = childSnapshot.getValue(UserQA.class);
                         User1QA.add(user1QA);
+                        temp1QA.add(user1QA);
 
                     }
 
                 }
+
                 Log.d("map", User1QA.toString());
                 getUser2QA(User2Uid,User1QArr);
 
@@ -315,16 +319,22 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User2QA = new ArrayList<>();
+                temp2QA = new ArrayList<>();
                 for(DataSnapshot childSnapshot : dataSnapshot.getChildren()){
                     if(arr.contains(childSnapshot.getKey())) {
 
                         UserQA user2QA = childSnapshot.getValue(UserQA.class);
                         User2QA.add(user2QA);
+                        temp2QA.add(user2QA);
 
                     }
 
                 }
+                //find questions with the same answer
                 User1QA.retainAll(User2QA);
+                //find questions with different answer
+                temp1QA.removeAll(User1QA);
+                temp2QA.removeAll(User1QA);
                 Log.d("afterQA", User1QA.toString());
 
                 Log.d("map2", User2QA.toString());
@@ -359,7 +369,8 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                                     Intent i = new Intent(getApplicationContext(),ResultActivity.class);
                                     i.putExtra("sameAnswer",User1QA);
                                     i.putExtra("user2",mUser);
-
+                                    i.putExtra("diffAnswer1",temp1QA);
+                                    i.putExtra("diffAnswer2",temp2QA);
                                     startActivity(i);
                                     dialog.dismiss();
                                 }
@@ -371,7 +382,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
                 });
 
-/********/
+
 
 
 

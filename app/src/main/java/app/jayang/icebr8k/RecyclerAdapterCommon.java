@@ -48,9 +48,6 @@ public class RecyclerAdapterCommon extends RecyclerView.Adapter<Viewholder> {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.result_common_item,parent,false);
 
 
-        mHandler = new Handler();
-
-
 
 
 
@@ -61,69 +58,31 @@ public class RecyclerAdapterCommon extends RecyclerView.Adapter<Viewholder> {
     @Override
     public void onBindViewHolder(final Viewholder holder, int position) {
         final UserQA userQA = commonArrayList.get(position);
-        final RelativeLayout mRlayout = holder.mRelativeLayout;
-         holder.question_common.setText(userQA.getQuestion());
-        YoYo.with(Techniques.Wobble)
-                .duration(500)
-                .repeat(0)
-                .playOn(mRlayout);
-        runnable = new Runnable() {
+
+
+        hideAnswer(holder,userQA);
+        holder.mRelativeLayout.setOnClickListener(new View.OnClickListener() {
+            int i=0;
             @Override
-            public void run() {
-      //* do what you need to do *//*
+            public void onClick(View view) {
+                if (i == 0) {
+                    YoYo.with(Techniques.FlipInX)
+                            .duration(1200)
+                            .repeat(0)
+                            .playOn(holder.commonCardView);
+                    showAnswer(holder,userQA);
+                    i=1;
+                }else {
 
-                holder.user1_pic.setVisibility(View.VISIBLE);
-                holder.user2_pic.setVisibility(View.VISIBLE);
-                holder.answer_common.setVisibility(View.VISIBLE);
-
-                holder.answer_common.setText(userQA.getAnswer());
-                Glide.with(holder.user1_pic.getContext()).load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl()).
-                        apply(RequestOptions.circleCropTransform()).into(holder.user1_pic);
-                Glide.with(holder.user2_pic.getContext()).load(user2.getPhotourl()).
-                        apply(RequestOptions.circleCropTransform()).into(holder.user2_pic);
-                YoYo.with(Techniques.FadeIn)
-                        .duration(500)
-                        .repeat(0)
-                        .playOn(mRlayout);
-
-
-                mRlayout.setClickable(false);
-
-      //* and here comes the "trick" *//*
-                mHandler.postDelayed(this, 1000);
-                mHandler.removeCallbacks(this);
-
-
+                    YoYo.with(Techniques.FlipInX)
+                            .duration(1200)
+                            .repeat(0)
+                            .playOn(holder.commonCardView);
+                    hideAnswer(holder,userQA);
+                    i=0;
+                }
             }
-        };
-         mRlayout.setOnClickListener(new View.OnClickListener() {
-             int i=0;
-             @Override
-             public void onClick(View view) {
-                 if (i == 0) {
-                     Toast.makeText(context, "clicked", Toast.LENGTH_SHORT).show();
-                     holder.question_common.setVisibility(View.GONE);
-                     // mHandler.postDelayed(runnable,2000);
-                     holder.user1_pic.setVisibility(View.VISIBLE);
-                     holder.user2_pic.setVisibility(View.VISIBLE);
-                     holder.answer_common.setVisibility(View.VISIBLE);
-                     holder.answer_common.setText(userQA.getAnswer());
-                     Glide.with(holder.user1_pic.getContext()).load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl()).
-                             apply(RequestOptions.circleCropTransform()).into(holder.user1_pic);
-                     Glide.with(holder.user2_pic.getContext()).load(user2.getPhotourl()).
-                             apply(RequestOptions.circleCropTransform()).into(holder.user2_pic);
-                     i=1;
-
-                 }else{
-                     holder.user1_pic.setVisibility(View.INVISIBLE);
-                     holder.user2_pic.setVisibility(View.INVISIBLE);
-                     holder.answer_common.setVisibility(View.INVISIBLE);
-                     holder.question_common.setVisibility(View.VISIBLE);
-                     holder.question_common.setText(userQA.getQuestion());
-                     i=0;
-                 }
-             }
-         });
+        });
 
 
 
@@ -136,4 +95,28 @@ public class RecyclerAdapterCommon extends RecyclerView.Adapter<Viewholder> {
     public int getItemCount() {
         return commonArrayList.size();
     }
+
+
+    public void hideAnswer(Viewholder viewholder,UserQA userQA){
+        viewholder.question_common.setVisibility(View.VISIBLE);
+        viewholder.user2_pic.setVisibility(View.GONE);
+        viewholder.user1_pic.setVisibility(View.GONE);
+        viewholder.answer_common.setVisibility(View.GONE);
+        viewholder.question_common.setText(userQA.getQuestion());
+    }
+    public void showAnswer(Viewholder viewholder,UserQA userQA){
+        viewholder.question_common.setVisibility(View.GONE);
+        viewholder.user2_pic.setVisibility(View.VISIBLE);
+        viewholder.user1_pic.setVisibility(View.VISIBLE);
+        viewholder.answer_common.setVisibility(View.VISIBLE);
+
+        Glide.with(viewholder.user1_pic.getContext()).load(FirebaseAuth.getInstance().
+                getCurrentUser().getPhotoUrl()).
+                apply(RequestOptions.circleCropTransform()).into(viewholder.user1_pic);
+        Glide.with(viewholder.user2_pic.getContext()).load(user2.getPhotourl()).
+                apply(RequestOptions.circleCropTransform()).into(viewholder.user2_pic);
+        viewholder.answer_common.setText(userQA.getAnswer());
+
+    }
+
 }

@@ -2,11 +2,16 @@ package app.jayang.icebr8k;
 
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.ImageViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.TableLayout;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +21,8 @@ public class ResultActivity extends AppCompatActivity {
     ViewPager mViewPager;
     Toolbar mToolbar;
     User user2;
-    ArrayList<UserQA> mArrayList;
+    ImageView user2Icon;
+    ArrayList<UserQA> mArrayList,diffAnswer1,diffAnswer2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +31,12 @@ public class ResultActivity extends AppCompatActivity {
 
         mLayout = findViewById(R.id.tabs_result);
         mToolbar = findViewById(R.id.toolbar_result);
+        user2Icon =findViewById(R.id.user2_icon);
 
+
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         mViewPager =findViewById(R.id.viewpager_result);
 
@@ -33,6 +44,13 @@ public class ResultActivity extends AppCompatActivity {
         Log.d("mapArr",mArrayList.toString());
         user2 = (User)getIntent().getSerializableExtra("user2");
         Log.d("mapArr",user2.getDisplayname());
+        diffAnswer1 = getIntent().getParcelableArrayListExtra("diffAnswer1");
+        Log.d("diff",diffAnswer1.toString());
+        diffAnswer2 = getIntent().getParcelableArrayListExtra("diffAnswer2");
+        Log.d("diff",diffAnswer2.toString());
+//user2 avatar on toolbar
+        Glide.with(getBaseContext()).load(user2.getPhotourl()).
+                apply(RequestOptions.circleCropTransform()).into(user2Icon);
 
 
 
@@ -40,15 +58,21 @@ public class ResultActivity extends AppCompatActivity {
 
 
         viewPagerAdapter.addFragment(new commonFrag());
+        viewPagerAdapter.addFragment(new diffFrag());
 
 
         mViewPager.setAdapter(viewPagerAdapter);
         mLayout.setupWithViewPager(mViewPager);
         mLayout.getTabAt(0).setIcon(R.drawable.check_mark);
-       // mLayout.getTabAt(1).setIcon(R.drawable.axe_mark);
+        mLayout.getTabAt(1).setIcon(R.drawable.axe_mark);
 
 
 
+    }
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return  true;
     }
 
     public User getUser2() {
@@ -57,5 +81,13 @@ public class ResultActivity extends AppCompatActivity {
 
     public ArrayList<UserQA> getArrayList() {
         return mArrayList;
+    }
+
+    public ArrayList<UserQA> getDiffAnswer1() {
+        return diffAnswer1;
+    }
+
+    public ArrayList<UserQA> getDiffAnswer2() {
+        return diffAnswer2;
     }
 }
