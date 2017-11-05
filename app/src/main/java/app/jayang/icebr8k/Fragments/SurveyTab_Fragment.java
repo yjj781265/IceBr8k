@@ -510,26 +510,15 @@ public void createUserQList(){
     public  static Techniques randomAnime(){
        ArrayList<Techniques> techniquesArrayList = new ArrayList<>();
 
-        techniquesArrayList.add(Techniques.BounceIn);
+
         techniquesArrayList.add(Techniques.FadeIn);
-        techniquesArrayList.add(Techniques.FlipInX);
-        techniquesArrayList.add(Techniques.FlipInY);
-        techniquesArrayList.add(Techniques.RollIn);
-        techniquesArrayList.add(Techniques.RotateIn);
-        techniquesArrayList.add(Techniques.RubberBand);
-        techniquesArrayList.add(Techniques.SlideInDown);
-        techniquesArrayList.add(Techniques.SlideInLeft);
-        techniquesArrayList.add(Techniques.SlideInRight);
-        techniquesArrayList.add(Techniques.SlideInUp);
-        techniquesArrayList.add(Techniques.ZoomIn);
-        techniquesArrayList.add(Techniques.ZoomInDown);
-        techniquesArrayList.add(Techniques.ZoomInLeft);
-        techniquesArrayList.add(Techniques.ZoomInRight);
-        techniquesArrayList.add(Techniques.ZoomInUp);
-        techniquesArrayList.add(Techniques.ZoomInRight);
-        techniquesArrayList.add(Techniques.DropOut);
-        techniquesArrayList.add(Techniques.Landing);
-        techniquesArrayList.add(Techniques.Pulse);
+        techniquesArrayList.add(Techniques.FadeInLeft);
+        techniquesArrayList.add(Techniques.FadeInRight);
+        techniquesArrayList.add(Techniques.FadeInDown);
+        techniquesArrayList.add(Techniques.FadeInUp);
+
+
+
         int index = new Random().nextInt(techniquesArrayList.size()-1);
 
         return techniquesArrayList.get(index);

@@ -101,7 +101,7 @@
                 android:layout_marginBottom="30dp"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="40dp"
                 android:visibility="invisible"
                 app:bsb_bubble_color="@color/colorAccent"
                 app:bsb_bubble_text_color="@color/colorPrimary"
@@ -109,12 +109,10 @@
                 app:bsb_min="1"
                 app:bsb_progress="5"
                 app:bsb_second_track_color="@color/colorAccent"
-                app:bsb_section_count="5"
-                app:bsb_section_text_position="bottom_sides"
                 app:bsb_show_progress_in_float="true"
-                app:bsb_show_section_mark="true"
-                app:bsb_show_section_text="true"
                 app:bsb_show_thumb_text="true"
+                app:bsb_section_count="5"
+                app:bsb_show_section_text="true"
                 app:bsb_track_color="@color/colorPrimaryDark"/>
 
             <Button
