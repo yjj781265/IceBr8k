@@ -1,8 +1,7 @@
-package app.jayang.icebr8k;
+package app.jayang.icebr8k.Fragments;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -13,11 +12,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.daimajia.androidanimations.library.Techniques;
-import com.daimajia.androidanimations.library.YoYo;
-
 import java.util.ArrayList;
-import java.util.HashMap;
+
+import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.Modle.UserQA;
+import app.jayang.icebr8k.R;
+import app.jayang.icebr8k.RecyclerAdapterCommon;
+import app.jayang.icebr8k.ResultActivity;
 
 /**
  * Created by yjj781265 on 10/30/2017.

@@ -1,0 +1,55 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+
+    tools:context="app.jayang.icebr8k.MainChatActivity">
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/chat_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+       ></android.support.v7.widget.Toolbar>
+
+    <ListView
+        android:id="@+id/chat_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/listFooter"
+        android:divider="@null"
+        android:dividerHeight="0dp"
+        android:transcriptMode="alwaysScroll"
+        android:layout_below="@+id/chat_toolbar"
+        android:background="@color/creamYellow"/>
+
+    <LinearLayout
+        android:id="@+id/listFooter"
+        android:layout_width="fill_parent"
+        android:layout_height="35dp"
+        android:layout_alignParentBottom="true"
+        android:gravity="bottom"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/messageInput"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:elevation="20dp"
+
+            android:gravity="center_horizontal"
+            android:hint="Text you message"
+            android:textSize="13sp"
+            android:imeActionLabel="send"
+            android:imeOptions="actionUnspecified"
+            android:inputType="textCapSentences|textAutoCorrect"
+            android:maxLines="1" />
+<ImageView
+    android:layout_width="40dp"
+    android:layout_height="match_parent"
+    android:background="@drawable/ic_send"
+    android:id="@+id/send_button"/>
+    </LinearLayout>
+
+
+</RelativeLayout>

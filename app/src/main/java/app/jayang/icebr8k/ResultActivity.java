@@ -1,20 +1,28 @@
 package app.jayang.icebr8k;
 
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.ImageViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.ImageView;
-import android.widget.TableLayout;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+
+import app.jayang.icebr8k.Fragments.commonFrag;
+import app.jayang.icebr8k.Fragments.diffFrag;
+import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.Modle.UserQA;
 
 public class ResultActivity extends AppCompatActivity {
     TabLayout mLayout ;
@@ -28,6 +36,11 @@ public class ResultActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_result);
+        if(FirebaseAuth.getInstance().getCurrentUser()!=null) {
+            DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Users/" +
+                    FirebaseAuth.getInstance().getCurrentUser().getUid());
+            mRef.child("onlineStats").setValue("1");
+        }
 
         mLayout = findViewById(R.id.tabs_result);
         mToolbar = findViewById(R.id.toolbar_result);
@@ -69,6 +82,17 @@ public class ResultActivity extends AppCompatActivity {
 
 
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(FirebaseAuth.getInstance().getCurrentUser()!=null) {
+            DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Users/" +
+                    FirebaseAuth.getInstance().getCurrentUser().getUid());
+            mRef.child("onlineStats").setValue("0");
+        }
+    }
+
     @Override
     public boolean onSupportNavigateUp() {
         finish();

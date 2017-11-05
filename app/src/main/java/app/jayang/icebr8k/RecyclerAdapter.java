@@ -1,30 +1,28 @@
 package app.jayang.icebr8k;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.RelativeSizeSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.daimajia.androidanimations.library.Techniques;
-import com.daimajia.androidanimations.library.YoYo;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Random;
+
+import app.jayang.icebr8k.Modle.User;
 
 
 /**
@@ -34,6 +32,7 @@ import java.util.Random;
 public class RecyclerAdapter extends RecyclerView.Adapter<Viewholder> implements FastScrollRecyclerView.SectionedAdapter  {
     private ArrayList<User> userArrayList = new ArrayList<>();
     private Context context;
+    FirebaseUser currentUser;
 
 
 
@@ -47,19 +46,64 @@ public class RecyclerAdapter extends RecyclerView.Adapter<Viewholder> implements
     @Override
     public Viewholder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_item,parent,false);
-
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         return  new Viewholder(view);
     }
 
     @Override
-    public void onBindViewHolder(Viewholder holder,  int position) {
+    public void onBindViewHolder(final Viewholder holder,  int position) {
 
         final User mUser = userArrayList.get(position);
+
         holder.username .setText(mUser.getUsername());
         holder.displayname.setText(mUser.getDisplayname());
+        holder.onlineStats.setVisibility(View.GONE);
         Glide.with(holder.image.getContext()).load(mUser.getPhotourl()).
                 apply(RequestOptions.circleCropTransform()).into(holder.image);
+        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Usernames/"+mUser.getUsername());
+        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+               String mUserUid = dataSnapshot.getValue(String.class);
+
+                DatabaseReference mRef2 = FirebaseDatabase.getInstance().getReference("Users/"+mUserUid+"/onlineStats");
+                mRef2.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+
+                      String online = dataSnapshot.getValue(String.class);
+
+                        if(online == null || online.equals("0")){
+                            holder.onlineStats.setVisibility(View.VISIBLE);
+                            holder.onlineStats.setImageDrawable(context.getDrawable(R.drawable.gray_dot));
+
+                        }else if(online.equals("1")){
+                            holder.onlineStats.setVisibility(View.VISIBLE);
+                            holder.onlineStats.setImageDrawable(context.getDrawable(R.drawable.green_dot));
+
+                        }else{
+                            holder.onlineStats.setVisibility(View.GONE);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+
+
+
 
 
 

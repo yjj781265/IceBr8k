@@ -1,17 +1,13 @@
 package app.jayang.icebr8k;
 
-import android.animation.Animator;
-import android.animation.ObjectAnimator;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -19,8 +15,10 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
-import com.facebook.login.LoginManager;
+import com.dd.processbutton.ProcessButton;
+import com.dd.processbutton.iml.ActionProcessButton;
 import com.github.lzyzsd.circleprogress.ArcProgress;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -34,20 +32,19 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
-import static android.R.id.progress;
+import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.Modle.UserQA;
 
 
 public class UserProfilePage extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener{
     Toolbar profileToolbar;
     ImageView mImageView;
-    Button mButton,resetBtn;
+    Button resetBtn;
+    ActionProcessButton mButton;
     TextView displayname_profile, email_profile,username_profile;
 
     FirebaseDatabase database;
@@ -70,6 +67,13 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile_page);
+
+        if(FirebaseAuth.getInstance().getCurrentUser()!=null) {
+            DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Users/" +
+                    FirebaseAuth.getInstance().getCurrentUser().getUid());
+            mRef.child("onlineStats").setValue("1");
+        }
+
         profileToolbar =  findViewById(R.id.profileToolbar);
         setSupportActionBar(profileToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -100,8 +104,19 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
         mUser = (User)i.getSerializableExtra("userInfo"); //user2
         selfUser = (User)i.getSerializableExtra("selfProfile");
 
+
                if(mUser!=null) {
-                 compareWithUser2(mUser);
+                   mButton.setMode(ActionProcessButton.Mode.PROGRESS);
+                   mButton.setOnClickListener(new View.OnClickListener() {
+                       @Override
+                       public void onClick(View view) {
+                           mButton.setProgress(0);
+                           mButton.setClickable(false);
+                           compareWithUser2(mUser);
+
+                       }
+                   });
+
 
 
                }
@@ -127,12 +142,6 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
     @Override
     protected void onStart() {
         super.onStart();
-
-
-
-
-
-
         if(selfUser!=null) {
             updateUI(selfUser);
 
@@ -167,6 +176,16 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(FirebaseAuth.getInstance().getCurrentUser()!=null) {
+            DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Users/" +
+                    FirebaseAuth.getInstance().getCurrentUser().getUid());
+            mRef.child("onlineStats").setValue("0");
+        }
+    }
+
     public void updateUI(User user){
         getSupportActionBar().setTitle(user.getDisplayname()+"'s Profile");
         Glide.with(getBaseContext()).load(user.getPhotourl()).
@@ -177,10 +196,17 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
     }
     public void Signout(){
+        if(FirebaseAuth.getInstance().getCurrentUser()!=null) {
+            DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Users/" + currentUser.getUid());
+            mRef.child("onlineStats").setValue("0");
+        }
         FirebaseAuth.getInstance().signOut();
 
 
-        if(currentUser.getProviders().get(0).contains("google")) {
+
+
+
+            if(currentUser.getProviders().get(0).contains("google")) {
 
             // Google sign out
             Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
@@ -217,6 +243,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
          @Override
          public void onDataChange(DataSnapshot dataSnapshot) {
              User2Uid = dataSnapshot.getValue(String.class);
+             mButton.setProgress(20);
              Log.d("user2", User2Uid);
              pullUser2Q(User2Uid);
 
@@ -243,6 +270,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                  Log.d("key",key);
              }
            User1QArr.retainAll(arrayList);
+             mButton.setProgress(60);
              Log.d("arr",User1QArr.toString());
              getUser1QA(FirebaseAuth.getInstance().getCurrentUser().getUid());
          }
@@ -267,6 +295,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                     User2QArr.add(key);
                     Log.d("key2",key);
                 }
+                mButton.setProgress(40);
                 pullUser1Q(FirebaseAuth.getInstance().getCurrentUser().getUid(),User2QArr);
 
 
@@ -297,7 +326,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                     }
 
                 }
-
+                mButton.setProgress(99);
                 Log.d("map", User1QA.toString());
                 getUser2QA(User2Uid,User1QArr);
 
@@ -330,6 +359,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                     }
 
                 }
+
                 //find questions with the same answer
                 User1QA.retainAll(User2QA);
                 //find questions with different answer
@@ -339,12 +369,11 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
                 Log.d("map2", User2QA.toString());
                 score = (int)(((double)User1QA.size()/(double)User1QArr.size())*100);
-                mButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
+
+                mButton.setClickable(true);
                         if(User2QArr.isEmpty()){
                             Toast.makeText(getBaseContext(),mUser.getDisplayname() +" hasn't answered any questions yet",Toast.LENGTH_LONG).show();
-
+                            mButton.setProgress(0);
                         }else{
                             dialog = new Dialog(UserProfilePage.this);
                             dialog.setCanceledOnTouchOutside(true);
@@ -356,10 +385,12 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                             arcProgress = dialog.findViewById(R.id.arc_progress);
                             arcProgress.setProgress(score);
                             dialog.show();
+                            mButton.setProgress(0);
                             cancel.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
                                     dialog.dismiss();
+                                    mButton.setProgress(0);
                                 }
                             });
 
@@ -371,6 +402,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                                     i.putExtra("user2",mUser);
                                     i.putExtra("diffAnswer1",temp1QA);
                                     i.putExtra("diffAnswer2",temp2QA);
+
                                     startActivity(i);
                                     dialog.dismiss();
                                 }
@@ -380,14 +412,14 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
                     }
 
-                });
 
 
 
 
 
 
-            }
+
+
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
@@ -397,8 +429,6 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
 
     }
-
-
 
 
 

@@ -1,4 +1,4 @@
-package app.jayang.icebr8k;
+package app.jayang.icebr8k.Modle;
 
 import android.os.Parcel;
 import android.os.Parcelable;

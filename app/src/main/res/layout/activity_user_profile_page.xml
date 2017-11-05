@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/tools"
 
     android:layout_width="match_parent"
+    android:orientation="vertical"
     android:layout_height="match_parent"
-    style="@style/AppTheme"
-    >
+    style="@style/AppTheme">
     
     <android.support.v7.widget.Toolbar
         android:layout_width="match_parent"
@@ -15,71 +15,135 @@
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         android:background="@color/colorPrimary"></android.support.v7.widget.Toolbar>
 
+    <RelativeLayout
+        android:background="@color/creamYellow"
+        android:layout_marginTop="10dp"
+        android:gravity="fill_horizontal"
+        android:id="@+id/R1"
+        android:elevation="3dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/profileToolbar">
     <ImageView
         android:id="@+id/profileButton"
-        android:layout_width="130dp"
-        android:layout_height="130dp"
-        android:layout_below="@+id/profileToolbar"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="34dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+
+        android:layout_alignParentLeft="true"
+        android:layout_margin="10dp"
         app:srcCompat="@drawable/common_google_signin_btn_icon_dark"/>
 
     <TextView
         android:id="@+id/displayname_profile"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/profileButton"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"
-        android:textSize="35sp"
+        android:layout_toRightOf="@id/profileButton"
+      android:layout_marginTop="30dp"
+        android:layout_marginLeft="10dp"
+        android:textColor="@android:color/black"
+        android:textSize="25sp"
         android:textStyle="bold"/>
 
-    <TextView
-        android:id="@+id/username_profile"
-        android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/username_profile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/displayname_profile"
+            android:layout_toRightOf="@id/profileButton"
+            android:layout_marginLeft="10dp"
+            android:textStyle="normal"
+            android:textSize="16sp"
+            android:text="Username" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:elevation="3dp"
+        android:background="@color/creamYellow"
+        android:layout_marginTop="10dp"
+        android:id="@+id/R2"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/displayname_profile"
-        android:layout_centerHorizontal="true"
-        android:textStyle="normal"
-        android:textSize="25sp"
+        android:layout_below="@id/R1">
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="Email"
+            android:id="@+id/email_tv"
+            android:paddingLeft="10dp"
+            android:textSize="20sp"
+            android:textColor="@android:color/black"
+            android:layout_margin="10dp"/>
+        <TextView
+            android:id="@+id/email_profile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/email_tv"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:textSize="16sp"
+            android:textStyle="italic"
 
-        android:text="Username" />
+            />
 
+    </RelativeLayout>
 
-
-    <Button
-        android:id="@+id/compareBtn"
-        android:layout_width="120dp"
-        android:layout_height="30dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="58dp"
-        android:background="@color/colorAccent"
-        android:text="Compare"/>
-
-    <TextView
-        android:id="@+id/email_profile"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:elevation="3dp"
+        android:background="@color/creamYellow"
+        android:layout_below="@id/R2"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/username_profile"
+        android:orientation="vertical"
+        android:layout_marginTop="100dp">
+
+
+
+
+    <com.dd.processbutton.iml.ActionProcessButton
+        android:layout_width="match_parent"
+        android:layout_height="42dp"
+        app:pb_colorNormal="@color/colorAccent"
+        app:pb_colorPressed="@color/colorAccent"
+        android:textColor="@android:color/white"
+        android:id="@+id/message_btn"
+        android:layout_centerInParent="true"
+        android:text="Message"
         android:layout_marginTop="15dp"
-        android:layout_centerHorizontal="true"
-        android:textSize="20sp"
-        android:text="Email"
-        android:textStyle="italic"
+        android:textSize="13sp"
 
-        />
+       android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"/>
 
-    <Button
-        android:id="@+id/reset"
-        android:layout_width="120dp"
-        android:layout_height="40dp"
-        android:layout_above="@+id/compareBtn"
-        android:textSize="16sp"
+        <com.dd.processbutton.iml.ActionProcessButton
+            android:id="@+id/compareBtn"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:textColor="@android:color/white"
+            android:layout_below="@id/message_btn"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="15dp"
+            android:textSize="13sp"
+            android:layout_marginLeft="30dp" android:layout_marginRight="30dp"
+            android:text="Compare"
+            app:pb_colorNormal="@color/colorPrimary"
+            app:pb_colorPressed="@color/colorPrimary"
+            app:pb_textProgress="Comparing..."
+            app:pb_colorProgress="@color/colorAccent"
+            app:pb_colorComplete="@color/colorAccent"
+            app:pb_textComplete ="Done"/>
 
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="22dp"
-        android:text="Reset"/>
+        <Button
+            android:id="@+id/reset"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:textSize="13sp"
+            android:layout_below="@id/message_btn"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginBottom="15dp"
+            android:text="Reset"/>
+    </LinearLayout>
 
 
 </RelativeLayout>

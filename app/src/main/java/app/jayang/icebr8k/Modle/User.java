@@ -1,6 +1,6 @@
-package app.jayang.icebr8k;
+package app.jayang.icebr8k.Modle;
 
-import android.os.Parcelable;
+import android.support.annotation.InterpolatorRes;
 import android.support.annotation.NonNull;
 
 import java.io.Serializable;
@@ -11,6 +11,7 @@ import java.io.Serializable;
 
 public class User implements Serializable,Comparable<User> {
     private String displayname,username,photourl,email,score;
+    private String onlineStats ="0";
 
     public User() {
     }
@@ -55,9 +56,34 @@ public class User implements Serializable,Comparable<User> {
         this.score = score;
     }
 
+    public String getOnlineStats() {
+        return onlineStats;
+    }
+
+    public void setOnlineStats(String onlineStats) {
+        if(onlineStats==null) {
+            onlineStats = "0";
+        }
+        this.onlineStats = onlineStats;
+    }
+
     @Override
     public int compareTo(@NonNull User user) {
-        return displayname.toUpperCase().compareTo(user.getDisplayname().toUpperCase());
+        Integer user1 =  Integer.valueOf(onlineStats);
+         int result;
+
+        Integer user2 =  Integer.valueOf(user.getOnlineStats());
+
+
+        result = user2.compareTo(user1);
+        if(result==0){
+            result =displayname.toUpperCase().compareTo(user.getDisplayname().toUpperCase());
+        }
+
+
+
+
+        return result;
 
     }
 }

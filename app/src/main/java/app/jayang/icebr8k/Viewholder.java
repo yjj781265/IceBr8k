@@ -13,7 +13,7 @@ import android.widget.TextView;
  */
 
 public class Viewholder extends RecyclerView.ViewHolder {
-    public ImageView image,user1_pic,user2_pic,user1_pic_diff,user2_pic_diff;
+    public ImageView image,user1_pic,user2_pic,user1_pic_diff,user2_pic_diff,onlineStats;
     public TextView displayname;
     public TextView username;
     public LinearLayout linearLayout;
@@ -30,6 +30,8 @@ public class Viewholder extends RecyclerView.ViewHolder {
         username=itemView.findViewById(R.id.username_textview);
         linearLayout =itemView.findViewById(R.id.recycleritem_id);
         score = itemView.findViewById(R.id.score);
+        onlineStats =itemView.findViewById(R.id.onlineStats);
+
         //for reuslt activity_common
         question_common =itemView.findViewById(R.id.question_common);
         answer_common =itemView.findViewById(R.id.answer_common);

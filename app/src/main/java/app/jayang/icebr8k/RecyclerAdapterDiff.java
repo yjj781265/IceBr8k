@@ -1,6 +1,7 @@
 package app.jayang.icebr8k;
 
 import android.content.Context;
+import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,9 @@ import com.daimajia.androidanimations.library.YoYo;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
+
+import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.Modle.UserQA;
 
 /**
  * Created by LoLJay on 11/2/2017.
@@ -47,21 +51,23 @@ public class RecyclerAdapterDiff extends RecyclerView.Adapter<Viewholder> {
                     int i =0;
                     @Override
                     public void onClick(View view) {
-                        if(i==0) {
-                            YoYo.with(Techniques.FlipInX)
-                                    .duration(1200)
-                                    .repeat(0)
-                                    .playOn(holder.diffCardView);
-                            showAnswer(holder, userQA, userQA2);
-                            i=1;
-                        }else{
-                            YoYo.with(Techniques.FlipInX)
-                                    .duration(1200)
-                                    .repeat(0)
-                                    .playOn(holder.diffCardView);
-                            hideAnswer(holder,userQA);
-                            i=0;
-                        }
+                        Runnable r = new Runnable() {
+                            public void run() {
+                                YoYo.with(Techniques.FlipInX)
+                                        .duration(1200)
+                                        .repeat(0)
+                                        .playOn(holder.diffCardView);
+                                hideAnswer(holder,userQA);
+                                holder.diffRelativeLayout.setClickable(true);
+
+                            }
+                        };
+                        Handler handler = new Handler();
+                        holder.diffRelativeLayout.setClickable(false);
+                        showAnswer(holder,userQA,userQA2);
+                        handler.postDelayed(r,2000);
+
+
                     }
                 });
             }
@@ -97,6 +103,11 @@ public class RecyclerAdapterDiff extends RecyclerView.Adapter<Viewholder> {
                 apply(RequestOptions.circleCropTransform()).into(viewholder.user2_pic_diff);
         viewholder.answer1_diff.setText(userQA1.getAnswer());
         viewholder.answer2_diff.setText(userQA2.getAnswer());
+        YoYo.with(Techniques.FlipInX)
+                .duration(1200)
+                .repeat(0)
+                .playOn(viewholder.diffCardView);
+
 
     }
 

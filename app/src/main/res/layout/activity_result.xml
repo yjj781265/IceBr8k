@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
+    android:id="@+id/result_activity_view"
     tools:context="app.jayang.icebr8k.ResultActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -45,10 +46,13 @@
 
 
         <android.support.design.widget.TabLayout
+            android:clickable="true"
+
         android:id="@+id/tabs_result"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-            android:background="@android:color/white"
+            android:background="?attr/selectableItemBackground"
+            app:tabBackground="@android:color/white"
             android:elevation="20dp"/>
 
 

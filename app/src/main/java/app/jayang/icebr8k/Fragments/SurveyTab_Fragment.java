@@ -1,28 +1,24 @@
-package app.jayang.icebr8k;
+package app.jayang.icebr8k.Fragments;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.CardView;
-import android.support.v7.widget.LinearLayoutCompat;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
-import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,7 +31,6 @@ import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.github.javiersantos.materialstyleddialogs.enums.Style;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -44,13 +39,14 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.xw.repo.BubbleSeekBar;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Random;
 import java.util.UUID;
+
+import app.jayang.icebr8k.Modle.SurveyQ;
+import app.jayang.icebr8k.Modle.UserQA;
+import app.jayang.icebr8k.R;
 
 
 /**
@@ -197,7 +193,6 @@ public class SurveyTab_Fragment extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 createInitQ();
                 mProgressBar.setProgress(0);
-                Toast.makeText(mview.getContext(),"Datachanged",Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -216,6 +211,20 @@ public class SurveyTab_Fragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        Snackbar snackbar =Snackbar.make(mview,
+               "No internet connection", Snackbar.LENGTH_SHORT);
+        ConnectivityManager cm =
+                (ConnectivityManager)mview.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+       if(!isConnected) {
+           snackbar.show();
+       }else {
+           snackbar.dismiss();
+       }
+
 
 
     }
@@ -508,9 +517,6 @@ public void createUserQList(){
         techniquesArrayList.add(Techniques.RollIn);
         techniquesArrayList.add(Techniques.RotateIn);
         techniquesArrayList.add(Techniques.RubberBand);
-        techniquesArrayList.add(Techniques.Tada);
-        techniquesArrayList.add(Techniques.Swing);
-        techniquesArrayList.add(Techniques.Wave);
         techniquesArrayList.add(Techniques.SlideInDown);
         techniquesArrayList.add(Techniques.SlideInLeft);
         techniquesArrayList.add(Techniques.SlideInRight);

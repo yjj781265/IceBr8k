@@ -1,4 +1,4 @@
-package app.jayang.icebr8k;
+package app.jayang.icebr8k.Fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,6 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
+
+import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.Modle.UserQA;
+import app.jayang.icebr8k.R;
+import app.jayang.icebr8k.RecyclerAdapterDiff;
+import app.jayang.icebr8k.ResultActivity;
 
 /**
  * Created by LoLJay on 11/2/2017.

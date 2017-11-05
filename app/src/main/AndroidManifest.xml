@@ -41,21 +41,21 @@
         </activity>
         <activity
             android:name=".Homepage"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ResultActivity"
-            android:screenOrientation="portrait"></activity>
-        <activity android:name=".SplashScreen"
-            android:theme="@style/SplashTheme"
-            android:screenOrientation="portrait">
-
-
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".SplashScreen"
+            android:screenOrientation="portrait"
+            android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".MainChatActivity"></activity>
     </application>
 
 </manifest>

@@ -1,11 +1,10 @@
-package app.jayang.icebr8k;
+package app.jayang.icebr8k.Fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.ImageViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -19,9 +18,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -43,7 +40,12 @@ import com.victor.loading.newton.NewtonCradleLoading;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+
+import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.R;
+import app.jayang.icebr8k.RecyclerAdapter;
+import app.jayang.icebr8k.UserProfilePage;
+import app.jayang.icebr8k.login_page;
 
 /**
  * Created by LoLJay on 10/20/2017.
@@ -168,6 +170,7 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
 
     public void populateUserList(){
         databaseReference = mDatabase.getReference("Users");
+
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -184,7 +187,7 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
 
                 }
                 //Toast.makeText(getContext(),"Refreshed",Toast.LENGTH_SHORT).show();
-                if(mUserArrayList!=null) {
+                if(mUserArrayList!=null && !mUserArrayList.isEmpty()) {
                     Collections.sort(mUserArrayList);
                     mRecyclerView.setHasFixedSize(false);
                     mRecyclerView.setAdapter(new RecyclerAdapter(getContext(), mUserArrayList));
@@ -198,7 +201,7 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                refreshLayout.setRefreshing(true);
             }
         });
 
@@ -227,7 +230,12 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
 
 
     public void Signout(){
+        if(FirebaseAuth.getInstance().getCurrentUser()!=null) {
+            DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Users/" + currentUser.getUid());
+            mRef.child("onlineStats").setValue("0");
+        }
         FirebaseAuth.getInstance().signOut();
+
 
 
         if(currentUser.getProviders().get(0).contains("google")) {
