@@ -44,7 +44,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
     Toolbar profileToolbar;
     ImageView mImageView;
     Button resetBtn;
-    ActionProcessButton mButton;
+    ActionProcessButton mButton,messageBtn;
     TextView displayname_profile, email_profile,username_profile;
 
     FirebaseDatabase database;
@@ -86,6 +86,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
         database = FirebaseDatabase.getInstance();
        currentUser = FirebaseAuth.getInstance().getCurrentUser();
         resetBtn = findViewById(R.id.reset);
+        messageBtn = findViewById(R.id.message_btn);
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
@@ -172,6 +173,34 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
             resetBtn.setVisibility(View.GONE);
             updateUI(mUser);
         }
+
+        messageBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Usernames/" + mUser.getUsername());
+                mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        User2Uid = dataSnapshot.getValue(String.class);
+                        Intent i = new Intent(UserProfilePage.this,MainChatActivity.class);
+                        i.putExtra("user2Id",User2Uid);
+                        i.putExtra("user2",mUser);
+                        startActivity(i);
+
+
+                    }
+
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+
+
+            }
+        });
 
 
     }

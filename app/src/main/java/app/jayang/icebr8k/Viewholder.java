@@ -17,6 +17,7 @@ public class Viewholder extends RecyclerView.ViewHolder {
     public TextView displayname;
     public TextView username;
     public LinearLayout linearLayout;
+    public RelativeLayout avatar_view;
     public RelativeLayout mRelativeLayout,diffRelativeLayout;
     public CardView diffCardView,commonCardView;
     public TextView score,question_common,answer_common;
@@ -31,6 +32,8 @@ public class Viewholder extends RecyclerView.ViewHolder {
         linearLayout =itemView.findViewById(R.id.recycleritem_id);
         score = itemView.findViewById(R.id.score);
         onlineStats =itemView.findViewById(R.id.onlineStats);
+        avatar_view = itemView.findViewById(R.id.avatar_view);
+
 
         //for reuslt activity_common
         question_common =itemView.findViewById(R.id.question_common);

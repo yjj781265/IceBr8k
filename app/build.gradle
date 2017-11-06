@@ -51,4 +51,5 @@ dependencies {
     compile 'me.grantland:autofittextview:0.2.+'
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.2.0'
+    compile 'com.github.stfalcon:chatkit:0.2.2'
 }

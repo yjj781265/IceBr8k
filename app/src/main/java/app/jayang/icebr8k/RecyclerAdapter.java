@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -56,11 +58,12 @@ public class RecyclerAdapter extends RecyclerView.Adapter<Viewholder> implements
 
         final User mUser = userArrayList.get(position);
 
+
         holder.username .setText(mUser.getUsername());
         holder.displayname.setText(mUser.getDisplayname());
-        holder.onlineStats.setVisibility(View.GONE);
         Glide.with(holder.image.getContext()).load(mUser.getPhotourl()).
                 apply(RequestOptions.circleCropTransform()).into(holder.image);
+
         DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Usernames/"+mUser.getUsername());
         mRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -75,16 +78,19 @@ public class RecyclerAdapter extends RecyclerView.Adapter<Viewholder> implements
                       String online = dataSnapshot.getValue(String.class);
 
                         if(online == null || online.equals("0")){
-                            holder.onlineStats.setVisibility(View.VISIBLE);
                             holder.onlineStats.setImageDrawable(context.getDrawable(R.drawable.gray_dot));
+                            holder.linearLayout.setVisibility(View.VISIBLE);
 
                         }else if(online.equals("1")){
-                            holder.onlineStats.setVisibility(View.VISIBLE);
                             holder.onlineStats.setImageDrawable(context.getDrawable(R.drawable.green_dot));
+                            holder.linearLayout.setVisibility(View.VISIBLE);
 
                         }else{
                             holder.onlineStats.setVisibility(View.GONE);
+                            holder.linearLayout.setVisibility(View.VISIBLE);
                         }
+
+                        YoYo.with(Techniques.FadeIn).duration(600).repeat(0).playOn(holder.onlineStats);
                     }
 
                     @Override
