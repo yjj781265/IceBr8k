@@ -36,11 +36,7 @@ public class ResultActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_result);
-        if(FirebaseAuth.getInstance().getCurrentUser()!=null) {
-            DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Users/" +
-                    FirebaseAuth.getInstance().getCurrentUser().getUid());
-            mRef.child("onlineStats").setValue("1");
-        }
+
 
         mLayout = findViewById(R.id.tabs_result);
         mToolbar = findViewById(R.id.toolbar_result);
@@ -83,15 +79,7 @@ public class ResultActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if(FirebaseAuth.getInstance().getCurrentUser()!=null) {
-            DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Users/" +
-                    FirebaseAuth.getInstance().getCurrentUser().getUid());
-            mRef.child("onlineStats").setValue("0");
-        }
-    }
+
 
     @Override
     public boolean onSupportNavigateUp() {

@@ -9,4 +9,5 @@
     <color name="darkRed">#FF0000</color>
     <color name="creamYellow">#fffff4</color>
     <color name="lightGreen">#e7fce0</color>
+    <color name="lightGray">#D3D3D3</color>
 </resources>

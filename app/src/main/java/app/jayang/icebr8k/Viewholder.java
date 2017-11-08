@@ -35,6 +35,7 @@ public class Viewholder extends RecyclerView.ViewHolder {
         avatar_view = itemView.findViewById(R.id.avatar_view);
 
 
+
         //for reuslt activity_common
         question_common =itemView.findViewById(R.id.question_common);
         answer_common =itemView.findViewById(R.id.answer_common);

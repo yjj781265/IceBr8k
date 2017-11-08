@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:gravity="start"
     android:id="@+id/recycleritem_id"
+              android:alpha="0.5"
     android:background="?android:attr/selectableItemBackground"
     android:clickable="true"
     >
@@ -28,6 +29,7 @@
             android:layout_height="10dp"
             android:visibility="visible"
             android:id="@+id/onlineStats"
+            android:elevation="10dp"
             android:layout_alignBottom="@+id/imageview_id"
             android:layout_alignRight="@+id/imageview_id"
             android:layout_margin="2dp"

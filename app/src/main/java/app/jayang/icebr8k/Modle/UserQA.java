@@ -53,13 +53,6 @@ public class UserQA implements Parcelable {
         if (questionId != null ? !questionId.equals(userQA.questionId) : userQA.questionId != null)
             return false;
         return answer != null ? answer.equals(userQA.answer) : userQA.answer == null;
-
-    }
-
-    @Override
-    public String toString() {
-        return "UserQA{" +  ", question='" + question + '\''+
-                "answer='" + answer + '\'' + '}';
     }
 
     @Override
@@ -68,6 +61,13 @@ public class UserQA implements Parcelable {
         result = 31 * result + (answer != null ? answer.hashCode() : 0);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "UserQA{" +  ", question='" + question + '\''+
+                "answer='" + answer + '\'' + '}';
+    }
+
 
 
     @Override

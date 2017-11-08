@@ -60,6 +60,7 @@ public class SurveyTab_Fragment extends Fragment {
     RadioGroup mRadioGroup;
     Button mSubmit;
     CardView mCardView;
+    TextView skip;
 
 
     ArrayList<SurveyQ> surveyQArrayList,temp; // for unpdating UI
@@ -122,6 +123,8 @@ public class SurveyTab_Fragment extends Fragment {
         mProgressBar2= mview.findViewById(R.id.progressBar2);
         mProgressBar2.setVisibility(View.VISIBLE);
         mRelativeLayout = mview.findViewById(R.id.cardView_RLayout);
+        skip = mview.findViewById(R.id.skip_btn);
+        skip.setVisibility(View.GONE);
 
         mSubmit.setVisibility(View.INVISIBLE);
 
@@ -180,6 +183,17 @@ public class SurveyTab_Fragment extends Fragment {
             }
         });
 
+
+        skip.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                pushUserQA(surveyQArrayList.get(index),"skipped");
+                updateCardView();
+
+
+            }
+        });
+
         return  mview;
     }
 
@@ -211,19 +225,7 @@ public class SurveyTab_Fragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        Snackbar snackbar =Snackbar.make(mview,
-               "No internet connection", Snackbar.LENGTH_SHORT);
-        ConnectivityManager cm =
-                (ConnectivityManager)mview.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
-       if(!isConnected) {
-           snackbar.show();
-       }else {
-           snackbar.dismiss();
-       }
 
 
 
@@ -244,6 +246,7 @@ public class SurveyTab_Fragment extends Fragment {
 
 
         mSubmit.setLayoutParams(params);
+        setSkipbtn();
 
     }
 
@@ -259,8 +262,18 @@ public class SurveyTab_Fragment extends Fragment {
         msubTextview.setVisibility(View.INVISIBLE);
 
         mSubmit.setLayoutParams(params);
+        setSkipbtn();
 
     }
+
+    public  void setSkipbtn(){
+        RelativeLayout.LayoutParams params= new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.addRule(RelativeLayout.ALIGN_BOTTOM, R.id.submitBtn);
+        params.setMargins(650,0,0,16);
+        skip.setLayoutParams(params);
+        skip.setVisibility(View.VISIBLE);
+    }
+
 
     public void setBelowSpinner(){
         RelativeLayout.LayoutParams params= new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -273,6 +286,7 @@ public class SurveyTab_Fragment extends Fragment {
 
         params.addRule(RelativeLayout.CENTER_HORIZONTAL);
         mSubmit.setLayoutParams(params);
+        setSkipbtn();
 
     }
 
@@ -320,6 +334,7 @@ public class SurveyTab_Fragment extends Fragment {
             msubTextview.setVisibility(View.GONE);
             mSpinner.setVisibility(View.GONE);
             mSeekBar.setVisibility(View.GONE);
+            skip.setVisibility(View.GONE);
             mTextView.setText("Check back later for more question");
             surveyQArrayList.clear();
 
@@ -399,6 +414,7 @@ public void createUserQList(){
                 }
             }
             if(userQlist.isEmpty()){
+                skip.setVisibility(View.GONE);
                 new MaterialStyledDialog.Builder(getContext())
                         .setTitle("IceBr8k!")
                         .setDescription("Welcome to the IceBr8k, please answer some simple questions to get this wonderful journey started")
@@ -480,6 +496,7 @@ public void createUserQList(){
                         mRadioGroup.setVisibility(View.GONE);
                         mSubmit.setVisibility(View.INVISIBLE);
                         msubTextview.setVisibility(View.GONE);
+                        skip.setVisibility(View.GONE);
                         mTextView.setText("Check back later for more questions");
 
                     }
@@ -512,10 +529,8 @@ public void createUserQList(){
 
 
         techniquesArrayList.add(Techniques.FadeIn);
-        techniquesArrayList.add(Techniques.FadeInLeft);
-        techniquesArrayList.add(Techniques.FadeInRight);
-        techniquesArrayList.add(Techniques.FadeInDown);
-        techniquesArrayList.add(Techniques.FadeInUp);
+       techniquesArrayList.add(Techniques.BounceIn);
+        techniquesArrayList.add(Techniques.ZoomIn);
 
 
 

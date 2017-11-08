@@ -37,8 +37,11 @@ public class Message implements IMessage {
 
     @Override
     public IUser getUser() {
-        return author ;
+       return author;
     }
+
+
+
 
     @Override
     public Date getCreatedAt() {
@@ -49,6 +52,8 @@ public class Message implements IMessage {
     public void setId(String id) {
         this.id = id;
     }
+    public void setUser(Author user){this.author =user;}
+
 
     public void setText(String text) {
         this.text = text;
@@ -56,10 +61,6 @@ public class Message implements IMessage {
 
     public void setCreatedAt(Date date) {
         this.createdAt = date;
-    }
-
-    public void setUser(Author author) {
-        this.author =author;
     }
 
     public void setMonth(String month) {

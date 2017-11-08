@@ -49,14 +49,19 @@ public class RecyclerAdapter extends RecyclerView.Adapter<Viewholder> implements
     public Viewholder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_item,parent,false);
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
-
         return  new Viewholder(view);
     }
 
     @Override
     public void onBindViewHolder(final Viewholder holder,  int position) {
+        holder.onlineStats.setVisibility(View.GONE);
+        holder.linearLayout.setAlpha((float) 0.5);
+
+
+
 
         final User mUser = userArrayList.get(position);
+
 
 
         holder.username .setText(mUser.getUsername());
@@ -76,21 +81,25 @@ public class RecyclerAdapter extends RecyclerView.Adapter<Viewholder> implements
                     public void onDataChange(DataSnapshot dataSnapshot) {
 
                       String online = dataSnapshot.getValue(String.class);
+                        if(online!=null) {
+                            if (online.equals("1")) {
+                                holder.onlineStats.setImageResource(R.drawable.green_dot);
+                                holder.onlineStats.setVisibility(View.VISIBLE);
+                                holder.linearLayout.setAlpha((float) 1.0);
 
-                        if(online == null || online.equals("0")){
-                            holder.onlineStats.setImageDrawable(context.getDrawable(R.drawable.gray_dot));
+
+                            } else {
+                                holder.linearLayout.setAlpha((float) 0.5);
+                                holder.onlineStats.setVisibility(View.GONE);
+                            }
+                        }else {
+                            // null
                             holder.linearLayout.setVisibility(View.VISIBLE);
-
-                        }else if(online.equals("1")){
-                            holder.onlineStats.setImageDrawable(context.getDrawable(R.drawable.green_dot));
-                            holder.linearLayout.setVisibility(View.VISIBLE);
-
-                        }else{
+                            holder.linearLayout.setAlpha((float) 0.5);
                             holder.onlineStats.setVisibility(View.GONE);
-                            holder.linearLayout.setVisibility(View.VISIBLE);
                         }
 
-                        YoYo.with(Techniques.FadeIn).duration(600).repeat(0).playOn(holder.onlineStats);
+
                     }
 
                     @Override
