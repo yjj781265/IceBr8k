@@ -31,7 +31,7 @@ public class Homepage extends AppCompatActivity {
 
         bubbleTab = findViewById(R.id.bubbleTab);
 
-        viewPager =findViewById(R.id.homepage_viewpager);
+        viewPager = findViewById(R.id.homepage_viewpager);
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
 
         viewPagerAdapter.addFragment(new SurveyTab_Fragment());
@@ -42,20 +42,18 @@ public class Homepage extends AppCompatActivity {
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
 
-
-        Snackbar snackbar =Snackbar.make(viewPager,"No internet connection", Snackbar.LENGTH_SHORT);
+        Snackbar snackbar = Snackbar.make(viewPager, "No internet connection", Snackbar.LENGTH_SHORT);
         ConnectivityManager cm =
-                (ConnectivityManager)viewPager.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+                (ConnectivityManager) viewPager.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
-        if(!isConnected) {
+        if (!isConnected) {
             snackbar.show();
-        }else {
+        } else {
             snackbar.dismiss();
         }
-
 
 
 
@@ -65,11 +63,14 @@ public class Homepage extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if(FirebaseAuth.getInstance().getCurrentUser()!=null){
-            mRef = FirebaseDatabase.getInstance().getReference("Users/"+currentUser.getUid());
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            mRef = FirebaseDatabase.getInstance().getReference("Users/" + currentUser.getUid());
             mRef.child("onlineStats").setValue("1");
             mRef.child("onlineStats").onDisconnect().setValue("0");
         }
+
+
+
     }
 
     @Override
@@ -79,11 +80,10 @@ public class Homepage extends AppCompatActivity {
     }
 
 
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(FirebaseAuth.getInstance().getCurrentUser()!=null) {
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Users/" + currentUser.getUid());
             mRef.child("onlineStats").setValue("0");
         }

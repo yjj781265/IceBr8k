@@ -49,21 +49,17 @@ public class commonFrag extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mArrayList = new ArrayList<>();
-        mArrayList= ((ResultActivity)getActivity()).getArrayList();
-        user2=((ResultActivity)getActivity()).getUser2();
-            Log.d("mapArr2",mArrayList.toString());
+        mArrayList = ((ResultActivity) getActivity()).getArrayList();
+        user2 = ((ResultActivity) getActivity()).getUser2();
+        Log.d("mapArr2", mArrayList.toString());
 
 
-
-
-
-
-        mView = inflater.inflate(R.layout.common_frag,container,false);
-        mRecyclerView_common =mView.findViewById(R.id.recyclerView_common);
+        mView = inflater.inflate(R.layout.common_frag, container, false);
+        mRecyclerView_common = mView.findViewById(R.id.recyclerView_common);
         LinearLayoutManager manager = new LinearLayoutManager(mView.getContext());
         mRecyclerView_common.setLayoutManager(manager);
         mRecyclerView_common.setHasFixedSize(false);
-        mRecyclerView_common.setAdapter(new RecyclerAdapterCommon(mArrayList,mView.getContext(),user2));
+        mRecyclerView_common.setAdapter(new RecyclerAdapterCommon(mArrayList, mView.getContext(), user2));
         return mView;
 
     }
@@ -71,32 +67,6 @@ public class commonFrag extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-         mHandler = new Handler();
-
-
-
-       /* runnable = new Runnable() {
-            @Override
-            public void run() {
-      *//* do what you need to do *//*
-                YoYo.with(Techniques.FadeInLeft)
-                        .duration(500)
-                        .repeat(0)
-                        .playOn(mView);
-
-
-                mTextView.setText("Do you like sport ?");
-                mView.setClickable(true);
-
-      *//* and here comes the "trick" *//*
-                mHandler.postDelayed(this, 1000);
-                mHandler.removeCallbacks(this);
-
-
-            }
-        };
-         mHandler.postDelayed(runnable,2000);*/
-
 
 
     }

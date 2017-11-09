@@ -67,7 +67,6 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
     ImageView profileImg;
 
 
-
     public Userstab_Fragment() {
     }
 
@@ -75,14 +74,11 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mDatabase = FirebaseDatabase.getInstance();
-        mUserArrayList=new ArrayList<>();
+        mUserArrayList = new ArrayList<>();
         setHasOptionsMenu(true);
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         getCurrentUserDB(currentUser);
         populateUserList();
-
-
-
 
 
     }
@@ -91,21 +87,18 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.users_tab,container,false);
+        view = inflater.inflate(R.layout.users_tab, container, false);
         mRecyclerView = view.findViewById(R.id.recyclerView_id);
         LinearLayoutManager manager = new LinearLayoutManager(view.getContext());
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(),1));
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), 1));
         newtonCradleLoading = view.findViewById(R.id.newton_cradle_loading);
         newtonCradleLoading.setVisibility(view.VISIBLE);
         newtonCradleLoading.setLoadingColor(R.color.holo_red_light);
         newtonCradleLoading.start();
         refreshLayout = view.findViewById(R.id.swiperefresh);
         profileImg = view.findViewById(R.id.imageBtn);
-
-
-
 
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -135,8 +128,8 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
         profileImg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Userstab_Fragment.this.getContext(),UserProfilePage.class);
-                intent.putExtra("selfProfile",currentUserDB);
+                Intent intent = new Intent(Userstab_Fragment.this.getContext(), UserProfilePage.class);
+                intent.putExtra("selfProfile", currentUserDB);
                 startActivity(intent);
             }
         });
@@ -147,8 +140,8 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
-        inflater.inflate(R.menu.menu_main,menu);
-        super.onCreateOptionsMenu(menu,inflater);
+        inflater.inflate(R.menu.menu_main, menu);
+        super.onCreateOptionsMenu(menu, inflater);
 
     }
 
@@ -165,29 +158,28 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
             default:
                 return super.onOptionsItemSelected(item);
         }
-        }
+    }
 
 
-    public void populateUserList(){
+    public void populateUserList() {
         databaseReference = mDatabase.getReference("Users");
 
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mUserArrayList.clear();
-                for(DataSnapshot userSnapshot : dataSnapshot.getChildren()){
+                for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
 
                     User mUser = userSnapshot.getValue(User.class);
-                    if(!mUser.getUsername().equals(currentUserDB.getUsername())) {
+                    if (!mUser.getUsername().equals(currentUserDB.getUsername())) {
                         mUserArrayList.add(mUser);
 
                     }
 
 
-
                 }
                 //Toast.makeText(getContext(),"Refreshed",Toast.LENGTH_SHORT).show();
-                if(mUserArrayList!=null && !mUserArrayList.isEmpty()) {
+                if (mUserArrayList != null && !mUserArrayList.isEmpty()) {
                     Collections.sort(mUserArrayList);
                     mRecyclerView.setHasFixedSize(false);
                     mRecyclerView.setAdapter(new RecyclerAdapter(getContext(), mUserArrayList));
@@ -207,14 +199,14 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
 
     }
 
-    public User getCurrentUserDB(FirebaseUser currentUser){
-        mDatabase.getReference("Users/"+currentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+    public User getCurrentUserDB(FirebaseUser currentUser) {
+        mDatabase.getReference("Users/" + currentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-              currentUserDB = dataSnapshot.getValue(User.class);
+                currentUserDB = dataSnapshot.getValue(User.class);
                 Glide.with(view.getContext()).load(currentUserDB.getPhotourl()).
                         apply(RequestOptions.circleCropTransform()).into(profileImg);
-                Log.d("currentUserDB",currentUserDB.getUsername());
+                Log.d("currentUserDB", currentUserDB.getUsername());
 
             }
 
@@ -228,17 +220,15 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
     }
 
 
-
-    public void Signout(){
-        if(FirebaseAuth.getInstance().getCurrentUser()!=null) {
+    public void Signout() {
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Users/" + currentUser.getUid());
             mRef.child("onlineStats").setValue("0");
         }
         FirebaseAuth.getInstance().signOut();
 
 
-
-        if(currentUser.getProviders().get(0).contains("google")) {
+        if (currentUser.getProviders().get(0).contains("google")) {
 
             // Google sign out
             Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
@@ -250,8 +240,8 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
                         }
                     });
         }
-        Intent intent = new Intent(view.getContext(),login_page.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+        Intent intent = new Intent(view.getContext(), login_page.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
 
     }
@@ -261,10 +251,6 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
-
-
-
-
 
 
 }

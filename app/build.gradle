@@ -1,5 +1,11 @@
+
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.android.application'
+
+
+
+
+
 
 
 android {
@@ -12,6 +18,8 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+
     }
     buildTypes {
         release {
@@ -52,4 +60,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.2.0'
     compile 'com.github.stfalcon:chatkit:0.2.2'
+
 }

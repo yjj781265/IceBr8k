@@ -36,6 +36,7 @@
 
             android:orientation="vertical"
             android:visibility="visible">
+
             <ProgressBar
                 android:id="@+id/progressBar2"
                 style="@style/Widget.AppCompat.ProgressBar"
@@ -103,19 +104,19 @@
                 android:layout_marginRight="15dp"
                 android:layout_marginTop="40dp"
                 android:visibility="invisible"
+                app:bsb_always_show_bubble="false"
+                app:bsb_bubble_color="@color/colorAccent"
+                app:bsb_bubble_text_color="@color/colorPrimary"
+                app:bsb_is_float_type="true"
                 app:bsb_max="10"
                 app:bsb_min="1"
                 app:bsb_progress="5"
-                app:bsb_bubble_color="@color/colorAccent"
-                app:bsb_bubble_text_color="@color/colorPrimary"
-                app:bsb_touch_to_seek="true"
                 app:bsb_second_track_color="@color/colorAccent"
-                app:bsb_show_progress_in_float="false"
-                app:bsb_always_show_bubble="false"
-                app:bsb_show_thumb_text="true"
                 app:bsb_section_count="5"
+                app:bsb_show_progress_in_float="false"
                 app:bsb_show_section_text="true"
-                app:bsb_is_float_type="true"
+                app:bsb_show_thumb_text="true"
+                app:bsb_touch_to_seek="true"
                 app:bsb_track_color="@color/colorPrimaryDark"/>
 
             <Button
@@ -149,8 +150,19 @@
 
     </android.support.v7.widget.CardView>
 
-
-
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/floatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/cardView"
+        android:layout_alignRight="@+id/cardView"
+        android:layout_below="@+id/cardView"
+        android:layout_marginEnd="35dp"
+        android:layout_marginRight="35dp"
+        android:layout_marginTop="23dp"
+        android:clickable="true"
+        app:backgroundTint="@color/colorPrimary"
+        app:srcCompat="@android:drawable/ic_input_add"/>
 
 
 </RelativeLayout>

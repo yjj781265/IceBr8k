@@ -6,6 +6,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
@@ -31,6 +32,7 @@ import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.github.javiersantos.materialstyleddialogs.enums.Style;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -61,6 +63,7 @@ public class SurveyTab_Fragment extends Fragment {
     Button mSubmit;
     CardView mCardView;
     TextView skip;
+    FloatingActionButton mActionButton;
 
 
     ArrayList<SurveyQ> surveyQArrayList,temp; // for unpdating UI
@@ -84,16 +87,16 @@ public class SurveyTab_Fragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        surveyQArrayList = new ArrayList<>();
-        temp = new ArrayList<>();
-        userQlist = new ArrayList<>();
-        surveyQlist = new ArrayList<>();
+
+
+
+
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
 
         index =0;
        // new UploadQ().updataQdatabase(FirebaseDatabase.getInstance().getReference());
-        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference();
+
         ArrayList<String> answers = new ArrayList();
         answers.add("A");
         answers.add("B");
@@ -125,24 +128,22 @@ public class SurveyTab_Fragment extends Fragment {
         mRelativeLayout = mview.findViewById(R.id.cardView_RLayout);
         skip = mview.findViewById(R.id.skip_btn);
         skip.setVisibility(View.GONE);
+        mActionButton= mview.findViewById(R.id.floatingActionButton);
 
         mSubmit.setVisibility(View.INVISIBLE);
+        mActionButton.setVisibility(View.GONE);
+        createInitQ();
 
 
 
+        mActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                createInitQ();
+                mActionButton.setVisibility(View.GONE);
 
-
-
-
-
-
-
-
-
-
-
-
-
+            }
+        });
 
 
         mSubmit.setOnClickListener(new View.OnClickListener() {
@@ -198,27 +199,13 @@ public class SurveyTab_Fragment extends Fragment {
     }
 
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Questions_8");
-        ref.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                createInitQ();
-                mProgressBar.setProgress(0);
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
 
     @Override
     public void onPause() {
         super.onPause();
+        createInitQ();
+
 
     }
 
@@ -228,6 +215,29 @@ public class SurveyTab_Fragment extends Fragment {
 
 
 
+
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser && getView()!=null) {
+
+
+            if(mTextView.getText().toString().equals("Check back later for more questions")){
+                createInitQ();
+
+                mActionButton.setVisibility(View.VISIBLE);
+
+
+            }else{
+                mActionButton.setVisibility(View.GONE);
+            }
+
+
+        }else{
+
+        }
 
     }
 
@@ -335,7 +345,9 @@ public class SurveyTab_Fragment extends Fragment {
             mSpinner.setVisibility(View.GONE);
             mSeekBar.setVisibility(View.GONE);
             skip.setVisibility(View.GONE);
-            mTextView.setText("Check back later for more question");
+            mTextView.setText("Check back later for more questions");
+            YoYo.with(Techniques.FadeIn).duration(1000).repeat(0).playOn(mActionButton);
+            mActionButton.setVisibility(View.VISIBLE);
             surveyQArrayList.clear();
 
         }else {
@@ -352,7 +364,8 @@ public class SurveyTab_Fragment extends Fragment {
 
     // create initial question;
 public void createInitQ(){
-
+    mProgressBar.setProgress(0);
+    surveyQlist = new ArrayList<>();
 
     DatabaseReference mRef= FirebaseDatabase.getInstance().getReference("Questions_8");
 
@@ -395,7 +408,7 @@ public void pushUserQA(SurveyQ surveyQ,String answer) {
 }
 
 public void createUserQList(){
-
+    userQlist = new ArrayList<>();
     // get all the questions user answered
     DatabaseReference mref = FirebaseDatabase.getInstance().getReference
             ("UserQA/"+FirebaseAuth.getInstance().getCurrentUser().getUid());
@@ -445,8 +458,9 @@ public void createUserQList(){
 
 }
     public void initQuestionPool(){
+        surveyQArrayList = new ArrayList<>();
         surveyQlist.removeAll(userQlist);
-        surveyQArrayList.clear();;
+
 
         Log.d("debug","After Removal"+surveyQlist);
 
@@ -457,7 +471,7 @@ public void createUserQList(){
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
 
-
+                    temp = new ArrayList<>();
                     for(DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
                         GenericTypeIndicator<ArrayList<String>> t = new GenericTypeIndicator<ArrayList<String>>() {};
                         ArrayList<String> answer = childSnapshot.child("answer").getValue(t);
@@ -467,7 +481,8 @@ public void createUserQList(){
                         String question_id = childSnapshot.child("questionId").getValue(String.class);
 
                         SurveyQ surveyQ = new SurveyQ(type, question, question_id, answer);
-                        Log.d("debug",surveyQlist.toString());
+                        Log.d("debug2",surveyQlist.toString());
+
 
                         if(surveyQlist.contains(surveyQ.getQuestionId())) {
                             temp.add(surveyQ);
@@ -476,19 +491,21 @@ public void createUserQList(){
 
 
                     }
-                    /*if(temp.size()>=8){
+
+                   if(temp.size()>=8){
                         Collections.shuffle(temp);
                         for(int i=0; i<8;i++){
                             surveyQArrayList.add(temp.get(i));
                         }
-                    }else{*/
+                    }else{
                         surveyQArrayList =temp;
-                   // }
+                    }
                     Log.d("debug",String.valueOf(surveyQArrayList.size()));
                     if(!surveyQArrayList.isEmpty() && surveyQArrayList!=null) {
                         index =0;
                         Collections.shuffle(surveyQArrayList);
                         mProgressBar2.setVisibility(View.INVISIBLE);
+                        mActionButton.setVisibility(View.GONE);
                         mSubmit.setVisibility(View.VISIBLE);
                         updateUI(surveyQArrayList.get(index));
                     }else{ // no questions
@@ -497,6 +514,7 @@ public void createUserQList(){
                         mSubmit.setVisibility(View.INVISIBLE);
                         msubTextview.setVisibility(View.GONE);
                         skip.setVisibility(View.GONE);
+                        mActionButton.setVisibility(View.VISIBLE);
                         mTextView.setText("Check back later for more questions");
 
                     }

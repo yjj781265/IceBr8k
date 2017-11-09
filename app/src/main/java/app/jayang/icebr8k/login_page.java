@@ -93,6 +93,7 @@ public class login_page extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_page);
 
+
          intent = new Intent(this, Homepage.class);
         FacebookSdk.sdkInitialize(getApplicationContext());
         mdatabase = FirebaseDatabase.getInstance();

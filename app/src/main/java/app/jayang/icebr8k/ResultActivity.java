@@ -25,12 +25,12 @@ import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.Modle.UserQA;
 
 public class ResultActivity extends AppCompatActivity {
-    TabLayout mLayout ;
+    TabLayout mLayout;
     ViewPager mViewPager;
     Toolbar mToolbar;
     User user2;
     ImageView user2Icon;
-    ArrayList<UserQA> mArrayList,diffAnswer1,diffAnswer2;
+    ArrayList<UserQA> mArrayList, diffAnswer1, diffAnswer2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,27 +40,26 @@ public class ResultActivity extends AppCompatActivity {
 
         mLayout = findViewById(R.id.tabs_result);
         mToolbar = findViewById(R.id.toolbar_result);
-        user2Icon =findViewById(R.id.user2_icon);
+        user2Icon = findViewById(R.id.user2_icon);
 
 
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        mViewPager =findViewById(R.id.viewpager_result);
+        mViewPager = findViewById(R.id.viewpager_result);
 
         mArrayList = getIntent().getParcelableArrayListExtra("sameAnswer");
-        Log.d("mapArr",mArrayList.toString());
-        user2 = (User)getIntent().getSerializableExtra("user2");
-        Log.d("mapArr",user2.getDisplayname());
+        Log.d("mapArr", mArrayList.toString());
+        user2 = (User) getIntent().getSerializableExtra("user2");
+        Log.d("mapArr", user2.getDisplayname());
         diffAnswer1 = getIntent().getParcelableArrayListExtra("diffAnswer1");
-        Log.d("diff",diffAnswer1.toString());
+        Log.d("diff", diffAnswer1.toString());
         diffAnswer2 = getIntent().getParcelableArrayListExtra("diffAnswer2");
-        Log.d("diff",diffAnswer2.toString());
+        Log.d("diff", diffAnswer2.toString());
 //user2 avatar on toolbar
         Glide.with(getBaseContext()).load(user2.getPhotourl()).
                 apply(RequestOptions.circleCropTransform()).into(user2Icon);
-
 
 
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
@@ -76,15 +75,13 @@ public class ResultActivity extends AppCompatActivity {
         mLayout.getTabAt(1).setIcon(R.drawable.axe_mark);
 
 
-
     }
-
 
 
     @Override
     public boolean onSupportNavigateUp() {
         finish();
-        return  true;
+        return true;
     }
 
     public User getUser2() {
