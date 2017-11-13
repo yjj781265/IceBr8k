@@ -1,4 +1,11 @@
+plugins {
+    id 'com.onesignal.androidsdk.onesignal-gradle-plugin' version '0.7.0'
+}
+apply plugin: 'com.onesignal.androidsdk.onesignal-gradle-plugin'
 
+repositories {
+    maven { url 'https://maven.google.com' }
+}
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.android.application'
 
@@ -18,6 +25,9 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders = [onesignal_app_id: "c1189c2a-37e1-4db8-8f8e-c236f552131a",
+                                // Project number pulled from dashboard, local value is ignored.
+                                onesignal_google_project_number: "REMOTE"]
 
 
     }
@@ -34,7 +44,6 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-
     compile 'com.github.d-max:spots-dialog:0.7@aar'
     compile 'com.facebook.android:facebook-android-sdk:[4,5)'
     compile 'com.android.support:appcompat-v7:26.+'
@@ -60,5 +69,8 @@ dependencies {
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.2.0'
     compile 'com.github.stfalcon:chatkit:0.2.2'
-
+    compile 'com.onesignal:OneSignal:[3.6.5, 3.99.99]'
+    compile 'com.loopj.android:android-async-http:1.4.9'
+    implementation files('src/main/android-viewbadger-master.zip')
+    implementation files('src/main/android-viewbadger.jar')
 }

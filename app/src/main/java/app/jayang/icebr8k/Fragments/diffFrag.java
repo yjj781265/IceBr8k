@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,10 @@ public class diffFrag extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         user1QA= ((ResultActivity)getActivity()).getDiffAnswer1();
         user2QA = ((ResultActivity)getActivity()).getDiffAnswer2();
+
+
+
+
         user2=((ResultActivity)getActivity()).getUser2();
         mview = inflater.inflate(R.layout.diff_frag,container,false);
         recyclerView = mview.findViewById(R.id.recyclerView_diff);

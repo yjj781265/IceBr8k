@@ -7,36 +7,43 @@
     android:layout_height="match_parent"
     tools:context="app.jayang.icebr8k.Homepage">
 
-    <com.github.florent37.bubbletab.BubbleTab
-        android:id="@+id/bubbleTab"
+    <android.support.design.widget.TabLayout
+        android:id="@+id/homepageTab"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="wrap_content"
+
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
 
-        android:background="@android:color/white"
-
-        android:clipToPadding="true"
-        android:elevation="80dp"
-        app:bubbleTab_circleColor="@color/colorAccent"
-        app:bubbleTab_circleRatio="1.2"
-        app:bubbleTab_image0="@drawable/survey_icon"
-        app:bubbleTab_image1="@drawable/users_icon"
-        app:bubbleTab_image2="@drawable/message_icon"
-        app:bubbleTab_image3="@drawable/map_icon"
-        app:bubbleTab_image4="@drawable/gi_icon"
+         app:tabMode="fixed"
+        app:tabIndicatorColor="@color/colorPrimary"
+        app:tabIndicatorHeight="2dp">
 
 
-        />
+    </android.support.design.widget.TabLayout>
+
 
     <android.support.v4.view.ViewPager
         android:id="@+id/homepage_viewpager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/bubbleTab"
+        android:layout_above="@id/homepageTab"
         android:layout_marginBottom="0dp"
         android:background="@android:color/white"></android.support.v4.view.ViewPager>
 
+    <ImageView
+        android:id="@+id/red_dot"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/homepage_viewpager"
+        android:layout_marginEnd="42dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginTop="10dp"
+        android:baselineAlignBottom="true"
+        android:contentDescription="@null"
+        android:src="@drawable/red_dot"/>
 
 </RelativeLayout>

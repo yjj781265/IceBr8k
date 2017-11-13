@@ -7,7 +7,7 @@
     <item
     android:title ="@string/log_out"
     android:id="@+id/log_out_item"
-    android:icon="@drawable/log_out"
+
     />
 
 </menu>

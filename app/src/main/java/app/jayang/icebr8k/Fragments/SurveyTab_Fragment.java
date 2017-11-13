@@ -126,21 +126,25 @@ public class SurveyTab_Fragment extends Fragment {
         mProgressBar2= mview.findViewById(R.id.progressBar2);
         mProgressBar2.setVisibility(View.VISIBLE);
         mRelativeLayout = mview.findViewById(R.id.cardView_RLayout);
+        mActionButton= mview.findViewById(R.id.floatingActionButton);
         skip = mview.findViewById(R.id.skip_btn);
         skip.setVisibility(View.GONE);
-        mActionButton= mview.findViewById(R.id.floatingActionButton);
-
-        mSubmit.setVisibility(View.INVISIBLE);
-        mActionButton.setVisibility(View.GONE);
         createInitQ();
+
 
 
 
         mActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                mActionButton.setClickable(false);
+                mTextView.setVisibility(View.INVISIBLE);
+                mProgressBar2.setVisibility(View.VISIBLE);
+
                 createInitQ();
-                mActionButton.setVisibility(View.GONE);
+                // prevent user spam click the button ,may crash the program
+
+
 
             }
         });
@@ -188,8 +192,10 @@ public class SurveyTab_Fragment extends Fragment {
         skip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                pushUserQA(surveyQArrayList.get(index),"skipped");
-                updateCardView();
+                if(surveyQArrayList!=null || !surveyQArrayList.isEmpty()) {
+                    pushUserQA(surveyQArrayList.get(index), "skipped");
+                    updateCardView();
+                }
 
 
             }
@@ -204,8 +210,6 @@ public class SurveyTab_Fragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        createInitQ();
-
 
     }
 
@@ -218,24 +222,16 @@ public class SurveyTab_Fragment extends Fragment {
 
     }
 
+
+    // this method is triggered once the survey fragment is appeared to the user
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         if (isVisibleToUser && getView()!=null) {
-
-
-            if(mTextView.getText().toString().equals("Check back later for more questions")){
+            if(mTextView.getText().toString().equals(getString(R.string.check_back_later))){
                 createInitQ();
-
-                mActionButton.setVisibility(View.VISIBLE);
-
-
-            }else{
-                mActionButton.setVisibility(View.GONE);
             }
 
-
-        }else{
 
         }
 
@@ -278,8 +274,8 @@ public class SurveyTab_Fragment extends Fragment {
 
     public  void setSkipbtn(){
         RelativeLayout.LayoutParams params= new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.addRule(RelativeLayout.ALIGN_BOTTOM, R.id.submitBtn);
-        params.setMargins(650,0,0,16);
+        params.addRule(RelativeLayout.BELOW, R.id.submitBtn);
+        params.setMargins(800,10,0,16);
         skip.setLayoutParams(params);
         skip.setVisibility(View.VISIBLE);
     }
@@ -335,17 +331,14 @@ public class SurveyTab_Fragment extends Fragment {
         }
     }
     public void updateCardView(){
+
         index = (index + 1);
         if(index >= surveyQArrayList.size()){
             mProgressBar.setProgress(0);
-            mProgressBar2.setVisibility(View.GONE);
-            mSubmit.setVisibility(View.INVISIBLE);
-            mRadioGroup.setVisibility(View.GONE);
-            msubTextview.setVisibility(View.GONE);
-            mSpinner.setVisibility(View.GONE);
-            mSeekBar.setVisibility(View.GONE);
-            skip.setVisibility(View.GONE);
-            mTextView.setText("Check back later for more questions");
+            hideCardViewComponent();
+
+            mTextView.setText(getString(R.string.check_back_later));
+            mActionButton.setClickable(true);
             YoYo.with(Techniques.FadeIn).duration(1000).repeat(0).playOn(mActionButton);
             mActionButton.setVisibility(View.VISIBLE);
             surveyQArrayList.clear();
@@ -364,6 +357,7 @@ public class SurveyTab_Fragment extends Fragment {
 
     // create initial question;
 public void createInitQ(){
+
     mProgressBar.setProgress(0);
     surveyQlist = new ArrayList<>();
 
@@ -442,7 +436,7 @@ public void createUserQList(){
                         .show();
 
             }
-             // remove all the question user Answered from the list
+
 
 
 
@@ -460,7 +454,7 @@ public void createUserQList(){
     public void initQuestionPool(){
         surveyQArrayList = new ArrayList<>();
         surveyQlist.removeAll(userQlist);
-
+        // remove all the question user Answered from the list
 
         Log.d("debug","After Removal"+surveyQlist);
 
@@ -501,21 +495,21 @@ public void createUserQList(){
                         surveyQArrayList =temp;
                     }
                     Log.d("debug",String.valueOf(surveyQArrayList.size()));
+                   //user has some question didint answer
                     if(!surveyQArrayList.isEmpty() && surveyQArrayList!=null) {
+                        mTextView.setVisibility(View.VISIBLE);
                         index =0;
                         Collections.shuffle(surveyQArrayList);
-                        mProgressBar2.setVisibility(View.INVISIBLE);
+                        hideCardViewComponent();
                         mActionButton.setVisibility(View.GONE);
                         mSubmit.setVisibility(View.VISIBLE);
                         updateUI(surveyQArrayList.get(index));
                     }else{ // no questions
-                        mProgressBar2.setVisibility(View.INVISIBLE);
-                        mRadioGroup.setVisibility(View.GONE);
-                        mSubmit.setVisibility(View.INVISIBLE);
-                        msubTextview.setVisibility(View.GONE);
-                        skip.setVisibility(View.GONE);
+                        hideCardViewComponent();
+                        mTextView.setVisibility(View.VISIBLE);
                         mActionButton.setVisibility(View.VISIBLE);
-                        mTextView.setText("Check back later for more questions");
+                        mTextView.setText(getString(R.string.check_back_later));
+                        mActionButton.setClickable(true);
 
                     }
 
@@ -544,19 +538,24 @@ public void createUserQList(){
 
     public  static Techniques randomAnime(){
        ArrayList<Techniques> techniquesArrayList = new ArrayList<>();
-
-
         techniquesArrayList.add(Techniques.FadeIn);
-       techniquesArrayList.add(Techniques.BounceIn);
-        techniquesArrayList.add(Techniques.ZoomIn);
-
-
-
-        int index = new Random().nextInt(techniquesArrayList.size()-1);
+        techniquesArrayList.add(Techniques.Bounce);
+         int index = new Random().nextInt(techniquesArrayList.size()-1);
 
         return techniquesArrayList.get(index);
 
     }
+
+    private void hideCardViewComponent(){
+        mSpinner.setVisibility(View.GONE);
+        mProgressBar2.setVisibility(View.GONE);
+        mRadioGroup.setVisibility(View.GONE);
+        mSubmit.setVisibility(View.GONE);
+        msubTextview.setVisibility(View.GONE);
+        mSeekBar.setVisibility(View.INVISIBLE);
+        skip.setVisibility(View.GONE);
+    }
+
 
 
 

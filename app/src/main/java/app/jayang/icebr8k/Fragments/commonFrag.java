@@ -30,7 +30,7 @@ public class commonFrag extends Fragment {
     TextView mTextView;
     Handler mHandler;
     Runnable runnable;
-    ArrayList<UserQA> mArrayList;
+    ArrayList<UserQA> mArrayList, commonArrList;
     RecyclerView mRecyclerView_common;
     User user2;
 
@@ -49,7 +49,14 @@ public class commonFrag extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mArrayList = new ArrayList<>();
+        commonArrList = new ArrayList<>();
         mArrayList = ((ResultActivity) getActivity()).getArrayList();
+
+        for(UserQA userQA: mArrayList){
+            if(!userQA.getAnswer().equals(getString(R.string.question_skip))){
+                commonArrList.add(userQA);
+            }
+        }
         user2 = ((ResultActivity) getActivity()).getUser2();
         Log.d("mapArr2", mArrayList.toString());
 
@@ -59,7 +66,7 @@ public class commonFrag extends Fragment {
         LinearLayoutManager manager = new LinearLayoutManager(mView.getContext());
         mRecyclerView_common.setLayoutManager(manager);
         mRecyclerView_common.setHasFixedSize(false);
-        mRecyclerView_common.setAdapter(new RecyclerAdapterCommon(mArrayList, mView.getContext(), user2));
+        mRecyclerView_common.setAdapter(new RecyclerAdapterCommon(commonArrList, mView.getContext(), user2));
         return mView;
 
     }

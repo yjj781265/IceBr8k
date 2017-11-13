@@ -31,11 +31,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_above="@+id/input_message"
+   app:textAutoLink="all"
         android:layout_below="@id/chat_toolbar"
         app:incomingDefaultBubbleColor="@color/colorAccent"
         app:incomingTimeTextColor="@color/creamYellow"
         app:outcomingTextColor="@color/creamYellow"
-        app:outcomingDefaultBubbleColor="@color/colorPrimary"/>
+        app:outcomingDefaultBubbleColor="@color/colorPrimary"
+    app:incomingDefaultBubblePressedColor="@android:color/holo_orange_light"
+        app:incomingDefaultBubbleSelectedColor="@android:color/holo_orange_light"/>
 
 
 

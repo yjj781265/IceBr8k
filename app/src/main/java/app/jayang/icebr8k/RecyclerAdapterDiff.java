@@ -78,7 +78,16 @@ public class RecyclerAdapterDiff extends RecyclerView.Adapter<Viewholder> {
 
     @Override
     public int getItemCount() {
-        return user1QA.size();
+        int counter=0;
+        for(UserQA user1 : user1QA){
+            for(UserQA user2 : user2QA){
+                if(user1.getQuestionId().equals(user2.getQuestionId())){
+                    counter++;
+
+                }
+            }
+        }
+        return counter;
     }
 
     public void hideAnswer(Viewholder viewholder,UserQA userQA){

@@ -311,25 +311,26 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
     public void getUser1QA(final String User1ID) {
         DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + User1ID);
 
+
         mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            ArrayList<String>user1QuestionArr = new ArrayList<>();
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                User1QA = new ArrayList<>();
-                temp1QA = new ArrayList<>();
+
+
                 for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
                     if (User1QArr.contains(childSnapshot.getKey())) {
                         UserQA user1QA = childSnapshot.getValue(UserQA.class);
                         if (!user1QA.getAnswer().equals("skipped")) {
-                            User1QA.add(user1QA);
-                            temp1QA.add(user1QA);
+                            user1QuestionArr.add(user1QA.getQuestionId());
                         }
 
                     }
 
+
                 }
                 mButton.setProgress(99);
-                Log.d("map", User1QA.toString());
-                getUser2QA(User2Uid, User1QArr);
+                getUser2QA(User2Uid, user1QuestionArr);
 
 
             }
@@ -345,9 +346,26 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
     public void getUser2QA(final String User2ID, final ArrayList arr) {
         DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + User2ID);
 
+
         mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            ArrayList<String>user2QuestionArr = new ArrayList<>();
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                    if (arr.contains(childSnapshot.getKey())) {
+
+                        UserQA user2QA = childSnapshot.getValue(UserQA.class);
+                        if (!user2QA.getAnswer().equals("skipped")) {
+                            user2QuestionArr.add(user2QA.getQuestionId());
+                        }
+
+                    }
+
+                }
+                //all the non-skipped questions id both users answered
+                arr.retainAll(user2QuestionArr);
+
                 User2QA = new ArrayList<>();
                 temp2QA = new ArrayList<>();
                 for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
@@ -362,55 +380,93 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                     }
 
                 }
+                DatabaseReference mRef2 = FirebaseDatabase.getInstance().getReference("UserQA/" + currentUser.getUid());
+                mRef2.addListenerForSingleValueEvent(new ValueEventListener() {
 
-                //find questions with the same answer
-                User1QA.retainAll(User2QA);
-                //find questions with different answer for user1,user2
-                temp1QA.removeAll(User1QA);
-                temp2QA.removeAll(User1QA);
-                Log.d("afterQA", User1QA.toString());
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        User1QA = new ArrayList<>();
+                        temp1QA = new ArrayList<>();
+                        for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                            if (arr.contains(childSnapshot.getKey())) {
 
-                Log.d("map2", User2QA.toString());
-                score = (int) (((double) User1QA.size() / (double) User1QArr.size()) * 100);
+                                UserQA user1QA = childSnapshot.getValue(UserQA.class);
+                                if (!user1QA.getAnswer().equals("skipped")) {
+                                    User1QA.add(user1QA);
+                                    temp1QA.add(user1QA);
+                                }
 
-                mButton.setClickable(true);
-                if (User2QArr.isEmpty()) {
-                    Toast.makeText(getBaseContext(), mUser.getDisplayname() + " hasn't answered any questions yet", Toast.LENGTH_LONG).show();
-                    mButton.setProgress(0);
-                } else {
-                    dialog = new Dialog(UserProfilePage.this);
-                    dialog.setCanceledOnTouchOutside(true);
-                    dialog.setContentView(R.layout.score_dialog);
-                    TextView textview = dialog.findViewById(R.id.compareText);
-                    textview.setText("Compare with " + mUser.getUsername());
-                    TextView cancel = dialog.findViewById(R.id.cancel_btn);
-                    TextView details = dialog.findViewById(R.id.details_btn);
-                    arcProgress = dialog.findViewById(R.id.arc_progress);
-                    arcProgress.setProgress(score);
-                    dialog.show();
-                    mButton.setProgress(0);
-                    cancel.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            dialog.dismiss();
+
+                            }
+
+
+                        }
+
+                        //find questions with the same answer
+                        User1QA.retainAll(User2QA);
+                        //find questions with different answer for user1,user2
+                        temp1QA.removeAll(User1QA);
+                        temp2QA.removeAll(User1QA);
+                        Log.d("afterQA", User1QA.toString());
+                        Log.d("afterQA", String.valueOf(temp1QA.size()));
+                        Log.d("afterQA", String.valueOf(temp2QA.size()));
+
+                        score = (int) (((double) User1QA.size() / (double) arr.size()) * 100);
+
+                        mButton.setClickable(true);
+                        if (User2QArr.isEmpty()) {
+                            Toast.makeText(getBaseContext(), mUser.getDisplayname() + " hasn't answered any questions yet", Toast.LENGTH_LONG).show();
                             mButton.setProgress(0);
-                        }
-                    });
+                        } else {
+                            dialog = new Dialog(UserProfilePage.this);
+                            dialog.setCanceledOnTouchOutside(true);
+                            dialog.setContentView(R.layout.score_dialog);
+                            TextView textview = dialog.findViewById(R.id.compareText);
+                            textview.setText("Compare with " + mUser.getUsername());
+                            TextView cancel = dialog.findViewById(R.id.cancel_btn);
+                            TextView details = dialog.findViewById(R.id.details_btn);
+                            arcProgress = dialog.findViewById(R.id.arc_progress);
+                            arcProgress.setProgress(score);
+                            dialog.show();
+                            mButton.setProgress(0);
+                            cancel.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    dialog.dismiss();
+                                    mButton.setProgress(0);
+                                }
+                            });
 
-                    details.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Intent i = new Intent(getApplicationContext(), ResultActivity.class);
-                            i.putExtra("sameAnswer", User1QA);
-                            i.putExtra("user2", mUser);
-                            i.putExtra("diffAnswer1", temp1QA);
-                            i.putExtra("diffAnswer2", temp2QA);
+                            details.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    // send user QA data to the result details activity
+                                    Intent i = new Intent(getApplicationContext(), ResultActivity.class);
+                                    i.putExtra("sameAnswer", User1QA);
+                                    i.putExtra("user2", mUser);
+                                    i.putExtra("diffAnswer1", temp1QA);
+                                    i.putExtra("diffAnswer2", temp2QA);
 
-                            startActivity(i);
-                            dialog.dismiss();
+                                    startActivity(i);
+                                    overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
+                                    dialog.dismiss();
+                                }
+                            });
                         }
-                    });
-                }
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+
+
+
+
+
 
 
             }

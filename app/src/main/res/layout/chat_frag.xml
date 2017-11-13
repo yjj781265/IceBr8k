@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/chat_frag_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        app:title="Conversations"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+         ></android.support.v7.widget.Toolbar>
+
+    <com.stfalcon.chatkit.dialogs.DialogsList
+        android:id="@+id/dialogsList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/chat_frag_toolbar"
+        app:dialogAvatarWidth="48dp"
+        app:dialogAvatarHeight="48dp"
+        app:dialogItemBackground="@color/white"
+        app:dialogMessageTextSize="13sp"
+        app:dialogTitleTextSize="16sp"
+        app:dialogUnreadBubbleEnabled="true"
+        app:dialogUnreadBubbleBackgroundColor="@android:color/holo_red_light"
+        app:dialogUnreadMessageTextStyle="bold"
+        app:dialogUnreadTitleTextStyle="bold"/>
+
+</RelativeLayout>

@@ -56,7 +56,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainChatActivity"></activity>
+        <activity android:name=".MainChatActivity" >
+        </activity>
+
+        <meta-data android:name="com.onesignal.NotificationOpened.DEFAULT" android:value="DISABLE" />
+        <meta-data android:name="com.onesignal.NotificationAccentColor.DEFAULT" android:value="0373CA"/>
     </application>
 
 

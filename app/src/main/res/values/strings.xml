@@ -6,5 +6,10 @@
     <string name="error_field_nospace">No space in username</string>
     <string name="error_invalid_username">Username needs at least 5 characters</string>
     <string name="log_out">Log out</string>
+    <string name="check_back_later">No more questions</string>
+    <string name ="question_skip">skipped</string>
+    <string name="date_header_yesterday">Yesterday</string>
+    <string name="OneSignal_user_API_key">YTc5NDVhYzEtMDBhMC00YTRiLTgyNzEtNTE0ZjE1Yjc5YmZm</string>
+    <string name="OneSignal_App_id">c1189c2a-37e1-4db8-8f8e-c236f552131a</string>
 
 </resources>

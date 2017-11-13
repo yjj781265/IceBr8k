@@ -64,6 +64,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import app.jayang.icebr8k.Modle.User;
 import dmax.dialog.SpotsDialog;
 
 
@@ -86,6 +87,8 @@ public class login_page extends AppCompatActivity implements
     private TextInputEditText input;
     private ArrayList<String> usernameList;
     private Intent intent;
+    private String user2Id;
+    private User user2;
     private  SpotsDialog loadingdialog;
 
     @Override
@@ -93,8 +96,12 @@ public class login_page extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_page);
 
+        user2Id = getIntent().getExtras().getString("user2Id");
+        user2 =(User)getIntent().getExtras().getSerializable("user2");
 
          intent = new Intent(this, Homepage.class);
+         intent.putExtra("user2Id",user2Id);
+         intent.putExtra("user2",user2);
         FacebookSdk.sdkInitialize(getApplicationContext());
         mdatabase = FirebaseDatabase.getInstance();
         myRef = mdatabase.getReference("Users");
@@ -124,7 +131,6 @@ public class login_page extends AppCompatActivity implements
         if(currentUser!=null){
             loadingdialog.dismiss();
             startActivity(intent);
-            Toast.makeText(getBaseContext(),"Welcome Back",Toast.LENGTH_SHORT).show();
             finish();
         }
 

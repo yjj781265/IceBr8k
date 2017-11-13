@@ -80,8 +80,17 @@ public class ResultActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
+        super.onSupportNavigateUp();
         finish();
+        overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+        overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
     }
 
     public User getUser2() {

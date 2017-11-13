@@ -2,6 +2,7 @@ package app.jayang.icebr8k.Fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -78,7 +79,7 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
         setHasOptionsMenu(true);
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         getCurrentUserDB(currentUser);
-        populateUserList();
+
 
 
     }
@@ -92,13 +93,13 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
         LinearLayoutManager manager = new LinearLayoutManager(view.getContext());
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), 1));
         newtonCradleLoading = view.findViewById(R.id.newton_cradle_loading);
         newtonCradleLoading.setVisibility(view.VISIBLE);
         newtonCradleLoading.setLoadingColor(R.color.holo_red_light);
         newtonCradleLoading.start();
         refreshLayout = view.findViewById(R.id.swiperefresh);
         profileImg = view.findViewById(R.id.imageBtn);
+        populateUserList();
 
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -167,28 +168,30 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                mUserArrayList.clear();
-                for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+                if (dataSnapshot != null) {
+                    mUserArrayList.clear();
+                    for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
 
-                    User mUser = userSnapshot.getValue(User.class);
-                    if (!mUser.getUsername().equals(currentUserDB.getUsername())) {
-                        mUserArrayList.add(mUser);
+                        User mUser = userSnapshot.getValue(User.class);
+                        if (userSnapshot.getKey().equals(currentUser.getUid())==false) {
+                            mUserArrayList.add(mUser);
 
+                        }
+
+
+                    }
+                    //Toast.makeText(getContext(),"Refreshed",Toast.LENGTH_SHORT).show();
+                    if (mUserArrayList != null && !mUserArrayList.isEmpty()) {
+                        Collections.sort(mUserArrayList);
+                        mRecyclerView.setHasFixedSize(false);
+                        mRecyclerView.setAdapter(new RecyclerAdapter(getContext(), mUserArrayList));
+                        refreshLayout.setRefreshing(false);
+                        newtonCradleLoading.stop();
+                        newtonCradleLoading.setVisibility(view.INVISIBLE);
                     }
 
 
                 }
-                //Toast.makeText(getContext(),"Refreshed",Toast.LENGTH_SHORT).show();
-                if (mUserArrayList != null && !mUserArrayList.isEmpty()) {
-                    Collections.sort(mUserArrayList);
-                    mRecyclerView.setHasFixedSize(false);
-                    mRecyclerView.setAdapter(new RecyclerAdapter(getContext(), mUserArrayList));
-                    refreshLayout.setRefreshing(false);
-                    newtonCradleLoading.stop();
-                    newtonCradleLoading.setVisibility(view.INVISIBLE);
-                }
-
-
             }
 
             @Override

@@ -47,14 +47,16 @@
                 android:visibility="visible"/>
 
 
-            <TextView
+            <me.grantland.widget.AutofitTextView
                 android:id="@+id/question_id"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
+                android:autoSizeTextType="uniform"
                 android:fontFamily="sans-serif"
                 android:gravity="left"
                 android:textSize="24sp"
+                app:minTextSize="20sp"
                 android:textStyle="bold"/>
 
             <TextView
