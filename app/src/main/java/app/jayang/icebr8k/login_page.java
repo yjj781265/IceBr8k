@@ -100,8 +100,10 @@ public class login_page extends AppCompatActivity implements
         user2 =(User)getIntent().getExtras().getSerializable("user2");
 
          intent = new Intent(this, Homepage.class);
-         intent.putExtra("user2Id",user2Id);
-         intent.putExtra("user2",user2);
+
+
+
+
         FacebookSdk.sdkInitialize(getApplicationContext());
         mdatabase = FirebaseDatabase.getInstance();
         myRef = mdatabase.getReference("Users");

@@ -29,6 +29,9 @@
         app:dialogUnreadBubbleEnabled="true"
         app:dialogUnreadBubbleBackgroundColor="@android:color/holo_red_light"
         app:dialogUnreadMessageTextStyle="bold"
-        app:dialogUnreadTitleTextStyle="bold"/>
+        app:dialogUnreadTitleTextStyle="bold"
+        app:dialogDividerLeftPadding="0dp"
+
+        app:dialogDividerEnabled="true"/>
 
 </RelativeLayout>

@@ -8,6 +8,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.onesignal.OneSignal;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,19 +30,19 @@ import cz.msebera.android.httpclient.entity.StringEntity;
 
 public class SendNotification {
     private static final String BASE_URL = "https://onesignal.com/api/v1/notifications";
-    private static final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+    private String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
 
     private static AsyncHttpClient client = new AsyncHttpClient();
 
-    public static void sendNotificationTo(String playerId, String name, String text, Context context,User user,String userId) {
-        final String appId = context.getString(R.string.OneSignal_App_id);
+    public static void sendNotificationTo(String playerId, String name, String text,String userId) {
+       /* final String appId = context.getString(R.string.OneSignal_App_id);
         String request = "{"
                 +   "\"app_id\": "+"\""+appId+"\""+","
                 +   "\"include_player_ids\": " + "["+"\""+playerId+"\""+"],"
                 +   "\"headings\":"+"{"+"\"en\": "+"\""+name+"\""+"}"+","
                 +   "\"contents\":"+"{"+"\"en\": "+"\""+text+"\""+"}"+","
-                +    "\"data\": "+"{"+"\"currentuserId\": "+"\""+uid+"\""+","+"\"user2Id\": "+"\""+userId+"\""+"}"
+                +    "\"data\": "+"{"+"\"user2Id\": "+"\""+userId+"\""+"}"
                 + "}";
         client.addHeader("Content-Type","application/json; charset=UTF-8");
         client.addHeader("Authorization", "Basic "+context.getString(R.string.OneSignal_user_API_key));
@@ -51,20 +52,37 @@ public class SendNotification {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                     super.onSuccess(statusCode, headers, response);
-                    Log.d("header",response.toString());
+
                 }
 
                 @Override
                 public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
                     super.onFailure(statusCode, headers, throwable, errorResponse);
-                    Log.d("header",errorResponse.toString());
+
                 }
             } );
 
         } catch (UnsupportedEncodingException e) {
             Log.d("entity",e.getMessage());
         }
+*/
+        try {
+            OneSignal.postNotification(new JSONObject("{'contents': {'en':'" + text + "'}," +
+                    " 'include_player_ids': ['" + playerId + "'], 'data' : { 'user2Id':'"+userId+"'},"
+                    + "'headings': { 'en':'"+ name+"'} }"),
+                    new OneSignal.PostNotificationResponseHandler() {
+                @Override
+                public void onSuccess(JSONObject response) {
+                 Log.d("Jsonjay","got it");
+                }
 
-
+                @Override
+                public void onFailure(JSONObject response) {
+                    Log.d("Jsonjay", response.toString());
+                }
+            });
+        } catch (JSONException e) {
+            Log.d("Jsonjay", e.getMessage());
+        }
     }
 }

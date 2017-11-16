@@ -33,6 +33,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.onesignal.OneSignal;
 
 import java.util.ArrayList;
 
@@ -120,7 +121,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
         super.onStart();
         if (selfUser != null) {
             updateUI(selfUser);
-
+            messageBtn.setVisibility(View.GONE);
             mButton.setText("Logout");
             mButton.setBackgroundColor(getResources().getColor(R.color.holo_red_light));
             mButton.setOnClickListener(new View.OnClickListener() {
@@ -139,7 +140,6 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                     Toast.makeText(getApplicationContext(), "Reset is done", Toast.LENGTH_SHORT).show();
                     Intent i = new Intent(getApplicationContext(), Homepage.class);
                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
                     startActivity(i);
 
                 }
@@ -165,6 +165,8 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                         i.putExtra("user2Id", User2Uid);
                         i.putExtra("user2", mUser);
                         startActivity(i);
+                        finish();
+
 
 
                     }
@@ -200,6 +202,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Users/" + currentUser.getUid());
             mRef.child("onlineStats").setValue("0");
+            OneSignal.setSubscription(false);
             FirebaseAuth.getInstance().signOut();
         }
 

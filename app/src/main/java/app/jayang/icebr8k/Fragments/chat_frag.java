@@ -1,7 +1,10 @@
 package app.jayang.icebr8k.Fragments;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.health.UidHealthStats;
 import android.provider.ContactsContract;
@@ -26,6 +29,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.onesignal.OneSignal;
 import com.stfalcon.chatkit.commons.ImageLoader;
 import com.stfalcon.chatkit.commons.models.IDialog;
 import com.stfalcon.chatkit.commons.models.IMessage;
@@ -77,8 +81,9 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("view","onCreate");
         currrentUser = FirebaseAuth.getInstance().getCurrentUser();
-        mChatDialogs = new ArrayList<>();
+
         mImageLoader = new ImageLoader() {
             @Override
             public void loadImage(ImageView imageView, String url) {
@@ -86,20 +91,24 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
                         apply(RequestOptions.circleCropTransform()).into(imageView);
             }
         };
+        mChatDialogs =new ArrayList<>();
         dialogsListAdapter =new DialogsListAdapter(mImageLoader);
         dialogsListAdapter.setDatesFormatter(this);
 
-    }
+}
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.chat_frag, container, false);
-        dialogsListAdapter.clear();
         mDialogsList=  mView.findViewById(R.id.dialogsList);
         mDialogsList.setAdapter(dialogsListAdapter,false);
-        getChatNodes();
+
+
+
+
         Log.d("view","createV");
+
         return  mView;
     }
 
@@ -108,7 +117,12 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
     @Override
     public void onStart() {
         super.onStart();
+        Log.d("view","Start");
+        mChatDialogs = new ArrayList<>();
+        getChatNodes();
         addChildListener(); //update dialog
+
+
         dialogsListAdapter.setOnDialogClickListener(new DialogsListAdapter.OnDialogClickListener() {
             @Override
             public void onDialogClick(IDialog dialog) {
@@ -150,9 +164,10 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
+        Log.d("view","Visable");
         if(isVisibleToUser){
 
-        mChatDialogs = new ArrayList<>();
+
         }
     }
 
@@ -161,11 +176,16 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
         super.onResume();
         Log.d("view","Resume");
 
+
+
     }
 
     public void getChatNodes(){
 
         counter =0;
+        mChatDialogs.clear();
+
+
         final DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Messages/"+currrentUser.getUid());
         mRef.addListenerForSingleValueEvent(new ValueEventListener() {
             HashMap <String,User> map = new HashMap<>();
@@ -183,6 +203,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
                 }
                 Log.d("Map",map.toString());
                 getUsersNode(map);
+                mListener.onComplete();
             }
 
             @Override
@@ -235,7 +256,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
     public void getLastMessageNode(final HashMap<String,User> map){
         DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Messages/" +
                 currrentUser.getUid());
-        counter =0;
+
 
 
         for(final String key: map.keySet()){
@@ -248,7 +269,8 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
                   User user = map.get(key);
                       counter++;
                       if(message!=null) {
-                          getUnread(message, user, key, counter, map.size());
+                          Log.d("herer","message");
+                          getUnread(message, user, key);
                       }
 
                 }
@@ -261,7 +283,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
         }
     }
 
-    public void getUnread(final Message message, final User user, final String Uid, final int count, final int size){
+    public void getUnread(final Message message, final User user, final String Uid){
 
         DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Messages/"+
                 currrentUser.getUid()+"/"+Uid+"/unRead");
@@ -285,14 +307,17 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
                     ChatDialog dialog = new ChatDialog(dialogId,
                             user.getPhotourl(),user.getDisplayname(),authors,message,uncount);
                     mChatDialogs.add(dialog);
-                    if(count==size){
+                    Log.d("herer","unread");
+
                         Log.d("herer","unread");
                         String size = String.valueOf(mChatDialogs.size());
                         Collections.sort(mChatDialogs);
                         dialogsListAdapter.setItems(mChatDialogs);
                         Log.d("herer",size);
+
+
                     }
-                    }
+
             }
 
 
@@ -304,7 +329,21 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
         });
     }
 
+    public static interface OnCompleteListener {
+        public abstract void onComplete();
+    }
 
+    private OnCompleteListener mListener;
+
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            this.mListener = (OnCompleteListener)context;
+        }
+        catch ( ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement OnCompleteListener");
+        }
+    }
 
 
 
@@ -314,6 +353,13 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
     @Override
     public void onPause() {
         super.onPause();
+
+
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
 
     }
 
@@ -371,17 +417,22 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
                     mref.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            User user = dataSnapshot.getValue(User.class);
-                            ChatDialog dialog = new ChatDialog(dialogId, user.getPhotourl(), finalAuthor.getName(),
-                                    authors, finalMessage, finalCount);
+                            if (dataSnapshot != null) {
+                                User user = dataSnapshot.getValue(User.class);
+                                ChatDialog dialog = new ChatDialog(dialogId, user.getPhotourl(), finalAuthor.getName(),
+                                        authors, finalMessage, finalCount);
 
-                            if (!dialogsListAdapter.updateDialogWithMessage(dialogId, finalMessage)) {
-                                dialogsListAdapter.addItem(dialog);
+                                if (!dialogsListAdapter.updateDialogWithMessage(dialogId, finalMessage)) {
+                                    dialogsListAdapter.addItem(dialog);
 
 
-                            } else {
-                                dialogsListAdapter.updateItemById(dialog);
+                                } else {
+                                    dialogsListAdapter.updateItemById(dialog);
+
+                                }
+
                             }
+
                         }
 
                         @Override

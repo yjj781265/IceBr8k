@@ -84,6 +84,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<Viewholder> implements
                                 holder.linearLayout.setAlpha((float) 1.0);
 
 
+                            }else if(online.equals("2")) {
+                                holder.onlineStats.setImageResource(R.drawable.red_dot);
+                                holder.onlineStats.setVisibility(View.VISIBLE);
+                                holder.linearLayout.setAlpha((float) 0.8);
                             } else {
                                 holder.linearLayout.setAlpha((float) 0.5);
                                 holder.onlineStats.setVisibility(View.GONE);
@@ -137,5 +141,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<Viewholder> implements
     public String getSectionName(int position) {
         return userArrayList.get(position).getDisplayname().substring(0, 1);
     }
+
+
 }
 

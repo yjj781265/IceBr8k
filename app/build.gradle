@@ -30,6 +30,7 @@ android {
                                 onesignal_google_project_number: "REMOTE"]
 
 
+
     }
     buildTypes {
         release {
@@ -68,9 +69,8 @@ dependencies {
     compile 'me.grantland:autofittextview:0.2.+'
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.2.0'
-    compile 'com.github.stfalcon:chatkit:0.2.2'
     compile 'com.onesignal:OneSignal:[3.6.5, 3.99.99]'
     compile 'com.loopj.android:android-async-http:1.4.9'
-    implementation files('src/main/android-viewbadger-master.zip')
-    implementation files('src/main/android-viewbadger.jar')
+    compile 'cat.ereza:customactivityoncrash:2.1.0'
+    compile 'com.github.stfalcon:chatkit:0.2.2'
 }

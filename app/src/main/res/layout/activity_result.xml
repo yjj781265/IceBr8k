@@ -31,14 +31,15 @@
                android:layout_height="match_parent"
                android:orientation="horizontal"
                android:gravity="center">
-            <ImageView
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:id="@+id/user2_icon"
-                android:layout_marginRight="80dp"
-                android:elevation="60dp"
 
-                />
+               <ImageView
+                   android:id="@+id/user2_icon"
+                   android:layout_width="45dp"
+                   android:layout_height="45dp"
+                   android:layout_gravity="center"
+                   android:elevation="60dp"
+
+                   />
            </LinearLayout>
         </android.support.v7.widget.Toolbar>
 

@@ -37,6 +37,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.onesignal.OneSignal;
 import com.victor.loading.newton.NewtonCradleLoading;
 
 import java.util.ArrayList;
@@ -209,7 +210,7 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
                 currentUserDB = dataSnapshot.getValue(User.class);
                 Glide.with(view.getContext()).load(currentUserDB.getPhotourl()).
                         apply(RequestOptions.circleCropTransform()).into(profileImg);
-                Log.d("currentUserDB", currentUserDB.getUsername());
+
 
             }
 
@@ -228,7 +229,9 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
             DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Users/" + currentUser.getUid());
             mRef.child("onlineStats").setValue("0");
         }
+        OneSignal.setSubscription(false);
         FirebaseAuth.getInstance().signOut();
+
 
 
         if (currentUser.getProviders().get(0).contains("google")) {
@@ -254,6 +257,8 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
+
+
 
 
 }

@@ -8,6 +8,8 @@ import android.widget.Toast;
 import com.onesignal.OSNotificationOpenResult;
 import com.onesignal.OneSignal;
 
+import cat.ereza.customactivityoncrash.config.CaocConfig;
+
 import static com.facebook.FacebookSdk.getApplicationContext;
 
 
@@ -31,12 +33,24 @@ public class MyApplication extends Application  {
     public void onCreate() {
         super.onCreate();
         context = getApplicationContext();
+        CaocConfig.Builder.create()
+                .backgroundMode(CaocConfig.BACKGROUND_MODE_SHOW_CUSTOM) //default: CaocConfig.BACKGROUND_MODE_SHOW_CUSTOM
+                .enabled(true) //default: true
+                .showErrorDetails(true) //default: true
+                .showRestartButton(true) //default: true
+                .trackActivities(false) //default: false
+                .minTimeBetweenCrashesMs(3000).apply(); //default: 3000
+
+
         OneSignal.startInit(this)
-                .inFocusDisplaying(OneSignal.OSInFocusDisplayOption.None)
+                .inFocusDisplaying(OneSignal.OSInFocusDisplayOption.Notification)
                 .unsubscribeWhenNotificationsAreDisabled(true).
                 setNotificationOpenedHandler( new MyNotificationOpenedHandler()).
                 setNotificationReceivedHandler(new MyNotificationReceivedHandler())
                 .init();
+
+
+
 
 
     }
@@ -45,5 +59,6 @@ public class MyApplication extends Application  {
     public void onTerminate() {
         super.onTerminate();
     }
+
 
 }

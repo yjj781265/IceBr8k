@@ -76,7 +76,7 @@ public class User implements Serializable,Comparable<User> {
 
 
         result = user2.compareTo(user1);
-        if(result==0){
+        if(result==0 && displayname!=null){
             result =displayname.toUpperCase().compareTo(user.getDisplayname().toUpperCase());
         }
 

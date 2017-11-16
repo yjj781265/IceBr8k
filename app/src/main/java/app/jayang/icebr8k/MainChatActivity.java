@@ -26,6 +26,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.stfalcon.chatkit.commons.ImageLoader;
 import com.stfalcon.chatkit.commons.models.IMessage;
 import com.stfalcon.chatkit.commons.models.IUser;
+import com.stfalcon.chatkit.messages.MessageHolders;
 import com.stfalcon.chatkit.messages.MessageInput;
 import com.stfalcon.chatkit.messages.MessagesList;
 import com.stfalcon.chatkit.messages.MessagesListAdapter;
@@ -41,11 +42,13 @@ import java.util.List;
 
 import app.jayang.icebr8k.Fragments.chat_frag;
 import app.jayang.icebr8k.Modle.Author;
+import app.jayang.icebr8k.Modle.CustomMessageViewHolder;
+import app.jayang.icebr8k.Modle.CustomOutcomingMessageViewHolder;
 import app.jayang.icebr8k.Modle.Message;
 import app.jayang.icebr8k.Modle.User;
 
 
-public class MainChatActivity extends AppCompatActivity  {
+public class MainChatActivity extends AppCompatActivity   {
 
     // global variables
     private  final String senderId ="0406";
@@ -62,9 +65,10 @@ public class MainChatActivity extends AppCompatActivity  {
     private ArrayList<Message> messages,temp;
     Boolean inChat = true;
     DateFormatter.Formatter formatter;
-
+    MessagesListAdapter.HoldersConfig holdersConfig;
     ImageLoader imageLoader;
-   final   int COUNT_LIMT =10;
+   final  int COUNT_LIMT =8;
+        final   int CHAT_MAX =100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +78,7 @@ public class MainChatActivity extends AppCompatActivity  {
         overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
         messagesList = findViewById(R.id.messagesList);
         messageInput = findViewById(R.id.input_message);
+
         chatToolBar =findViewById(R.id.chat_toolbar);
         setSupportActionBar(chatToolBar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -81,38 +86,9 @@ public class MainChatActivity extends AppCompatActivity  {
         messages = new ArrayList<>();
         temp =new ArrayList<>();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
-
-
-     // get user2 the people you chat with info
-        user2=(User)getIntent().getSerializableExtra("User2");
-        if(user2==null){
-            user2 =(User)getIntent().getExtras().getSerializable("user2");
-        }
-
-
-
-
-
-
-       user2Id= getIntent().getStringExtra("User2Id");
-       if(user2Id==null){
-
-           // get user2's unique id for database
-           user2Id = getIntent().getStringExtra("user2Id");
-
-
-    }
-
-        if(user2!=null) {
-            getSupportActionBar().setTitle(user2.getDisplayname());
-            Log.d("user2", user2.getUsername());
-        }
-
-        loadMessage();
-
-
-
-        //imageloader for the chat bubble only work for incoming message
+        holdersConfig = new MessagesListAdapter.HoldersConfig();
+        holdersConfig.setOutcomingTextHolder(CustomOutcomingMessageViewHolder.class);
+        holdersConfig.setIncomingTextHolder(CustomMessageViewHolder.class);
         imageLoader = new ImageLoader() {
             @Override
             public void loadImage(ImageView imageView, String url) {
@@ -120,6 +96,16 @@ public class MainChatActivity extends AppCompatActivity  {
                         apply(RequestOptions.circleCropTransform()).into(imageView);
             }
         };
+        adapter = new MessagesListAdapter<>(senderId, holdersConfig, imageLoader);
+
+
+
+        loadMessage();
+
+
+
+        //imageloader for the chat bubble only work for incoming message
+
         //setup firebase database instance
         mRef = FirebaseDatabase.getInstance().getReference();
 
@@ -127,29 +113,20 @@ public class MainChatActivity extends AppCompatActivity  {
             @Override
             public String format(Date date) {
                 if (DateFormatter.isToday(date)) {
-                    return "Today";
+                    return   "Today "+ new SimpleDateFormat("hh:mm a").format(date);
                 } else if (DateFormatter.isYesterday(date)) {
-                    return getString(R.string.date_header_yesterday);
+                    return getString(R.string.date_header_yesterday) + " " +
+                            new SimpleDateFormat("hh:mm a").format(date);
 
-                } else {
-                    return DateFormatter.format(date, DateFormatter.Template.STRING_DAY_MONTH_YEAR);
+
+                } else  {
+                    return DateFormatter.format(date, DateFormatter.Template.STRING_DAY_MONTH_YEAR)
+                            +" "+
+                            new SimpleDateFormat("hh:mm a").format(date);
                 }
             }
         };
 
-
-
-
-
-    }
-
-//back arrow on toolbar
-
-
-
-    @Override
-    protected void onStart() {
-        super.onStart();
         // set inchat node for the chatroom
         DatabaseReference chatInfoRef = FirebaseDatabase.getInstance().getReference
                 ("Messages/"+currentUser.getUid()+"/"+user2Id);
@@ -160,11 +137,29 @@ public class MainChatActivity extends AppCompatActivity  {
         DatabaseReference inChatRef = FirebaseDatabase.getInstance().getReference("Messages/"+currentUser.getUid());
         inChatRef.child("inChatRoom").setValue(inChatRoom);
 
-        //input box listner
+
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
         messageInput.setInputListener(new MessageInput.InputListener() {
             @Override
             public boolean onSubmit(final CharSequence input) {
-          // get current time
+
+                // get current time
                 Calendar calendar = Calendar.getInstance();
                 calendar.get(Calendar.DAY_OF_MONTH);
                 lastLoadedDate = calendar.getTime();
@@ -173,12 +168,12 @@ public class MainChatActivity extends AppCompatActivity  {
 
                 Author author2 = new Author(recieverId, currentUser.getDisplayName(), currentUser.getPhotoUrl().toString());
                 Message message2 = new Message(recieverId, input.toString(), lastLoadedDate, author2);
-            // create two identical messages one for the user1 node ,one for the user2 node
+                // create two identical messages one for the user1 node ,one for the user2 node
                 if (user2 != null) {
-                    mRef.child("Messages").child(currentUser.getUid()).child(user2Id).push().setValue(message);
+                    mRef.child("Messages").child(currentUser.getUid()).child(user2Id).child("chathistory").push().setValue(message);
                     mRef.child("Messages").child(currentUser.getUid()).child(user2Id).child("lastmessage").setValue(message);
                     //reciever
-                    mRef.child("Messages").child(user2Id).child(currentUser.getUid()).push().setValue(message2);
+                    mRef.child("Messages").child(user2Id).child(currentUser.getUid()).child("chathistory").push().setValue(message2);
                     mRef.child("Messages").child(user2Id).child(currentUser.getUid()).child("lastmessage").setValue(message2);
                     adapter.addToStart(message, true);
 
@@ -203,15 +198,15 @@ public class MainChatActivity extends AppCompatActivity  {
                                         unRead++;
                                         mRef.child("Messages").child(user2Id).child(currentUser.getUid()).child("unRead").setValue(unRead);
                                         //sending notification to that user;
-                                     DatabaseReference notificationRef = FirebaseDatabase.getInstance().getReference("Notification/"+user2Id);
+                                        DatabaseReference notificationRef = FirebaseDatabase.getInstance().getReference("Notification/"+user2Id);
                                         notificationRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                                                    String playerid = dataSnapshot.child("player_id").getValue(String.class);
-                                                    String name = dataSnapshot.child("name").getValue(String.class);
-                                                    if(playerid!=null&& name!=null){
-                                                    SendNotification.sendNotificationTo(playerid, name, input.toString(), MainChatActivity.this,user2,user2Id);
+                                                String playerid = dataSnapshot.child("player_id").getValue(String.class);
+                                                if(playerid!=null){
+                                                    SendNotification.sendNotificationTo(playerid,
+                                                           currentUser.getDisplayName(), input.toString(), currentUser.getUid());
                                                 }
 
                                             }
@@ -230,9 +225,9 @@ public class MainChatActivity extends AppCompatActivity  {
                                             public void onDataChange(DataSnapshot dataSnapshot) {
 
                                                 String playerid = dataSnapshot.child("player_id").getValue(String.class);
-                                                String name = dataSnapshot.child("name").getValue(String.class);
-                                                if(playerid!=null&& name!=null){
-                                                    SendNotification.sendNotificationTo(playerid, name, input.toString(), MainChatActivity.this,user2,user2Id);
+                                                if(playerid!=null){
+                                                    SendNotification.sendNotificationTo
+                                                            (playerid,  currentUser.getDisplayName(), input.toString(), currentUser.getUid());
                                                 }
 
                                             }
@@ -243,7 +238,7 @@ public class MainChatActivity extends AppCompatActivity  {
                                             }
                                         });
 
-                                     // user2 is in chat live
+                                        // user2 is in chat live
                                     }else {
                                         mRef.child("Messages").child(user2Id).child(currentUser.getUid()).child("unRead").setValue(0);
                                     }
@@ -271,6 +266,8 @@ public class MainChatActivity extends AppCompatActivity  {
 
 
         });
+
+
 
 
 
@@ -316,8 +313,6 @@ public class MainChatActivity extends AppCompatActivity  {
                 ("Messages/"+currentUser.getUid()+"/"+user2Id);
         chatInfoRef.child("inChat").setValue(inChat);
         chatInfoRef.child("unRead").setValue(0);
-
-
         Boolean inChatRoom = false;
         DatabaseReference inChatRef = FirebaseDatabase.getInstance().getReference("Messages/"+currentUser.getUid());
         inChatRef.child("inChatRoom").setValue(inChatRoom);
@@ -327,69 +322,97 @@ public class MainChatActivity extends AppCompatActivity  {
  // load history message in real time
     public void loadMessage(){
 
-        DatabaseReference mref = FirebaseDatabase.getInstance().getReference("Messages/"+currentUser.getUid()+"/"+user2Id);
-        mref.addListenerForSingleValueEvent(new ValueEventListener() {
+        Bundle extras = getIntent().getExtras();
+        if (extras.get("user2Uid") != null) {
+            user2Id = extras.getString("user2Uid");
+            user2 = (User) extras.getSerializable("user2");
+        }else{
+            // get user2 the people you chat with info
+            user2 =(User)getIntent().getExtras().getSerializable("user2");
+            // get user2's unique id for database
+            user2Id = getIntent().getStringExtra("user2Id");
+
+        }
+        if(user2!=null) {
+            getSupportActionBar().setTitle(user2.getDisplayname());
+            Log.d("user2", user2.getUsername());
+        }
+
+        final DatabaseReference mref = FirebaseDatabase.getInstance().getReference("Messages/"+currentUser.getUid()+"/"+user2Id+"/chathistory");
+        mref.limitToLast(COUNT_LIMT).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 messages.clear();
+                adapter.clear();
+                temp.clear();
                 for(DataSnapshot childSnapshot :dataSnapshot.getChildren()){
-                  if(!childSnapshot.getKey().equals("lastmessage") &&
-                          !childSnapshot.getKey().equals("inChat") &&
-                          !childSnapshot.getKey().equals("unRead") &&
-                          user2Id.equals(currentUser.getUid())){
+                  if(user2Id.equals(currentUser.getUid())){
                     Message message = childSnapshot.getValue(Message.class);
                     Author author = new Author(message.getId(),currentUser.getDisplayName(),currentUser.getPhotoUrl().toString());
                     message.setUser(author);
                     messages.add(message);
-                      if(messages.size()>COUNT_LIMT){
-                          temp.add(message);
-                      }
 
-                  }else if(!childSnapshot.getKey().equals("lastmessage") &&
-                          !childSnapshot.getKey().equals("inChat") &&
-                          !childSnapshot.getKey().equals("unRead") &&  user2!=null){
+                  }else if(user2!=null){
 
                       Message message = childSnapshot.getValue(Message.class);
                       Author author = new Author(message.getId(),user2.getDisplayname(),user2.getPhotourl());
                       message.setUser(author);
                       messages.add(message);
 
-                      if(messages.size()>COUNT_LIMT){
-                          temp.add(message);
-                      }
                   }
 
 
 
               }
-              Log.d("arraylist",String.valueOf(messages.size()));
+                Log.d("arraylist",String.valueOf(messages.size()));
 
-              if(messages.size()>COUNT_LIMT){
-                  adapter = new MessagesListAdapter<>(senderId, imageLoader);
-                  messagesList.setAdapter(adapter);
-                  adapter.setDateHeadersFormatter(formatter);
-                 final int size =messages.size();
-                  Collections.reverse(messages);
-                  for(int i=COUNT_LIMT;i<size;i++){
-                      messages.remove(messages.size()-1);
-                  }
-                  Log.d("arraylistafter",String.valueOf(messages.size()));
-                  adapter.addToEnd(messages,false);
-                  adapter.setLoadMoreListener(new MessagesListAdapter.OnLoadMoreListener() {
-                      @Override
-                      public void onLoadMore(int page, int totalItemsCount) {
-                          Log.d("arraylistafter",String.valueOf(temp.size()));
-                          if(totalItemsCount<100){
-                              adapter.addToEnd(temp,true);
-                          }
-                      }
-                  });
-              }else{
-                  adapter = new MessagesListAdapter<>(senderId, imageLoader);
-                  messagesList.setAdapter(adapter);
-                  adapter.setDateHeadersFormatter(formatter);
-                  adapter.addToEnd(messages,true);
-              }
+
+                adapter.setDateHeadersFormatter(formatter);
+                adapter.addToEnd(messages,true);
+                messagesList.setAdapter(adapter);
+
+
+                final DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Messages/"+currentUser.getUid()+"/"+user2Id+"/chathistory");
+                adapter.setLoadMoreListener(new MessagesListAdapter.OnLoadMoreListener() {
+                    @Override
+                    public void onLoadMore(int page, final int totalItemsCount) {
+                        if(totalItemsCount<CHAT_MAX && totalItemsCount>=COUNT_LIMT){
+                            Log.d("arraylist","triggered");
+                            ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    long total = dataSnapshot.getChildrenCount();
+                                    if(total>totalItemsCount)
+                                        ref.limitToFirst((int)( total-totalItemsCount)).addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                for(DataSnapshot snapshot : dataSnapshot.getChildren()){
+                                                    Message message = snapshot.getValue(Message.class);
+                                                    Author author = new Author(message.getId(),user2.getDisplayname(),user2.getPhotourl());
+                                                    message.setUser(author);
+                                                    temp.add(message);
+                                                }
+                                                adapter.addToEnd(temp,true);
+                                            }
+
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
+
+                                            }
+                                        });
+
+
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
+                    }
+                });
+
 
 
             }
@@ -398,6 +421,7 @@ public class MainChatActivity extends AppCompatActivity  {
 
             }
         });
+
     }
 
 
@@ -405,9 +429,10 @@ public class MainChatActivity extends AppCompatActivity  {
     @Override
     public boolean onSupportNavigateUp() {
 
-
-
-        finish();
+       Intent intent = new Intent(this,Homepage.class) ;
+         intent.putExtra("mainchat","1");
+         startActivity(intent);
+         finish();
         overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
         return true;
     }
@@ -415,6 +440,9 @@ public class MainChatActivity extends AppCompatActivity  {
     @Override
     public void onBackPressed() {
 
+        Intent intent = new Intent(this,Homepage.class) ;
+        intent.putExtra("mainchat","1");
+        startActivity(intent);
         finish();
         overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
     }

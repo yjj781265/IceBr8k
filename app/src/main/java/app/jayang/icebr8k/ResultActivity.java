@@ -1,5 +1,7 @@
 package app.jayang.icebr8k;
 
+import android.content.Intent;
+import android.provider.ContactsContract;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -7,15 +9,21 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -31,6 +39,7 @@ public class ResultActivity extends AppCompatActivity {
     User user2;
     ImageView user2Icon;
     ArrayList<UserQA> mArrayList, diffAnswer1, diffAnswer2;
+    String user2Id ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +84,43 @@ public class ResultActivity extends AppCompatActivity {
         mLayout.getTabAt(1).setIcon(R.drawable.axe_mark);
 
 
+    }
+    //create an action bar button
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.result_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    // handle button activities
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.mybutton) {
+
+            DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Usernames/"+
+            user2.getUsername());
+            mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    user2Id =dataSnapshot.getValue(String.class);
+                   Intent mIntent = new Intent(getBaseContext(),MainChatActivity.class);
+                    mIntent.putExtra("user2",user2);
+                    mIntent.putExtra("user2Id",user2Id);
+                    startActivity(mIntent);
+                    finish();
+                    overridePendingTransition(R.anim.slide_from_right,R.anim.slide_to_left);
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 
