@@ -129,6 +129,7 @@ public class SurveyTab_Fragment extends Fragment {
         mActionButton= mview.findViewById(R.id.floatingActionButton);
         skip = mview.findViewById(R.id.skip_btn);
         skip.setVisibility(View.GONE);
+        mProgressBar.setVisibility(View.VISIBLE);
         createInitQ();
 
 
@@ -275,7 +276,7 @@ public class SurveyTab_Fragment extends Fragment {
     public  void setSkipbtn(){
         RelativeLayout.LayoutParams params= new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
         params.addRule(RelativeLayout.BELOW, R.id.submitBtn);
-        params.setMargins(800,10,0,16);
+        params.setMargins(650,0,0,10);
         skip.setLayoutParams(params);
         skip.setVisibility(View.VISIBLE);
     }
@@ -359,6 +360,7 @@ public class SurveyTab_Fragment extends Fragment {
 public void createInitQ(){
 
     mProgressBar.setProgress(0);
+
     surveyQlist = new ArrayList<>();
 
     DatabaseReference mRef= FirebaseDatabase.getInstance().getReference("Questions_8");
@@ -554,6 +556,7 @@ public void createUserQList(){
         msubTextview.setVisibility(View.GONE);
         mSeekBar.setVisibility(View.INVISIBLE);
         skip.setVisibility(View.GONE);
+
     }
 
 

@@ -53,7 +53,7 @@ import app.jayang.icebr8k.login_page;
  * Created by LoLJay on 10/20/2017.
  */
 
-public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnConnectionFailedListener {
+public class Userstab_Fragment extends Fragment{
     View view;
 
     FirebaseDatabase mDatabase;
@@ -62,11 +62,9 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
     RecyclerView mRecyclerView;
     SwipeRefreshLayout refreshLayout;
     NewtonCradleLoading newtonCradleLoading;
-    Toolbar toolbar;
-    User currentUserDB;
+
     FirebaseUser currentUser;
-    GoogleApiClient mGoogleApiClient;
-    ImageView profileImg;
+
 
 
     public Userstab_Fragment() {
@@ -77,9 +75,9 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
         super.onCreate(savedInstanceState);
         mDatabase = FirebaseDatabase.getInstance();
         mUserArrayList = new ArrayList<>();
-        setHasOptionsMenu(true);
+
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        getCurrentUserDB(currentUser);
+
 
 
 
@@ -99,22 +97,10 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
         newtonCradleLoading.setLoadingColor(R.color.holo_red_light);
         newtonCradleLoading.start();
         refreshLayout = view.findViewById(R.id.swiperefresh);
-        profileImg = view.findViewById(R.id.imageBtn);
         populateUserList();
 
 
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
-        // [END configure_signin]
 
-        // [START build_client]
-        // Build a GoogleApiClient with access to the Google Sign-In API and the
-        // options specified by gso.
-        mGoogleApiClient = new GoogleApiClient.Builder(view.getContext())
-                .enableAutoManage(getActivity() /* FragmentActivity */, this /* OnConnectionFailedListener */)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
 
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -123,18 +109,8 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
                 populateUserList();
             }
         });
-        toolbar = view.findViewById(R.id.users_toolbar);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(" ");
 
-        profileImg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Userstab_Fragment.this.getContext(), UserProfilePage.class);
-                intent.putExtra("selfProfile", currentUserDB);
-                startActivity(intent);
-            }
-        });
+
         return view;
     }
 
@@ -148,19 +124,7 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
     }
 
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.log_out_item:
-                Signout();
-                getActivity().finish();
 
-                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
 
 
     public void populateUserList() {
@@ -203,60 +167,9 @@ public class Userstab_Fragment extends Fragment implements GoogleApiClient.OnCon
 
     }
 
-    public User getCurrentUserDB(FirebaseUser currentUser) {
-        mDatabase.getReference("Users/" + currentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                currentUserDB = dataSnapshot.getValue(User.class);
-                Glide.with(view.getContext()).load(currentUserDB.getPhotourl()).
-                        apply(RequestOptions.circleCropTransform()).into(profileImg);
-
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-        return currentUserDB;
-
-    }
-
-
-    public void Signout() {
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Users/" + currentUser.getUid());
-            mRef.child("onlineStats").setValue("0");
-        }
-        OneSignal.setSubscription(false);
-        FirebaseAuth.getInstance().signOut();
 
 
 
-        if (currentUser.getProviders().get(0).contains("google")) {
-
-            // Google sign out
-            Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                    new ResultCallback<Status>() {
-
-                        @Override
-                        public void onResult(@NonNull Status status) {
-
-                        }
-                    });
-        }
-        Intent intent = new Intent(view.getContext(), login_page.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-
-    }
-
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
 
 
 
