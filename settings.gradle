@@ -1,1 +1,1 @@
-include ':app', ':lib', ':lib123', ':jaychatkit'
+include ':app', ':lib'
