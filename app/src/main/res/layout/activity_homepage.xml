@@ -6,6 +6,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="app.jayang.icebr8k.Homepage">
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/users_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:background="@color/colorPrimary"
+        app:titleTextColor="@android:color/white"
+        app:title="IceBr8k"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark">
+
+    </android.support.v7.widget.Toolbar>
 
     <android.support.design.widget.TabLayout
         android:id="@+id/homepageTab"
@@ -28,8 +39,10 @@
         android:id="@+id/homepage_viewpager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/homepageTab"
-        android:layout_marginBottom="0dp"
+        android:layout_above="@+id/homepageTab"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/users_toolbar"
         android:background="@android:color/white"></android.support.v4.view.ViewPager>
 
     <ImageView
@@ -45,5 +58,15 @@
         android:baselineAlignBottom="true"
         android:contentDescription="@null"
         android:src="@drawable/red_dot"/>
+
+    <ImageView
+        android:id="@+id/imageBtn"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_above="@+id/homepage_viewpager"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="3dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true" />
 
 </RelativeLayout>
