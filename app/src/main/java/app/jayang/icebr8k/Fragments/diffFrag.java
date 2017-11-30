@@ -11,6 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.Modle.UserQA;
@@ -46,6 +48,8 @@ public class diffFrag extends Fragment {
         LinearLayoutManager manager = new LinearLayoutManager(mview.getContext());
         recyclerView.setLayoutManager(manager);
         recyclerView.setHasFixedSize(false);
+        Collections.sort(user1QA);
+        Collections.sort(user2QA);
         recyclerView.setAdapter(new RecyclerAdapterDiff(user1QA,user2QA,user2,mview.getContext()));
         return  mview;
     }

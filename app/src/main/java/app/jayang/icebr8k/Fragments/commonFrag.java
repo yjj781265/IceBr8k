@@ -13,6 +13,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.Modle.UserQA;
@@ -66,6 +68,7 @@ public class commonFrag extends Fragment {
         LinearLayoutManager manager = new LinearLayoutManager(mView.getContext());
         mRecyclerView_common.setLayoutManager(manager);
         mRecyclerView_common.setHasFixedSize(false);
+        Collections.sort(commonArrList);
         mRecyclerView_common.setAdapter(new RecyclerAdapterCommon(commonArrList, mView.getContext(), user2));
         return mView;
 

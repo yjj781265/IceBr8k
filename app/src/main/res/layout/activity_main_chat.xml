@@ -8,40 +8,43 @@
     <android.support.v7.widget.Toolbar
         android:id="@+id/chat_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:background="@color/colorPrimary"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
        ></android.support.v7.widget.Toolbar>
 
+    <com.stfalcon.chatkit.messages.MessageInput
+        android:id="@+id/input_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:focusedByDefault="true"
+        app:inputBackground="@color/creamYellow"
+        app:inputButtonDefaultBgColor="@color/colorPrimary"
+        app:inputHint="Enter a message"/>
 
-
-
-
-        <com.stfalcon.chatkit.messages.MessageInput
-            app:inputBackground="@color/creamYellow"
-            android:id="@+id/input_message"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            app:inputButtonDefaultBgColor="@color/colorPrimary"
-            app:inputHint="Enter a message"/>
 
     <com.stfalcon.chatkit.messages.MessagesList
-    android:id="@+id/messagesList"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_above="@+id/input_message"
-    app:incomingTextLinkColor="@color/dark_gray"
-    app:outcomingTextLinkColor="@color/creamYellow"
-   app:textAutoLink="all"
-        android:layout_below="@id/chat_toolbar"
+        android:id="@+id/messagesList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/input_message"
+        android:labelFor="@id/chat_toolbar"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/chat_toolbar"
         app:incomingDefaultBubbleColor="@color/colorAccent"
+        app:incomingDefaultBubblePressedColor="@color/colorPressed"
+        app:incomingDefaultBubbleSelectedColor="@color/colorPressed"
         app:incomingTextColor="@color/black"
-        app:outcomingTextColor="@color/white"
+        app:incomingTextLinkColor="@color/dark_gray"
         app:outcomingDefaultBubbleColor="@color/colorPrimary"
         app:outcomingDefaultBubblePressedColor="@color/colorPrimaryDark"
-        app:incomingDefaultBubblePressedColor="@color/colorPressed"
-        app:incomingDefaultBubbleSelectedColor="@color/colorPressed"/>
+        app:outcomingTextColor="@color/white"
+        app:outcomingTextLinkColor="@color/creamYellow"
+        app:textAutoLink="all"/>
 
 
 

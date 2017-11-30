@@ -425,7 +425,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                             dialog.setCanceledOnTouchOutside(true);
                             dialog.setContentView(R.layout.score_dialog);
                             TextView textview = dialog.findViewById(R.id.compareText);
-                            textview.setText("Compare with " + mUser.getUsername());
+                            textview.setText("Compare with " + mUser.getUsername()+"\n\t\t"+User1QA.size()+"/"+User2QA.size());
                             TextView cancel = dialog.findViewById(R.id.cancel_btn);
                             TextView details = dialog.findViewById(R.id.details_btn);
                             arcProgress = dialog.findViewById(R.id.arc_progress);

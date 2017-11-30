@@ -114,6 +114,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
 
 
 
+
     @Override
     public void onStart() {
         super.onStart();
@@ -123,9 +124,12 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
         addChildListener(); //update dialog
 
 
+
         dialogsListAdapter.setOnDialogClickListener(new DialogsListAdapter.OnDialogClickListener() {
             @Override
             public void onDialogClick(IDialog dialog) {
+                OneSignal.clearOneSignalNotifications();
+
                String id ;
                if(dialog.getId().equals(currrentUser.getUid()+currrentUser.getUid())){
                    id =currrentUser.getUid();
@@ -166,6 +170,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
         super.setUserVisibleHint(isVisibleToUser);
         Log.d("view","Visable");
         if(isVisibleToUser){
+            OneSignal.clearOneSignalNotifications();
 
 
         }
@@ -369,7 +374,9 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
             return  new SimpleDateFormat("hh:mm a").format(date);
         } else if (DateFormatter.isYesterday(date)) {
             return getString(R.string.date_header_yesterday);
-        } else {
+        } else if(DateFormatter.isCurrentYear(date)){
+            return DateFormatter.format(date, DateFormatter.Template.STRING_DAY_MONTH);
+        }else{
             return DateFormatter.format(date, DateFormatter.Template.STRING_DAY_MONTH_YEAR);
         }
     }

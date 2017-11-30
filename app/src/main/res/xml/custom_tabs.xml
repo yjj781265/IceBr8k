@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <tabs>
+        <tab
+            id="@+id/tab_survey"
+            icon="@drawable/survey_selector"
+            title="Survey" />
+        <tab
+            id="@+id/tab_users"
+            icon="@drawable/user_selector"
+            title="Users" />
+        <tab
+            id="@+id/tab_message"
+            icon="@drawable/message_selector"
+            title="Chat"
+            badgeHidesWhenActive="false"/>
+    </tabs>
+
+</PreferenceScreen>

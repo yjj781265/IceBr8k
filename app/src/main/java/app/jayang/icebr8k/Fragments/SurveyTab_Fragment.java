@@ -129,7 +129,6 @@ public class SurveyTab_Fragment extends Fragment {
         mActionButton= mview.findViewById(R.id.floatingActionButton);
         skip = mview.findViewById(R.id.skip_btn);
         skip.setVisibility(View.GONE);
-        mProgressBar.setVisibility(View.VISIBLE);
         createInitQ();
 
 
@@ -142,8 +141,7 @@ public class SurveyTab_Fragment extends Fragment {
                 mTextView.setVisibility(View.INVISIBLE);
                 mProgressBar2.setVisibility(View.VISIBLE);
 
-                createInitQ();
-                // prevent user spam click the button ,may crash the program
+                createInitQ();// prevent user spam click the button ,may crash the program
 
 
 
@@ -276,7 +274,9 @@ public class SurveyTab_Fragment extends Fragment {
     public  void setSkipbtn(){
         RelativeLayout.LayoutParams params= new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
         params.addRule(RelativeLayout.BELOW, R.id.submitBtn);
-        params.setMargins(650,0,0,10);
+        params.addRule(RelativeLayout.ALIGN_END,R.id.question_id);
+        params.addRule(RelativeLayout.ALIGN_RIGHT,R.id.question_id);
+        params.setMargins(0,0,5,10);
         skip.setLayoutParams(params);
         skip.setVisibility(View.VISIBLE);
     }
@@ -372,6 +372,7 @@ public void createInitQ(){
             surveyQlist.clear();
 // pull all the questions from questions table just hte questions id
             for (DataSnapshot surveySnapshot : dataSnapshot.getChildren()) {
+
 
                /* GenericTypeIndicator<ArrayList<String>> t = new GenericTypeIndicator<ArrayList<String>>() {};
                 ArrayList<String> answer = surveySnapshot.child("answer").getValue(t);*/
@@ -503,6 +504,7 @@ public void createUserQList(){
                         index =0;
                         Collections.shuffle(surveyQArrayList);
                         hideCardViewComponent();
+                        mProgressBar.setVisibility(View.VISIBLE);
                         mActionButton.setVisibility(View.GONE);
                         mSubmit.setVisibility(View.VISIBLE);
                         updateUI(surveyQArrayList.get(index));
@@ -550,6 +552,7 @@ public void createUserQList(){
 
     private void hideCardViewComponent(){
         mSpinner.setVisibility(View.GONE);
+        mProgressBar.setVisibility(View.GONE);
         mProgressBar2.setVisibility(View.GONE);
         mRadioGroup.setVisibility(View.GONE);
         mSubmit.setVisibility(View.GONE);

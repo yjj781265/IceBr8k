@@ -29,8 +29,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@color/creamYellow"
-
-            android:orientation="vertical"
             android:visibility="visible">
 
             <ProgressBar
@@ -38,11 +36,11 @@
                 style="@style/Widget.AppCompat.ProgressBar.Horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
+                android:layout_alignParentTop="true"
                 android:layout_marginTop="3dp"
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
-                android:layout_alignParentTop="true"
-                android:progress="0" />
+                android:progress="0"/>
 
             <ProgressBar
                 android:id="@+id/progressBar2"
@@ -58,14 +56,14 @@
                 android:id="@+id/question_id"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/survey_progressBar"
                 android:layout_margin="5dp"
                 android:autoSizeTextType="uniform"
-                android:layout_below="@id/survey_progressBar"
                 android:fontFamily="sans-serif"
                 android:gravity="left"
                 android:textSize="24sp"
-                app:minTextSize="20sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                app:minTextSize="20sp"/>
 
             <TextView
                 android:id="@+id/sub_question_id"
@@ -143,20 +141,21 @@
                 android:visibility="invisible">
 
 
-
             </Button>
 
             <TextView
                 android:id="@+id/skip_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignEnd="@+id/question_id"
+                android:layout_alignRight="@+id/question_id"
+                android:layout_below="@+id/spinner_id"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:text="Skip"
                 android:textColor="@color/colorPrimary"
                 android:textSize="16sp"
                 android:visibility="visible"/>
-
 
 
         </RelativeLayout>

@@ -15,16 +15,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TableLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.github.florent37.bubbletab.BubbleTab;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
@@ -41,6 +42,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.onesignal.OSSubscriptionObserver;
 import com.onesignal.OSSubscriptionStateChanges;
 import com.onesignal.OneSignal;
+import com.roughike.bottombar.BottomBar;
+import com.roughike.bottombar.BottomBarTab;
+import com.roughike.bottombar.OnTabSelectListener;
 
 
 import java.util.HashMap;
@@ -51,11 +55,11 @@ import app.jayang.icebr8k.Fragments.chat_frag;
 import app.jayang.icebr8k.Modle.User;
 
 public class Homepage extends AppCompatActivity implements OSSubscriptionObserver,chat_frag.OnCompleteListener,GoogleApiClient.OnConnectionFailedListener  {
-    TabLayout homepageTab;
+    BottomBar homepageTab;
     ViewPager viewPager;
     DatabaseReference mRef;
     FirebaseUser currentUser;
-    ImageView reddot;
+    BottomBarTab chatTab;
     ImageView profileImg;
     User currentUserDB;
     GoogleApiClient mGoogleApiClient;
@@ -69,6 +73,7 @@ public class Homepage extends AppCompatActivity implements OSSubscriptionObserve
         setContentView(R.layout.activity_homepage);
         mToolbar = findViewById(R.id.users_toolbar);
         setSupportActionBar(mToolbar);
+
 
 
 
@@ -107,8 +112,6 @@ public class Homepage extends AppCompatActivity implements OSSubscriptionObserve
 
         homepageTab = findViewById(R.id.homepageTab);
         viewPager = findViewById(R.id.homepage_viewpager);
-        reddot = findViewById(R.id.red_dot);
-        reddot.setVisibility(View.GONE);
         unReadCheck();
 
         viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
@@ -116,8 +119,51 @@ public class Homepage extends AppCompatActivity implements OSSubscriptionObserve
         viewPagerAdapter.addFragment(new Userstab_Fragment());
         viewPagerAdapter.addFragment(new chat_frag());
         viewPager.setAdapter(viewPagerAdapter);
-        homepageTab.setupWithViewPager(viewPager);
         viewPager.setOffscreenPageLimit(2);
+        homepageTab.setOnTabSelectListener(new OnTabSelectListener() {
+            @Override
+            public void onTabSelected(int tabId) {
+                switch (tabId){
+                    case R.id.tab_survey:
+                        viewPager.setCurrentItem(0,false);
+
+                        break;
+
+                    case R.id.tab_users:
+                        viewPager.setCurrentItem(1,false);
+
+                        break;
+
+                    case R.id.tab_message:
+                        viewPager.setCurrentItem(2,false);
+
+                        break;
+
+                    default:
+                        viewPager.setCurrentItem(0,false);
+                        break;
+
+
+                }
+            }
+        });
+
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                homepageTab.selectTabAtPosition(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
         profileImg = findViewById(R.id.imageBtn);
         profileImg.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -128,12 +174,11 @@ public class Homepage extends AppCompatActivity implements OSSubscriptionObserve
             }
         });
 
-        homepageTab.getTabAt(0).setIcon(R.drawable.survey_selector);
-        homepageTab.getTabAt(1).setIcon(R.drawable.user_selector);
-        homepageTab.getTabAt(2).setIcon(R.drawable.message_selector);
+
 
         if( getIntent().getExtras().getString("mainchat")!=null){
             viewPager.setCurrentItem(2);
+            homepageTab.selectTabWithId(R.id.tab_message);
         }
 
 
@@ -233,6 +278,7 @@ public class Homepage extends AppCompatActivity implements OSSubscriptionObserve
         mref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                chatTab = homepageTab.getTabWithId(R.id.tab_message);
                 int count = 0;
                 for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
                     Integer i = childSnapshot.child("unRead").getValue(Integer.class);
@@ -241,9 +287,12 @@ public class Homepage extends AppCompatActivity implements OSSubscriptionObserve
                     }
                 }
                 if (count > 0) {
-                    reddot.setVisibility(View.VISIBLE);
+                    chatTab.setBadgeCount(count);
+                    mToolbar.setTitle("IceBr8k"+"("+count+")");
+
                 } else {
-                    reddot.setVisibility(View.GONE);
+                    chatTab.removeBadge();
+                    mToolbar.setTitle("IceBr8k");
                 }
             }
 

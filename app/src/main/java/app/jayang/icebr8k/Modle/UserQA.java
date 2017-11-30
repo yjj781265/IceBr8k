@@ -2,12 +2,13 @@ package app.jayang.icebr8k.Modle;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 /**
  * Created by yjj781265 on 11/2/2017.
  */
 
-public class UserQA implements Parcelable {
+public class UserQA implements Parcelable,Comparable<UserQA> {
     private String questionId,answer,question;
 
     public UserQA(){}
@@ -102,4 +103,8 @@ public class UserQA implements Parcelable {
   };
 
 
+    @Override
+    public int compareTo(@NonNull UserQA userQA) {
+        return question.compareTo(userQA.getQuestion());
+    }
 }
