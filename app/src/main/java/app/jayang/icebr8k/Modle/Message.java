@@ -63,39 +63,15 @@ public class Message implements IMessage {
         this.createdAt = date;
     }
 
-    public void setMonth(String month) {
-        this.month = month;
-    }
-
-    public void setTimezoneOffset(String timezoneOffset) {
-        this.timezoneOffset = timezoneOffset;
-    }
-
     public void setTime(String time) {
         this.time = time;
-    }
-
-    public void setMinutes(String minutes) {
-        this.minutes = minutes;
-    }
-
-    public void setSeconds(String seconds) {
-        this.seconds = seconds;
-    }
-
-    public void setHours(String hours) {
-        this.hours = hours;
-    }
-
-    public void setDay(String day) {
-        this.day = day;
     }
 
     public void setDate(String date) {
         this.date = date;
     }
 
-    public void setYear(String year) {
-        this.year = year;
+    public String getDate() {
+        return date;
     }
 }

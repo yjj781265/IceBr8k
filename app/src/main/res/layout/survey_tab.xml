@@ -23,7 +23,9 @@
         android:background="@color/creamYellow"
         android:visibility="visible"
         app:cardCornerRadius="5dp">
-
+        <ScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
         <RelativeLayout
             android:id="@+id/cardView_RLayout"
             android:layout_width="wrap_content"
@@ -58,12 +60,12 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/survey_progressBar"
                 android:layout_margin="5dp"
-                android:autoSizeTextType="uniform"
                 android:fontFamily="sans-serif"
                 android:gravity="left"
                 android:textSize="24sp"
                 android:textStyle="bold"
-                app:minTextSize="20sp"/>
+                android:maxLines="4"
+                app:minTextSize="13sp"/>
 
             <TextView
                 android:id="@+id/sub_question_id"
@@ -159,9 +161,11 @@
 
 
         </RelativeLayout>
+        </ScrollView>
 
 
     </android.support.v7.widget.CardView>
+
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/floatingActionButton"

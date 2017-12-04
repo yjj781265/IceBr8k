@@ -26,6 +26,8 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
@@ -212,6 +214,7 @@ public class Homepage extends AppCompatActivity implements OSSubscriptionObserve
                 currentUserDB = dataSnapshot.getValue(User.class);
                 Glide.with(getApplicationContext()).load(currentUserDB.getPhotourl()).
                         apply(RequestOptions.circleCropTransform()).into(profileImg);
+                YoYo.with(Techniques.FadeIn).duration(300).playOn(profileImg);
 
 
             }

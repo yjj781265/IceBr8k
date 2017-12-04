@@ -3,8 +3,12 @@ package app.jayang.icebr8k;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -15,6 +19,9 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
@@ -47,12 +54,14 @@ import app.jayang.icebr8k.Modle.CustomOutcomingMessageViewHolder;
 import app.jayang.icebr8k.Modle.Message;
 import app.jayang.icebr8k.Modle.User;
 
+import static com.facebook.FacebookSdk.getApplicationContext;
 
-public class MainChatActivity extends AppCompatActivity   {
+
+public class MainChatActivity extends AppCompatActivity {
 
     // global variables
-    private  final String senderId ="0406";
-    private  final String recieverId ="0401";
+    private final String senderId = "0406";
+    private final String recieverId = "0401";
     private MessagesList messagesList;
     private MessageInput messageInput;
     private MessagesListAdapter<Message> adapter;
@@ -62,13 +71,13 @@ public class MainChatActivity extends AppCompatActivity   {
     private User user2;
     private String user2Id;
     Date lastLoadedDate;
-    private ArrayList<Message> messages,temp;
+    private ArrayList<Message> messages, temp;
     Boolean inChat = true;
     DateFormatter.Formatter formatter;
     MessagesListAdapter.HoldersConfig holdersConfig;
     ImageLoader imageLoader;
-   final  int COUNT_LIMT =8;
-        final   int CHAT_MAX =100;
+    final int COUNT_LIMT = 8;
+    final int CHAT_MAX = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,15 +85,16 @@ public class MainChatActivity extends AppCompatActivity   {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_chat);
         overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
+
         messagesList = findViewById(R.id.messagesList);
         messageInput = findViewById(R.id.input_message);
 
-        chatToolBar =findViewById(R.id.chat_toolbar);
+        chatToolBar = findViewById(R.id.chat_toolbar);
         setSupportActionBar(chatToolBar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(" ");
         messages = new ArrayList<>();
-        temp =new ArrayList<>();
+        temp = new ArrayList<>();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         holdersConfig = new MessagesListAdapter.HoldersConfig();
         holdersConfig.setOutcomingTextHolder(CustomOutcomingMessageViewHolder.class);
@@ -99,29 +109,27 @@ public class MainChatActivity extends AppCompatActivity   {
         adapter = new MessagesListAdapter<>(senderId, holdersConfig, imageLoader);
 
 
-
         loadMessage();
 
 
-
-        //imageloader for the chat bubble only work for incoming message
-
+       // FirebaseDatabase.getInstance().setPersistenceEnabled(false);
         //setup firebase database instance
         mRef = FirebaseDatabase.getInstance().getReference();
+        mRef.keepSynced(true);
 
-       formatter =new DateFormatter.Formatter() {
+        formatter = new DateFormatter.Formatter() {
             @Override
             public String format(Date date) {
                 if (DateFormatter.isToday(date)) {
-                    return   "Today "+ new SimpleDateFormat("hh:mm a").format(date);
+                    return "Today " + new SimpleDateFormat("hh:mm a").format(date);
                 } else if (DateFormatter.isYesterday(date)) {
                     return getString(R.string.date_header_yesterday) + " " +
                             new SimpleDateFormat("hh:mm a").format(date);
 
 
-                } else  {
+                } else {
                     return DateFormatter.format(date, DateFormatter.Template.STRING_DAY_MONTH_YEAR)
-                            +" "+
+                            + " " +
                             new SimpleDateFormat("hh:mm a").format(date);
                 }
             }
@@ -129,26 +137,16 @@ public class MainChatActivity extends AppCompatActivity   {
 
         // set inchat node for the chatroom
         DatabaseReference chatInfoRef = FirebaseDatabase.getInstance().getReference
-                ("Messages/"+currentUser.getUid()+"/"+user2Id);
+                ("Messages/" + currentUser.getUid() + "/" + user2Id);
         chatInfoRef.child("inChat").setValue(inChat);
         chatInfoRef.child("unRead").setValue(0);
         //set node to true if user is in chat activity can be texting to other users beside user2
         Boolean inChatRoom = true;
-        DatabaseReference inChatRef = FirebaseDatabase.getInstance().getReference("Messages/"+currentUser.getUid());
+        DatabaseReference inChatRef = FirebaseDatabase.getInstance().getReference("Messages/" + currentUser.getUid());
         inChatRef.child("inChatRoom").setValue(inChatRoom);
 
 
-
-
-
-
-
-
-
     }
-
-
-
 
 
     @Override
@@ -165,12 +163,16 @@ public class MainChatActivity extends AppCompatActivity   {
                 lastLoadedDate = calendar.getTime();
                 Author author = new Author(senderId, currentUser.getDisplayName(), currentUser.getPhotoUrl().toString());
                 Message message = new Message(senderId, input.toString(), lastLoadedDate, author);
+                message.setDate(lastLoadedDate.toString());
 
                 Author author2 = new Author(recieverId, currentUser.getDisplayName(), currentUser.getPhotoUrl().toString());
                 Message message2 = new Message(recieverId, input.toString(), lastLoadedDate, author2);
                 // create two identical messages one for the user1 node ,one for the user2 node
-                if (user2 != null) {
+                if (user2 != null && checkInternet()) {
+
+                    message.setDate(lastLoadedDate.toString());
                     mRef.child("Messages").child(currentUser.getUid()).child(user2Id).child("chathistory").push().setValue(message);
+
                     mRef.child("Messages").child(currentUser.getUid()).child(user2Id).child("lastmessage").setValue(message);
                     //reciever
                     mRef.child("Messages").child(user2Id).child(currentUser.getUid()).child("chathistory").push().setValue(message2);
@@ -182,10 +184,10 @@ public class MainChatActivity extends AppCompatActivity   {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             Boolean inChat;
-                            if(dataSnapshot.getValue()!=null) {
+                            if (dataSnapshot.getValue() != null) {
                                 inChat = dataSnapshot.getValue(Boolean.class);
-                            }else{
-                                inChat =false;
+                            } else {
+                                inChat = false;
                             }
 
                             final Boolean finalInChat = inChat;
@@ -194,19 +196,19 @@ public class MainChatActivity extends AppCompatActivity   {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     Integer unRead = dataSnapshot.getValue(Integer.class);
-                                    if  (finalInChat == false && unRead != null ) {
+                                    if (finalInChat == false && unRead != null) {
                                         unRead++;
                                         mRef.child("Messages").child(user2Id).child(currentUser.getUid()).child("unRead").setValue(unRead);
                                         //sending notification to that user;
-                                        DatabaseReference notificationRef = FirebaseDatabase.getInstance().getReference("Notification/"+user2Id);
+                                        DatabaseReference notificationRef = FirebaseDatabase.getInstance().getReference("Notification/" + user2Id);
                                         notificationRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
 
                                                 String playerid = dataSnapshot.child("player_id").getValue(String.class);
-                                                if(playerid!=null){
+                                                if (playerid != null) {
                                                     SendNotification.sendNotificationTo(playerid,
-                                                           currentUser.getDisplayName(), input.toString(), currentUser.getUid());
+                                                            currentUser.getDisplayName(), input.toString(), currentUser.getUid());
                                                 }
 
                                             }
@@ -216,18 +218,18 @@ public class MainChatActivity extends AppCompatActivity   {
 
                                             }
                                         });
-                                    } else if( unRead == null ) { // user2 doenst have unread node yet , set it to 1 prevent nullpointer exception
+                                    } else if (unRead == null) { // user2 doenst have unread node yet , set it to 1 prevent nullpointer exception
                                         mRef.child("Messages").child(user2Id).child(currentUser.getUid()).child("unRead").setValue(1);
                                         mRef.child("Messages").child(user2Id).child(currentUser.getUid()).child("inChat").setValue(false);
-                                        DatabaseReference notificationRef = FirebaseDatabase.getInstance().getReference("Notification/"+user2Id);
+                                        DatabaseReference notificationRef = FirebaseDatabase.getInstance().getReference("Notification/" + user2Id);
                                         notificationRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
 
                                                 String playerid = dataSnapshot.child("player_id").getValue(String.class);
-                                                if(playerid!=null){
+                                                if (playerid != null) {
                                                     SendNotification.sendNotificationTo
-                                                            (playerid,  currentUser.getDisplayName(), input.toString(), currentUser.getUid());
+                                                            (playerid, currentUser.getDisplayName(), input.toString(), currentUser.getUid());
                                                 }
 
                                             }
@@ -239,7 +241,7 @@ public class MainChatActivity extends AppCompatActivity   {
                                         });
 
                                         // user2 is in chat live
-                                    }else {
+                                    } else {
                                         mRef.child("Messages").child(user2Id).child(currentUser.getUid()).child("unRead").setValue(0);
                                     }
                                 }
@@ -259,6 +261,9 @@ public class MainChatActivity extends AppCompatActivity   {
                     });
 
 
+                } else {
+                    message.setId(null);
+                    adapter.addToStart(message, true);
                 }
 
                 return true;
@@ -268,39 +273,32 @@ public class MainChatActivity extends AppCompatActivity   {
         });
 
 
-
-
-
-
-
-
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        inChat =true;
+        inChat = true;
         DatabaseReference chatInfoRef = FirebaseDatabase.getInstance().getReference
-                ("Messages/"+currentUser.getUid()+"/"+user2Id);
+                ("Messages/" + currentUser.getUid() + "/" + user2Id);
         chatInfoRef.child("inChat").setValue(inChat);
         chatInfoRef.child("unRead").setValue(0);
 
         Boolean inChatRoom = true;
-        DatabaseReference inChatRef = FirebaseDatabase.getInstance().getReference("Messages/"+currentUser.getUid());
+        DatabaseReference inChatRef = FirebaseDatabase.getInstance().getReference("Messages/" + currentUser.getUid());
         inChatRef.child("inChatRoom").setValue(inChatRoom);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        inChat =false;
+        inChat = false;
         DatabaseReference chatInfoRef = FirebaseDatabase.getInstance().getReference
-                ("Messages/"+currentUser.getUid()+"/"+user2Id);
+                ("Messages/" + currentUser.getUid() + "/" + user2Id);
         chatInfoRef.child("inChat").setValue(inChat);
 
         Boolean inChatRoom = false;
-        DatabaseReference inChatRef = FirebaseDatabase.getInstance().getReference("Messages/"+currentUser.getUid());
+        DatabaseReference inChatRef = FirebaseDatabase.getInstance().getReference("Messages/" + currentUser.getUid());
         inChatRef.child("inChatRoom").setValue(inChatRoom);
     }
 
@@ -308,91 +306,90 @@ public class MainChatActivity extends AppCompatActivity   {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        inChat =false;
+        inChat = false;
         DatabaseReference chatInfoRef = FirebaseDatabase.getInstance().getReference
-                ("Messages/"+currentUser.getUid()+"/"+user2Id);
+                ("Messages/" + currentUser.getUid() + "/" + user2Id);
         chatInfoRef.child("inChat").setValue(inChat);
         chatInfoRef.child("unRead").setValue(0);
         Boolean inChatRoom = false;
-        DatabaseReference inChatRef = FirebaseDatabase.getInstance().getReference("Messages/"+currentUser.getUid());
+        DatabaseReference inChatRef = FirebaseDatabase.getInstance().getReference("Messages/" + currentUser.getUid());
         inChatRef.child("inChatRoom").setValue(inChatRoom);
     }
 
 
- // load history message in real time
-    public void loadMessage(){
+    // load history message in real time
+    public void loadMessage() {
 
         Bundle extras = getIntent().getExtras();
         if (extras.get("user2Uid") != null) {
             user2Id = extras.getString("user2Uid");
             user2 = (User) extras.getSerializable("user2");
-        }else{
+        } else {
             // get user2 the people you chat with info
-            user2 =(User)getIntent().getExtras().getSerializable("user2");
+            user2 = (User) getIntent().getExtras().getSerializable("user2");
             // get user2's unique id for database
             user2Id = getIntent().getStringExtra("user2Id");
 
         }
-        if(user2!=null) {
+        if (user2 != null) {
             getSupportActionBar().setTitle(user2.getDisplayname());
             Log.d("user2", user2.getUsername());
         }
 
-        final DatabaseReference mref = FirebaseDatabase.getInstance().getReference("Messages/"+currentUser.getUid()+"/"+user2Id+"/chathistory");
+        final DatabaseReference mref = FirebaseDatabase.getInstance().getReference("Messages/" + currentUser.getUid() + "/" + user2Id + "/chathistory");
         mref.limitToLast(COUNT_LIMT).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 messages.clear();
                 adapter.clear();
                 temp.clear();
-                for(DataSnapshot childSnapshot :dataSnapshot.getChildren()){
-                  if(user2Id.equals(currentUser.getUid())){
-                    Message message = childSnapshot.getValue(Message.class);
-                    Author author = new Author(message.getId(),currentUser.getDisplayName(),currentUser.getPhotoUrl().toString());
-                    message.setUser(author);
-                    messages.add(message);
+                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                    if (user2Id.equals(currentUser.getUid())) {
+                        Message message = childSnapshot.getValue(Message.class);
+                        Author author = new Author(message.getId(), currentUser.getDisplayName(), currentUser.getPhotoUrl().toString());
+                        message.setUser(author);
+                        messages.add(message);
 
-                  }else if(user2!=null){
+                    } else if (user2 != null) {
 
-                      Message message = childSnapshot.getValue(Message.class);
-                      Author author = new Author(message.getId(),user2.getDisplayname(),user2.getPhotourl());
-                      message.setUser(author);
-                      messages.add(message);
+                        Message message = childSnapshot.getValue(Message.class);
+                        Author author = new Author(message.getId(), user2.getDisplayname(), user2.getPhotourl());
+                        message.setUser(author);
+                        messages.add(message);
 
-                  }
+                    }
 
 
-
-              }
-                Log.d("arraylist",String.valueOf(messages.size()));
+                }
+                Log.d("arraylist", String.valueOf(messages.size()));
 
 
                 adapter.setDateHeadersFormatter(formatter);
-                adapter.addToEnd(messages,true);
+                adapter.addToEnd(messages, true);
                 messagesList.setAdapter(adapter);
 
 
-                final DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Messages/"+currentUser.getUid()+"/"+user2Id+"/chathistory");
+                final DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Messages/" + currentUser.getUid() + "/" + user2Id + "/chathistory");
                 adapter.setLoadMoreListener(new MessagesListAdapter.OnLoadMoreListener() {
                     @Override
                     public void onLoadMore(int page, final int totalItemsCount) {
-                        if(totalItemsCount<CHAT_MAX && totalItemsCount>=COUNT_LIMT){
-                            Log.d("arraylist","triggered");
+                        if (totalItemsCount < CHAT_MAX && totalItemsCount >= COUNT_LIMT) {
+                            Log.d("arraylist", "triggered");
                             ref.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     long total = dataSnapshot.getChildrenCount();
-                                    if(total>totalItemsCount)
-                                        ref.limitToFirst((int)( total-totalItemsCount)).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    if (total > totalItemsCount)
+                                        ref.limitToFirst((int) (total - totalItemsCount)).addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                                for(DataSnapshot snapshot : dataSnapshot.getChildren()){
+                                                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                                                     Message message = snapshot.getValue(Message.class);
-                                                    Author author = new Author(message.getId(),user2.getDisplayname(),user2.getPhotourl());
+                                                    Author author = new Author(message.getId(), user2.getDisplayname(), user2.getPhotourl());
                                                     message.setUser(author);
                                                     temp.add(message);
                                                 }
-                                                adapter.addToEnd(temp,true);
+                                                adapter.addToEnd(temp, true);
                                             }
 
                                             @Override
@@ -414,8 +411,8 @@ public class MainChatActivity extends AppCompatActivity   {
                 });
 
 
-
             }
+
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
@@ -425,14 +422,13 @@ public class MainChatActivity extends AppCompatActivity   {
     }
 
 
-
     @Override
     public boolean onSupportNavigateUp() {
 
-       Intent intent = new Intent(this,Homepage.class) ;
-         intent.putExtra("mainchat","1");
-         startActivity(intent);
-         finish();
+        Intent intent = new Intent(this, Homepage.class);
+        intent.putExtra("mainchat", "1");
+        startActivity(intent);
+        finish();
         overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
         return true;
     }
@@ -440,13 +436,23 @@ public class MainChatActivity extends AppCompatActivity   {
     @Override
     public void onBackPressed() {
 
-        Intent intent = new Intent(this,Homepage.class) ;
-        intent.putExtra("mainchat","1");
-        startActivity(intent);
+
         finish();
         overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
     }
 
+    public boolean checkInternet() {
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        if (null != activeNetwork) {
+            return true;
+        } else {
+            return false;
+
+
+        }
+    }
 
 
 }

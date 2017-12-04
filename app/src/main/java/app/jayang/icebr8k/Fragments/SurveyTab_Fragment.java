@@ -364,6 +364,7 @@ public void createInitQ(){
     surveyQlist = new ArrayList<>();
 
     DatabaseReference mRef= FirebaseDatabase.getInstance().getReference("Questions_8");
+    mRef.keepSynced(true);
 
     mRef.addListenerForSingleValueEvent(new ValueEventListener() {
         @Override
@@ -399,6 +400,7 @@ public void createInitQ(){
 // push the user survy data to the userQA doc in firebase
 public void pushUserQA(SurveyQ surveyQ,String answer) {
     DatabaseReference mReference = FirebaseDatabase.getInstance().getReference("UserQA");
+    mReference.keepSynced(true);
     UserQA userQA = new UserQA(surveyQ.getQuestionId(),answer,surveyQ.getQuestion());
     mReference.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(userQA.getQuestionId()).setValue(userQA);
 
@@ -409,6 +411,7 @@ public void createUserQList(){
     // get all the questions user answered
     DatabaseReference mref = FirebaseDatabase.getInstance().getReference
             ("UserQA/"+FirebaseAuth.getInstance().getCurrentUser().getUid());
+    mref.keepSynced(true);
     mref.addListenerForSingleValueEvent(new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -464,6 +467,7 @@ public void createUserQList(){
 
 
             DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Questions_8");
+            mRef.keepSynced(true);
             mRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {

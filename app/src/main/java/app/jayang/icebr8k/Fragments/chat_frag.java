@@ -15,10 +15,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.internal.MDAdapter;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.google.android.gms.auth.api.Auth;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
@@ -65,7 +69,9 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
     FirebaseUser currrentUser;
     ImageLoader mImageLoader;
     ArrayList<ChatDialog> mChatDialogs;
+    TextView loading;
     int counter;
+
 
 
 
@@ -84,6 +90,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
         Log.d("view","onCreate");
         currrentUser = FirebaseAuth.getInstance().getCurrentUser();
 
+
         mImageLoader = new ImageLoader() {
             @Override
             public void loadImage(ImageView imageView, String url) {
@@ -95,6 +102,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
         dialogsListAdapter =new DialogsListAdapter(mImageLoader);
         dialogsListAdapter.setDatesFormatter(this);
 
+
 }
 
     @Nullable
@@ -102,7 +110,15 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.chat_frag, container, false);
         mDialogsList=  mView.findViewById(R.id.dialogsList);
+        mDialogsList.setVisibility(View.INVISIBLE);
         mDialogsList.setAdapter(dialogsListAdapter,false);
+        loading = mView.findViewById(R.id.chatFregLoading);
+        loading.setVisibility(View.VISIBLE);
+
+        getChatNodes();
+        addChildListener();
+
+
 
 
 
@@ -119,9 +135,8 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
     public void onStart() {
         super.onStart();
         Log.d("view","Start");
-        mChatDialogs = new ArrayList<>();
-        getChatNodes();
-        addChildListener(); //update dialog
+        OneSignal.clearOneSignalNotifications();
+
 
 
 
@@ -170,7 +185,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
         super.setUserVisibleHint(isVisibleToUser);
         Log.d("view","Visable");
         if(isVisibleToUser){
-            OneSignal.clearOneSignalNotifications();
+
 
 
         }
@@ -205,6 +220,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
                         map.put(Uid,null);
 
                     }
+
                 }
                 Log.d("Map",map.toString());
                 getUsersNode(map);
@@ -276,6 +292,11 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
                       if(message!=null) {
                           Log.d("herer","message");
                           getUnread(message, user, key);
+                      }else{
+
+                              loading.setText("No Conversations");
+                              mDialogsList.setVisibility(View.INVISIBLE);
+
                       }
 
                 }
@@ -318,6 +339,11 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
                         String size = String.valueOf(mChatDialogs.size());
                         Collections.sort(mChatDialogs);
                         dialogsListAdapter.setItems(mChatDialogs);
+                        loading.setVisibility(View.GONE);
+                        mDialogsList.setVisibility(View.VISIBLE);
+
+
+                    YoYo.with(Techniques.FadeIn).duration(200).playOn(mDialogsList);
                         Log.d("herer",size);
 
 
@@ -381,6 +407,9 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
         }
     }
 
+
+
+
     public void addChildListener(){
         DatabaseReference ref = FirebaseDatabase.getInstance().
                 getReference("Messages/"+currrentUser.getUid());
@@ -395,66 +424,77 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
                 Integer count = 0;
                 Message message = null;
                 Author author = null;
-                String url = null;
-                String name = null;
-                Log.d("child", "child changed" + dataSnapshot.getValue());
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    if (snapshot.getKey().equals("unRead")) {
-                        count = snapshot.getValue(Integer.class);
+                String url;
+                String name;
 
-                    } else if (snapshot.getKey().equals("lastmessage")) {
-                        message = snapshot.getValue(Message.class);
-                        url = snapshot.child("user").child("avatar").getValue(String.class);
-                        name = snapshot.child("user").child("name").getValue(String.class);
-                        author = new Author(message.getId(), name, url);
+
+                    Log.d("child", "child changed" + dataSnapshot.getKey());
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        if (snapshot.getKey().equals("unRead")) {
+                            count = snapshot.getValue(Integer.class);
+
+                        } else if (snapshot.getKey().equals("lastmessage")) {
+                            message = snapshot.getValue(Message.class);
+                            url = snapshot.child("user").child("avatar").getValue(String.class);
+                            name = snapshot.child("user").child("name").getValue(String.class);
+                            author = new Author(message.getId(), name, url);
+
+                        }
 
                     }
 
-                }
-
-                if (message != null && count != null && author != null) {
-                    final String dialogId = currrentUser.getUid()+dataSnapshot.getKey();
-                    final ArrayList<Author> authors = new ArrayList<>();
-                    authors.add(author);
-                    DatabaseReference mref =FirebaseDatabase.getInstance().
-                            getReference("Users/"+dataSnapshot.getKey());
-                    final Author finalAuthor = author;
-                    final Message finalMessage = message;
-                    final Integer finalCount = count;
-                    mref.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            if (dataSnapshot != null) {
-                                User user = dataSnapshot.getValue(User.class);
-                                ChatDialog dialog = new ChatDialog(dialogId, user.getPhotourl(), finalAuthor.getName(),
-                                        authors, finalMessage, finalCount);
-
-                                if (!dialogsListAdapter.updateDialogWithMessage(dialogId, finalMessage)) {
-                                    dialogsListAdapter.addItem(dialog);
+                    if (message != null && count != null && author != null) {
+                        final String dialogId = currrentUser.getUid() + dataSnapshot.getKey();
+                        final ArrayList<Author> authors = new ArrayList<>();
+                        authors.add(author);
+                        DatabaseReference mref = FirebaseDatabase.getInstance().
+                                getReference("Users/" + dataSnapshot.getKey());
+                        final Author finalAuthor = author;
+                        final Message finalMessage = message;
+                        final Integer finalCount = count;
+                        mref.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (dataSnapshot != null) {
+                                    User user = dataSnapshot.getValue(User.class);
+                                    ChatDialog dialog = new ChatDialog(dialogId, user.getPhotourl(), finalAuthor.getName(),
+                                            authors, finalMessage, finalCount);
 
 
-                                } else {
-                                    dialogsListAdapter.updateItemById(dialog);
+                                    if (!dialogsListAdapter.updateDialogWithMessage(dialogId, finalMessage)) {
+                                        dialogsListAdapter.addItem(dialog);
+                                        loading.setVisibility(View.GONE);
+                                        mDialogsList.setVisibility(View.VISIBLE);
+
+
+                                        YoYo.with(Techniques.FadeIn).duration(200).playOn(mDialogsList);
+
+
+                                    } else {
+                                       dialogsListAdapter.updateItemById(dialog);
+                                        loading.setVisibility(View.GONE);
+                                        mDialogsList.setVisibility(View.VISIBLE);
+
+
+                                        YoYo.with(Techniques.FadeIn).duration(200).playOn(mDialogsList);
+
+                                    }
+                                    dialogsListAdapter.notifyDataSetChanged();
 
                                 }
 
                             }
 
-                        }
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
+                            }
+                        });
 
 
-
-
-
-
+                    }
                 }
-            }
+
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {

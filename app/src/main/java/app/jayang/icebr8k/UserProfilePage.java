@@ -240,6 +240,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
     public int compareWithUser2(User user2) {
         DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Usernames/" + user2.getUsername());
+        mRef.keepSynced(true);
         mRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -262,6 +263,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
     public void pullUser1Q(String Uid, final ArrayList arrayList) {
         DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + Uid);
+        mRef.keepSynced(true);
         mRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -287,6 +289,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
     public void pullUser2Q(String Uid) {
         DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + Uid);
+        mRef.keepSynced(true);
         mRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -313,6 +316,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
     public void getUser1QA(final String User1ID) {
         DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + User1ID);
+        mRef.keepSynced(true);
 
 
         mRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -348,6 +352,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
     public void getUser2QA(final String User2ID, final ArrayList arr) {
         DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + User2ID);
+        mRef.keepSynced(true);
 
 
         mRef.addListenerForSingleValueEvent(new ValueEventListener() {
