@@ -19,11 +19,8 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -31,9 +28,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.stfalcon.chatkit.commons.ImageLoader;
-import com.stfalcon.chatkit.commons.models.IMessage;
-import com.stfalcon.chatkit.commons.models.IUser;
-import com.stfalcon.chatkit.messages.MessageHolders;
+
 import com.stfalcon.chatkit.messages.MessageInput;
 import com.stfalcon.chatkit.messages.MessagesList;
 import com.stfalcon.chatkit.messages.MessagesListAdapter;
@@ -42,19 +37,15 @@ import com.stfalcon.chatkit.utils.DateFormatter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
 
-import app.jayang.icebr8k.Fragments.chat_frag;
+import java.util.Date;
+
 import app.jayang.icebr8k.Modle.Author;
 import app.jayang.icebr8k.Modle.CustomMessageViewHolder;
 import app.jayang.icebr8k.Modle.CustomOutcomingMessageViewHolder;
 import app.jayang.icebr8k.Modle.Message;
 import app.jayang.icebr8k.Modle.User;
 
-import static com.facebook.FacebookSdk.getApplicationContext;
 
 
 public class MainChatActivity extends AppCompatActivity {
@@ -163,14 +154,11 @@ public class MainChatActivity extends AppCompatActivity {
                 lastLoadedDate = calendar.getTime();
                 Author author = new Author(senderId, currentUser.getDisplayName(), currentUser.getPhotoUrl().toString());
                 Message message = new Message(senderId, input.toString(), lastLoadedDate, author);
-                message.setDate(lastLoadedDate.toString());
-
                 Author author2 = new Author(recieverId, currentUser.getDisplayName(), currentUser.getPhotoUrl().toString());
                 Message message2 = new Message(recieverId, input.toString(), lastLoadedDate, author2);
                 // create two identical messages one for the user1 node ,one for the user2 node
                 if (user2 != null && checkInternet()) {
 
-                    message.setDate(lastLoadedDate.toString());
                     mRef.child("Messages").child(currentUser.getUid()).child(user2Id).child("chathistory").push().setValue(message);
 
                     mRef.child("Messages").child(currentUser.getUid()).child(user2Id).child("lastmessage").setValue(message);
@@ -436,7 +424,9 @@ public class MainChatActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
-
+        Intent intent = new Intent(this, Homepage.class);
+        intent.putExtra("mainchat", "1");
+        startActivity(intent);
         finish();
         overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
     }

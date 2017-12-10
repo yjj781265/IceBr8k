@@ -11,7 +11,6 @@ import java.text.SimpleDateFormat;
 
 import app.jayang.icebr8k.MainChatActivity;
 
-import static com.facebook.FacebookSdk.getApplicationContext;
 
 /**
  * Created by yjj781265 on 11/14/2017.
