@@ -90,7 +90,7 @@ public class Homepage extends AppCompatActivity implements OSSubscriptionObserve
         map.put("onlineStats", "1");
         mRef = FirebaseDatabase.getInstance().getReference("Users/" + currentUser.getUid());
         mRef.updateChildren(map);
-        mRef.child("onlineStats").onDisconnect().setValue("0");
+
 
 
         Boolean inChatRoom = false;
@@ -185,6 +185,15 @@ public class Homepage extends AppCompatActivity implements OSSubscriptionObserve
 
 
 
+
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        if( intent.getExtras().getString("mainchat")!=null){
+            viewPager.setCurrentItem(2);
+            homepageTab.selectTabWithId(R.id.tab_message);
+        }
 
     }
 
@@ -336,8 +345,6 @@ public class Homepage extends AppCompatActivity implements OSSubscriptionObserve
     public void onComplete() {
         Bundle extras = getIntent().getExtras();
         if (viewPagerAdapter.getCount() > 2) {
-
-
             if (extras.getString("user2Uid") != null) {
                 Intent mIntent = new Intent(this, MainChatActivity.class);
                 mIntent.putExtras(extras);

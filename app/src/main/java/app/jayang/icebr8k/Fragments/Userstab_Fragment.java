@@ -129,6 +129,7 @@ public class Userstab_Fragment extends Fragment{
 
     public void populateUserList() {
         databaseReference = mDatabase.getReference("Users");
+        databaseReference.keepSynced(true);
 
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override

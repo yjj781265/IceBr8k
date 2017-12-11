@@ -20,7 +20,6 @@ import org.json.JSONObject;
 
 import app.jayang.icebr8k.Modle.User;
 
-import static com.facebook.FacebookSdk.getApplicationContext;
 
 /**
  * Created by yjj781265 on 11/13/2017.

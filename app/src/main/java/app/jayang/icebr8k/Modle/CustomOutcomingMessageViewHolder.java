@@ -11,7 +11,7 @@ import java.text.SimpleDateFormat;
 
 import app.jayang.icebr8k.R;
 
-import static com.facebook.FacebookSdk.getApplicationContext;
+
 
 /**
  * Created by yjj781265 on 11/14/2017.
@@ -37,18 +37,8 @@ public class CustomOutcomingMessageViewHolder extends MessagesListAdapter.Outcom
     }
 
 
-    public boolean checkInternet() {
-        ConnectivityManager cm = (ConnectivityManager) getApplicationContext()
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        if (null != activeNetwork) {
-            return true;
-        } else {
-            return false;
 
-
-        }
     }
 
 
-}
+

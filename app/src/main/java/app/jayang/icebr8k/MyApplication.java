@@ -11,7 +11,7 @@ import com.onesignal.OneSignal;
 
 import cat.ereza.customactivityoncrash.config.CaocConfig;
 
-import static com.facebook.FacebookSdk.getApplicationContext;
+
 
 
 /**
@@ -35,7 +35,7 @@ public class MyApplication extends Application  {
         super.onCreate();
         context = getApplicationContext();
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-        FirebaseDatabase.getInstance().getReference().keepSynced(true);
+
 
         CaocConfig.Builder.create()
                 .backgroundMode(CaocConfig.BACKGROUND_MODE_SHOW_CUSTOM) //default: CaocConfig.BACKGROUND_MODE_SHOW_CUSTOM

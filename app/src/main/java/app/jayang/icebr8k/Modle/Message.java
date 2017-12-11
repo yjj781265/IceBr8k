@@ -13,7 +13,7 @@ public class Message implements IMessage {
     private String id,text;
     private Date createdAt;
     private Author author;
-    private String month,timezoneOffset,time,minutes,seconds,hours,day,date,year;
+    private String date;
 
     public Message() {
     }
@@ -40,9 +40,6 @@ public class Message implements IMessage {
        return author;
     }
 
-
-
-
     @Override
     public Date getCreatedAt() {
         return createdAt;
@@ -61,10 +58,6 @@ public class Message implements IMessage {
 
     public void setCreatedAt(Date date) {
         this.createdAt = date;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
     }
 
     public void setDate(String date) {
