@@ -21,8 +21,6 @@
             android:name=".UserProfilePage"
             android:screenOrientation="portrait" />
 
-
-
         <activity
             android:name=".Homepage"
             android:screenOrientation="portrait"
