@@ -129,7 +129,7 @@ public class SurveyTab_Fragment extends Fragment {
         mActionButton= mview.findViewById(R.id.floatingActionButton);
         skip = mview.findViewById(R.id.skip_btn);
         skip.setVisibility(View.GONE);
-        createInitQ();
+
 
 
 
@@ -215,7 +215,7 @@ public class SurveyTab_Fragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
+        createInitQ();
 
 
 

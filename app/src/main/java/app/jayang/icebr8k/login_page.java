@@ -92,8 +92,6 @@ public class login_page extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_page);
 
-        user2Id = getIntent().getExtras().getString("user2Id");
-        user2 =(User)getIntent().getExtras().getSerializable("user2");
 
         intent = new Intent(this, Homepage.class);
 

@@ -137,10 +137,12 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                 public void onClick(View view) {
                     DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + currentUser.getUid());
                     mRef.removeValue();
-                    Toast.makeText(getApplicationContext(), "Reset is done", Toast.LENGTH_SHORT).show();
                     Intent i = new Intent(getApplicationContext(), Homepage.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    i.putExtra("reset","1");
+
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(i);
+                    finish();
 
                 }
             });

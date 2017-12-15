@@ -173,15 +173,13 @@ public class Homepage extends AppCompatActivity implements OSSubscriptionObserve
                 Intent intent = new Intent(getApplicationContext(), UserProfilePage.class);
                 intent.putExtra("selfProfile", currentUserDB);
                 startActivity(intent);
+
             }
         });
 
 
 
-        if( getIntent().getExtras().getString("mainchat")!=null){
-            viewPager.setCurrentItem(2);
-            homepageTab.selectTabWithId(R.id.tab_message);
-        }
+
 
 
 
@@ -190,9 +188,16 @@ public class Homepage extends AppCompatActivity implements OSSubscriptionObserve
 
     @Override
     protected void onNewIntent(Intent intent) {
-        if( intent.getExtras().getString("mainchat")!=null){
-            viewPager.setCurrentItem(2);
-            homepageTab.selectTabWithId(R.id.tab_message);
+        super.onNewIntent(intent);
+        Toast.makeText(getApplicationContext(),"New Intent",Toast.LENGTH_SHORT).show();
+        if(intent!=null) {
+            if (intent.getExtras().getString("mainchat") != null) {
+                viewPager.setCurrentItem(2);
+                homepageTab.selectTabWithId(R.id.tab_message);
+            }else{
+                viewPager.setCurrentItem(0);
+                homepageTab.selectTabWithId(R.id.tab_survey);
+            }
         }
 
     }
@@ -242,10 +247,6 @@ public class Homepage extends AppCompatActivity implements OSSubscriptionObserve
     @Override
     protected void onStart() {
         super.onStart();
-
-
-
-
     }
 
     @Override

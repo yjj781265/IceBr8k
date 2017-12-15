@@ -272,7 +272,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
                                 user2.getDisplayname(),authors,message,unRead);
                         mChatDialogs.add(chatDialog);
                         //end of the for loop
-                        if(counter==totalcount){
+                        if(counter==totalcount && counter!=null){
                             Log.d(TAG,"TOTAL "+totalcount + "We are at item "+counter+
                                     "dialog count is " + mChatDialogs.size());
                             Collections.sort(mChatDialogs);
@@ -280,12 +280,14 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
                             loading.setVisibility(View.GONE);
                         }else if(counter==null){
                             if(dialogsListAdapter.updateDialogWithMessage(dialogId,message)){
+                                Log.d(TAG,"update");
                                 dialogsListAdapter.updateItemById(chatDialog);
                             }else{
+                                Log.d(TAG,"added");
                                 dialogsListAdapter.addItem(chatDialog);
                             }
                             loading.setVisibility(View.GONE);
-                            Log.d(TAG,"update");
+
                         }
 
                     }
