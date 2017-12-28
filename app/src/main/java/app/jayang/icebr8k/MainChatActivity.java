@@ -132,9 +132,7 @@ public class MainChatActivity extends AppCompatActivity {
         chatInfoRef.child("inChat").setValue(inChat);
         chatInfoRef.child("unRead").setValue(0);
         //set node to true if user is in chat activity can be texting to other users beside user2
-        Boolean inChatRoom = true;
-        DatabaseReference inChatRef = FirebaseDatabase.getInstance().getReference("Messages/" + currentUser.getUid());
-        inChatRef.child("inChatRoom").setValue(inChatRoom);
+
 
 
     }
@@ -272,9 +270,6 @@ public class MainChatActivity extends AppCompatActivity {
         chatInfoRef.child("inChat").setValue(inChat);
         chatInfoRef.child("unRead").setValue(0);
 
-        Boolean inChatRoom = true;
-        DatabaseReference inChatRef = FirebaseDatabase.getInstance().getReference("Messages/" + currentUser.getUid());
-        inChatRef.child("inChatRoom").setValue(inChatRoom);
     }
 
     @Override
@@ -285,9 +280,6 @@ public class MainChatActivity extends AppCompatActivity {
                 ("Messages/" + currentUser.getUid() + "/" + user2Id);
         chatInfoRef.child("inChat").setValue(inChat);
 
-        Boolean inChatRoom = false;
-        DatabaseReference inChatRef = FirebaseDatabase.getInstance().getReference("Messages/" + currentUser.getUid());
-        inChatRef.child("inChatRoom").setValue(inChatRoom);
     }
 
 
@@ -299,9 +291,7 @@ public class MainChatActivity extends AppCompatActivity {
                 ("Messages/" + currentUser.getUid() + "/" + user2Id);
         chatInfoRef.child("inChat").setValue(inChat);
         chatInfoRef.child("unRead").setValue(0);
-        Boolean inChatRoom = false;
-        DatabaseReference inChatRef = FirebaseDatabase.getInstance().getReference("Messages/" + currentUser.getUid());
-        inChatRef.child("inChatRoom").setValue(inChatRoom);
+
     }
 
 
@@ -321,7 +311,7 @@ public class MainChatActivity extends AppCompatActivity {
         }
         if (user2 != null) {
             getSupportActionBar().setTitle(user2.getDisplayname());
-            Log.d("user2", user2.getUsername());
+
         }
 
         final DatabaseReference mref = FirebaseDatabase.getInstance().getReference("Messages/" + currentUser.getUid() + "/" + user2Id + "/chathistory");

@@ -3,6 +3,7 @@ package app.jayang.icebr8k.Modle;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 
 import com.stfalcon.chatkit.messages.MessagesListAdapter;
@@ -27,13 +28,15 @@ public class CustomOutcomingMessageViewHolder extends MessagesListAdapter.Outcom
         super.onBind(message);
         if (message.getId()==null) {
             time.setText("Send Text Failed, Check Internet Connection");
-            time.setTextColor(itemView.getContext().getColor(android.R.color.holo_red_light));
+            time.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.holo_red_light));
             time.setTextSize((float) 11);
         }else{
             time.setText(new SimpleDateFormat("hh:mm a").format(message.getCreatedAt()));
             time.setTextSize((float) 11);
-            time.setTextColor(itemView.getContext().getColor(android.R.color.secondary_text_dark));
+            time.setTextColor(ContextCompat.getColor(itemView.getContext(),
+                    android.R.color.secondary_text_dark));
         }
+
     }
 
 

@@ -9,26 +9,58 @@
         android:id="@+id/dialogsList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        app:dialogAvatarWidth="48dp"
+        android:layout_alignParentTop="true"
         app:dialogAvatarHeight="48dp"
+        app:dialogAvatarWidth="48dp"
+        app:dialogDividerEnabled="true"
+        app:dialogDividerLeftPadding="0dp"
         app:dialogItemBackground="@color/white"
         app:dialogMessageTextSize="13sp"
         app:dialogTitleTextSize="16sp"
-        app:dialogUnreadBubbleEnabled="true"
         app:dialogUnreadBubbleBackgroundColor="@android:color/holo_red_light"
+        app:dialogUnreadBubbleEnabled="true"
         app:dialogUnreadMessageTextStyle="bold"
-        app:dialogUnreadTitleTextStyle="bold"
-        app:dialogDividerLeftPadding="0dp"
+        app:dialogUnreadTitleTextStyle="bold"/>
 
-        app:dialogDividerEnabled="true"/>
-
-    <TextView
-        android:id="@+id/chatFregLoading"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <RelativeLayout
+        android:id="@+id/loadingImg_chatTab"
         android:layout_centerInParent="true"
-        android:text="Loading..."/>
+        android:paddingBottom="50dp"
+        android:layout_width="wrap_content"
+        android:layout_height="150dp">
+        <pl.droidsonroids.gif.GifImageView
+            android:id="@+id/loadingImg"
+            android:layout_centerHorizontal="true"
+            android:layout_width="75dp"
+            android:layout_height="75dp"
+            android:src="@drawable/icebr8k_load"
+            android:paddingTop="10dp"
+            android:paddingLeft="6dp"
+            />
+
+        <TextView
+            android:id="@+id/chatFregLoading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:paddingLeft="15dp"
+            android:text="Loading..."/>
+
+    </RelativeLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:layout_width="66dp"
+        android:layout_height="66dp"
+        android:id="@+id/fabChat"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        app:elevation="4dp"
+        android:src="@drawable/user_icon"
+        android:clickable="true"
+        app:fabSize="normal"
+        android:layout_margin="50dp"/>
+
 
 </RelativeLayout>

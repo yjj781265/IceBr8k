@@ -13,7 +13,7 @@ public class Message implements IMessage {
     private String id,text;
     private Date createdAt;
     private Author author;
-    private String date;
+
 
     public Message() {
     }
@@ -40,17 +40,17 @@ public class Message implements IMessage {
        return author;
     }
 
+    public Author getAuthor(){return  author;}
+
     @Override
     public Date getCreatedAt() {
         return createdAt;
     }
 
-
     public void setId(String id) {
         this.id = id;
     }
     public void setUser(Author user){this.author =user;}
-
 
     public void setText(String text) {
         this.text = text;
@@ -60,11 +60,4 @@ public class Message implements IMessage {
         this.createdAt = date;
     }
 
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public String getDate() {
-        return date;
-    }
 }

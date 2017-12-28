@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -64,6 +65,7 @@ public class SurveyTab_Fragment extends Fragment {
     CardView mCardView;
     TextView skip;
     FloatingActionButton mActionButton;
+    String TAG = "surveyFrag";
 
 
     ArrayList<SurveyQ> surveyQArrayList,temp; // for unpdating UI
@@ -76,10 +78,6 @@ public class SurveyTab_Fragment extends Fragment {
     RelativeLayout mlayout;
     FirebaseUser currentUser;
     int index  ;
-
-
-
-
     public SurveyTab_Fragment() {
 
     }
@@ -87,9 +85,6 @@ public class SurveyTab_Fragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
-
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -102,11 +97,7 @@ public class SurveyTab_Fragment extends Fragment {
         answers.add("B");
         SurveyQ q8 = new SurveyQ("mc","A or B?", UUID.randomUUID().toString(),answers);
        // mRef.child("Questions_8").child(q8.getQuestionId()).setValue(q8);
-
-
-
-
-
+       showLog("onCreate");
     }
 
     @Nullable
@@ -129,11 +120,6 @@ public class SurveyTab_Fragment extends Fragment {
         mActionButton= mview.findViewById(R.id.floatingActionButton);
         skip = mview.findViewById(R.id.skip_btn);
         skip.setVisibility(View.GONE);
-
-
-
-
-
         mActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -153,10 +139,7 @@ public class SurveyTab_Fragment extends Fragment {
 
             @Override
             public void onClick(View view) {
-
-
-
-               // Toast.makeText(mview.getContext(),String.valueOf(index),Toast.LENGTH_SHORT).show();
+                // Toast.makeText(mview.getContext(),String.valueOf(index),Toast.LENGTH_SHORT).show();
                 //Toast.makeText(mview.getContext(),"SQ List "+surveyQArrayList.size(),Toast.LENGTH_SHORT).show();
                 if(mRadioGroup.getCheckedRadioButtonId()==-1&& mRadioGroup.getVisibility()==View.VISIBLE){
                     Toast.makeText(getContext(),"Make a selection",Toast.LENGTH_SHORT).show();
@@ -199,23 +182,28 @@ public class SurveyTab_Fragment extends Fragment {
 
             }
         });
-
+        showLog("onCreateView");
         return  mview;
     }
 
-
-
+    @Override
+    public void onStart() {
+        super.onStart();
+        createInitQ();
+        showLog("onStart");
+    }
 
     @Override
     public void onPause() {
         super.onPause();
-
+        showLog("onPause");
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        createInitQ();
+        showLog("onResume");
+
 
 
 
@@ -228,7 +216,7 @@ public class SurveyTab_Fragment extends Fragment {
         super.setUserVisibleHint(isVisibleToUser);
         if (isVisibleToUser && getView()!=null) {
             if(mTextView.getText().toString().equals(getString(R.string.check_back_later))){
-                createInitQ();
+              //  createInitQ();
             }
 
 
@@ -246,10 +234,6 @@ public class SurveyTab_Fragment extends Fragment {
         params.addRule(RelativeLayout.CENTER_HORIZONTAL);
         mRadioGroup.setVisibility(View.INVISIBLE);
         mSpinner.setVisibility(View.INVISIBLE);
-
-
-
-
         mSubmit.setLayoutParams(params);
         setSkipbtn();
 
@@ -565,6 +549,11 @@ public void createUserQList(){
         skip.setVisibility(View.GONE);
 
     }
+
+    public void showLog(String str){
+        Log.d(TAG,str);
+    }
+
 
 
 

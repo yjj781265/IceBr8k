@@ -20,7 +20,11 @@ public class ChatDialog implements IDialog,Comparable<ChatDialog> {
     IMessage lastmessage;
     int unreadcount;
 
-    public ChatDialog(String id,String dialogphoto, String dialogname, ArrayList<Author> users, IMessage lastmessage, int unreadcount) {
+    public ChatDialog(){}
+
+
+    public ChatDialog(String id,String dialogphoto, String dialogname,
+                      ArrayList<Author> users, Message lastmessage, int unreadcount) {
         this.id = id;
         this.dialogphoto = dialogphoto;
         this.dialogname = dialogname;
@@ -65,12 +69,52 @@ public class ChatDialog implements IDialog,Comparable<ChatDialog> {
     }
 
 
+    public void setUnreadcount(int unreadcount) {
+        this.unreadcount = unreadcount;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setDialogphoto(String dialogphoto) {
+        this.dialogphoto = dialogphoto;
+    }
+
+    public void setDialogname(String dialogname) {
+        this.dialogname = dialogname;
+    }
+
+    public void setUsers(ArrayList<Author> users) {
+        this.users = users;
+    }
+
+    public void setLastmessage(Message lastmessage) {
+        this.lastmessage = lastmessage;
+    }
+
     @Override
     public int compareTo(@NonNull ChatDialog chatDialog) {
+
         int result =Integer.valueOf(chatDialog.getUnreadCount()).compareTo(unreadcount);
         if(result==0){
            result= chatDialog.getLastMessage().getCreatedAt().compareTo(lastmessage.getCreatedAt());
         }
         return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ChatDialog that = (ChatDialog) o;
+
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 }

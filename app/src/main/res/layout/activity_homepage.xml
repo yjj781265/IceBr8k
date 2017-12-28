@@ -1,72 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/mBubbleTab"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:theme="@style/ThemeOverlay.AppCompat"
+
     tools:context="app.jayang.icebr8k.Homepage">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/users_toolbar"
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:elevation="4dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_gravity="top"
         android:background="@color/colorPrimary"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark"
+
         app:title="IceBr8k"
         app:titleTextColor="@android:color/white">
 
     </android.support.v7.widget.Toolbar>
 
-    <com.roughike.bottombar.BottomBar
-        android:id="@+id/homepageTab"
+    <TextView
+        android:id="@+id/noConnection_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/users_toolbar"
+        android:alpha="0.87"
+        android:background="@color/holo_red_light"
+        android:paddingBottom="5dp"
+        android:paddingLeft="10dp"
+        android:paddingTop="5dp"
+        android:text="No Internet Connection"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:visibility="visible"/>
+
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/coordLayout"
+        android:layout_below="@id/noConnection_tv"
+        android:layout_above="@id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/homepage_viewpager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/bottom_navigation"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:background="@android:color/white">
+
+        </android.support.v4.view.ViewPager>
+
+
+    </android.support.design.widget.CoordinatorLayout>
+
+    <com.aurelhubert.ahbottomnavigation.AHBottomNavigation
+        android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-
-        android:layout_alignParentBottom="true"
-        app:bb_tabXmlResource="@xml/custom_tabs">
-
-
-    </com.roughike.bottombar.BottomBar>
-
-
-    <android.support.v4.view.ViewPager
-        android:id="@+id/homepage_viewpager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/homepageTab"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/users_toolbar"
-        android:background="@android:color/white"></android.support.v4.view.ViewPager>
-
-    <ImageView
-        android:id="@+id/red_dot"
-        android:layout_width="10dp"
-        android:layout_height="10dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/homepage_viewpager"
-        android:layout_marginEnd="42dp"
-        android:layout_marginRight="40dp"
-        android:layout_marginTop="10dp"
-        android:baselineAlignBottom="true"
-        android:contentDescription="@null"
-        android:src="@drawable/red_dot"/>
-
-    <ImageView
-        android:id="@+id/imageBtn"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_above="@+id/homepage_viewpager"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="11dp"
-        android:src="@drawable/user_profile_icon"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:clickable="true"/>
+        android:theme="@style/Base.Theme.AppCompat.Light"
+   android:layout_alignParentBottom="true"
+        />
 
 </RelativeLayout>

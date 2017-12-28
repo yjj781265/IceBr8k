@@ -2,30 +2,40 @@ package app.jayang.icebr8k.Fragments;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.media.MediaPlayer;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.health.UidHealthStats;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.PopupMenu;
 import android.util.Log;
+import android.view.ActionMode;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.internal.MDAdapter;
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.daimajia.androidanimations.library.Techniques;
-import com.daimajia.androidanimations.library.YoYo;
-import com.google.android.gms.auth.api.Auth;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -45,13 +55,9 @@ import com.stfalcon.chatkit.utils.DateFormatter;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 
-import app.jayang.icebr8k.Homepage;
 import app.jayang.icebr8k.MainChatActivity;
 import app.jayang.icebr8k.Modle.Author;
 import app.jayang.icebr8k.Modle.ChatDialog;
@@ -63,22 +69,25 @@ import app.jayang.icebr8k.R;
  * Created by yjj781265 on 11/9/2017.
  */
 
-public class chat_frag extends Fragment implements DateFormatter.Formatter {
-    View mView;
-    DialogsListAdapter dialogsListAdapter;
-    DialogsList mDialogsList;
-    FirebaseUser currrentUser;
-    ImageLoader mImageLoader;
-    ArrayList<ChatDialog> mChatDialogs;
-    TextView loading;
-    FirebaseDatabase mDatabase;
-    DatabaseReference mRef;
-    HashMap<String,String> map ;
-    HashMap<String,Integer> map2;
-;
-    User user2;
-    ArrayList<Author> authors;
-    String TAG = "chatfrag";
+public class chat_frag extends Fragment implements DateFormatter.Formatter{
+    private View mView;
+    private DialogsListAdapter dialogsListAdapter;
+    private DialogsList mDialogsList;
+    private FirebaseUser currrentUser;
+    private ImageLoader mImageLoader;
+    private ArrayList<ChatDialog> mChatDialogs,tempChatList;
+    private FirebaseDatabase mDatabase;
+    private DatabaseReference childAddedRef,unReadCountRef,childChangededRef;
+    private ActionMode actionMode;
+    private ArrayList<Author> authors;
+    private String TAG = "chatfrag";
+    private FloatingActionButton fabChat;
+    private Integer unReadcount,messageNodeCount,newDialogCount;
+    private  boolean initChat,clicked;
+    private Author author;
+    private Message message;
+    private RelativeLayout loadingGif;
+
 
     public chat_frag() {
 
@@ -87,11 +96,9 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d("view","onCreate");
         currrentUser = FirebaseAuth.getInstance().getCurrentUser();
         mDatabase = FirebaseDatabase.getInstance();
-        map = new HashMap<>();
-        map2 = new HashMap<>();
+        newDialogCount =0;
 
         mImageLoader = new ImageLoader() {
             @Override
@@ -100,25 +107,84 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
                         apply(RequestOptions.circleCropTransform()).into(imageView);
             }
         };
+
         authors = new ArrayList<>();
         mChatDialogs =new ArrayList<>();
+        tempChatList= new ArrayList<>();
         dialogsListAdapter =new DialogsListAdapter(mImageLoader);
         dialogsListAdapter.setDatesFormatter(this);
 
 
-}
+        Log.d(TAG,"onCreate");
 
-    @Nullable
+
+
+
+
+
+
+
+}
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.chat_frag, container, false);
+        fabChat = mView.findViewById(R.id.fabChat);
+        loadingGif = mView.findViewById(R.id.loadingImg_chatTab);
         mDialogsList=  mView.findViewById(R.id.dialogsList);
         mDialogsList.setAdapter(dialogsListAdapter,false);
-        loading = mView.findViewById(R.id.chatFregLoading);
-        loading.setVisibility(View.VISIBLE);
         mDialogsList.setVisibility(View.VISIBLE);
+        Log.d(TAG,"onCreateView");
+        getMessages();
 
-        loadDialogs();
+
+        dialogsListAdapter.setOnDialogClickListener(new DialogsListAdapter.OnDialogClickListener<ChatDialog>() {
+            @Override
+            public void onDialogClick(ChatDialog dialog) {
+                if(actionMode!=null){
+                    int poistion = mChatDialogs.indexOf(dialog);
+                    View chatView= mDialogsList.getLayoutManager().findViewByPosition(poistion);
+                  if(chatView.isSelected()){
+                      chatView.setBackgroundColor(getContext().getResources().getColor(R.color.white));
+                      chatView.setSelected(false);
+                      tempChatList.remove(dialog);
+                      actionMode.setTitle(String.valueOf(tempChatList.size()) + " Selected");
+                  }else{
+                      chatView.setBackgroundColor(getContext().getResources().getColor(R.color.creamYellow));
+                      chatView.setSelected(true);
+                      tempChatList.add(dialog);
+                      actionMode.setTitle(String.valueOf(tempChatList.size()) + " Selected");
+
+                  }
+                }else{
+                      refreshListAndToChat(dialog);
+                }
+
+            }
+
+        });
+
+        dialogsListAdapter.setOnDialogLongClickListener(new DialogsListAdapter.OnDialogLongClickListener<ChatDialog>() {
+            @Override
+            public void onDialogLongClick(ChatDialog dialog) {
+
+                int poistion = mChatDialogs.indexOf(dialog);
+                View chatView= mDialogsList.getLayoutManager().findViewByPosition(poistion);
+                if (actionMode != null) {
+
+                }else{
+                    tempChatList.clear();
+                    // Start the CAB using the ActionMode.Callback defined above
+                    actionMode = getActivity().startActionMode(mActionModeCallback);
+                    chatView.setSelected(true);
+                    chatView.setBackgroundColor(getContext().getResources().
+                            getColor(R.color.creamYellow));
+                    tempChatList.add(dialog);
+                    actionMode.setTitle(String.valueOf(tempChatList.size()) + " Selected");
+
+                }
+
+            }
+        });
 
         return  mView;
     }
@@ -129,56 +195,98 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
     @Override
     public void onStart() {
         super.onStart();
-        Log.d("view","Start");
+        Log.d(TAG,"Start");
         OneSignal.clearOneSignalNotifications();
 
-
-
-
-        dialogsListAdapter.setOnDialogClickListener(new DialogsListAdapter.OnDialogClickListener() {
+        fabChat.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onDialogClick(IDialog dialog) {
-                // clear notifications in the notifications bar
-                OneSignal.clearOneSignalNotifications();
+            public void onClick(View view) {
 
-               String id ;
-               if(dialog.getId().equals(currrentUser.getUid()+currrentUser.getUid())){
-                   id =currrentUser.getUid();
-               }else{
-                   id = dialog.getId().replace(currrentUser.getUid(),"");
-               }
-
-                DatabaseReference mref = FirebaseDatabase.getInstance().getReference("Users/"+id);
-                final String finalId = id;
-                mref.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        User user = dataSnapshot.getValue(User.class);
-                        Log.d("Userid",user.getDisplayname());
-                        Intent i = new Intent(getContext(), MainChatActivity.class);
-                i.putExtra("user2Id", finalId);
-                i.putExtra("user2",user);
-                startActivity(i);
-
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
+                Toast.makeText(getContext(),String.valueOf(messageNodeCount),Toast.LENGTH_SHORT).show();
 
 
             }
         });
+    }
+
+    private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+        // Called when the action mode is created; startActionMode() was called
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            // Inflate a menu resource providing context menu items
+            MenuInflater inflater = mode.getMenuInflater();
+            inflater.inflate(R.menu.chatdialog_menu, menu);
+            return true;
+        }
 
 
+        // Called each time the action mode is shown. Always called after onCreateActionMode, but
+        // may be called multiple times if the mode is invalidated.
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false; // Return false if nothing is done
+        }
 
+        // Called when the user selects a contextual menu item
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.action_delete:
+                    showRemoveDialog();
+                    mode.finish(); // Action picked, so close the CAB
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        // Called when the user exits the action mode
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            actionMode = null;
+
+            // reset color
+            for(ChatDialog dialog : mChatDialogs){
+                int poistion = mChatDialogs.indexOf(dialog);
+                View chatView= mDialogsList.getLayoutManager().findViewByPosition(poistion);
+                chatView.setBackgroundColor(getContext().getResources().getColor(R.color.white));
+                chatView.setSelected(false);
+            }
+
+        }
+    };
+
+    public void showRemoveDialog(){
+        new MaterialDialog.Builder(getContext())
+                .content("Remove these conversations ?")
+                .positiveText("Yes")
+                .negativeText("No").onPositive(new MaterialDialog.SingleButtonCallback() {
+            @Override
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                removeDialog();
+            }
+        }).onNegative(new MaterialDialog.SingleButtonCallback() {
+            @Override
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                dialog.cancel();
+            }
+        }).show();
     }
 
 
 
+    public void removeDialog(){
+        for(ChatDialog dialog: tempChatList) {
+            mChatDialogs.remove(dialog);
+            dialogsListAdapter.setItems(mChatDialogs);
+            DatabaseReference removeRef = mDatabase.getReference().child("Messages").child(currrentUser.getUid()).
+                    child(dialog.getId());
+            removeRef.removeValue();
+            showToast("Removed");
+        }
 
+    }
 
 
     public static interface OnCompleteListener {
@@ -197,13 +305,6 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
         }
     }
 
-
-
-
-
-
-
-
     // format dialog date
     @Override
     public String format(Date date) {
@@ -218,33 +319,39 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
         }
     }
 
-
-    public void loadDialogs(){
-
-        //init the database reference
-        mRef = mDatabase.getReference("Messages/"+currrentUser.getUid());
-        mRef.keepSynced(true);
-
-
-        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
-           Integer totalCount =0;
+    //if user has lastmessage node
+    private void getMessages() {
+        dialogsListAdapter.clear();
+        mChatDialogs.clear();
+        messageNodeCount =0;
+        initChat = false;
+        DatabaseReference lastMessageRef = mDatabase.getReference().child("Messages").
+                child(currrentUser.getUid());
+        lastMessageRef.keepSynced(true);
+        lastMessageRef. addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG,"LOADING DATA");
-                for(DataSnapshot childSnap : dataSnapshot.getChildren()) {
-                    if (childSnap.hasChild("lastmessage")) {
-                        totalCount++;
+                for(DataSnapshot messageNode : dataSnapshot.getChildren()){
+                    if(!messageNode.getKey().equals("inChatRoom") &&
+                            messageNode.hasChild("lastmessage") ){
+                        message= messageNode.child("lastmessage").getValue(Message.class);
+                        Log.d(TAG,message.getId() + " "+message.getCreatedAt()+ " " +
+                                "\n"+message.getText() +"\n UserInfo for lastmessage "+message.getUser().getAvatar() + " "+message.getUser().getId() + " "+ message.getUser().getName() );
+                        getUser(messageNode.getKey(),message,false);
+                        messageNodeCount++;
                     }
+                }
+                initChat=true;
 
-
+                if( initChat && messageNodeCount==0 ){
+                    if(childAddedRef==null){
+                        showToast("User has no chats");
+                    }
+                    addChildAddedListener();
+                    Log.d(TAG,"childlistnener added from 0");
                 }
 
-                    Log.d(TAG,"added counter");
-                    childAddedListener(totalCount);
 
-                if(totalCount==0){
-                    loading.setText("No Conversations");
-                }
             }
 
             @Override
@@ -252,227 +359,265 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter {
 
             }
         });
-
-
     }
 
-    public void updateDialog(final Message message,final Integer unRead,final String user2Uid,
-                             final ArrayList<Author> authors,final Integer counter,
-                             final Integer totalcount){
-        mRef=mDatabase.getReference("Users/"+user2Uid);
-        mRef.keepSynced(true);
-        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        user2 = dataSnapshot.getValue(User.class);
-                      String dialogUrl =user2.getPhotourl();
-                      String dialogId = currrentUser.getUid()+user2Uid;
-                        Log.d(TAG,"dialogid "+dialogId );
-                        ChatDialog chatDialog = new ChatDialog(dialogId,dialogUrl,
-                                user2.getDisplayname(),authors,message,unRead);
-                        mChatDialogs.add(chatDialog);
-                        //end of the for loop
-                        if(counter==totalcount && counter!=null){
-                            Log.d(TAG,"TOTAL "+totalcount + "We are at item "+counter+
-                                    "dialog count is " + mChatDialogs.size());
-                            Collections.sort(mChatDialogs);
-                            dialogsListAdapter.addItems(mChatDialogs);
-                            loading.setVisibility(View.GONE);
-                        }else if(counter==null){
-                            if(dialogsListAdapter.updateDialogWithMessage(dialogId,message)){
-                                Log.d(TAG,"update");
-                                dialogsListAdapter.updateItemById(chatDialog);
-                            }else{
-                                Log.d(TAG,"added");
-                                dialogsListAdapter.addItem(chatDialog);
-                            }
-                            loading.setVisibility(View.GONE);
+    private void getUser(final String userUid, final Message message, final boolean newChat){
+        DatabaseReference userRef = mDatabase.getReference().child("Users").child(userUid);
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User user = dataSnapshot.getValue(User.class);
+                Log.d(TAG, user.getDisplayname()+" "+ user.getDisplayname()+ " "+user.getPhotourl());
+                /************************* url is not accurate here ************************/
+                author = new Author(message.getUser().getId(),message.getUser().getName(),currrentUser.getPhotoUrl().toString());
+                message.setUser(author);
 
+                Log.d(TAG,"after add userinfo"+ message.getId() + " "+message.getCreatedAt()+ " " +
+                        "\n"+message.getText() +"\n UserInfo for lastmessage "+message.getUser().getAvatar() + " "+message.getUser().getId() + " "+ message.getUser().getName() );
+                createDialogs(message,userUid,user,newChat);
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void  createDialogs(final Message message, final String userUid, final User user, final boolean newChat){
+
+        authors.clear();
+        authors.add(message.getAuthor());
+        Log.d(TAG, "newChat boolean is"+newChat);
+         unReadCountRef = mDatabase.getReference("Messages").
+                child(currrentUser.getUid()).child(userUid).child("unRead");
+        unReadCountRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+
+                unReadcount = dataSnapshot.getValue(Integer.class);
+                Log.d(TAG, "unreadcount is here");
+                if (unReadcount != null ) {
+                    Log.d(TAG, "unreadcount is " + dataSnapshot.getValue(Integer.class).
+                            toString());
+                  ChatDialog  mdialog = new ChatDialog(userUid, user.getPhotourl(), user.getDisplayname(),
+                            authors, message, unReadcount);
+                    Log.d(TAG, "new Dialog  " + mdialog.getDialogName() + " " +
+                            mdialog.getUnreadCount() + mdialog.getDialogPhoto());
+                    Log.d(TAG, "COndition " + mChatDialogs.contains(mdialog));
+
+
+                    mChatDialogs.add(mdialog);
+                    if (mChatDialogs.size() == messageNodeCount && messageNodeCount!=0 && !newChat) {
+                        Log.d(TAG, "init chat done there are " + mChatDialogs.size());
+                        Collections.sort(mChatDialogs);
+                        dialogsListAdapter.setItems(mChatDialogs);
+                        loadingGif.setVisibility(View.INVISIBLE);
+                        for(ChatDialog dialog : mChatDialogs){
+                            addChildChangeListener(dialog,false);
+                        }
+                        if(childAddedRef ==null) {
+                            addChildAddedListener();
+                            Log.d(TAG,"childlistnener added from null");
                         }
 
+
+
+
+                    }else if(newChat){
+                        Log.d(TAG, "The dialogArrList size is " + mChatDialogs.size());
+                        Collections.sort(mChatDialogs);
+                        dialogsListAdapter.setItems(mChatDialogs);
+                        addChildChangeListener(mdialog, false);
+                        Log.d(TAG, "new Dialog added into the adapter "
+                                + dialogsListAdapter.getItemCount());
                     }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-
-
-    }
-
-
-
-    public void childAddedListener(final Integer total){
-        mDatabase.getReference("Messages/"+currrentUser.getUid()).keepSynced(true);
-        mDatabase.getReference("Messages/"+currrentUser.getUid()).addChildEventListener
-                (new ChildEventListener() {
-                    Integer counter =0;
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Log.d(TAG, "added " + dataSnapshot.toString());
-                if(dataSnapshot.hasChild("lastmessage")) {
-                    counter++;
-
-                    String user2Uid = dataSnapshot.getKey();
-                    Message  message = dataSnapshot.child("lastmessage").getValue(Message.class);
-                    Integer unRead =dataSnapshot.child("unRead").getValue(Integer.class);
-                    Log.d(TAG,message.getId() + " " + message.getCreatedAt()+" " +
-                            message.getText());
-                    Author author = new Author(message.getUser().getId(),
-                            message.getUser().getName(),dataSnapshot.child("lastmessage")
-                            .child("user").child("avatar").getValue(String.class));
-                    Log.d(TAG,"photourl is " + author.getAvatar());
-                    message.setUser(author);
-                    authors.clear();
-                    authors.add(author);
-                    if(unRead==null){
-                        unRead=0;
-                    }
-                    map.put(user2Uid,message.getCreatedAt().toString());
-                    map2.put(user2Uid,unRead);
-
-                    updateDialog(message,unRead,user2Uid,authors,counter,total);
 
 
                 }
             }
 
+
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                HashMap<String,String> tempMap = new HashMap<>();
-                HashMap<String,Integer> tempMap2 = new HashMap<>();
+            public void onCancelled(DatabaseError databaseError) {
 
-                Date tempDate;
-                if(dataSnapshot.hasChild("lastmessage") ) {
-                    tempDate = dataSnapshot.child("lastmessage").getValue(Message.class).
-                            getCreatedAt();
-                  tempMap.put(dataSnapshot.getKey(),tempDate.toString());
-                  if(map.get(dataSnapshot.getKey())!=null && !map.get(dataSnapshot.getKey()).
-                                  equals(tempMap.get(dataSnapshot.getKey()))){
+            }
+        });
+    }
 
-                      Log.d(TAG,"DATE IS DIFFERENT");
-                      String user2Uid = dataSnapshot.getKey();
-                      Message  message = dataSnapshot.child("lastmessage").getValue(Message.class);
-                      Integer unRead =dataSnapshot.child("unRead").getValue(Integer.class);
-                      Log.d(TAG,message.getId() + " " + message.getCreatedAt()+" " +
-                              message.getText());
-                      Author author = new Author(message.getUser().getId(),
-                              message.getUser().getName(),dataSnapshot.child("lastmessage")
-                              .child("user").child("avatar").getValue(String.class));
-                      Log.d(TAG,"photourl is " + author.getAvatar());
-                      message.setUser(author);
-                      authors.clear();
-                      authors.add(author);
-                      if(unRead==null){
-                          unRead=0;
-                      }
-                      updateDialog(message,unRead,user2Uid,authors,null,null);
-                      map.put(dataSnapshot.getKey(),tempDate.toString());
+    public void addChildChangeListener(final ChatDialog chatDialog,boolean isNewChat) {
+        String uid = chatDialog.getId();
+        if (isNewChat) {
+            final DatabaseReference lastMessageRef = mDatabase.getReference().child("Messages").
+                    child(currrentUser.getUid()).child(uid);
+            lastMessageRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (!dataSnapshot.getKey().equals("inChatRoom") &&
+                            dataSnapshot.hasChild("lastmessage")&&dataSnapshot.hasChild("unRead")) {
+                        message = dataSnapshot.child("lastmessage").getValue(Message.class);
+                        Log.d(TAG, "new dialog creating " + message.getText() + " "+ message.getUser().getAvatar() + " "+ message.getUser().getName());
+                        getUser(dataSnapshot.getKey(), message,true);
+                       lastMessageRef.removeEventListener(this);
+                    }
+                }
 
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+        } else {
+            childChangededRef = mDatabase.getReference("Messages").
+                    child(currrentUser.getUid()).child(uid);
+            childChangededRef.keepSynced(true);
+            childChangededRef.addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                    Log.d(TAG, dataSnapshot.getKey() + " child changed");
+                    if (dataSnapshot.getKey().equals("unRead")) {
+                        unReadcount = dataSnapshot.getValue(Integer.class);
+                        chatDialog.setUnreadcount(unReadcount);
+                        dialogsListAdapter.updateItemById(chatDialog);
+                        Log.d(TAG, "unreadcount changed to " + dataSnapshot.getValue(Integer.class).toString());
+
+                    } else if (dataSnapshot.getKey().equals("lastmessage")) {
+                        Message lastMessage = dataSnapshot.getValue(Message.class);
+                        ///////// not accurent photourl
+                        lastMessage.getAuthor().setAvatar(currrentUser.getPhotoUrl().toString());
+                        chatDialog.setLastMessage(lastMessage);
+                        dialogsListAdapter.updateDialogWithMessage(chatDialog.getId(),lastMessage);
+
+                        Log.d(TAG, "lastmessage changed to " + lastMessage.getText());
+                    }
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+    }
+
+    public void addChildAddedListener(){
+        childAddedRef = mDatabase.getReference().child("Messages").child(currrentUser.getUid());
+        childAddedRef.keepSynced(true);
+              childAddedRef.addChildEventListener(new ChildEventListener() {
+                  @Override
+                  public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                      if(!dataSnapshot.getKey().equals("inChatRoom")
+                               ){
+                          Log.d(TAG,dataSnapshot.getKey() + " child added");
+                          Log.d(TAG,"Dialog has size"+mChatDialogs.size());
+                          ChatDialog chatDialog = new ChatDialog();
+                          chatDialog.setId(dataSnapshot.getKey());
+                          if(!mChatDialogs.isEmpty()&&checkDialogUniqueness(mChatDialogs,chatDialog)) {
+                              Log.d(TAG, "new  find");
+                              addChildChangeListener(chatDialog, true);
+                          }else if(mChatDialogs.isEmpty()){
+                              addChildChangeListener(chatDialog,true);
+                              Log.d(TAG, "new  find was empty");
+                          }
                       }
-                      else if (map.get(dataSnapshot.getKey())==null) {
-                      Log.d(TAG,"DATE IS null");
-                      String user2Uid = dataSnapshot.getKey();
-                      Message  message = dataSnapshot.child("lastmessage").getValue(Message.class);
-                      Integer unRead =dataSnapshot.child("unRead").getValue(Integer.class);
-                      Log.d(TAG,message.getId() + " " + message.getCreatedAt()+" " +
-                              message.getText());
-                      Author author = new Author(message.getUser().getId(),
-                              message.getUser().getName(),dataSnapshot.child("lastmessage")
-                              .child("user").child("avatar").getValue(String.class));
-                      Log.d(TAG,"photourl is " + author.getAvatar());
-                      message.setUser(author);
-                      authors.clear();
-                      authors.add(author);
-                      if(unRead==null){
-                          unRead=0;
-                      }
-                      updateDialog(message,unRead,user2Uid,authors,null,null);
-                      map.put(dataSnapshot.getKey(),tempDate.toString());
-                  }else{
-                      Log.d(TAG,"DATE IS the same");
-                      map.put(dataSnapshot.getKey(),tempDate.toString());
+                  }
+
+                  @Override
+                  public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
                   }
 
+                  @Override
+                  public void onChildRemoved(DataSnapshot dataSnapshot) {
 
-                }
-                    if(dataSnapshot.hasChild("unRead") && dataSnapshot.hasChild("lastmessage")) {
-                        Log.d(TAG, dataSnapshot.child("unRead").getValue(Integer.class).toString());
-                        Integer unRead2 = dataSnapshot.child("unRead").getValue(Integer.class);
-                        tempMap2.put(dataSnapshot.getKey(),unRead2);
+                  }
 
-                        if(map2.get(dataSnapshot.getKey())!=null && map2.get(dataSnapshot.getKey())
-                               !=tempMap2.get(dataSnapshot.getKey())){
+                  @Override
+                  public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
-                            Log.d(TAG,"unread IS DIFFERENT");
-                            String user2Uid = dataSnapshot.getKey();
-                            Message  message = dataSnapshot.child("lastmessage").getValue(Message.class);
-                            Integer unRead =dataSnapshot.child("unRead").getValue(Integer.class);
-                            Log.d(TAG,message.getId() + " " + message.getCreatedAt()+" " +
-                                    message.getText());
+                  }
 
-                            Author author = new Author(message.getUser().getId(),
-                                    message.getUser().getName(),dataSnapshot.child("lastmessage")
-                                    .child("user").child("avatar").getValue(String.class));
-                            Log.d(TAG,"photourl is " + author.getAvatar());
-                            message.setUser(author);
-                            authors.clear();
-                            authors.add(author);
-                            if(unRead==null){
-                                unRead=0;
-                            }
-                            updateDialog(message,unRead,user2Uid,authors,null,null);
-                            map2.put(dataSnapshot.getKey(),unRead);
+                  @Override
+                  public void onCancelled(DatabaseError databaseError) {
 
-                        }
-                        else if (map2.get(dataSnapshot.getKey())==null) {
-                            Log.d(TAG,"unread IS null");
-                            String user2Uid = dataSnapshot.getKey();
-                            Message  message = dataSnapshot.child("lastmessage").getValue(Message.class);
-                            Integer unRead =dataSnapshot.child("unRead").getValue(Integer.class);
-                            Log.d(TAG,message.getId() + " " + message.getCreatedAt()+" " +
-                                    message.getText());
-                            Author author = new Author(message.getUser().getId(),
-                                    message.getUser().getName(),dataSnapshot.child("lastmessage")
-                                    .child("user").child("avatar").getValue(String.class));
-                            Log.d(TAG,"photourl is " + author.getAvatar());
-                            message.setUser(author);
-                            authors.clear();
-                            authors.add(author);
-                            if(unRead==null){
-                                unRead=0;
-                            }
-                            updateDialog(message,unRead,user2Uid,authors,null,null);
-                            map2.put(dataSnapshot.getKey(),unRead);
-                        }else{
-                            Log.d(TAG,"unread IS the same");
-                            map2.put(dataSnapshot.getKey(),unRead2);
-
-                        }
-
-                    }
-
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+                  }
+              });
     }
+
+
+
+
+
+
+
+    private boolean checkDialogUniqueness(ArrayList<ChatDialog> arrayList,ChatDialog mChatDialog){
+        boolean flag = true;
+        for(ChatDialog dialog :arrayList){
+            if(dialog.getId().equals(mChatDialog.getId())){
+              flag= false;
+              break;
+            }
+        }
+        return  flag;
+    }
+
+    private void refreshListAndToChat(ChatDialog dialog){
+        if(dialog.getUnreadCount()>0 ) {
+            dialog.setUnreadcount(0);
+            Collections.sort(mChatDialogs);
+            dialogsListAdapter.setItems(mChatDialogs);
+        }
+        Intent i = new Intent(getContext(), MainChatActivity.class);
+        User user = new User();
+        user.setDisplayname(dialog.getDialogName());
+        user.setPhotourl(dialog.getDialogPhoto());
+        i.putExtra("user2",user);
+        i.putExtra("user2Id",dialog.getId());
+        startActivity(i);
+    }
+
+    private  void toggleColor(View view){
+        if(clicked){
+           view.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.creamYellow));
+           clicked=false;
+
+        }else{
+            view.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.white));
+            clicked=true;
+        }
+    }
+
+
+
+
+
+
+
+
+    public void showToast(String str){
+        Toast.makeText(getContext(),str,Toast.LENGTH_LONG).show();
+    }
+
+
 
     }
 
