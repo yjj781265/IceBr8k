@@ -32,57 +32,46 @@ public class MyNotificationOpenedHandler implements OneSignal.NotificationOpened
         OneSignal.clearOneSignalNotifications();
         final JSONObject data = result.notification.payload.additionalData;
         final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        String user2Id = null;
+        final String user2Id ,name;
         if (data != null) {
             user2Id = data.optString("user2Id");
-            if (user2Id != null) {
-                DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Users/" + user2Id);
-                final String finalUser2Id = user2Id;
-                mRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        final User user = dataSnapshot.getValue(User.class);
-                        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Users/" + currentUser.getUid());
-                        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                String online = dataSnapshot.child("onlineStats").getValue(String.class);
-                                if (online.equals("1")) {
-                                    Intent mIntent = new Intent(MyApplication.getContext(), MainChatActivity.class);
-                                    Bundle mBundle = new Bundle();
-                                    mBundle.putString("user2Uid", finalUser2Id);
-                                    mBundle.putSerializable("user2", user);
-                                    mIntent.putExtras(mBundle);
-                                    mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT );
-                                    MyApplication.getContext().startActivity(mIntent);
-                                } else {
-                                    Intent mIntent = new Intent(MyApplication.getContext(), Homepage.class);
-                                    Bundle mBundle = new Bundle();
-                                    mBundle.putString("user2Uid", finalUser2Id);
-                                    mBundle.putSerializable("user2", user);
-                                    mIntent.putExtras(mBundle);
-                                    mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT );
-                                    MyApplication.getContext().startActivity(mIntent);
-                                }
+            name =data.optString("user2Name");
 
+            final DatabaseReference onLineCheck = FirebaseDatabase.getInstance().getReference().child("Users")
+                    .child(user2Id).child("onlineStats");
+            onLineCheck.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                   String online = dataSnapshot.getValue(String.class);
+                    if(!online.equals("0")){
+                        if (user2Id != null && name!=null) {
 
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
-
-
+                            Intent mIntent = new Intent(MyApplication.getContext(), MainChatActivity.class);
+                            mIntent.putExtra("user2Id", user2Id);
+                            mIntent.putExtra("user2Name", name);
+                            mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
+                                    FLAG_ACTIVITY_REORDER_TO_FRONT );
+                            MyApplication.getContext().startActivity(mIntent);
+                        }
+                    }else{
+                        if (user2Id != null && name!=null) {
+                            Intent mIntent = new Intent(MyApplication.getContext(), Homepage.class);
+                            mIntent.putExtra("user2Id", user2Id);
+                            mIntent.putExtra("user2Name", name);
+                            mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
+                                    FLAG_ACTIVITY_REORDER_TO_FRONT );
+                            MyApplication.getContext().startActivity(mIntent);
+                        }
                     }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
 
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
 
 
             }
@@ -93,7 +82,7 @@ public class MyNotificationOpenedHandler implements OneSignal.NotificationOpened
 
         }
     }
-}
+
 
 
 

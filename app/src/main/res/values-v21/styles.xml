@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:navigationBarColor">@android:color/background_dark</item>
+        <item name="android:background">@android:color/transparent</item>
         <item name="actionOverflowMenuStyle">@style/OverflowMenu</item>
-        <item name="android:textColorSecondary">@color/colorAccent</item>
-        <item name="actionModeBackground">@color/colorAccent</item>
-        <item name="android:itemBackground">@color/primary</item>
-        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:dropDownListViewStyle">@style/PopupMenuListView</item>
+        <item name="dropDownListViewStyle">@style/PopupMenuListView</item>
         <item name="windowActionModeOverlay">true</item>
-        <item name="android:actionMenuTextColor">@color/white</item>
-        <item name="actionOverflowButtonStyle">@style/OverFlow</item>
-        <item name="android:colorForeground">@android:color/black</item>
+        <item name="actionModeBackground">@color/primary</item>
+
+        <item name="android:actionBarWidgetTheme">@style/PopupMenuTextView</item>
+        <!-- Change Overflow Menu ListView Item Height & Property -->
+        <item name="android:listPreferredItemHeight">36dp</item>
+
     </style>
 
     <style name="OverflowMenu" parent="Widget.AppCompat.PopupMenu.Overflow">
         <item name="android:windowDisablePreview">true</item>
         <item name="overlapAnchor">false</item>
-        <item name="android:textColor">@color/white</item>
         <item name="android:dropDownVerticalOffset">5.0dp</item>
+
         <!--<item name="android:popupBackground">#FFF</item>-->
     </style>
 
@@ -37,6 +37,34 @@
 
     <style name="OverFlow" parent="@style/Widget.AppCompat.Light.ActionButton.Overflow">
         <item name="android:src">@drawable/ic_action_add</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="background">?attr/selectableItemBackground</item>
+    </style>
+
+
+    <!--ActionMode style-->
+    <style name="ActionStyle" parent="@style/Widget.AppCompat.ActionMode">
+        <item name="actionModeBackground">@color/colorAccent</item>
+        <item name="height">50dp</item>
+    </style>
+
+    <!-- OverFlow menu Styles -->
+    <style name="PopupMenuListView" parent="@style/Widget.AppCompat.Light.ListView.DropDown">
+        <item name="android:divider">#D3D3D3</item>
+        <item name="android:dividerHeight">2dp</item>
+        <item name="android:background">@color/white</item>
+    </style>
+
+    <style name="myPopupMenuTextAppearanceSmall" parent="@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Small">
+        <item name="android:textColor">@color/dark_gray</item>
+    </style>
+
+
+
+    <!-- Change Overflow Menu ListView Text Size and Text Size -->
+    <style name="PopupMenuTextView" parent="@style/android:Theme.Holo.Light">
+        <item name="android:textColor">#00FF00</item>
+        <item name="android:textSize">12sp</item>
     </style>
 
 

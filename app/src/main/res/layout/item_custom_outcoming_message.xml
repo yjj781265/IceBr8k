@@ -1,0 +1,65 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+   android:layout_marginBottom="8dp"
+    android:layout_marginTop="2dp"
+    android:animateLayoutChanges="true"
+
+    android:orientation="vertical"
+    android:layout_marginEnd="9dp">
+
+
+
+    <LinearLayout
+        android:id="@+id/incoming_main"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+
+
+        android:orientation="horizontal">
+      <TextView
+          android:id="@+id/outcoming_text"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="bottom"
+          android:background="@drawable/outcoming_message_selector"
+          android:padding="10dp"
+          android:maxWidth="220dp"
+          android:maxLength="500"
+          android:autoLink="all"
+          android:textColor="@color/white"
+          android:textColorLink="@color/white"
+          android:textSize="16dp"
+          android:text="hello."/>
+
+        <ImageView
+            android:id="@+id/outcoming_avatar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginLeft="9dp"
+            android:layout_gravity="bottom"
+
+            android:src="@drawable/user_profile_icon"/>
+
+
+
+    </LinearLayout>
+    <TextView
+
+        android:id="@+id/outcoming_time"
+        android:text="hey daf"
+        android:layout_gravity="end"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="49dp"
+        android:visibility="visible"
+        android:textSize="12sp"
+        android:layout_below="@id/incoming_main"/>
+
+
+
+
+
+</LinearLayout>

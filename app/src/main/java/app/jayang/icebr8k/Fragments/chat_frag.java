@@ -30,6 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
@@ -58,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 
+import app.jayang.icebr8k.Homepage;
 import app.jayang.icebr8k.MainChatActivity;
 import app.jayang.icebr8k.Modle.Author;
 import app.jayang.icebr8k.Modle.ChatDialog;
@@ -71,6 +73,7 @@ import app.jayang.icebr8k.R;
 
 public class chat_frag extends Fragment implements DateFormatter.Formatter{
     private View mView;
+    private Homepage mHomepage;
     private DialogsListAdapter dialogsListAdapter;
     private DialogsList mDialogsList;
     private FirebaseUser currrentUser;
@@ -81,11 +84,11 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
     private ActionMode actionMode;
     private ArrayList<Author> authors;
     private String TAG = "chatfrag";
-    private FloatingActionButton fabChat;
     private Integer unReadcount,messageNodeCount,newDialogCount;
-    private  boolean initChat,clicked;
+    private  boolean initChat;
     private Author author;
     private Message message;
+    private TextView noChat;
     private RelativeLayout loadingGif;
 
 
@@ -113,6 +116,8 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
         tempChatList= new ArrayList<>();
         dialogsListAdapter =new DialogsListAdapter(mImageLoader);
         dialogsListAdapter.setDatesFormatter(this);
+        setHasOptionsMenu(true);
+
 
 
         Log.d(TAG,"onCreate");
@@ -128,28 +133,44 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.chat_frag, container, false);
-        fabChat = mView.findViewById(R.id.fabChat);
+        mHomepage = (Homepage)getActivity();
+        if(mHomepage!=null) {
+            mHomepage.getViewPager().setSwipeable(true);
+        }
+
+        noChat = mView.findViewById(R.id.noChat_tv);
         loadingGif = mView.findViewById(R.id.loadingImg_chatTab);
         mDialogsList=  mView.findViewById(R.id.dialogsList);
         mDialogsList.setAdapter(dialogsListAdapter,false);
+        dialogsListAdapter.setDatesFormatter(this);
         mDialogsList.setVisibility(View.VISIBLE);
         Log.d(TAG,"onCreateView");
         getMessages();
 
-
+     // item long and short click listener
         dialogsListAdapter.setOnDialogClickListener(new DialogsListAdapter.OnDialogClickListener<ChatDialog>() {
             @Override
             public void onDialogClick(ChatDialog dialog) {
                 if(actionMode!=null){
                     int poistion = mChatDialogs.indexOf(dialog);
                     View chatView= mDialogsList.getLayoutManager().findViewByPosition(poistion);
+
                   if(chatView.isSelected()){
+
                       chatView.setBackgroundColor(getContext().getResources().getColor(R.color.white));
                       chatView.setSelected(false);
                       tempChatList.remove(dialog);
-                      actionMode.setTitle(String.valueOf(tempChatList.size()) + " Selected");
+                      if(tempChatList.isEmpty()){
+
+                          actionMode.finish();
+                      }else {
+                          actionMode.setTitle(String.valueOf(tempChatList.size()) + " Selected");
+                      }
+
                   }else{
-                      chatView.setBackgroundColor(getContext().getResources().getColor(R.color.creamYellow));
+
+                      chatView.setBackgroundColor(getContext().
+                              getResources().getColor(R.color.lightGray));
                       chatView.setSelected(true);
                       tempChatList.add(dialog);
                       actionMode.setTitle(String.valueOf(tempChatList.size()) + " Selected");
@@ -169,15 +190,30 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
 
                 int poistion = mChatDialogs.indexOf(dialog);
                 View chatView= mDialogsList.getLayoutManager().findViewByPosition(poistion);
-                if (actionMode != null) {
+                if (actionMode != null && !tempChatList.contains(dialog)) {
+
+                    chatView.setSelected(true);
+                    chatView.setBackgroundColor(getContext().getResources().
+                            getColor(R.color.lightGray));
+                    tempChatList.add(dialog);
+                    actionMode.setTitle(String.valueOf(tempChatList.size()) + " Selected");
+                }else if(actionMode != null && tempChatList.contains(dialog)){
+                    chatView.setBackgroundColor(getContext().getResources().getColor(R.color.white));
+                    chatView.setSelected(false);
+                    tempChatList.remove(dialog);
+                    if(tempChatList.isEmpty()){
+                        actionMode.finish();
+                    }else {
+                        actionMode.setTitle(String.valueOf(tempChatList.size()) + " Selected");
+                    }
 
                 }else{
                     tempChatList.clear();
-                    // Start the CAB using the ActionMode.Callback defined above
+                    // Start the CAB using the ActionMode.Callback defined below
                     actionMode = getActivity().startActionMode(mActionModeCallback);
                     chatView.setSelected(true);
                     chatView.setBackgroundColor(getContext().getResources().
-                            getColor(R.color.creamYellow));
+                            getColor(R.color.lightGray));
                     tempChatList.add(dialog);
                     actionMode.setTitle(String.valueOf(tempChatList.size()) + " Selected");
 
@@ -191,22 +227,33 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
 
 
 
-
     @Override
     public void onStart() {
         super.onStart();
         Log.d(TAG,"Start");
         OneSignal.clearOneSignalNotifications();
 
-        fabChat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
-                Toast.makeText(getContext(),String.valueOf(messageNodeCount),Toast.LENGTH_SHORT).show();
+    }
 
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if(!isVisibleToUser && actionMode !=null){
+            actionMode.finish();
+        }
+    }
 
-            }
-        });
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG,"Stop");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(TAG,"Pause");
     }
 
     private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
@@ -217,6 +264,9 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
             // Inflate a menu resource providing context menu items
             MenuInflater inflater = mode.getMenuInflater();
             inflater.inflate(R.menu.chatdialog_menu, menu);
+            if(mHomepage!=null) {
+                mHomepage.getViewPager().setSwipeable(false);
+            }
             return true;
         }
 
@@ -253,13 +303,22 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
                 chatView.setBackgroundColor(getContext().getResources().getColor(R.color.white));
                 chatView.setSelected(false);
             }
+            if(mHomepage!=null) {
+                mHomepage.getViewPager().setSwipeable(true);
+            }
 
         }
     };
 
     public void showRemoveDialog(){
+        String content;
+        if(tempChatList.size() ==1){
+            content ="Remove this conversation ?";
+        }else{
+            content ="Remove these conversations ?";
+        }
         new MaterialDialog.Builder(getContext())
-                .content("Remove these conversations ?")
+                .content(content)
                 .positiveText("Yes")
                 .negativeText("No").onPositive(new MaterialDialog.SingleButtonCallback() {
             @Override
@@ -279,12 +338,20 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
     public void removeDialog(){
         for(ChatDialog dialog: tempChatList) {
             mChatDialogs.remove(dialog);
-            dialogsListAdapter.setItems(mChatDialogs);
             DatabaseReference removeRef = mDatabase.getReference().child("Messages").child(currrentUser.getUid()).
                     child(dialog.getId());
             removeRef.removeValue();
-            showToast("Removed");
+            dialogsListAdapter.setItems(mChatDialogs);
+
         }
+        String conversation = "Conversation";
+        if(tempChatList.size() ==1){
+            conversation = "Conversation";
+        }
+        if(mChatDialogs.isEmpty()){
+            noChat.setVisibility(View.VISIBLE);
+        }
+        showToast( tempChatList.size()+" "+ conversation + " Removed");
 
     }
 
@@ -309,7 +376,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
     @Override
     public String format(Date date) {
         if (DateFormatter.isToday(date)) {
-            return  new SimpleDateFormat("hh:mm a").format(date);
+            return  new SimpleDateFormat("h:mm a").format(date);
         } else if (DateFormatter.isYesterday(date)) {
             return getString(R.string.date_header_yesterday);
         } else if(DateFormatter.isCurrentYear(date)){
@@ -345,7 +412,8 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
 
                 if( initChat && messageNodeCount==0 ){
                     if(childAddedRef==null){
-                        showToast("User has no chats");
+                       loadingGif.setVisibility(View.GONE);
+                       noChat.setVisibility(View.VISIBLE);
                     }
                     addChildAddedListener();
                     Log.d(TAG,"childlistnener added from 0");
@@ -410,6 +478,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
 
 
                     mChatDialogs.add(mdialog);
+                    noChat.setVisibility(View.GONE);
                     if (mChatDialogs.size() == messageNodeCount && messageNodeCount!=0 && !newChat) {
                         Log.d(TAG, "init chat done there are " + mChatDialogs.size());
                         Collections.sort(mChatDialogs);
@@ -581,35 +650,15 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
     }
 
     private void refreshListAndToChat(ChatDialog dialog){
-        if(dialog.getUnreadCount()>0 ) {
-            dialog.setUnreadcount(0);
-            Collections.sort(mChatDialogs);
-            dialogsListAdapter.setItems(mChatDialogs);
-        }
+
+        OneSignal.clearOneSignalNotifications();
+
         Intent i = new Intent(getContext(), MainChatActivity.class);
-        User user = new User();
-        user.setDisplayname(dialog.getDialogName());
-        user.setPhotourl(dialog.getDialogPhoto());
-        i.putExtra("user2",user);
         i.putExtra("user2Id",dialog.getId());
+        i.putExtra("user2Name",dialog.getDialogName());
         startActivity(i);
+
     }
-
-    private  void toggleColor(View view){
-        if(clicked){
-           view.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.creamYellow));
-           clicked=false;
-
-        }else{
-            view.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.white));
-            clicked=true;
-        }
-    }
-
-
-
-
-
 
 
 
@@ -618,8 +667,8 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
     }
 
 
+}
 
-    }
 
 
 

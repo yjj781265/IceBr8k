@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="3dp"
+    android:elevation="6dp"
+    android:background="@color/lightBlue"
+    >
+    <ImageView
+        android:layout_width="40dp"
+        android:id="@+id/avatar_frt"
+        android:layout_height="40dp"
+        android:clickable="true"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:onClick="avatar_frtOnClick"
+        android:layout_margin="9dp"/>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="8dp"
+        android:layout_toEndOf="@+id/avatar_frt">
+
+        <TextView
+            android:id="@+id/name_frt"
+            android:textSize="14dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLength="15"
+            android:maxLines="1"
+            android:text="Junjie Yang1hhhhhhhhh"
+            android:textColor="@color/black"/>
+
+        <TextView
+            android:id="@+id/username_frt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/name_frt"
+            android:maxLines="1"
+            android:maxLength="20"
+            android:text="Junjie Yanghhhhhhhhhhhhhfdfsfsfsfds"
+            android:textSize="10dp"/>
+
+    </RelativeLayout>
+    <LinearLayout
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+   <com.beardedhen.androidbootstrap.BootstrapButton
+       android:elevation="6dp"
+       android:id="@+id/accept_frt"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_gravity="center_vertical"
+       app:bootstrapBrand="success"
+       app:roundedCorners="true"
+       android:layout_marginRight="9dp"
+       android:background="@color/accent"
+       android:textColor="@color/black"
+       android:textSize="12dp"
+       android:text="Accept"/>
+
+        <com.beardedhen.androidbootstrap.BootstrapButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/delete_frt"
+            android:text="Delete"
+            android:layout_marginEnd="5dp"
+            app:bootstrapBrand="danger"
+            app:buttonMode="regular"
+            app:showOutline="false"
+            app:roundedCorners="true"
+            />
+
+    </LinearLayout>
+
+
+
+
+
+</RelativeLayout>

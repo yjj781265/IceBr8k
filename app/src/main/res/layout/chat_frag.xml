@@ -5,19 +5,19 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+
+
     <com.stfalcon.chatkit.dialogs.DialogsList
         android:id="@+id/dialogsList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
         app:dialogAvatarHeight="48dp"
         app:dialogAvatarWidth="48dp"
         app:dialogDividerEnabled="true"
         app:dialogDividerLeftPadding="0dp"
         app:dialogItemBackground="@color/white"
-        app:dialogMessageTextSize="13sp"
-        app:dialogTitleTextSize="16sp"
+        app:dialogMessageTextSize="14dp"
+        app:dialogTitleTextSize="16dp"
         app:dialogUnreadBubbleBackgroundColor="@android:color/holo_red_light"
         app:dialogUnreadBubbleEnabled="true"
         app:dialogUnreadMessageTextStyle="bold"
@@ -45,22 +45,19 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:gravity="center"
+            android:textSize="14dp"
             android:paddingLeft="15dp"
             android:text="Loading..."/>
 
     </RelativeLayout>
 
-    <android.support.design.widget.FloatingActionButton
-        android:layout_width="66dp"
-        android:layout_height="66dp"
-        android:id="@+id/fabChat"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        app:elevation="4dp"
-        android:src="@drawable/user_icon"
-        android:clickable="true"
-        app:fabSize="normal"
-        android:layout_margin="50dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        android:text="No Conversations"
+        android:id="@+id/noChat_tv"/>
 
 
 </RelativeLayout>

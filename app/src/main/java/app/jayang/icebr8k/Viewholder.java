@@ -8,6 +8,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import app.jayang.icebr8k.Modle.UserDialog;
+
 /**
  * Created by LoLJay on 10/20/2017.
  */
@@ -17,6 +19,7 @@ public class Viewholder extends RecyclerView.ViewHolder {
     public TextView displayname;
     public TextView username;
     public LinearLayout linearLayout;
+    public RecyclerView mRecyclerView;
     public RelativeLayout avatar_view;
     public RelativeLayout mRelativeLayout,diffRelativeLayout;
     public CardView diffCardView,commonCardView;
@@ -33,6 +36,8 @@ public class Viewholder extends RecyclerView.ViewHolder {
         score = itemView.findViewById(R.id.score);
         onlineStats =itemView.findViewById(R.id.onlineStats);
         avatar_view = itemView.findViewById(R.id.avatar_view);
+        mRecyclerView =itemView.findViewById(R.id.recyclerView_id);
+
 
 
 
@@ -54,5 +59,10 @@ public class Viewholder extends RecyclerView.ViewHolder {
         diffCardView =itemView.findViewById(R.id.diffCardView);
 
     }
+
+
+
+
+
 
 }

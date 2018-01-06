@@ -1,18 +1,33 @@
 package app.jayang.icebr8k;
+import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
@@ -23,13 +38,21 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.onesignal.OSSubscriptionObserver;
@@ -41,42 +64,55 @@ import com.zplesac.connectionbuddy.interfaces.ConnectivityChangeListener;
 import com.zplesac.connectionbuddy.models.ConnectivityEvent;
 import com.zplesac.connectionbuddy.models.ConnectivityState;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.UUID;
+
 import app.jayang.icebr8k.Fragments.SurveyTab_Fragment;
 import app.jayang.icebr8k.Fragments.Userstab_Fragment;
 import app.jayang.icebr8k.Fragments.chat_frag;
+import app.jayang.icebr8k.Fragments.me_frag;
+import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.Modle.UserDialog;
 
 
 public class Homepage extends AppCompatActivity  implements
         OSSubscriptionObserver,chat_frag.OnCompleteListener,
-        GoogleApiClient.OnConnectionFailedListener,ConnectivityChangeListener {
-   private AHBottomNavigation homepageTab;
-   private TextView noConnection_tv;
-   private ViewPager viewPager;
-   private ViewPagerAdapter mViewPagerAdapter;
-   private FirebaseUser currentUser;
-   private GoogleApiClient mGoogleApiClient;
-   private Toolbar mToolbar;
-   private DatabaseReference mRef;
-   private DatabaseReference presenceRef;
-   private CoordinatorLayout mCoordinatorLayout;
-   private ScreenStateReceiver mReceiver;
-   private String TAG ="homePage";
-
-
+        GoogleApiClient.OnConnectionFailedListener,ConnectivityChangeListener{
+    private AHBottomNavigation homepageTab;
+    private TextView noConnection_tv;
+    protected myViewPager viewPager;
+    private ViewPagerAdapter mViewPagerAdapter;
+    private FirebaseUser currentUser;
+    private GoogleApiClient mGoogleApiClient;
+    private Toolbar mToolbar;
+    private DatabaseReference mRef;
+    private DatabaseReference presenceRef;
+    private CoordinatorLayout mCoordinatorLayout;
+    private ScreenStateReceiver mReceiver;
+    private  MenuItem mainMenu;
+    private  Userstab_Fragment mUserstab_fragment;
+    private String TAG = "homePage";
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_homepage);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         mToolbar = findViewById(R.id.users_toolbar);
         setSupportActionBar(mToolbar);
         homepageTab = findViewById(R.id.bottom_navigation);
         viewPager = findViewById(R.id.homepage_viewpager);
+        viewPager.setSwipeable(true);
         noConnection_tv = findViewById(R.id.noConnection_tv);
         mCoordinatorLayout = findViewById(R.id.coordLayout);
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        mRef =  FirebaseDatabase.getInstance().getReference();
+        mRef = FirebaseDatabase.getInstance().getReference();
         mRef.keepSynced(true);
         presenceRef = FirebaseDatabase.getInstance().getReference().child("Users").
                 child(currentUser.getUid()).child("onlineStats");
@@ -86,9 +122,8 @@ public class Homepage extends AppCompatActivity  implements
         showLog(currentUser.getPhotoUrl().toString());
 
 
-
         /****************************google client stuff*/////////////////
-        GoogleSignInOptions gso =new GoogleSignInOptions.
+        GoogleSignInOptions gso = new GoogleSignInOptions.
                 Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
@@ -99,7 +134,7 @@ public class Homepage extends AppCompatActivity  implements
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
         /**************************************************************//////
-        if(savedInstanceState != null){
+        if (savedInstanceState != null) {
             ConnectionBuddyCache.clearLastNetworkState(this);
         }
 
@@ -108,38 +143,76 @@ public class Homepage extends AppCompatActivity  implements
         OneSignal.addSubscriptionObserver(this);
         OneSignal.setSubscription(true);
 
-        Log.d("haha",currentUser.getPhotoUrl().toString() +" from currentuserAfterUpdate");
+        Log.d("haha", currentUser.getPhotoUrl().toString() + " from currentuserAfterUpdate");
+
 
         initialiseOnlinePresence();
         setScreenOnOffListener();
         deleteInChatRoomNode();
         unReadCheck();
-        setOnline();
+        setBadge();
+
 
         // bottom nav bar
         setHomepageTab();
+
+        if(getIntent().getExtras()!=null) {
+            if (getIntent().getExtras().getString("user2Id") != null &&
+                    getIntent().getExtras().getString("user2Name") != null) {
+                String user2Id = getIntent().getExtras().getString("user2Id");
+                String name = getIntent().getExtras().getString("user2Name");
+                Intent mIntent = new Intent(this, MainChatActivity.class);
+                mIntent.putExtra("user2Id", user2Id);
+                mIntent.putExtra("user2Name", name);
+                startActivity(mIntent);
+            }
+            if (getIntent().getExtras().getString("mainchat") != null) {
+                viewPager.setCurrentItem(2);
+            }
+        }
+
+
+
+
 
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-       // Toast.makeText(getApplicationContext(),"New Intent",Toast.LENGTH_SHORT).show();
-        if(intent!=null) {
+     //  Toast.makeText(getApplicationContext(),"New Intent",Toast.LENGTH_SHORT).show();
+        if (intent.getExtras() != null) {
             if (intent.getExtras().getString("mainchat") != null) {
                 viewPager.setCurrentItem(2);
+            }
+            else {
+            viewPager.setCurrentItem(0);
 
-            }else{
-                viewPager.setCurrentItem(0);
+        }
+    }else{
+            viewPager.setCurrentItem(0);
+        }
 
+        if(getIntent().getExtras()!=null) {
+            if (getIntent().getExtras().getString("user2Id") != null &&
+                    getIntent().getExtras().getString("user2Name") != null) {
+                String user2Id = getIntent().getExtras().getString("user2Id");
+                String name = getIntent().getExtras().getString("user2Name");
+                Intent mIntent = new Intent(this, MainChatActivity.class);
+                mIntent.putExtra("user2Id", user2Id);
+                mIntent.putExtra("user2Name", name);
+                startActivity(mIntent);
             }
         }
+
 
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        mainMenu = menu.findItem(R.id.main_menu);
+
         return super.onCreateOptionsMenu(menu);
     }
     @Override
@@ -148,8 +221,19 @@ public class Homepage extends AppCompatActivity  implements
             case R.id.log_out_item:
                 Signout();
                  finish();
-
                 return true;
+
+            case R.id.add_friend:
+             Intent i = new Intent(getApplicationContext(),SearchUser.class);
+             startActivity(i);
+                return true;
+
+            case R.id.scan_qr:
+                Intent intent = new Intent(getApplicationContext(),DevoderActivity.class);
+                startActivity(intent);
+                return true;
+
+
 
             default:
                 return super.onOptionsItemSelected(item);
@@ -157,10 +241,16 @@ public class Homepage extends AppCompatActivity  implements
     }
 
 
+
+
     @Override
     protected void onStart() {
         super.onStart();
+        ConnectionBuddyCache.clearLastNetworkState(this);
         showLog("onStart");
+        setOnline();
+
+
 
 
     }
@@ -168,6 +258,9 @@ public class Homepage extends AppCompatActivity  implements
     @Override
     protected void onResume() {
         super.onResume();
+
+        ConnectionBuddyCache.clearLastNetworkState(this);
+
         ConnectionBuddy.getInstance().registerForConnectivityEvents(this, this);
         setOnline();
         showLog("onResume");
@@ -227,6 +320,35 @@ public class Homepage extends AppCompatActivity  implements
         });
     }
 
+    private void setBadge(){
+        DatabaseReference badgeRef = FirebaseDatabase.getInstance().getReference().child("Friends")
+                .child(currentUser.getUid());
+        badgeRef.keepSynced(true);
+
+        badgeRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                int count =0;
+                for(DataSnapshot chidSnapShot : dataSnapshot.getChildren()){
+                    if(chidSnapShot.child("Stats").getValue(String.class).equals("Pending")){
+                        count++;
+                    }
+                }
+
+                if(count==0){
+                    homepageTab.setNotification("", 3);
+                }else{
+                    homepageTab.setNotification(String.valueOf(count), 3);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
 
     private void initialiseOnlinePresence() {
 
@@ -255,9 +377,11 @@ public class Homepage extends AppCompatActivity  implements
 
     public void setHomepageTab(){mViewPagerAdapter =
             new ViewPagerAdapter(getSupportFragmentManager());
-      mViewPagerAdapter.addFragment(new SurveyTab_Fragment());
+        mViewPagerAdapter.addFragment(new SurveyTab_Fragment());
       mViewPagerAdapter.addFragment(new Userstab_Fragment());
       mViewPagerAdapter.addFragment(new chat_frag() );
+      mViewPagerAdapter.addFragment(new me_frag());
+
       viewPager.setAdapter(mViewPagerAdapter);
 
         homepageTab.setTitleState(AHBottomNavigation.TitleState.ALWAYS_SHOW);
@@ -268,10 +392,14 @@ public class Homepage extends AppCompatActivity  implements
                 R.drawable.user_selector);
         AHBottomNavigationItem item3 = new AHBottomNavigationItem("Chat",
                 R.drawable.message_selector);
+        AHBottomNavigationItem item4 = new AHBottomNavigationItem("Me",
+                R.drawable.me_selector);
         // Add items
         homepageTab.addItem(item1);
         homepageTab.addItem(item2);
         homepageTab.addItem(item3);
+        homepageTab.addItem(item4);
+
         // for smooth swipe
         viewPager.setOffscreenPageLimit(2);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -325,6 +453,12 @@ public class Homepage extends AppCompatActivity  implements
 
     public void setOnline(){
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            presenceRef.setValue("2");
+        }
+    }
+
+    public void setBusy(){
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             presenceRef.setValue("1");
         }
     }
@@ -365,15 +499,10 @@ public class Homepage extends AppCompatActivity  implements
 
     @Override
     public void onComplete() {
-        Bundle extras = getIntent().getExtras();
-        if (homepageTab.getItemsCount() > 2) {
-            if (extras.getString("user2Uid") != null) {
-                Intent mIntent = new Intent(this, MainChatActivity.class);
-                mIntent.putExtras(extras);
-                startActivity(mIntent);
-                getIntent().removeExtra("user2Uid");
-            }
-        }
+
+
+
+
     }
 
 
@@ -433,11 +562,32 @@ public class Homepage extends AppCompatActivity  implements
             String action = intent.getAction();
             if (Intent.ACTION_SCREEN_ON.equals(action)) {
                 showLog("Screen ON");
+                setOnline();
             } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 showLog("Screen OFF");
+                setBusy();
             }
         }
     }
 
+    public myViewPager getViewPager() {
+        return viewPager;
+    }
 
+    public void setViewPager(myViewPager viewPager) {
+        this.viewPager = viewPager;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

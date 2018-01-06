@@ -148,6 +148,10 @@ public class signup extends AppCompatActivity {
         });
 
 
+
+
+
+
     }
 
 
@@ -414,7 +418,6 @@ public class signup extends AppCompatActivity {
         getCroppedBitmap(bitmap).compress(Bitmap.CompressFormat.PNG, 75, stream);
         // Get the data from an ImageView as bytes
         UploadTask uploadTask = avatarRef.putBytes(stream.toByteArray());
-        showToast(String.valueOf((long)stream.toByteArray().length/1024) +"KB");
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {

@@ -11,8 +11,10 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -27,6 +29,7 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
@@ -41,6 +44,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.xw.repo.BubbleSeekBar;
+
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,7 +65,7 @@ public class SurveyTab_Fragment extends Fragment {
     BubbleSeekBar mSeekBar;
     TextView mTextView,msubTextview;
     RadioGroup mRadioGroup;
-    Button mSubmit;
+    BootstrapButton mSubmit;
     CardView mCardView;
     TextView skip;
     FloatingActionButton mActionButton;
@@ -87,6 +91,7 @@ public class SurveyTab_Fragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        setHasOptionsMenu(true);
 
 
         index =0;
@@ -106,6 +111,7 @@ public class SurveyTab_Fragment extends Fragment {
 
       mview = inflater.inflate(R.layout.survey_tab,container,false);
         mSubmit = mview.findViewById(R.id.submitBtn);
+        mSubmit.setVisibility(View.GONE);
         mSeekBar = mview.findViewById(R.id.seekBar);
         mTextView = mview.findViewById(R.id.question_id);
         mRadioGroup =mview.findViewById(R.id.radioGroup);
@@ -123,11 +129,11 @@ public class SurveyTab_Fragment extends Fragment {
         mActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mActionButton.setClickable(false);
+                mActionButton.setClickable(false);;// prevent user spam click the button ,may crash the program
                 mTextView.setVisibility(View.INVISIBLE);
                 mProgressBar2.setVisibility(View.VISIBLE);
 
-                createInitQ();// prevent user spam click the button ,may crash the program
+                createInitQ();
 
 
 
@@ -162,8 +168,10 @@ public class SurveyTab_Fragment extends Fragment {
                 }else if(mSeekBar.getVisibility()==View.VISIBLE){
 
                    String answer = String.valueOf(mSeekBar.getProgress());
-                    pushUserQA(surveyQArrayList.get(index),answer);
+                 //  Toast.makeText(getContext(),answer,Toast.LENGTH_SHORT).show();
+              pushUserQA(surveyQArrayList.get(index),answer);
                     updateCardView();
+
 
 
                 }
@@ -182,9 +190,29 @@ public class SurveyTab_Fragment extends Fragment {
 
             }
         });
+
+        mSeekBar.setOnProgressChangedListener(new BubbleSeekBar.OnProgressChangedListener() {
+            @Override
+            public void onProgressChanged(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
+
+            }
+
+            @Override
+            public void getProgressOnActionUp(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
+                mSeekBar.setProgress(progressFloat);
+            }
+
+            @Override
+            public void getProgressOnFinally(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
+
+            }
+        });
         showLog("onCreateView");
         return  mview;
     }
+
+
+
 
     @Override
     public void onStart() {
@@ -207,6 +235,11 @@ public class SurveyTab_Fragment extends Fragment {
 
 
 
+    }
+
+    public int dpToPx(int dp) {
+        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
+        return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
 
 

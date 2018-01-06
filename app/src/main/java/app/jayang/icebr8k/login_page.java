@@ -2,8 +2,10 @@ package app.jayang.icebr8k;
 
 import android.app.Dialog;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
@@ -15,6 +17,8 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.Settings;
@@ -101,14 +105,13 @@ import dmax.dialog.SpotsDialog;
 
 
 public class login_page extends AppCompatActivity implements
-        GoogleApiClient.OnConnectionFailedListener, View.OnClickListener,
-        ConnectivityChangeListener {
+        GoogleApiClient.OnConnectionFailedListener, View.OnClickListener
+        {
 
     private static final String TAG = "loginPage";
     private static final int RC_SIGN_IN = 9001;
     // [START declare_auth]
     private FirebaseAuth mAuth;
-    private boolean connected;
     // [END declare_auth]
     private RelativeLayout loginPage_Rlayout;
     private FirebaseDatabase mdatabase;
@@ -122,6 +125,7 @@ public class login_page extends AppCompatActivity implements
     private TextInputEditText password,email;
     private MaterialDialog userNameDialog;
     private  MaterialDialog.Builder userNameDialogBuilder;
+    private    SharedPreferences sharedPref;
 
 
     @Override
@@ -135,6 +139,8 @@ public class login_page extends AppCompatActivity implements
         email = findViewById(R.id.email_login);
         email_layout = findViewById(R.id.email_layout_login);
         password_layout = findViewById(R.id.password_layout_login);
+        sharedPref =
+                login_page.this.getPreferences(Context.MODE_PRIVATE);
 
         sv =findViewById(R.id.mScroll);
         loginPage_Rlayout = findViewById(R.id.login_page);
@@ -151,10 +157,7 @@ public class login_page extends AppCompatActivity implements
             }
         });
 
-        //clear connection stats cache
-        if(savedInstanceState != null){
-            ConnectionBuddyCache.clearLastNetworkState(this);
-        }
+
 
 //get shai key;
         try {
@@ -201,9 +204,9 @@ public class login_page extends AppCompatActivity implements
             finish();
         }
 
-        ConnectionBuddy.getInstance().registerForConnectivityEvents(this, this);
 
     }
+
 
     @Override
     protected void onPause() {
@@ -218,7 +221,7 @@ public class login_page extends AppCompatActivity implements
     @Override
     protected void onStop() {
         super.onStop();
-        ConnectionBuddy.getInstance().unregisterFromConnectivityEvents(this);
+
     }
 
     public void showToast(String str){
@@ -331,7 +334,7 @@ public class login_page extends AppCompatActivity implements
     }
 
 
-    public void updateDatabaseAndCurrentUser(User user, final FirebaseUser currentUser){
+    public void updateDatabaseAndCurrentUser(final User user, final FirebaseUser currentUser){
         if(currentUser!=null ) {
             myRef.child(currentUser.getUid()).setValue(user);
             DatabaseReference userNameRef = mdatabase.getReference("Usernames");
@@ -348,10 +351,11 @@ public class login_page extends AppCompatActivity implements
                             if (task.isSuccessful()) {
                                 Log.d("loginPage", "profile updated " +currentUser.getPhotoUrl() );
                                 startActivity(intent);
-                                loadingdialog.dismiss();
-                                finish();
-                                overridePendingTransition(android.R.anim.fade_in,android.
-                                        R.anim.fade_out);
+                                    loadingdialog.dismiss();
+                                    finish();
+                                    overridePendingTransition(android.R.anim.fade_in, android.
+                                            R.anim.fade_out);
+
                             }else{
                                 showDismissDialog(task.getException().getMessage());
                             }
@@ -471,7 +475,9 @@ public void usernameCreateCheck(final GoogleSignInAccount account){
                 user.setDisplayname(account.getDisplayName());
                 user.setEmail(account.getEmail());
                 user.setUsername(dataSnapshot.getValue(String.class));
-                updateDatabaseAndCurrentUser(user,mAuth.getCurrentUser());
+
+                    updateDatabaseAndCurrentUser(user, mAuth.getCurrentUser());
+
 
             }
         }
@@ -551,7 +557,7 @@ public void usernameCreateCheck(final GoogleSignInAccount account){
     public void onClick(View view) {
 
         if (view.getId() == R.id.sign_in_button && mAuth.getCurrentUser()==null) {
-            if(connected) {
+            if(checkInternet()) {
                 signIn();
             }else{
                 Snackbar snackbar = Snackbar
@@ -585,18 +591,18 @@ public void usernameCreateCheck(final GoogleSignInAccount account){
 
     }
 
-    // connection changed
-    @Override
-    public void onConnectionChange(ConnectivityEvent event) {
-        if(event.getState() == ConnectivityState.CONNECTED){
-            // device has active internet connection
-            connected=true;
-        }
-        else{
-            // there is no active internet connection on this device
-            connected =false;
-        }
 
+    public boolean checkInternet() {
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        if (null != activeNetwork) {
+            return true;
+        } else {
+            return false;
+
+
+        }
     }
 
 

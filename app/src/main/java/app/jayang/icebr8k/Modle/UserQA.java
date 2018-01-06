@@ -51,15 +51,15 @@ public class UserQA implements Parcelable,Comparable<UserQA> {
 
         UserQA userQA = (UserQA) o;
 
-        if (questionId != null ? !questionId.equals(userQA.questionId) : userQA.questionId != null)
-            return false;
-        return answer != null ? answer.equals(userQA.answer) : userQA.answer == null;
+        if (!questionId.equals(userQA.questionId)) return false;
+        return (answer.equals(userQA.answer) && !answer.equals("skipped")
+                && !userQA.answer.equals("skipped")) ;
     }
 
     @Override
     public int hashCode() {
-        int result = questionId != null ? questionId.hashCode() : 0;
-        result = 31 * result + (answer != null ? answer.hashCode() : 0);
+        int result = questionId.hashCode();
+        result = 31 * result + answer.hashCode();
         return result;
     }
 

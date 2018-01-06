@@ -4,11 +4,41 @@
 
 
 
+     <item android:title="Main Menu"
+           android:id="@+id/main_menu"
+      android:icon="@drawable/ic_action_add"
+    app:showAsAction="ifRoom">
+<menu>
+
+    <item
+        android:title ="Add Friend"
+        android:orderInCategory="100"
+        android:id="@+id/add_friend"
+        android:icon="@drawable/ic_action_addfriend"
+        app:showAsAction="never"
+        />
+
+
+    <item
+        android:title ="Scan QR Code"
+        android:orderInCategory="100"
+        android:id="@+id/scan_qr"
+        android:icon="@drawable/ic_action_scan"
+        app:showAsAction="never"/>
+
     <item
     android:title ="@string/log_out"
+    android:orderInCategory="100"
     android:id="@+id/log_out_item"
-    app:showAsAction="collapseActionView"
+    android:icon="@drawable/ic_action_exit"
+    app:showAsAction="never"
 
     />
+
+
+</menu>
+</item>
+
+
 
 </menu>

@@ -1,9 +1,15 @@
 package app.jayang.icebr8k;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -13,19 +19,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.daimajia.androidanimations.library.Techniques;
-import com.daimajia.androidanimations.library.YoYo;
-import com.dd.processbutton.ProcessButton;
 import com.dd.processbutton.iml.ActionProcessButton;
 import com.github.lzyzsd.circleprogress.ArcProgress;
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -33,7 +34,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.onesignal.OneSignal;
+
 
 import java.util.ArrayList;
 
@@ -41,17 +42,18 @@ import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.Modle.UserQA;
 
 
-public class UserProfilePage extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
+public class UserProfilePage extends AppCompatActivity implements View.OnClickListener {
     Toolbar profileToolbar;
-    ImageView mImageView;
-    Button resetBtn;
-    ActionProcessButton mButton, messageBtn;
+    ImageView mImageView,qrImage;
+    ActionProcessButton  compare_btn;
+    BootstrapButton message_btn,addFriend_btn,deleteFriend_btn,reset_btn;
     TextView displayname_profile, email_profile, username_profile;
+
 
     FirebaseDatabase database;
     FirebaseUser currentUser;
-    GoogleApiClient mGoogleApiClient;
     User mUser, selfUser;
+    String uid;
     Dialog dialog;
     ArcProgress arcProgress;
     String User2Uid;
@@ -72,44 +74,52 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         mImageView = findViewById(R.id.profileButton);
-        mButton = findViewById(R.id.compareBtn);
+        qrImage = findViewById(R.id.profile_QR);
+        compare_btn = findViewById(R.id.compare_btn);
+        addFriend_btn = findViewById(R.id.addFriend_btn);
+        message_btn = findViewById(R.id.message_btn);
+        deleteFriend_btn = findViewById(R.id.deleteFriend_btn);
+        reset_btn =findViewById(R.id.reset_btn);
         displayname_profile = findViewById(R.id.displayname_profile);
         email_profile = findViewById(R.id.email_profile);
         username_profile = findViewById(R.id.username_profile);
         database = FirebaseDatabase.getInstance();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        resetBtn = findViewById(R.id.reset);
-        messageBtn = findViewById(R.id.message_btn);
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
-        // [END configure_signin]
+        compare_btn.setOnClickListener(this);
+        addFriend_btn.setOnClickListener(this);
+        message_btn.setOnClickListener(this);
+        deleteFriend_btn.setOnClickListener(this);
+        reset_btn.setOnClickListener(this);
 
-        // [START build_client]
-        // Build a GoogleApiClient with access to the Google Sign-In API and the
-        // options specified by gso.
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
+
 
 
         Intent i = getIntent();
-        mUser = (User) i.getSerializableExtra("userInfo"); //user2
-        selfUser = (User) i.getSerializableExtra("selfProfile");
-        if (mUser != null) {
-            mButton.setMode(ActionProcessButton.Mode.PROGRESS);
-            mButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mButton.setProgress(0);
-                    mButton.setClickable(false);
-                    compareWithUser2(mUser);
-
-                }
-            });
+        if(i!=null) {
+            mUser = (User) i.getSerializableExtra("userInfo"); //user2
+            uid = i.getStringExtra("userUid");
+        }
 
 
+
+        // uid is not my self
+        if (mUser != null && uid!=null &&! uid.equals(currentUser.getUid())) {
+            compare_btn.setVisibility(View.VISIBLE);
+            reset_btn.setVisibility(View.GONE);
+            qrImage.setVisibility(View.GONE);
+            compare_btn.setMode(ActionProcessButton.Mode.PROGRESS);
+            updateUI(mUser);
+            checkFriendStats();
+
+            // uid is currentuser
+        }else if(mUser != null && uid!=null && uid.equals(currentUser.getUid())){
+            qrImage.setVisibility(View.VISIBLE);
+            compare_btn.setVisibility(View.GONE);
+            addFriend_btn.setVisibility(View.GONE);
+            message_btn.setVisibility(View.GONE);
+            deleteFriend_btn.setVisibility(View.GONE);
+            reset_btn.setVisibility(View.VISIBLE);
+            updateUI(mUser);
         }
 
 
@@ -119,77 +129,15 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
     @Override
     protected void onStart() {
         super.onStart();
-        if (selfUser != null) {
-            updateUI(selfUser);
-            messageBtn.setVisibility(View.GONE);
-            mButton.setText("Logout");
-            mButton.setBackgroundColor(getResources().getColor(R.color.holo_red_light));
-            mButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Signout();
+        updateUI(mUser);
 
-
-                }
-            });
-            resetBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + currentUser.getUid());
-                    mRef.removeValue();
-                    Intent i = new Intent(getApplicationContext(), Homepage.class);
-                    i.putExtra("reset","1");
-
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(i);
-                    finish();
-
-                }
-            });
-        } else {
-            resetBtn.setVisibility(View.GONE);
-            updateUI(mUser);
-
-        }
-
-        messageBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (selfUser != null) {
-                    mUser = selfUser;
-                }
-                DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Usernames/" + mUser.getUsername());
-                mRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        User2Uid = dataSnapshot.getValue(String.class);
-                        Intent i = new Intent(UserProfilePage.this, MainChatActivity.class);
-                        i.putExtra("user2Id", User2Uid);
-                        i.putExtra("user2", mUser);
-                        startActivity(i);
-                        finish();
-
-
-
-                    }
-
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-
-
-            }
-        });
 
 
     }
 
 
     public void updateUI(User user) {
-        getSupportActionBar().setTitle(user.getDisplayname() + "'s Profile");
+        getSupportActionBar().setTitle(user.getDisplayname());
         Glide.with(getBaseContext()).load(user.getPhotourl()).
                 apply(RequestOptions.circleCropTransform()).into(mImageView);
         displayname_profile.setText(user.getDisplayname());
@@ -198,40 +146,10 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
     }
 
-    public void Signout() {
 
 
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Users/" + currentUser.getUid());
-            mRef.child("onlineStats").setValue("0");
-            OneSignal.setSubscription(false);
-            FirebaseAuth.getInstance().signOut();
-        }
 
 
-        if (currentUser.getProviders().get(0).contains("google")) {
-
-            // Google sign out
-            Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                    new ResultCallback<Status>() {
-
-                        @Override
-                        public void onResult(@NonNull Status status) {
-
-                        }
-                    });
-        }
-        Intent intent = new Intent(UserProfilePage.this, login_page.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        finish();
-    }
-
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
 
     @Override
     public boolean onSupportNavigateUp() {
@@ -247,7 +165,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User2Uid = dataSnapshot.getValue(String.class);
-                mButton.setProgress(20);
+                compare_btn.setProgress(20);
                 Log.d("user2", User2Uid);
                 pullUser2Q(User2Uid);
 
@@ -276,7 +194,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                     Log.d("key", key);
                 }
                 User1QArr.retainAll(arrayList);
-                mButton.setProgress(60);
+                compare_btn.setProgress(60);
                 Log.d("arr", User1QArr.toString());
                 getUser1QA(FirebaseAuth.getInstance().getCurrentUser().getUid());
             }
@@ -302,7 +220,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                     User2QArr.add(key);
                     Log.d("key2", key);
                 }
-                mButton.setProgress(40);
+                compare_btn.setProgress(40);
                 pullUser1Q(FirebaseAuth.getInstance().getCurrentUser().getUid(), User2QArr);
 
 
@@ -338,7 +256,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
 
                 }
-                mButton.setProgress(99);
+                compare_btn.setProgress(99);
                 getUser2QA(User2Uid, user1QuestionArr);
 
 
@@ -423,10 +341,10 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
                         score = (int) (((double) User1QA.size() / (double) arr.size()) * 100);
 
-                        mButton.setClickable(true);
+                        compare_btn.setClickable(true);
                         if (User2QArr.isEmpty()) {
                             Toast.makeText(getBaseContext(), mUser.getDisplayname() + " hasn't answered any questions yet", Toast.LENGTH_LONG).show();
-                            mButton.setProgress(0);
+                            compare_btn.setProgress(0);
                         } else {
                             dialog = new Dialog(UserProfilePage.this);
                             dialog.setCanceledOnTouchOutside(true);
@@ -438,12 +356,12 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                             arcProgress = dialog.findViewById(R.id.arc_progress);
                             arcProgress.setProgress(score);
                             dialog.show();
-                            mButton.setProgress(0);
+                           compare_btn.setProgress(0);
                             cancel.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
                                     dialog.dismiss();
-                                    mButton.setProgress(0);
+                                    compare_btn.setProgress(0);
                                 }
                             });
 
@@ -473,14 +391,7 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
                 });
 
 
-
-
-
-
-
-
             }
-
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
@@ -491,5 +402,181 @@ public class UserProfilePage extends AppCompatActivity implements GoogleApiClien
 
     }
 
+    private void checkFriendStats(){
+        DatabaseReference friendStatsRef = database.getReference().child("Friends").
+                child(currentUser.getUid()).child(uid).child("Stats");
+        friendStatsRef.keepSynced(true);
+        friendStatsRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String stats = dataSnapshot.getValue(String.class);
+                if(stats ==null){
+                    addFriend_btn.setVisibility(View.VISIBLE);
+                    addFriend_btn.setText("Send Friend Request");
+                    message_btn.setVisibility(View.GONE);
+                    deleteFriend_btn.setVisibility(View.GONE);
+                }else if(stats.equals("Pending")){
+                    deleteFriend_btn.setVisibility(View.GONE);
+                    addFriend_btn.setVisibility(View.VISIBLE);
+                    message_btn.setVisibility(View.GONE);
+                    addFriend_btn.setText("Pending");
+                }else if(stats.equals("Accepted")){
+                    addFriend_btn.setVisibility(View.GONE);
+                    message_btn.setVisibility(View.VISIBLE);
+                    deleteFriend_btn.setVisibility(View.VISIBLE);
+                }else{
+                    addFriend_btn.setVisibility(View.VISIBLE);
+                    addFriend_btn.setText("Send Friend Request");
+                    message_btn.setVisibility(View.GONE);
+                    deleteFriend_btn.setVisibility(View.GONE);
+                }
+            }
 
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        DatabaseReference friendStatsRef2 = database.getReference().child("Friends").
+              child(uid).child(currentUser.getUid()).child("Stats");
+        friendStatsRef2.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                 String stats = dataSnapshot.getValue(String.class);
+                         if(stats!=null &&  stats.equals("Pending")){
+                             deleteFriend_btn.setVisibility(View.GONE);
+                             addFriend_btn.setVisibility(View.VISIBLE);
+                             message_btn.setVisibility(View.GONE);
+                             addFriend_btn.setText("Friend Request Sent");
+                }else if(stats==null){
+                             addFriend_btn.setVisibility(View.VISIBLE);
+                             addFriend_btn.setText("Send Friend Request");
+                             message_btn.setVisibility(View.GONE);
+                             deleteFriend_btn.setVisibility(View.GONE);
+                         }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    private void resetQuestions(){
+        DatabaseReference resetRef = database.getReference().child("UserQA").child(currentUser.getUid());
+        if(uid.equals(currentUser.getUid()) && reset_btn.getVisibility()==View.VISIBLE){
+            resetRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    Intent intent = new Intent(getApplicationContext(),Homepage.class);
+                    Toast.makeText(getApplicationContext(),"Reset Success",Toast.LENGTH_SHORT).show();
+                    startActivity(intent);
+                    finish();
+                }
+            });
+
+        }
+    }
+
+    private void sendFriendRequest(){
+        if( uid !=null && !uid.equals(currentUser.getUid())){
+            DatabaseReference setUser2FriendRef = database.getReference().child("Friends").child(uid)
+                    .child(currentUser.getUid()).child("Stats");
+            setUser2FriendRef.setValue("Pending").addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    Toast.makeText(getApplicationContext(),"Request Sent",Toast.LENGTH_SHORT).show();
+                }
+            });
+
+
+        }
+    }
+
+    private void deleteFriend(){
+        if(uid!=null && !uid.equals(currentUser.getUid())) {
+            DatabaseReference deleteRef = database.getReference().child("Friends").child(currentUser.getUid())
+                    .child(uid);
+            deleteRef.removeValue();
+            DatabaseReference deleteRef2 = database.getReference().child("Friends").child(uid).child(currentUser.getUid());
+            deleteRef2.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    Toast.makeText(getApplicationContext(),"Friend Deleted",Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        }
+
+
+
+
+    }
+
+
+    public void qrOnClick(View view) {
+     Intent intent = new Intent(getApplicationContext(),ImageViewer.class);
+     startActivity(intent);
+
+    }
+
+
+    @Override
+    public void onClick(View view) {
+        int id =view.getId();
+
+        if(checkInternet()) {
+            if (id == R.id.reset_btn) {
+                resetQuestions();
+            } else if (id == R.id.compare_btn) {
+                if (mUser != null) {
+                    compare_btn.setProgress(0);
+                    compareWithUser2(mUser);
+                }
+            } else if (id == R.id.message_btn) {
+                if (!uid.equals(currentUser.getUid())) {
+                    Intent intent = new Intent(getApplicationContext(), MainChatActivity.class);
+                    intent.putExtra("user2Id", uid);
+                    intent.putExtra("user2Name", mUser.getDisplayname());
+                    startActivity(intent);
+                    finish();
+                    overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
+                }
+            } else if (id == R.id.addFriend_btn) {
+                if (!addFriend_btn.getText().toString().equals("Pending")) {
+                     sendFriendRequest();
+                }
+            }else if(id==R.id.deleteFriend_btn){
+                 deleteFriend();
+            }
+        }else{
+            Snackbar snackbar = Snackbar
+                    .make(profileToolbar, "No Internet Connection", Snackbar.LENGTH_LONG)
+                    .setAction("Setting", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            startActivity(new Intent(Settings.ACTION_SETTINGS));
+                        }
+                    });
+
+            snackbar.show();
+        }
+
+    }
+
+    public boolean checkInternet() {
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        if (null != activeNetwork) {
+            return true;
+        } else {
+            return false;
+
+
+        }
+    }
 }

@@ -5,7 +5,7 @@
     <string name="error_field_required">This field is required</string>
     <string name="error_field_nospace">No space in username</string>
     <string name="error_invalid_username">Username needs at least 5 characters</string>
-    <string name="log_out">Log out</string>
+    <string name="log_out">Log Out</string>
     <string name="check_back_later">No more questions</string>
     <string name="question_skip">skipped</string>
     <string name="date_header_yesterday">Yesterday</string>
@@ -24,9 +24,11 @@
     <string name="pwdError">password does not match</string>
     <string name="pwdError2">password needs at least 6 characters with no space</string>
     <string name="usernameError">username already exist</string>
-    <string name ="usernameError2">username needs at least 3 and at most 20 characters</string>
-    <string name ="usernameError3">username should not contain spaces</string>
-    <string name ="emptyfieldError">this field is required </string>
+    <string name="usernameError2">username needs at least 3 and at most 20 characters</string>
+    <string name="usernameError3">username should not contain spaces</string>
+    <string name="emptyfieldError">this field is required </string>
+    <string name="sendMessageError"><![CDATA[<b><font color=#FF0000>Failed,tap to try again</font></b>]]></string>
+    <string name="hint1"><i>Search Name</i></string>
 
 
 </resources>

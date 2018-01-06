@@ -39,12 +39,8 @@ public class RecyclerAdapterCommon extends RecyclerView.Adapter<Viewholder> {
 
     @Override
     public Viewholder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.result_common_item,parent,false);
-
-
-
-
-
+        View view = LayoutInflater.from(parent.getContext()).
+                inflate(R.layout.result_common_item,parent,false);
 
         return new Viewholder(view);
     }
@@ -53,8 +49,6 @@ public class RecyclerAdapterCommon extends RecyclerView.Adapter<Viewholder> {
     public void onBindViewHolder(final Viewholder holder, int position) {
 
         final UserQA userQA = commonArrayList.get(position);
-
-
 
         hideAnswer(holder,userQA);
         holder.mRelativeLayout.setOnClickListener(new View.OnClickListener() {

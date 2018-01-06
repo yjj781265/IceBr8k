@@ -75,7 +75,7 @@
                 android:layout_margin="5dp"
                 android:shadowColor="@android:color/darker_gray"
                 android:text="1:Hate it  10:Love it"
-                android:textSize="14sp"
+                android:textSize="14dp"
                 android:visibility="invisible"/>
 
             <RadioGroup
@@ -104,6 +104,10 @@
                 android:visibility="invisible"></Spinner>
 
 
+
+
+
+
             <com.xw.repo.BubbleSeekBar
                 android:id="@+id/seekBar"
                 android:layout_width="match_parent"
@@ -113,37 +117,35 @@
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
                 android:layout_marginTop="40dp"
-                android:visibility="invisible"
-                app:bsb_always_show_bubble="false"
-                app:bsb_bubble_color="@color/colorAccent"
-                app:bsb_bubble_text_color="@color/colorPrimary"
-                app:bsb_is_float_type="true"
                 app:bsb_max="10"
                 app:bsb_min="1"
+               app:bsb_seek_by_section="true"
                 app:bsb_progress="5"
-                app:bsb_second_track_color="@color/colorAccent"
-                app:bsb_section_count="5"
-                app:bsb_show_progress_in_float="false"
-                app:bsb_show_section_text="true"
-                app:bsb_show_thumb_text="true"
-                app:bsb_touch_to_seek="true"
-                app:bsb_track_color="@color/colorPrimaryDark"/>
+                app:bsb_second_track_color="@color/accent"
+                app:bsb_section_count="9"
+                app:bsb_show_thumb_text="false"
+                app:bsb_show_section_text ="true"
+                app:bsb_show_section_mark="true"
+                app:bsb_hide_bubble="true"
+                app:bsb_section_text_position="below_section_mark"
+                android:visibility="gone"
+                />
 
-            <Button
+            <com.beardedhen.androidbootstrap.BootstrapButton
 
                 android:id="@+id/submitBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:paddingBottom="10dp"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
-                android:paddingTop="10dp"
-                android:text="confirm"
-                android:visibility="invisible">
+                android:textSize="14dp"
+                app:bootstrapBrand="success"
+                app:roundedCorners="true"
+                app:buttonMode="regular"
+                android:gravity="center"
+                android:text="Confirm"
+                android:visibility="gone">
 
 
-            </Button>
+            </com.beardedhen.androidbootstrap.BootstrapButton>
 
             <TextView
                 android:id="@+id/skip_btn"
@@ -156,7 +158,7 @@
                 android:clickable="true"
                 android:text="Skip"
                 android:textColor="@color/colorPrimary"
-                android:textSize="16sp"
+                android:textSize="16dp"
                 android:visibility="visible"/>
 
 

@@ -10,6 +10,14 @@
     tools:context="app.jayang.icebr8k.login_page">
     <ScrollView
         android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    <LinearLayout
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    <ScrollView
+        android:layout_width="match_parent"
         android:scrollIndicators="none"
         android:scrollbars="none"
         android:layout_height="wrap_content"
@@ -169,6 +177,8 @@
             android:text="@string/SignUp"
             android:textAlignment="center"
             android:textSize="16sp"/>
+    </LinearLayout>
+    </ScrollView>
 
 
 

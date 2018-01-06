@@ -3,23 +3,25 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:animateLayoutChanges="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@style/ThemeOverlay.AppCompat"
+    android:theme="@style/AppTheme"
 
     tools:context="app.jayang.icebr8k.Homepage">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/users_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:elevation="4dp"
+        android:layout_height="?android:attr/actionBarSize"
+        android:elevation="6dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_gravity="top"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/AppTheme"
         android:background="@color/colorPrimary"
-
         app:title="IceBr8k"
         app:titleTextColor="@android:color/white">
 
@@ -38,7 +40,7 @@
         android:text="No Internet Connection"
         android:textColor="@color/white"
         android:textSize="16sp"
-        android:visibility="visible"/>
+        android:visibility="gone"/>
 
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/coordLayout"
@@ -48,7 +50,7 @@
         android:layout_height="wrap_content">
 
 
-        <android.support.v4.view.ViewPager
+        <app.jayang.icebr8k.myViewPager
             android:id="@+id/homepage_viewpager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -57,7 +59,7 @@
             android:layout_alignParentStart="true"
             android:background="@android:color/white">
 
-        </android.support.v4.view.ViewPager>
+        </app.jayang.icebr8k.myViewPager>
 
 
     </android.support.design.widget.CoordinatorLayout>

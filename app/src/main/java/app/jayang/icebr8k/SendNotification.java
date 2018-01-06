@@ -30,10 +30,6 @@ import cz.msebera.android.httpclient.entity.StringEntity;
 
 public class SendNotification {
     private static final String BASE_URL = "https://onesignal.com/api/v1/notifications";
-
-
-
-
     public static void sendNotificationTo(String playerId, String name, String text,String userId) {
        /* final String appId = context.getString(R.string.OneSignal_App_id);
         String request = "{"
@@ -68,7 +64,8 @@ public class SendNotification {
         try {
             String url = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString();
             OneSignal.postNotification(new JSONObject("{'contents': {'en':'" + text + "'}," +
-                    " 'include_player_ids': ['" + playerId + "'], 'data' : { 'user2Id':'"+userId+"'},"
+                    " 'include_player_ids': ['" + playerId + "'], 'data' : { 'user2Id':'"
+                            +userId+"'"+",'user2Name':'"+name+"'"+"},"
                     + "'headings': { 'en':'"+ name+"'},"+"large_icon :'"+ url+"'"+" }"),
                     new OneSignal.PostNotificationResponseHandler() {
                 @Override

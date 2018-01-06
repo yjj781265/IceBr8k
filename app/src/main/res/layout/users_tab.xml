@@ -1,41 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/userTab_frag"
+    android:animateLayoutChanges="true"
+    android:background="@color/white"
+
+
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <android.support.v4.widget.SwipeRefreshLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/swiperefresh"
+
+
+
+<android.support.design.widget.AppBarLayout
+    android:background="@color/white"
+    android:layout_width="wrap_content"
+    app:elevation="0dp"
+    android:id="@+id/appbar"
+    app:expanded="false"
+    android:divider="@color/gray"
+
+
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_marginTop="5dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"
+        app:layout_scrollFlags="scroll|snap"
+        android:minHeight="30dp"
+        android:background="@color/white"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+       >
+     <LinearLayout
+         android:id="@+id/searchview_user"
+         android:paddingLeft="10dp"
+         android:layout_gravity="center_horizontal"
+         android:layout_width="300dp"
+         android:layout_marginStart="10dp"
+         android:orientation="horizontal"
+         android:layout_height="wrap_content">
+
+         <ImageView
+             android:layout_width="27dp"
+             android:src="@drawable/ic_search"
+             android:layout_height="27dp"/>
+
+         <TextView
+             android:paddingLeft="10dp"
+             android:layout_gravity="center_vertical"
+             android:textSize="14dp"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:text="@string/hint1"/>
+
+     </LinearLayout>
 
 
-        <com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
+        <Button
+            android:id="@+id/filter_btn"
+            android:layout_width="30dp"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/ic_action_filter"
+            android:gravity="center"
+            android:layout_gravity="end"/>
+    </LinearLayout>
+</android.support.design.widget.AppBarLayout>
+
+
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipetoRefresh"
+        app:layout_anchor="@id/appbar"
+        app:layout_anchorGravity="bottom"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView_id"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-
-        android:orientation="vertical"
+        android:layout_height="match_parent"
+        android:nestedScrollingEnabled="true"
         android:scrollbars="none"
-        app:fastScrollPopupBgColor="@color/colorAccent"
-        app:fastScrollPopupTextColor="@android:color/primary_text_dark"
-        app:fastScrollThumbColor="@color/colorPrimaryDark"
-        app:fastScrollAutoHide="true"
-        app:fastScrollPopupTextSize="40sp"/>
+
+      >
+    </android.support.v7.widget.RecyclerView>
+</android.support.v4.widget.SwipeRefreshLayout>
 
 
 
-    </android.support.v4.widget.SwipeRefreshLayout>
+
+
+
+
+
+
+
+
 
     <RelativeLayout
         android:id="@+id/loadingImg_friendtab"
-        android:layout_centerInParent="true"
+        android:visibility="gone"
+        android:layout_gravity="center"
         android:paddingBottom="50dp"
         android:layout_width="wrap_content"
-        android:layout_height="150dp">
+        android:layout_height="wrap_content">
         <pl.droidsonroids.gif.GifImageView
-            android:layout_centerHorizontal="true"
+            android:id="@+id/gif"
             android:layout_width="75dp"
             android:layout_height="75dp"
             android:src="@drawable/icebr8k_load"
@@ -43,13 +117,7 @@
             android:paddingLeft="6dp"
             />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:gravity="center"
-            android:paddingLeft="15dp"
-            android:text="Loading..."/>
+
 
     </RelativeLayout>
 
@@ -57,4 +125,7 @@
 
 
 
-</RelativeLayout>
+
+
+
+</android.support.design.widget.CoordinatorLayout>
