@@ -539,6 +539,7 @@ public class Homepage extends AppCompatActivity  implements
         if(event.getState() == ConnectivityState.CONNECTED){
             // device has active internet connection
             noConnection_tv.setVisibility(View.GONE);
+            setOnline();
 
 
         }

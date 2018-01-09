@@ -120,7 +120,6 @@ public class SearchUser extends AppCompatActivity implements android.widget.Sear
             public void onDataChange(DataSnapshot dataSnapshot) {
                 String userId = dataSnapshot.getValue(String.class);
                 if(userId!=null) {
-                    Toast.makeText(getApplicationContext(), userId, Toast.LENGTH_LONG).show();
                     getUserInfo(userId);
 
 

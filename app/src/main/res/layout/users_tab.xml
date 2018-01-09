@@ -90,42 +90,4 @@
     </android.support.v7.widget.RecyclerView>
 </android.support.v4.widget.SwipeRefreshLayout>
 
-
-
-
-
-
-
-
-
-
-
-
-    <RelativeLayout
-        android:id="@+id/loadingImg_friendtab"
-        android:visibility="gone"
-        android:layout_gravity="center"
-        android:paddingBottom="50dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-        <pl.droidsonroids.gif.GifImageView
-            android:id="@+id/gif"
-            android:layout_width="75dp"
-            android:layout_height="75dp"
-            android:src="@drawable/icebr8k_load"
-            android:paddingTop="10dp"
-            android:paddingLeft="6dp"
-            />
-
-
-
-    </RelativeLayout>
-
-
-
-
-
-
-
-
 </android.support.design.widget.CoordinatorLayout>

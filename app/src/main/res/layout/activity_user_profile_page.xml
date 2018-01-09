@@ -205,7 +205,7 @@
             android:id="@+id/reset_btn"
             app:buttonMode="regular"
             app:bootstrapBrand="danger"
-            android:visibility="visible"
+            android:visibility="gone"
             android:layout_gravity="center_horizontal"
             android:text="Reset Questions"
             android:layout_marginTop="15dp"

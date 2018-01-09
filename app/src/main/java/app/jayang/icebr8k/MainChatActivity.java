@@ -59,8 +59,7 @@ import app.jayang.icebr8k.Modle.Author;
 import app.jayang.icebr8k.Modle.CustomIncomingMessageViewHolder;
 import app.jayang.icebr8k.Modle.CustomOutcomingMessageViewHolder;
 import app.jayang.icebr8k.Modle.Message;
-
-
+import app.jayang.icebr8k.Modle.User;
 
 
 public class MainChatActivity extends AppCompatActivity implements MessagesListAdapter.OnLoadMoreListener {
@@ -141,7 +140,7 @@ public class MainChatActivity extends AppCompatActivity implements MessagesListA
                 } else if (DateFormatter.isYesterday(date)) {
                     return getString(R.string.date_header_yesterday) ;
                 } else {
-                    return new SimpleDateFormat("MMM d,yyyy").format(date);
+                    return new SimpleDateFormat("MMM d " + bullet+ " yyyy").format(date);
 
                 }
             }
@@ -169,6 +168,53 @@ public class MainChatActivity extends AppCompatActivity implements MessagesListA
          adapter.setDateHeadersFormatter(formatter);
          adapter.setLoadMoreListener(this);
          messagesList.setAdapter(adapter);
+         adapter.registerViewClickListener(R.id.incoming_avatar, new MessagesListAdapter.OnMessageViewClickListener<Message>() {
+             @Override
+             public void onMessageViewClick(View view, Message message) {
+                 showLog("clicked image");
+                 DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Users")
+                         .child(user2Id);
+                 ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                     @Override
+                     public void onDataChange(DataSnapshot dataSnapshot) {
+                         User user = dataSnapshot.getValue(User.class);
+                         Intent i = new Intent(getBaseContext(),UserProfilePage.class);
+                         i.putExtra("userInfo",user);
+                         i.putExtra("userUid",user2Id);
+                         startActivity(i);
+                     }
+
+                     @Override
+                     public void onCancelled(DatabaseError databaseError) {
+
+                     }
+                 });
+             }
+         });
+
+         adapter.registerViewClickListener(R.id.outcoming_avatar, new MessagesListAdapter.OnMessageViewClickListener<Message>() {
+             @Override
+             public void onMessageViewClick(View view, Message message) {
+                 DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Users")
+                         .child(currentUser.getUid());
+                 ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                     @Override
+                     public void onDataChange(DataSnapshot dataSnapshot) {
+                         User user = dataSnapshot.getValue(User.class);
+                         Intent i = new Intent(getBaseContext(),UserProfilePage.class);
+                         i.putExtra("userInfo",user);
+                         i.putExtra("userUid",currentUser.getUid());
+                         startActivity(i);
+                     }
+
+                     @Override
+                     public void onCancelled(DatabaseError databaseError) {
+
+                     }
+                 });
+             }
+         });
+        
 
 
         messageInput.setInputListener(new MessageInput.InputListener() {
@@ -240,9 +286,6 @@ public class MainChatActivity extends AppCompatActivity implements MessagesListA
         mp = MediaPlayer.create(this, R.raw.typing);
         volume = (float) (1 - (Math.log(MAX_VOLUME - 30) / Math.log(MAX_VOLUME)));
         mp.setVolume(volume, volume);
-
-
-
     }
 
     @Override
@@ -274,9 +317,6 @@ public class MainChatActivity extends AppCompatActivity implements MessagesListA
     protected void onDestroy() {
         super.onDestroy();
         showLog("Destory");
-
-
-
     }
 
 
@@ -392,7 +432,7 @@ public class MainChatActivity extends AppCompatActivity implements MessagesListA
                     showLog("User2 doesnt have unRead node");
                     checkUnreadRef.setValue(1);
                     showLog("unread set  was null");
-                }else {
+                }else if(!user2Inchat) {
                     checkUnreadRef.setValue(++unRead);
 
 
@@ -536,13 +576,13 @@ public class MainChatActivity extends AppCompatActivity implements MessagesListA
 
 
 
+
+
                showLog(String.valueOf(mMessages.size()));
                showLog(String.valueOf(dataSnapshot.getChildrenCount()));
                Collections.sort(mMessages);
-               //get lastmessage;
                if(!mMessages.isEmpty()){
                    oldMessage = mMessages.get(0);
-                   showLog("oldmessage"+oldMessage.getId());
                }
                addValueChangeListener();
                ArrayList<Message> tempAddList = new ArrayList<>();
@@ -557,6 +597,7 @@ public class MainChatActivity extends AppCompatActivity implements MessagesListA
                    mMessages.clear();
                }
                showLog(String.valueOf(tempAddList.size()));
+
 
 
 
@@ -589,9 +630,15 @@ public class MainChatActivity extends AppCompatActivity implements MessagesListA
 
                        //new message
                        showLog(message.getId());
+
                        if(message.getAuthor().getId().equals(recieverId) &&
                                !message.getId().equals(oldMessage.getId())) {
+                           adapter.update(oldMessage);
                            adapter.addToStart(message, true);
+                           oldMessage =message;
+
+
+
                            showLog("new Chat"+message.getId());
                        }
 
@@ -741,5 +788,8 @@ public class MainChatActivity extends AppCompatActivity implements MessagesListA
 
  }
 
+ }
 
-}
+
+
+

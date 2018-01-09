@@ -119,11 +119,27 @@ public class UserDialog implements Comparable<UserDialog>,SortedListAdapter.View
 
         UserDialog dialog = (UserDialog) o;
 
-        return username.equals(dialog.username);
+        if (username != null ? !username.equals(dialog.username) : dialog.username != null)
+            return false;
+        return id.equals(dialog.id);
     }
 
     @Override
     public int hashCode() {
-        return username.hashCode();
+        int result = username != null ? username.hashCode() : 0;
+        result = 31 * result + id.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "UserDialog{" +
+                "name='" + name + '\'' +
+                ", username='" + username + '\'' +
+                ", photoUrl='" + photoUrl + '\'' +
+                ", onlineStats='" + onlineStats + '\'' +
+                ", email='" + email + '\'' +
+                ", id='" + id + '\'' +
+                '}';
     }
 }

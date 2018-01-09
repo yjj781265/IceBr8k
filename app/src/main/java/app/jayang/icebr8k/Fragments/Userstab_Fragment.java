@@ -4,6 +4,8 @@ import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
@@ -72,23 +74,22 @@ import app.jayang.icebr8k.Viewholder;
 
 public class Userstab_Fragment extends Fragment {
     View view;
+    String TAG ="UserFrag";
     FirebaseDatabase mDatabase;
     DatabaseReference databaseReference;
     ArrayList<UserDialog> mUserDialogArrayList;
     RecyclerView mRecyclerView;
-    RelativeLayout loadingGif;
     FirebaseUser currentUser;
     RecyclerAdapter mAdapter;
-    Integer childCount,counter;
+    Integer friendCount,counter;
     SwipeRefreshLayout mRefreshLayout;
     LinearLayout mSearchView;
     Button filter_btn;
+    private SharedPreferences sharedPref;
     private ArrayList<UserDialog> mFilteredList;
-    private boolean sortByscore,once;
+    private Boolean sortByScore,done,newChat;
+    private String sortByScoreStr;
 
-    public interface OnItemClickListener{
-        void onItemClick(UserDialog dialog);
-    }
 
     private static final Comparator<UserDialog>ONLINESTATS = new Comparator<UserDialog>() {
         @Override
@@ -122,7 +123,21 @@ public class Userstab_Fragment extends Fragment {
         mDatabase = FirebaseDatabase.getInstance();
         mUserDialogArrayList = new ArrayList<>();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        sortByscore =true;
+        done =false;
+        newChat =false;
+        friendCount=0;
+        counter=0;
+        sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        sortByScoreStr= sharedPref.getString("sort",null);
+        if(sortByScoreStr==null){
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putString("sort", "yes");
+            editor.commit();
+        }else if(sortByScoreStr.equals("no")){
+            sortByScore =false;
+        }else{
+            sortByScore =true;
+        }
 
 
     }
@@ -137,11 +152,17 @@ public class Userstab_Fragment extends Fragment {
         final LinearLayoutManager manager = new LinearLayoutManager(view.getContext());
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mAdapter = new RecyclerAdapter(getContext(),mUserDialogArrayList);
+        mAdapter.setHasStableIds(true);
+        mRecyclerView.setAdapter(mAdapter);
         mRefreshLayout =view.findViewById(R.id.swipetoRefresh);
                 filter_btn =view.findViewById(R.id.filter_btn);
-        setHasOptionsMenu(true);
 
-                filter_btn.setOnClickListener(new View.OnClickListener() {
+        populateUserDialogList();
+        addQAListener();
+
+        filter_btn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         //Toast.makeText(getContext(),"Clicked",Toast.LENGTH_SHORT).show();
@@ -153,16 +174,21 @@ public class Userstab_Fragment extends Fragment {
                             public boolean onMenuItemClick(MenuItem item) {
                               int id = item.getItemId();
                               if(id==R.id.score) {
-                                  if (!sortByscore) {
-                                      sortByscore = true;
-                                      populateUserDialogList();
-                                  }
+                                  SharedPreferences.Editor editor = sharedPref.edit();
+                                  editor.putString("sort", "yes");
+                                  editor.commit();
+                                  sortByScore=true;
+                                  Collections.sort(mUserDialogArrayList,SCORE);
+                                  mAdapter.notifyDataSetChanged();
                               }
-                                if (id == R.id.online_stats)
-                                    if (sortByscore) {
-                                        sortByscore = false;
-                                        populateUserDialogList();
-                                    }
+                                if (id == R.id.online_stats){
+                                    SharedPreferences.Editor editor = sharedPref.edit();
+                                    editor.putString("sort", "no");
+                                    editor.commit();
+                                    sortByScore=false;
+                                    Collections.sort(mUserDialogArrayList,ONLINESTATS);
+                                    mAdapter.notifyDataSetChanged();
+                                }
                                 return true;
 
                             }
@@ -172,16 +198,25 @@ public class Userstab_Fragment extends Fragment {
 
                     }
                 });
-        loadingGif = view.findViewById(R.id.loadingImg_friendtab);
-        loadingGif.setVisibility(View.VISIBLE);
-        addQAListener();
+
 
 
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                mRefreshLayout.setRefreshing(true);
-                populateUserDialogList();
+                mRecyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+
+                    @Override
+                    public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                                               int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                        mRecyclerView.removeOnLayoutChangeListener(this);
+                        Log.e(TAG, "updated");
+                        mRefreshLayout.setRefreshing(false);
+                    }
+                });
+
+                mAdapter.notifyDataSetChanged();
+
             }
         });
 
@@ -199,39 +234,57 @@ public class Userstab_Fragment extends Fragment {
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
-       if(isVisibleToUser && getView()!=null && !once){
 
-       }
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
-        Log.d("Score","OnResume");
+        Log.d(TAG,"OnResume");
 
     }
 
-    public void populateUserDialogList() {
+    private  void showLog(Object str){
+        Log.d(TAG,String.valueOf(str));
+    }
 
+    public void populateUserDialogList() {
+        mRefreshLayout.setRefreshing(true);
+        mUserDialogArrayList.clear();
+        friendCount=0;
+        done=false;
         databaseReference = mDatabase.getReference("Friends").child(currentUser.getUid());
         databaseReference.keepSynced(true);
-        databaseReference.addValueEventListener(new ValueEventListener() {
+        databaseReference.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                once =true;
-                childCount =(int) dataSnapshot.getChildrenCount();
-                counter =0;
-                mUserDialogArrayList.clear();
-                for(DataSnapshot childSnapshot: dataSnapshot.getChildren()){
-                    if(childSnapshot.child("Stats").getValue(String.class).equals("Accepted")){
-                        UserDialog dialog = new UserDialog();
-                        dialog.setId(childSnapshot.getKey());
-                        getUserinfo(dialog);
-
-                    }
-                    counter++;
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if(dataSnapshot.child("Stats").getValue(String.class).equals("Accepted")){
+                    showLog(dataSnapshot.getKey() +" added");
+                   UserDialog dialog = new UserDialog();
+                   dialog.setId(dataSnapshot.getKey());
+                    getUserinfo(dialog);
+                    friendCount++;
+                    done =false;
+                    showLog("friendCount "+friendCount);
                 }
+
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
             }
 
             @Override
@@ -239,7 +292,6 @@ public class Userstab_Fragment extends Fragment {
 
             }
         });
-
     }
 
     private void getUserinfo(final UserDialog dialog){
@@ -252,12 +304,8 @@ public class Userstab_Fragment extends Fragment {
              dialog.setUsername(user.getUsername());
              dialog.setPhotoUrl(user.getPhotourl());
              dialog.setEmail(user.getEmail());
-             dialog.setScore("0");
              dialog.setOnlineStats(user.getOnlineStats());
              compareWithUser2(dialog);
-
-
-
 
 
 
@@ -378,32 +426,67 @@ public class Userstab_Fragment extends Fragment {
             dialog.setOnlineStats("0");
         }
         dialog.setScore(score);
+        if(!done) {
+            mUserDialogArrayList.add(dialog);
+            addOnLineListener(dialog);
+            addUser2QAListener(dialog);
+        }else if(done){
+            int index;
+            for(index =0; index<mUserDialogArrayList.size();index++ ){
+               if(mUserDialogArrayList.get(index).getId().equals(dialog.getId())){
+                   mUserDialogArrayList.set(index,dialog);
+                   if(sortByScore){
+                       Collections.sort(mUserDialogArrayList,SCORE);
+                       mAdapter.notifyDataSetChanged();
+                       showLog("resorted by score");
+                   }else{
+                       mAdapter.notifyDataSetChanged();
 
-        mUserDialogArrayList.add(dialog);
-        if(once){
-            
+
+
+
+
+
+
+
+
+
+
+
+
+                       showLog("updated at "+ index); //update score
+                   }
+               }
+           }
+
+
         }
 
+        showLog("list Size " + mUserDialogArrayList.size());
 
-
-
-        if (mUserDialogArrayList != null && !mUserDialogArrayList.isEmpty()
-                && counter==childCount) {
-            if(sortByscore){
-                Collections.sort(mUserDialogArrayList,SCORE);
-                mAdapter = new RecyclerAdapter(getContext(),mUserDialogArrayList,sortByscore);
-            }else{
-                Collections.sort(mUserDialogArrayList,ONLINESTATS);
-                mAdapter = new RecyclerAdapter(getContext(),mUserDialogArrayList,sortByscore);
+        if(mUserDialogArrayList.size()==friendCount && !done){
+            done =true;
+            showLog("DONE" + "LIST SIZE " + mUserDialogArrayList.size());
+         if(sortByScore){
+             Collections.sort(mUserDialogArrayList,SCORE);
+             mAdapter.notifyDataSetChanged();
+         }else {
+             Collections.sort(mUserDialogArrayList,ONLINESTATS);
+             mAdapter.notifyDataSetChanged();
             }
-
-            mRecyclerView.setAdapter( mAdapter);
             mRefreshLayout.setRefreshing(false);
-            once =false;
-            loadingGif.setVisibility(view.INVISIBLE);
+
+
+
 
         }
-        }
+
+
+
+
+
+
+    }
 
 
     private void addQAListener(){
@@ -414,7 +497,15 @@ public class Userstab_Fragment extends Fragment {
         mref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-               populateUserDialogList();
+                if(done) {
+                    showLog("New Question with User Id" + dataSnapshot.getKey());
+                  for(UserDialog dialog : mUserDialogArrayList){
+                      compareWithUser2(dialog);
+
+                  }
+
+
+                }
 
             }
 
@@ -425,32 +516,22 @@ public class Userstab_Fragment extends Fragment {
         });
     }
 
-    private void addChildeventListener(UserDialog dialog){
-        DatabaseReference mref = FirebaseDatabase.getInstance().getReference().child("Users").child(dialog.getId())
-
-                ;
-        mref.addChildEventListener(new ChildEventListener() {
+    private void addUser2QAListener(final UserDialog dialog){
+        DatabaseReference mref = FirebaseDatabase.getInstance().getReference().child("UserQA")
+                .child(dialog.getId());
+        mref.keepSynced(true);
+        mref.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(done) {
+                    showLog("New Question with User2 Id" + dataSnapshot.getKey());
 
-            }
+                        compareWithUser2(dialog);
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-               if(!sortByscore){
-                   Log.d("UseTab","Online Changed" +dataSnapshot);
 
-                  populateUserDialogList();
-               }
-            }
 
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
 
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                }
 
             }
 
@@ -459,6 +540,45 @@ public class Userstab_Fragment extends Fragment {
 
             }
         });
+    }
+
+
+
+    private void addOnLineListener(final UserDialog dialog){
+        DatabaseReference mref = FirebaseDatabase.getInstance().getReference().child("Users").
+                child(dialog.getId()).child("onlineStats");
+        mref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                int index;
+                if(done ) {
+                    String online = dataSnapshot.getValue(String.class);
+                    for(index=0;index<mUserDialogArrayList.size();index++){
+                        if(mUserDialogArrayList.get(index).getId().equals(dialog.getId())){
+                            dialog.setOnlineStats(online);
+                            mUserDialogArrayList.set(index,dialog);
+                            if(!sortByScore) {
+                                Collections.sort(mUserDialogArrayList, ONLINESTATS);
+                                mAdapter.notifyDataSetChanged();
+                                showLog("online changed");
+                            }else{
+                                mAdapter.notifyDataSetChanged();
+                                showLog("online updated");
+                            }
+
+                        }
+                    }
+
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
     }
 
 
@@ -468,7 +588,6 @@ public class Userstab_Fragment extends Fragment {
 
     @Override
     public void onStop() {
-        populateUserDialogList();
         super.onStop();
 
     }
@@ -479,5 +598,17 @@ public class Userstab_Fragment extends Fragment {
 
     public RecyclerAdapter getAdapter() {
         return mAdapter;
+    }
+
+
+    public  class swapItems extends AsyncTask<ArrayList<UserDialog>,Void,Void>{
+
+
+
+        @Override
+        protected Void doInBackground(ArrayList<UserDialog>[] arrayLists) {
+            mAdapter.swapItems(arrayLists[0]);
+            return null;
+        }
     }
 }
