@@ -10,12 +10,22 @@
     
     <android.support.v7.widget.Toolbar
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="?actionBarSize"
         android:id="@+id/profileToolbar"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         android:background="@color/colorPrimary"></android.support.v7.widget.Toolbar>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/profileToolbar">
 
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
     <RelativeLayout
+
         android:background="@color/creamYellow"
         android:layout_marginTop="10dp"
         android:gravity="fill_horizontal"
@@ -25,35 +35,57 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/profileToolbar">
     <ImageView
-        android:id="@+id/profileButton"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
 
+        android:id="@+id/profileButton"
+        android:layout_width="66dp"
+        android:layout_height="66dp"
+        android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_margin="10dp"
+        android:clickable="true"
+        android:onClick="profileOnClick"
         app:srcCompat="@drawable/common_google_signin_btn_icon_dark"/>
-
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_toRightOf="@id/profileButton"
+        android:layout_marginStart="9dp"
+        android:layout_centerVertical="true"
+        android:orientation="vertical"
+        android:layout_height="wrap_content">
     <TextView
         android:id="@+id/displayname_profile"
+
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+
+        android:maxLength="18"
+        android:maxLines="2"
+        android:text="123456789111315172"
         android:layout_toRightOf="@id/profileButton"
-      android:layout_marginTop="30dp"
-        android:layout_marginLeft="10dp"
+
         android:textColor="@android:color/black"
-        android:textSize="25sp"
-        android:textStyle="bold"/>
+        android:textSize="20dp"/>
 
         <TextView
             android:id="@+id/username_profile"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/displayname_profile"
-            android:layout_toRightOf="@id/profileButton"
-            android:layout_marginLeft="10dp"
             android:textStyle="normal"
-            android:textSize="16sp"
+            android:textSize="14dp"
             android:text="Username" />
+    </LinearLayout>
+
+
+        <ImageView
+            android:id="@+id/profile_QR"
+            android:layout_width="30dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="30dp"
+            android:clickable="true"
+            android:onClick="qrOnClick"
+            android:src="@drawable/qr_code_selector"
+            android:layout_height="30dp"/>
     </RelativeLayout>
 
     <RelativeLayout
@@ -65,66 +97,57 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/R1">
         <TextView
-            android:layout_width="100dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Email"
             android:id="@+id/email_tv"
-            android:paddingLeft="10dp"
-            android:textSize="20sp"
-            android:textColor="@android:color/black"
-            android:layout_margin="10dp"/>
+            android:layout_marginLeft="20dp"
+            android:layout_centerVertical="true"
+            android:textSize="16dp"
+
+            android:textColor="@android:color/black"/>
         <TextView
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
             android:id="@+id/email_profile"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/email_tv"
-            android:layout_marginTop="10dp"
-            android:layout_marginLeft="10dp"
-            android:textSize="16sp"
-            android:textStyle="italic"
-
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="96dp"
+            android:text="yjj@gmail.com"
+            android:textSize="16dp"
+            android:autoLink="email"
+            android:textColor="@color/material_drawer_secondary_text"
+            android:textColorLink="@color/material_drawer_secondary_text"
             />
+
 
     </RelativeLayout>
 
     <LinearLayout
-        android:elevation="3dp"
+        android:elevation="6dp"
         android:background="@color/creamYellow"
         android:layout_below="@id/R2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingBottom="15dp"
+        android:gravity="center"
         android:orientation="vertical"
         android:layout_marginTop="100dp">
 
-
-
-
-    <com.dd.processbutton.iml.ActionProcessButton
-        android:layout_width="match_parent"
-        android:layout_height="42dp"
-        app:pb_colorNormal="@color/colorAccent"
-        app:pb_colorPressed="@color/colorAccent"
-        android:textColor="@android:color/white"
-        android:id="@+id/message_btn"
-        android:layout_centerInParent="true"
-        android:text="Message"
-        android:layout_marginTop="15dp"
-        android:textSize="13sp"
-
-       android:layout_marginLeft="30dp"
-        android:layout_marginRight="30dp"/>
-
         <com.dd.processbutton.iml.ActionProcessButton
-            android:id="@+id/compareBtn"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:id="@+id/compare_btn"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="320dp"
+            android:layout_height="42dp"
+            android:visibility="visible"
             android:textColor="@android:color/white"
             android:layout_below="@id/message_btn"
-            android:layout_centerHorizontal="true"
             android:layout_marginTop="15dp"
-            android:layout_marginBottom="15dp"
             android:textSize="13sp"
-            android:layout_marginLeft="30dp" android:layout_marginRight="30dp"
             android:text="Compare"
             app:pb_colorNormal="@color/colorPrimary"
             app:pb_colorPressed="@color/colorPrimary"
@@ -133,17 +156,66 @@
             app:pb_colorComplete="@color/colorAccent"
             app:pb_textComplete ="Done"/>
 
-        <Button
-            android:id="@+id/reset"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:textSize="13sp"
-            android:layout_below="@id/message_btn"
-            android:layout_marginLeft="30dp"
-            android:layout_marginRight="30dp"
-            android:layout_marginBottom="15dp"
-            android:text="Reset"/>
+        <com.beardedhen.androidbootstrap.BootstrapButton
+            android:layout_width="320dp"
+            android:layout_height="42dp"
+            android:visibility="gone"
+            android:layout_marginTop="15dp"
+            app:buttonMode="regular"
+            app:bootstrapBrand="success"
+            android:id="@+id/addFriend_btn"
+            android:layout_gravity="center_horizontal"
+            android:text="Add Friend"
+            android:textSize="13dp"
+            />
+
+
+
+    <com.beardedhen.androidbootstrap.BootstrapButton
+        android:layout_width="320dp"
+        android:layout_height="42dp"
+        android:textColor="@android:color/black"
+        app:buttonMode="regular"
+        app:bootstrapBrand="success"
+        android:id="@+id/message_btn"
+        android:visibility="gone"
+        android:layout_gravity="center_horizontal"
+        android:text="Message"
+        android:layout_marginTop="15dp"
+        android:textSize="13dp"/>
+
+
+        <com.beardedhen.androidbootstrap.BootstrapButton
+            android:layout_width="320dp"
+            android:layout_height="42dp"
+            android:textColor="@android:color/black"
+            android:id="@+id/deleteFriend_btn"
+            android:visibility="gone"
+            android:layout_gravity="center_horizontal"
+            android:text="Delete Friend"
+            app:buttonMode="regular"
+            app:bootstrapBrand="danger"
+            android:layout_marginTop="15dp"
+            android:textSize="13dp"/>
+
+        <com.beardedhen.androidbootstrap.BootstrapButton
+            android:layout_width="320dp"
+            android:layout_height="42dp"
+            android:textColor="@android:color/black"
+            android:id="@+id/reset_btn"
+            app:buttonMode="regular"
+            app:bootstrapBrand="danger"
+            android:visibility="gone"
+            android:layout_gravity="center_horizontal"
+            android:text="Reset Questions"
+            android:layout_marginTop="15dp"
+            android:textSize="13dp"/>
+
+
+
     </LinearLayout>
+    </LinearLayout>
+    </ScrollView>
 
 
 </RelativeLayout>

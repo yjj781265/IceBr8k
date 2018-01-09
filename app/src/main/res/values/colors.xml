@@ -4,13 +4,16 @@
     <color name="colorPrimaryDark">#004899</color>
     <color name="colorAccent">#3ad185</color>
     <color name="colorPressed">#31af70</color>
+    <color name="lightBlue">#d5edff</color>
 
     <color name="darkGreen">#006400</color>
     <color name="darkYellow">#ffdb01</color>
-    <color name="darkOrange">	#FF8C00</color>
+    <color name="darkOrange">#FF8C00</color>
     <color name="darkRed">#FF0000</color>
     <color name="creamYellow">#fffff4</color>
+    <color name="ripple">#40ffffff</color>
     <color name="lightGreen">#e7fce0</color>
     <color name="lightGray">#D3D3D3</color>
+    <color name="lightRed">#feb2b2</color>
 
 </resources>

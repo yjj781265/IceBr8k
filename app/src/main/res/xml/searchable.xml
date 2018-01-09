@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<searchable
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:label="@string/app_name"
+    app:queryHint="Search IceBr8k Username"
+    app:defaultQueryHint="Search IceBr8k Username"
+    android:hint="Search IceBr8k Username">
+</searchable>

@@ -8,6 +8,8 @@ import android.widget.Toast;
 import com.google.firebase.database.FirebaseDatabase;
 import com.onesignal.OSNotificationOpenResult;
 import com.onesignal.OneSignal;
+import com.zplesac.connectionbuddy.ConnectionBuddy;
+import com.zplesac.connectionbuddy.ConnectionBuddyConfiguration;
 
 import cat.ereza.customactivityoncrash.config.CaocConfig;
 
@@ -18,11 +20,12 @@ import cat.ereza.customactivityoncrash.config.CaocConfig;
  * Created by yjj781265 on 11/8/2017.
  */
 
-public class MyApplication extends Application  {
+public class MyApplication extends Application {
 
     public MyApplication() {
         super();
     }
+
     private static Context context;
 
 
@@ -34,9 +37,6 @@ public class MyApplication extends Application  {
     public void onCreate() {
         super.onCreate();
         context = getApplicationContext();
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-
-
         CaocConfig.Builder.create()
                 .backgroundMode(CaocConfig.BACKGROUND_MODE_SHOW_CUSTOM) //default: CaocConfig.BACKGROUND_MODE_SHOW_CUSTOM
                 .enabled(true) //default: true
@@ -49,15 +49,17 @@ public class MyApplication extends Application  {
         OneSignal.startInit(this)
                 .inFocusDisplaying(OneSignal.OSInFocusDisplayOption.Notification)
                 .unsubscribeWhenNotificationsAreDisabled(true).
-                setNotificationOpenedHandler( new MyNotificationOpenedHandler()).
+                setNotificationOpenedHandler(new MyNotificationOpenedHandler()).
                 setNotificationReceivedHandler(new MyNotificationReceivedHandler())
                 .init();
 
-
-
-
-
+        ConnectionBuddyConfiguration networkInspectorConfiguration =
+                new ConnectionBuddyConfiguration.Builder(this).
+                        notifyOnlyReliableEvents(true)
+                        .build();
+        ConnectionBuddy.getInstance().init(networkInspectorConfiguration);
     }
+
 
     @Override
     public void onTerminate() {
@@ -65,4 +67,8 @@ public class MyApplication extends Application  {
     }
 
 
+
+
 }
+
+

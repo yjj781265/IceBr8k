@@ -106,7 +106,7 @@ public class ResultActivity extends AppCompatActivity {
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     user2Id =dataSnapshot.getValue(String.class);
                    Intent mIntent = new Intent(getBaseContext(),MainChatActivity.class);
-                    mIntent.putExtra("user2",user2);
+                    mIntent.putExtra("user2Name",user2.getDisplayname());
                     mIntent.putExtra("user2Id",user2Id);
                     startActivity(mIntent);
                     finish();

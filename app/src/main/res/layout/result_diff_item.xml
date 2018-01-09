@@ -7,9 +7,9 @@
     android:layout_height="wrap_content">
     <android.support.v7.widget.CardView
         android:id="@+id/diffCardView"
-
+        android:padding="6dp"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="wrap_content"
         app:cardBackgroundColor="@color/creamYellow"
         app:cardElevation="4dp"
 
@@ -18,21 +18,22 @@
         <RelativeLayout
             android:id="@+id/diff_Rlayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:background="?android:attr/selectableItemBackground"
             android:clickable="true">
 
             <me.grantland.widget.AutofitTextView
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
                 android:id="@+id/question_diff"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
-                android:maxLines="1"
                 android:layout_alignParentLeft="true"
                 android:gravity="center_vertical"
                 android:layout_marginLeft="10dp"
-                autofit:autoSizeMinTextSize="15sp"
-                android:textSize="16sp"/>
+                autofit:autoSizeMinTextSize="14dp"
+                android:textSize="16dp"/>
 
 
             <ImageView
@@ -48,7 +49,9 @@
                 android:id="@+id/user2_pic_diff"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:layout_centerInParent="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:layout_toRightOf="@id/answer1_diff"
                 android:layout_marginTop="15dp"
                 android:visibility="gone"/>
 
@@ -57,7 +60,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
-                android:textSize="13sp"
+                android:textSize="13dp"
                 android:layout_toRightOf="@id/user1_pic_diff"
                 android:layout_marginLeft="10dp"
                 android:layout_centerVertical="true"
@@ -68,7 +71,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
-                android:textSize="13sp"
+                android:textSize="13dp"
                 android:layout_toRightOf="@id/user2_pic_diff"
                 android:layout_marginLeft="10dp"
                 android:layout_centerVertical="true"

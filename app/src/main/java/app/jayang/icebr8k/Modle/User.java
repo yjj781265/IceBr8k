@@ -16,6 +16,13 @@ public class User implements Serializable,Comparable<User> {
     public User() {
     }
 
+    public User(String displayname, String username, String photourl, String email) {
+        this.displayname = displayname;
+        this.username = username;
+        this.photourl = photourl;
+        this.email = email;
+    }
+
     public String getDisplayname() {
         return displayname;
     }
@@ -69,21 +76,39 @@ public class User implements Serializable,Comparable<User> {
 
     @Override
     public int compareTo(@NonNull User user) {
+        int result;
         Integer user1 =  Integer.valueOf(onlineStats);
-         int result;
-
         Integer user2 =  Integer.valueOf(user.getOnlineStats());
-
-
         result = user2.compareTo(user1);
-        if(result==0 && displayname!=null){
-            result =displayname.toUpperCase().compareTo(user.getDisplayname().toUpperCase());
+        if(result==0 ){
+            result = Integer.valueOf(score).compareTo(Integer.valueOf(user.getScore()));
+        }else {
+            result =displayname.compareTo(user.getDisplayname());
         }
+          return result;
 
 
 
 
+
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        if (displayname != null ? !displayname.equals(user.displayname) : user.displayname != null)
+            return false;
+        return photourl != null ? photourl.equals(user.photourl) : user.photourl == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = displayname != null ? displayname.hashCode() : 0;
+        result = 31 * result + (photourl != null ? photourl.hashCode() : 0);
         return result;
-
     }
 }

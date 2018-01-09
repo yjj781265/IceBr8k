@@ -8,16 +8,15 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import app.jayang.icebr8k.Modle.UserDialog;
+
 /**
  * Created by LoLJay on 10/20/2017.
  */
 
 public class Viewholder extends RecyclerView.ViewHolder {
-    public ImageView image,user1_pic,user2_pic,user1_pic_diff,user2_pic_diff,onlineStats;
-    public TextView displayname;
+    public ImageView user1_pic,user2_pic,user1_pic_diff,user2_pic_diff,onlineStats;
     public TextView username;
-    public LinearLayout linearLayout;
-    public RelativeLayout avatar_view;
     public RelativeLayout mRelativeLayout,diffRelativeLayout;
     public CardView diffCardView,commonCardView;
     public TextView score,question_common,answer_common;
@@ -26,16 +25,6 @@ public class Viewholder extends RecyclerView.ViewHolder {
 
     public Viewholder(View itemView) {
         super(itemView);
-        image = itemView.findViewById(R.id.imageview_id);
-        displayname =itemView.findViewById(R.id.displayname_textview);
-        username=itemView.findViewById(R.id.username_textview);
-        linearLayout =itemView.findViewById(R.id.recycleritem_id);
-        score = itemView.findViewById(R.id.score);
-        onlineStats =itemView.findViewById(R.id.onlineStats);
-        avatar_view = itemView.findViewById(R.id.avatar_view);
-
-
-
         //for reuslt activity_common
         question_common =itemView.findViewById(R.id.question_common);
         answer_common =itemView.findViewById(R.id.answer_common);
@@ -54,5 +43,10 @@ public class Viewholder extends RecyclerView.ViewHolder {
         diffCardView =itemView.findViewById(R.id.diffCardView);
 
     }
+
+
+
+
+
 
 }

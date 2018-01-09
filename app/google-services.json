@@ -1,4 +1,4 @@
- {
+{
   "project_info": {
     "project_number": "773225047243",
     "firebase_url": "https://icebr8k-98675.firebaseio.com",
@@ -14,6 +14,22 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "773225047243-sdqklltfldh0kr0oki58m2epnsvs2vg4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.jayang.icebr8k",
+            "certificate_hash": "acc16b2d5aa574b4b53cb2f5ba50ffaf65177d2d"
+          }
+        },
+        {
+          "client_id": "773225047243-746c4konj08esd8i8vnq0gmoa0dvvp0r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.jayang.icebr8k",
+            "certificate_hash": "142711a5ba835a161c3861d9aac07da93e09acbb"
+          }
+        },
         {
           "client_id": "773225047243-vasqlv24jrlug9rbsdtri17ibkt6e5mj.apps.googleusercontent.com",
           "client_type": 1,
