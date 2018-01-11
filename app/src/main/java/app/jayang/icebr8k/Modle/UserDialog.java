@@ -1,5 +1,7 @@
 package app.jayang.icebr8k.Modle;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v7.util.SortedList;
 import android.support.v7.widget.util.SortedListAdapterCallback;
@@ -11,7 +13,7 @@ import com.github.wrdlbrnft.sortedlistadapter.SortedListAdapter;
  * Created by yjj781265 on 1/2/2018.
  */
 
-public class UserDialog implements Comparable<UserDialog>,SortedListAdapter.ViewModel{
+public class UserDialog implements Comparable<UserDialog>,SortedListAdapter.ViewModel,Parcelable{
     private String name, username,photoUrl,score,onlineStats,email,id;
 
 
@@ -119,16 +121,12 @@ public class UserDialog implements Comparable<UserDialog>,SortedListAdapter.View
 
         UserDialog dialog = (UserDialog) o;
 
-        if (username != null ? !username.equals(dialog.username) : dialog.username != null)
-            return false;
         return id.equals(dialog.id);
     }
 
     @Override
     public int hashCode() {
-        int result = username != null ? username.hashCode() : 0;
-        result = 31 * result + id.hashCode();
-        return result;
+        return id.hashCode();
     }
 
     @Override
@@ -142,4 +140,44 @@ public class UserDialog implements Comparable<UserDialog>,SortedListAdapter.View
                 ", id='" + id + '\'' +
                 '}';
     }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public UserDialog(Parcel in){
+        this.id = in.readString();
+        this.name = in.readString();
+        this.username = in.readString();
+        this.photoUrl = in.readString();
+        this.score = in.readString();
+        this.onlineStats = in.readString();
+        this.email = in.readString();
+
+
+    }
+
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+       parcel.writeString(this.id);
+        parcel.writeString(this.name);
+        parcel.writeString(this.username);
+        parcel.writeString(this.photoUrl);
+        parcel.writeString(this.score);
+        parcel.writeString(this.onlineStats);
+        parcel.writeString(this.email);
+
+    }
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public UserDialog createFromParcel(Parcel in) {
+            return new UserDialog(in);
+        }
+
+        public UserDialog[] newArray(int size) {
+            return new UserDialog[size];
+        }
+    };
 }

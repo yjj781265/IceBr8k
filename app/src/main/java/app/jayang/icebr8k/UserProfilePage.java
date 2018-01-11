@@ -372,6 +372,7 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
                                     Intent i = new Intent(getApplicationContext(), ResultActivity.class);
                                     i.putExtra("sameAnswer", User1QA);
                                     i.putExtra("user2", mUser);
+                                    i.putExtra("user2Id" ,uid);
                                     i.putExtra("diffAnswer1", temp1QA);
                                     i.putExtra("diffAnswer2", temp2QA);
 
@@ -489,6 +490,21 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     Toast.makeText(getApplicationContext(),"Request Sent",Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            DatabaseReference playerIdRef = database.getReference().child("Notification").child(uid).
+                    child("player_id");
+            playerIdRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    String playerid = dataSnapshot.getValue(String.class);
+                  SendNotification.sendFriendRequestNotification(playerid,"Friend Request",  currentUser.getDisplayName()+" send you a friend request");
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
                 }
             });
 

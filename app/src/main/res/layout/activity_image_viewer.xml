@@ -19,7 +19,7 @@
         app:titleTextColor="@color/white"/>
 
 
-    <com.github.chrisbanes.photoview.PhotoView
+    <ImageView
         android:id="@+id/photo_view"
         android:layout_width="260dp"
         android:layout_height="260dp"

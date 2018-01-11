@@ -98,14 +98,14 @@ import static android.content.Context.CLIPBOARD_SERVICE;
 
     @Override
     public void onClick(View view) {
-          itemView.setClickable(false);
+
         if (messageTime.getVisibility() == View.VISIBLE) {
             messageTime.setVisibility(View.INVISIBLE);
-            itemView.setClickable(true);
+
 
         } else {
             messageTime.setVisibility(View.VISIBLE);
-            itemView.setClickable(true);
+
         }
 
 

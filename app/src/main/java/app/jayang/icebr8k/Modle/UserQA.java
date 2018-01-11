@@ -75,6 +75,7 @@ public class UserQA implements Parcelable,Comparable<UserQA> {
     public int describeContents() {
         return 0;
     }
+
     public UserQA(Parcel in){
       this.questionId = in.readString();
         this.answer = in.readString();

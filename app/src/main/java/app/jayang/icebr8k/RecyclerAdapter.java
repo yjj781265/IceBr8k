@@ -9,6 +9,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -39,10 +41,14 @@ import app.jayang.icebr8k.Modle.UserQA;
  * Created by LoLJay on 10/20/2017.
  */
 
-public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDialogViewHolder>  {
+public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDialogViewHolder>
+        implements Filterable {
     private Context context;
     private ArrayList<UserDialog>mUserDialogs;
-    private Comparator<UserDialog> mComparator;
+    private ArrayList<UserDialog> mFilteredList;
+
+
+
 
 
     public class UserDialogViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -79,85 +85,12 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
     }
 
 
-    private  final SortedList<UserDialog> mSortedList = new SortedList<>(UserDialog.class,
-            new SortedList.Callback<UserDialog>() {
-        @Override
-        public void onInserted(int position, int count) {
-            notifyItemChanged(position,count);
-
-        }
-
-        @Override
-        public void onRemoved(int position, int count) {
-            notifyItemChanged(position,count);
-
-        }
-
-        @Override
-        public void onMoved(int fromPosition, int toPosition) {
-            notifyItemChanged(fromPosition,toPosition);
-
-        }
-
-        @Override
-        public int compare(UserDialog o1, UserDialog o2) {
-
-            return mComparator.compare(o1,o2);
-        }
-
-        @Override
-        public void onChanged(int position, int count) {
-            notifyItemChanged(position,count);
-
-        }
-
-        @Override
-        public boolean areContentsTheSame(UserDialog oldItem, UserDialog newItem) {
-            return oldItem.equals(newItem);
-        }
-
-        @Override
-        public boolean areItemsTheSame(UserDialog item1, UserDialog item2) {
-            return item1.getId()==item2.getId();
-        }
-    });
-
-    public void add(UserDialog dialog){
-        mSortedList.add(dialog);
-    }
-
-    public void remove(UserDialog dialog){
-        mSortedList.remove(dialog);
-    }
-
-    public void add(ArrayList<UserDialog> dialogs){
-        mSortedList.addAll(dialogs);
-    }
-
-    public void remove(ArrayList<UserDialog> dialogs){
-        mSortedList.beginBatchedUpdates();
-        for(UserDialog dialog : dialogs ){
-            mSortedList.remove(dialog);
-        }
-        mSortedList.endBatchedUpdates();
-    }
-
-    public void replaceAll(ArrayList<UserDialog> dialogs){
-        mSortedList.beginBatchedUpdates();
-       for(int i = mSortedList.size()-1;i>=0;i--){
-           final UserDialog dialog = mSortedList.get(i);
-           if(!dialogs.contains(dialog)){
-               mSortedList.remove(dialog);
-           }
-       }
-       mSortedList.addAll(dialogs);
-        mSortedList.endBatchedUpdates();
-    }
 
 
     public RecyclerAdapter(Context context, ArrayList<UserDialog> dialogs) {
         this.context = context;
         mUserDialogs = dialogs;
+        mFilteredList =dialogs;
 
     }
 
@@ -183,7 +116,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
         Glide.with(holder.image.getContext()).load(dialog.getPhotoUrl()).
                 apply(RequestOptions.circleCropTransform()).into(holder.image);
 
-        if (dialog.getScore().equals("")) {
+        if ( dialog.getScore()!=null && dialog.getScore().equals("")) {
             holder.score.setVisibility(View.INVISIBLE);
         } else {
             holder.score.setText(dialog.getScore() + "%");
@@ -201,7 +134,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
 
 
                     } else if (online.equals("1")) {
-                        holder.onlineStats.setImageResource(R.drawable.circleshape_busy);
+                        holder.onlineStats.setImageResource(R.drawable.circle_shape_busy);
                         holder.onlineStats.setVisibility(View.VISIBLE);
                         if(holder.mRelativeLayout.getAlpha()!=1.0f) {
                             holder.mRelativeLayout.setAlpha(1.0f);
@@ -230,10 +163,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
 
             }
 
-
-
-
-
     @Override
     public int getItemCount() {
         return mUserDialogs.size();
@@ -255,6 +184,33 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
 
         diffResult.dispatchUpdatesTo(this);
         // calls adapter's notify methods after diff is computed
+    }
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String chatString = charSequence.toString();
+                    ArrayList<UserDialog> filteredList = new ArrayList<>();
+                    for(UserDialog dialog : mUserDialogs){
+                        if(dialog.getName().toLowerCase().contains(chatString)){
+                            filteredList.add(dialog);
+                        }
+                    }
+                    mFilteredList =filteredList;
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = mFilteredList;
+                return filterResults;
+
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                mFilteredList = (ArrayList<UserDialog>) filterResults.values;
+                notifyDataSetChanged();
+            }
+        };
     }
 
 

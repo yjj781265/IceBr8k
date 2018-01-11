@@ -84,5 +84,30 @@ public class SendNotification {
     }
 
 
+    public static void sendFriendRequestNotification(String playerId, String name, String text) {
+
+
+        try {
+            String url = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString();
+            OneSignal.postNotification(new JSONObject("{'contents': {'en':'" + text + "'}," +
+                            " 'include_player_ids': ['" + playerId + "'],"
+                            + "'headings': { 'en':'"+ name+"'},"+"large_icon :'"+ url+"'"+" }"),
+                    new OneSignal.PostNotificationResponseHandler() {
+                        @Override
+                        public void onSuccess(JSONObject response) {
+                            Log.d("Jsonjay","got it");
+                        }
+
+                        @Override
+                        public void onFailure(JSONObject response) {
+                            Log.d("Jsonjay", response.toString());
+                        }
+                    });
+        } catch (JSONException e) {
+            Log.d("Jsonjay", e.getMessage());
+        }
+    }
+
+
 
 }

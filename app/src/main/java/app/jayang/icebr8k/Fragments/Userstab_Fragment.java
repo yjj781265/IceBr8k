@@ -43,6 +43,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 
+import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -57,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import app.jayang.icebr8k.FriendRequestPage;
 import app.jayang.icebr8k.Homepage;
 import app.jayang.icebr8k.Modle.ChatDialog;
 import app.jayang.icebr8k.Modle.User;
@@ -65,6 +67,7 @@ import app.jayang.icebr8k.Modle.UserQA;
 import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.RecyclerAdapter;
 import app.jayang.icebr8k.SearchName;
+import app.jayang.icebr8k.SearchUser;
 import app.jayang.icebr8k.Viewholder;
 
 
@@ -85,6 +88,7 @@ public class Userstab_Fragment extends Fragment {
     SwipeRefreshLayout mRefreshLayout;
     LinearLayout mSearchView;
     Button filter_btn;
+    BootstrapButton addFriend;
     private SharedPreferences sharedPref;
     private ArrayList<UserDialog> mFilteredList;
     private Boolean sortByScore,done,newChat;
@@ -149,6 +153,9 @@ public class Userstab_Fragment extends Fragment {
         view = inflater.inflate(R.layout.users_tab, container, false);
         mRecyclerView = view.findViewById(R.id.recyclerView_id);
         mSearchView =view.findViewById(R.id.searchview_user);
+        mSearchView.setVisibility(View.GONE);
+        addFriend = view.findViewById(R.id.add_friend_frag);
+        addFriend.setVisibility(View.GONE);
         final LinearLayoutManager manager = new LinearLayoutManager(view.getContext());
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.setHasFixedSize(true);
@@ -158,6 +165,7 @@ public class Userstab_Fragment extends Fragment {
         mRecyclerView.setAdapter(mAdapter);
         mRefreshLayout =view.findViewById(R.id.swipetoRefresh);
                 filter_btn =view.findViewById(R.id.filter_btn);
+                filter_btn.setVisibility(View.GONE);
 
         populateUserDialogList();
         addQAListener();
@@ -204,18 +212,7 @@ public class Userstab_Fragment extends Fragment {
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                mRecyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-
-                    @Override
-                    public void onLayoutChange(View v, int left, int top, int right, int bottom,
-                                               int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                        mRecyclerView.removeOnLayoutChangeListener(this);
-                        Log.e(TAG, "updated");
-                        mRefreshLayout.setRefreshing(false);
-                    }
-                });
-
-                mAdapter.notifyDataSetChanged();
+               mRefreshLayout.setRefreshing(false);
 
             }
         });
@@ -224,6 +221,15 @@ public class Userstab_Fragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(getContext(), SearchName.class);
+                i.putParcelableArrayListExtra("friendList",mUserDialogArrayList);
+                startActivity(i);
+            }
+        });
+
+        addFriend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(getContext(), SearchUser.class);
                 startActivity(i);
             }
         });
@@ -250,10 +256,10 @@ public class Userstab_Fragment extends Fragment {
     }
 
     public void populateUserDialogList() {
-        mRefreshLayout.setRefreshing(true);
+
         mUserDialogArrayList.clear();
+        addFriend.setVisibility(View.VISIBLE);
         friendCount=0;
-        done=false;
         databaseReference = mDatabase.getReference("Friends").child(currentUser.getUid());
         databaseReference.keepSynced(true);
         databaseReference.addChildEventListener(new ChildEventListener() {
@@ -261,25 +267,53 @@ public class Userstab_Fragment extends Fragment {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 if(dataSnapshot.child("Stats").getValue(String.class).equals("Accepted")){
                     showLog(dataSnapshot.getKey() +" added");
+                    done =false;
+                    mRefreshLayout.setRefreshing(true);
                    UserDialog dialog = new UserDialog();
                    dialog.setId(dataSnapshot.getKey());
                     getUserinfo(dialog);
+                    addFriend.setVisibility(View.GONE);
+                    mSearchView.setVisibility(View.VISIBLE);
+                    filter_btn.setVisibility(View.VISIBLE);
                     friendCount++;
-                    done =false;
+
                     showLog("friendCount "+friendCount);
                 }
-
 
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                showLog("Changed "+dataSnapshot.getKey());
+                if(dataSnapshot.child("Stats").getValue(String.class).equals("Accepted")){
+                    showLog(dataSnapshot.getKey() +" added");
+                    done =false;
+                    UserDialog dialog = new UserDialog();
+                    dialog.setId(dataSnapshot.getKey());
+                    getUserinfo(dialog);
+                    addFriend.setVisibility(View.GONE);
+                    mSearchView.setVisibility(View.VISIBLE);
+                    filter_btn.setVisibility(View.VISIBLE);
+                    friendCount++;
 
+                    showLog("friendCount "+friendCount);
+                }
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
+               UserDialog dialog = new UserDialog();
+               dialog.setId(dataSnapshot.getKey());
+               mUserDialogArrayList.remove(dialog);
+               friendCount = mUserDialogArrayList.size();
+               mAdapter.notifyDataSetChanged();
+               if(mAdapter.getItemCount()==0){
+                   addFriend.setVisibility(View.VISIBLE);
+                   mSearchView.setVisibility(View.GONE);
+                   filter_btn.setVisibility(View.GONE);
+               }
 
+               showLog("Child Removed"+dataSnapshot.getKey());
             }
 
             @Override
@@ -441,19 +475,6 @@ public class Userstab_Fragment extends Fragment {
                        showLog("resorted by score");
                    }else{
                        mAdapter.notifyDataSetChanged();
-
-
-
-
-
-
-
-
-
-
-
-
-
                        showLog("updated at "+ index); //update score
                    }
                }
@@ -470,14 +491,12 @@ public class Userstab_Fragment extends Fragment {
          if(sortByScore){
              Collections.sort(mUserDialogArrayList,SCORE);
              mAdapter.notifyDataSetChanged();
+             mRefreshLayout.setRefreshing(false);
          }else {
              Collections.sort(mUserDialogArrayList,ONLINESTATS);
              mAdapter.notifyDataSetChanged();
+             mRefreshLayout.setRefreshing(false);
             }
-            mRefreshLayout.setRefreshing(false);
-
-
-
 
         }
 

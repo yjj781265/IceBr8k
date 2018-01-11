@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "773225047243-54avivj7e59hsnomfcqq6jn3201i6jmc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.jayang.icebr8k",
+            "certificate_hash": "ff6354f64e800fadc215b7067e95d02525ad44d8"
+          }
+        },
+        {
           "client_id": "773225047243-sdqklltfldh0kr0oki58m2epnsvs2vg4.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

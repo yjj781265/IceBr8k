@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -28,10 +29,9 @@ public class FriendRequestPage extends AppCompatActivity {
     private ArrayList<UserDialog> mUserDialogs;
     private FriendReqestItemAdapter mAdapter;
     private RecyclerView mRecyclerView;
-    private Boolean init;
     private TextView noFrt;
     private FirebaseUser currentUser;
-    private int counter,childerenCount;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,29 +66,31 @@ public class FriendRequestPage extends AppCompatActivity {
     }
 
     private void getData(){
-        init =false;
         DatabaseReference requestRef = FirebaseDatabase.getInstance().getReference().child("Friends")
                 .child(currentUser.getUid());
         requestRef.keepSynced(true);
-        requestRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                 mUserDialogs.clear();
-                  counter =0;
-                 childerenCount=(int)dataSnapshot.getChildrenCount();
-                 if(childerenCount==0){
-                     noFrt.setVisibility(View.VISIBLE);
-                 }
 
-                for(DataSnapshot chidSnapShot : dataSnapshot.getChildren()){
-                   counter++;
-                    if(chidSnapShot.child("Stats").getValue(String.class).equals("Pending")){
-                        addToDialog( chidSnapShot.getKey());
+        requestRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    if(dataSnapshot.child("Stats").getValue(String.class).equals("Pending")){
+                        addToDialog( dataSnapshot.getKey());
                     }
 
-                }
+            }
 
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
             }
 
@@ -97,6 +99,24 @@ public class FriendRequestPage extends AppCompatActivity {
 
             }
         });
+
+        requestRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                noFrt.setVisibility(View.VISIBLE);
+                for(DataSnapshot child : dataSnapshot.getChildren()) {
+                    if (child.child("Stats").getValue(String.class).equals("Pending")) {
+                        noFrt.setVisibility(View.GONE);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
 
     }
 
@@ -115,13 +135,9 @@ public class FriendRequestPage extends AppCompatActivity {
                 UserDialog dialog  =new UserDialog(user2Uid,user.getDisplayname(),user.getUsername()
                 ,user.getPhotourl(), null,null,user.getEmail());
                 mUserDialogs.add(dialog);
-
-                if(counter!=0 && counter==childerenCount){
-                    noFrt.setVisibility(View.GONE);
+                noFrt.setVisibility(View.GONE);
                  mAdapter.notifyDataSetChanged();
-                }else{
-                    noFrt.setVisibility(View.VISIBLE);
-                }
+
             }
 
             @Override

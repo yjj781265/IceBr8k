@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <RelativeLayout
+
+        android:background="@color/creamYellow"
+        android:layout_marginTop="10dp"
+        android:gravity="fill_horizontal"
+        android:id="@+id/R1"
+        android:elevation="3dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/profileToolbar">
+        <ImageView
+
+            android:id="@+id/avatar_frag"
+            android:layout_width="66dp"
+            android:layout_height="66dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_margin="10dp"
+            android:clickable="true"/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_toRightOf="@id/avatar_frag"
+            android:layout_marginStart="9dp"
+            android:layout_centerVertical="true"
+            android:orientation="vertical"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/displayname_frag"
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="normal"
+
+                android:maxLength="18"
+                android:maxLines="2"
+                android:text="123456789111315172"
+                android:layout_toRightOf="@id/avatar_frag"
+
+                android:textColor="@android:color/black"
+                android:textSize="20dp"/>
+
+            <TextView
+                android:id="@+id/username_frag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="normal"
+                android:textSize="14dp"
+                android:text="Username" />
+        </LinearLayout>
+
+
+        <ImageView
+            android:id="@+id/QR_frag"
+            android:layout_width="30dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="30dp"
+            android:clickable="true"
+            android:onClick="qrOnClick"
+            android:src="@drawable/qr_code_selector"
+            android:layout_height="30dp"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:elevation="3dp"
+        android:background="@color/creamYellow"
+        android:layout_marginTop="10dp"
+        android:id="@+id/R2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/R1">
+        <TextView
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Email"
+            android:id="@+id/email_tv"
+            android:layout_marginLeft="20dp"
+            android:layout_centerVertical="true"
+            android:textSize="16dp"
+
+            android:textColor="@android:color/black"/>
+        <TextView
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:id="@+id/email_frag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="96dp"
+            android:text="yjj@gmail.com"
+            android:textSize="16dp"
+            android:autoLink="email"
+            android:textColor="@color/material_drawer_secondary_text"
+            android:textColorLink="@color/material_drawer_secondary_text"
+            />
+
+
+    </RelativeLayout>
+        <LinearLayout
+            android:id="@+id/frt_frag"
+            android:layout_below="@id/R2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:background="@color/creamYellow"
+            android:foreground="?selectableItemBackground"
+            android:elevation="3dp"
+            android:padding="10dp">
+            <TextView
+                android:layout_marginStart="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Friend Request"
+                android:textSize="16dp"
+                android:textColor="@color/black"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_marginLeft="56dp"
+                android:id="@+id/badge_frag"
+                android:gravity="center"
+                android:background="@drawable/badge_circle"
+
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+        <com.beardedhen.androidbootstrap.BootstrapButton
+            android:layout_width="320dp"
+            android:layout_below="@id/frt_frag"
+            android:layout_marginTop="56dp"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/reset_frag"
+            android:layout_height="42dp"
+            app:buttonMode="regular"
+            app:bootstrapBrand="danger"
+            android:text="Reset Questions"
+            />
+
+
+</RelativeLayout>

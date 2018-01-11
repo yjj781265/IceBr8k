@@ -2,7 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="app.jayang.icebr8k">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.CAMERA"/>
 
@@ -36,6 +39,7 @@
             android:screenOrientation="portrait"/>
         <activity
             android:name=".SplashScreen"
+            android:noHistory="true"
             android:screenOrientation="portrait"
             android:theme="@style/SplashTheme">
             <intent-filter>
@@ -84,6 +88,7 @@
         </activity>
         <activity
             android:name=".DevoderActivity"
+            android:noHistory="true"
             android:screenOrientation="portrait">
         </activity>
         <activity android:name=".SearchName"

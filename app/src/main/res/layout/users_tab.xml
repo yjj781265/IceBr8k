@@ -6,8 +6,6 @@
     android:id="@+id/userTab_frag"
     android:animateLayoutChanges="true"
     android:background="@color/white"
-
-
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -18,17 +16,16 @@
     android:layout_width="wrap_content"
     app:elevation="0dp"
     android:id="@+id/appbar"
-    app:expanded="false"
     android:divider="@color/gray"
-
-
+    app:expanded="false"
     android:layout_height="wrap_content">
     <LinearLayout
         android:layout_marginTop="5dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="10dp"
         app:layout_scrollFlags="scroll|snap"
         android:minHeight="30dp"
+        android:layout_margin="10dp"
         android:background="@color/white"
         android:orientation="horizontal"
         android:layout_height="wrap_content"
@@ -39,7 +36,6 @@
          android:paddingLeft="10dp"
          android:layout_gravity="center_horizontal"
          android:layout_width="300dp"
-         android:layout_marginStart="10dp"
          android:orientation="horizontal"
          android:layout_height="wrap_content">
 
@@ -89,5 +85,15 @@
       >
     </android.support.v7.widget.RecyclerView>
 </android.support.v4.widget.SwipeRefreshLayout>
+
+   <com.beardedhen.androidbootstrap.BootstrapButton
+       android:layout_width="wrap_content"
+       android:id="@+id/add_friend_frag"
+       android:layout_height="wrap_content"
+       app:bootstrapBrand="success"
+       app:roundedCorners="true"
+       android:layout_gravity="center"
+       android:visibility="gone"
+       android:text="Add Friend"/>
 
 </android.support.design.widget.CoordinatorLayout>

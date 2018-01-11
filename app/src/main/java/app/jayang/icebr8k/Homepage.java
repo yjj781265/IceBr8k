@@ -1,4 +1,6 @@
 package app.jayang.icebr8k;
+import android.*;
+import android.Manifest;
 import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -15,8 +17,10 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -53,6 +57,12 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.single.PermissionListener;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.onesignal.OSSubscriptionObserver;
@@ -147,7 +157,6 @@ public class Homepage extends AppCompatActivity  implements
 
 
         initialiseOnlinePresence();
-        setScreenOnOffListener();
         deleteInChatRoomNode();
         unReadCheck();
         setBadge();
@@ -229,8 +238,7 @@ public class Homepage extends AppCompatActivity  implements
                 return true;
 
             case R.id.scan_qr:
-                Intent intent = new Intent(getApplicationContext(),DevoderActivity.class);
-                startActivity(intent);
+                checkCameraPermission();
                 return true;
 
 
@@ -249,6 +257,7 @@ public class Homepage extends AppCompatActivity  implements
         ConnectionBuddyCache.clearLastNetworkState(this);
         showLog("onStart");
         setOnline();
+        setScreenOnOffListener();
 
 
 
@@ -291,6 +300,24 @@ public class Homepage extends AppCompatActivity  implements
         }
         showLog("onDestroy");
 
+    }
+
+    public void checkCameraPermission(){
+        Dexter.withActivity(this)
+                .withPermission(Manifest.permission.CAMERA)
+                .withListener(new PermissionListener() {
+                    @Override public void onPermissionGranted(PermissionGrantedResponse response) {
+                        Intent intent = new Intent(getApplicationContext(),DevoderActivity.class);
+                        startActivity(intent);
+
+                    }
+                    @Override public void onPermissionDenied(PermissionDeniedResponse response) {
+                        showSnackbarWithSetting("Camera Permission needed for Scanning QR Code",viewPager);
+                    }
+                    @Override public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
+                        token.continuePermissionRequest();
+                    }
+                }).check();
     }
 
     public void unReadCheck() {
@@ -495,6 +522,24 @@ public class Homepage extends AppCompatActivity  implements
         moveTaskToBack(true);
 
     }
+
+    public void showSnackbarWithSetting(String str, View view){
+        Snackbar snackbar = Snackbar
+                .make(view, str, Snackbar.LENGTH_LONG)
+                .setAction("Setting", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Context context = view.getContext();
+                        Intent myAppSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                Uri.parse("package:" + context.getPackageName()));
+                        myAppSettings.addCategory(Intent.CATEGORY_DEFAULT);
+                        myAppSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(myAppSettings);
+                    }
+                });
+        snackbar.show();
+    }
+
 
 
     @Override

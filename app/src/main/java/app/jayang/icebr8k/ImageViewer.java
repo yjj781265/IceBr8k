@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.ImageView;
 import android.widget.Toolbar;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -20,7 +21,7 @@ import java.net.URL;
 
 public class ImageViewer extends AppCompatActivity {
 
-    private PhotoView photoView;
+    private ImageView photoView;
     private android.support.v7.widget.Toolbar  mToolbar;
     private String photourl;
     private MaterialDialog mDialog;
@@ -30,7 +31,7 @@ public class ImageViewer extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_viewer);
-        photoView = (PhotoView) findViewById(R.id.photo_view);
+        photoView =  findViewById(R.id.photo_view);
         mToolbar =findViewById(R.id.imageViewer_toolbar);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

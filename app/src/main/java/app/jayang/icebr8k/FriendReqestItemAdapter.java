@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -18,11 +19,18 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
+import app.jayang.icebr8k.Modle.Author;
+import app.jayang.icebr8k.Modle.Message;
 import app.jayang.icebr8k.Modle.UserDialog;
 
 /**
@@ -107,9 +115,9 @@ public class FriendReqestItemAdapter extends RecyclerView.Adapter<FriendReqestIt
         }
     }
 
-    private void acceptFriend(String uid, final int position){
-        FirebaseUser currentuser = FirebaseAuth.getInstance().getCurrentUser();
-        if(uid!=null && !uid.equals(currentuser.getUid())) {
+    private void acceptFriend(final String uid, final int position) {
+        final FirebaseUser currentuser = FirebaseAuth.getInstance().getCurrentUser();
+        if (uid != null && !uid.equals(currentuser.getUid())) {
             DatabaseReference acceptRef = FirebaseDatabase.getInstance().getReference().child("Friends").child(currentuser.getUid())
                     .child(uid).child("Stats");
             acceptRef.setValue("Accepted");
@@ -121,20 +129,65 @@ public class FriendReqestItemAdapter extends RecyclerView.Adapter<FriendReqestIt
                 public void onComplete(@NonNull Task<Void> task) {
                     Toast.makeText(mContext, "Friend Request Accepted", Toast.LENGTH_SHORT).show();
                     removeAt(position);
+                    Author author = new Author("0406", currentuser.getDisplayName(),
+                            currentuser.getPhotoUrl().toString());
+                    final Message message = new Message(createTransactionID(), "I have accepted your friend request", new Date(), author);
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference().
+                            child("Messages").child(currentuser.getUid()).
+                            child(uid);
+                    ref.child("chathistory").child(message.getId()).setValue(message);
+                    ref.child("lastmessage").setValue(message);
+                    ref.child("inChat").setValue(false);
+                    ref.child("unRead").setValue(0);
+
+
+
+                    DatabaseReference ref2 = FirebaseDatabase.getInstance().getReference().
+                            child("Messages").child(uid).child(currentuser.getUid());
+                    author.setId("0401");
+                    message.setUser(author);
+                    ref2.child("chathistory").child(message.getId()).
+                            setValue(message).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            DatabaseReference playerIdRef = FirebaseDatabase.getInstance().getReference().child("Notification").child(uid).
+                                    child("player_id");
+                            playerIdRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    String playerid = dataSnapshot.getValue(String.class);
+                                    SendNotification.sendNotificationTo(playerid, currentuser.getDisplayName(), message.getText(), currentuser.getUid());
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+
+
+                        }
+                    });
+                    ref2.child("lastmessage").setValue(message);
+                    ref2.child("inChat").setValue(false);
+                    ref2.child("unRead").setValue(1);
+
 
                 }
             });
 
 
-
-
-
         }
-
-
-
-
     }
+    public String createTransactionID() {
+        return UUID.randomUUID().toString().replaceAll("-", "").substring(0,6);
+    }
+
+
+
+
+
+
 
     public void removeAt(int position) {
         requestList.remove(position);

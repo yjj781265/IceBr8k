@@ -29,9 +29,6 @@ import app.jayang.icebr8k.ResultActivity;
 public class commonFrag extends Fragment {
 
     View mView;
-    TextView mTextView;
-    Handler mHandler;
-    Runnable runnable;
     ArrayList<UserQA> mArrayList, commonArrList;
     RecyclerView mRecyclerView_common;
     User user2;

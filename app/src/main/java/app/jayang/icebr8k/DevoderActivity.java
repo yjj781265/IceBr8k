@@ -3,6 +3,7 @@ package app.jayang.icebr8k;
 import android.content.Intent;
 import android.graphics.PointF;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Toast;
@@ -67,7 +68,10 @@ public class DevoderActivity extends AppCompatActivity  implements ZXingScannerV
                 }
             });
         }else{
-            Toast.makeText(getApplicationContext(),"Sorry, not a valid IceBr8k QR code, try it again",Toast.LENGTH_LONG).show();
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(userId));
+            startActivity(browserIntent);
+
+
         }
     }
 
@@ -111,7 +115,7 @@ public class DevoderActivity extends AppCompatActivity  implements ZXingScannerV
     @Override
     public void handleResult(Result result) {
          searchUser(result.getText());
-        mScannerView.resumeCameraPreview(this);
+
 
     }
     }

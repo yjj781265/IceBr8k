@@ -126,6 +126,7 @@
                 app:bsb_show_thumb_text="false"
                 app:bsb_show_section_text ="true"
                 app:bsb_show_section_mark="true"
+                app:bsb_touch_to_seek="true"
                 app:bsb_hide_bubble="true"
                 app:bsb_section_text_position="below_section_mark"
                 android:visibility="gone"

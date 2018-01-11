@@ -237,6 +237,7 @@ public class login_page extends AppCompatActivity implements
         if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
 
+
             if (result.isSuccess()) {
                 // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = result.getSignInAccount();
@@ -377,8 +378,8 @@ public class login_page extends AppCompatActivity implements
                 .inputType(InputType.TYPE_CLASS_TEXT).inputRange(3,    20,
                         getResources().
                         getColor(R.color.red_error)).positiveText("Confirm").positiveColor
-                        (getColor(R.color.colorAccent)).negativeText("Discard").
-                        negativeColor(getColor(R.color.red_error)).
+                        (getResources().getColor(R.color.colorAccent)).negativeText("Discard").
+                        negativeColor(getResources().getColor(R.color.red_error)).
                         icon(getDrawable(R.mipmap.ic_launcher));
 
         userNameDialogBuilder.input("Username", null,

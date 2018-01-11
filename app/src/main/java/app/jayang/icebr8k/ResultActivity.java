@@ -55,6 +55,7 @@ public class ResultActivity extends AppCompatActivity {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setTitle("");
 
         mViewPager = findViewById(R.id.viewpager_result);
 
@@ -62,6 +63,7 @@ public class ResultActivity extends AppCompatActivity {
         Log.d("mapArr", mArrayList.toString());
         user2 = (User) getIntent().getSerializableExtra("user2");
         Log.d("mapArr", user2.getDisplayname());
+        user2Id = getIntent().getExtras().getString("user2Id");
         diffAnswer1 = getIntent().getParcelableArrayListExtra("diffAnswer1");
         Log.d("diff", diffAnswer1.toString());
         diffAnswer2 = getIntent().getParcelableArrayListExtra("diffAnswer2");
@@ -89,6 +91,24 @@ public class ResultActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.result_menu, menu);
+        final MenuItem item = menu.findItem(R.id.mybutton);
+        DatabaseReference mref = FirebaseDatabase.getInstance().getReference().child("Friends").
+                child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        mref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChild(user2Id)){
+                    item.setVisible(true);
+                }else{
+                    item.setVisible(false);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -98,14 +118,7 @@ public class ResultActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.mybutton) {
-
-            DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Usernames/"+
-            user2.getUsername());
-            mRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    user2Id =dataSnapshot.getValue(String.class);
-                   Intent mIntent = new Intent(getBaseContext(),MainChatActivity.class);
+            Intent mIntent = new Intent(getBaseContext(),MainChatActivity.class);
                     mIntent.putExtra("user2Name",user2.getDisplayname());
                     mIntent.putExtra("user2Id",user2Id);
                     startActivity(mIntent);
@@ -114,12 +127,8 @@ public class ResultActivity extends AppCompatActivity {
 
                 }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
 
-                }
-            });
-        }
+
         return super.onOptionsItemSelected(item);
     }
 
