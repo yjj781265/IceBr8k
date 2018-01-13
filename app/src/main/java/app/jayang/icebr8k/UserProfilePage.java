@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.beardedhen.androidbootstrap.BootstrapButton;
+import com.beardedhen.androidbootstrap.api.attributes.BootstrapBrand;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.dd.processbutton.iml.ActionProcessButton;
@@ -407,7 +408,7 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
         DatabaseReference friendStatsRef = database.getReference().child("Friends").
                 child(currentUser.getUid()).child(uid).child("Stats");
         friendStatsRef.keepSynced(true);
-        friendStatsRef.addValueEventListener(new ValueEventListener() {
+        friendStatsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 String stats = dataSnapshot.getValue(String.class);
@@ -449,7 +450,9 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
                              deleteFriend_btn.setVisibility(View.GONE);
                              addFriend_btn.setVisibility(View.VISIBLE);
                              message_btn.setVisibility(View.GONE);
-                             addFriend_btn.setText("Friend Request Sent");
+                             addFriend_btn.setText("Friend Request Pending");
+
+
                 }else if(stats==null){
                              addFriend_btn.setVisibility(View.VISIBLE);
                              addFriend_btn.setText("Send Friend Request");

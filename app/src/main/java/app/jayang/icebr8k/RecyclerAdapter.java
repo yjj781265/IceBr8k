@@ -80,6 +80,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
                 intent.putExtra("userUid",dialog.getId());
                 context.startActivity(intent);
 
+
             }
         }
     }

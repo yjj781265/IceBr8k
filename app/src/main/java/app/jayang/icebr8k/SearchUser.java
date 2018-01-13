@@ -64,6 +64,7 @@ public class SearchUser extends AppCompatActivity implements SearchView.OnQueryT
         final MenuItem searchItem = menu.findItem(R.id.pdf_menu_search_item);
         SearchView searchView =(SearchView) MenuItemCompat.getActionView(searchItem);
         searchView.setIconified(false);
+        searchView.setIconifiedByDefault(false);
         searchView.setQueryHint("Search Username");
         searchView.setOnQueryTextListener(this);
         searchView.requestFocus();
@@ -77,7 +78,6 @@ public class SearchUser extends AppCompatActivity implements SearchView.OnQueryT
         //hide keyboard
         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-        finish();
         finish();
         return true;
     }
@@ -155,6 +155,7 @@ public class SearchUser extends AppCompatActivity implements SearchView.OnQueryT
                 i.putExtra("userUid",uid);
                 searchingDialog.dismiss();
                 startActivity(i);
+                finish();
                 overridePendingTransition(R.anim.slide_from_right,R.anim.slide_to_left);
             }
 

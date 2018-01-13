@@ -60,8 +60,6 @@ public class DevoderActivity extends AppCompatActivity  implements ZXingScannerV
 
                     }
                 }
-
-
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
 

@@ -55,6 +55,7 @@ public class SearchName extends AppCompatActivity implements SearchView.OnQueryT
         final MenuItem searchItem = menu.findItem(R.id.pdf_menu_search_item);
         SearchView searchView =(SearchView) MenuItemCompat.getActionView(searchItem);
         searchView.setIconified(false);
+        searchView.setIconifiedByDefault(false);
         searchView.setQueryHint(getString(R.string.hint1));
         searchView.setOnQueryTextListener(this);
         searchView.requestFocus();

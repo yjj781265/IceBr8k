@@ -18,6 +18,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.Gravity;
@@ -47,6 +48,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.onesignal.OneSignal;
 import com.stfalcon.chatkit.commons.ImageLoader;
+import com.stfalcon.chatkit.commons.ViewHolder;
 import com.stfalcon.chatkit.commons.models.IDialog;
 import com.stfalcon.chatkit.commons.models.IMessage;
 import com.stfalcon.chatkit.commons.models.IUser;
@@ -66,6 +68,7 @@ import app.jayang.icebr8k.Modle.ChatDialog;
 import app.jayang.icebr8k.Modle.Message;
 import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.R;
+import app.jayang.icebr8k.Viewholder;
 
 /**
  * Created by yjj781265 on 11/9/2017.
@@ -161,7 +164,6 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
                       chatView.setSelected(false);
                       tempChatList.remove(dialog);
                       if(tempChatList.isEmpty()){
-
                           actionMode.finish();
                       }else {
                           actionMode.setTitle(String.valueOf(tempChatList.size()) + " Selected");
@@ -297,11 +299,13 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
             actionMode = null;
 
             // reset color
-            for(ChatDialog dialog : mChatDialogs){
+            for(ChatDialog dialog : tempChatList){
                 int poistion = mChatDialogs.indexOf(dialog);
-                View chatView= mDialogsList.getLayoutManager().findViewByPosition(poistion);
-                chatView.setBackgroundColor(getContext().getResources().getColor(R.color.white));
-                chatView.setSelected(false);
+                View chatView = mDialogsList.getLayoutManager().findViewByPosition(poistion);
+                if(chatView!=null) {
+                    chatView.setBackgroundColor(getContext().getResources().getColor(R.color.white));
+                    chatView.setSelected(false);
+                }
             }
             if(mHomepage!=null) {
                 mHomepage.getViewPager().setSwipeable(true);
@@ -344,7 +348,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
             dialogsListAdapter.setItems(mChatDialogs);
 
         }
-        String conversation = "Conversation";
+        String conversation = "Conversations";
         if(tempChatList.size() ==1){
             conversation = "Conversation";
         }
