@@ -49,9 +49,11 @@ import app.jayang.icebr8k.Modle.CustomIncomingMessageViewHolder;
 import app.jayang.icebr8k.Modle.CustomOutcomingMessageViewHolder;
 import app.jayang.icebr8k.Modle.Message;
 import app.jayang.icebr8k.Modle.User;
+import me.imid.swipebacklayout.lib.SwipeBackLayout;
+import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 
 
-public class MainChatActivity extends AppCompatActivity implements MessagesListAdapter.OnLoadMoreListener {
+public class MainChatActivity extends SwipeBackActivity implements MessagesListAdapter.OnLoadMoreListener {
 
     // global variables
     private final String senderId = "0406";
@@ -73,6 +75,7 @@ public class MainChatActivity extends AppCompatActivity implements MessagesListA
     private String user2Id,user2Name ;
     private ArrayList<Message> mMessages;
     private ImageView inChatIndicator;
+    private SwipeBackLayout mSwipeBackLayout;
     DateFormatter.Formatter formatter,formatter2;
     ImageLoader imageLoader;
     final int COUNT_LIMT = 20;
@@ -95,13 +98,16 @@ public class MainChatActivity extends AppCompatActivity implements MessagesListA
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         mDatabase = FirebaseDatabase.getInstance();
 
-        messagesList = findViewById(R.id.messagesList);
+        messagesList = (MessagesList) findViewById(R.id.messagesList);
         messagesList.setHasFixedSize(true);
-        messageInput = findViewById(R.id.input_message);
-        chatToolBar = findViewById(R.id.chat_toolbar);
-        inChatIndicator = findViewById(R.id.inChat_indicator);
+        messageInput =(MessageInput) findViewById(R.id.input_message);
+        chatToolBar = (Toolbar) findViewById(R.id.chat_toolbar);
+        inChatIndicator =(ImageView) findViewById(R.id.inChat_indicator);
         setSupportActionBar(chatToolBar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        mSwipeBackLayout = getSwipeBackLayout();
+        mSwipeBackLayout.setEdgeTrackingEnabled(SwipeBackLayout.EDGE_LEFT);
 
 
         user2Id= getIntent().getExtras().getString("user2Id");
@@ -256,6 +262,29 @@ public class MainChatActivity extends AppCompatActivity implements MessagesListA
             }
         });
 
+        mSwipeBackLayout.addSwipeListener(new SwipeBackLayout.SwipeListener() {
+            @Override
+            public void onScrollStateChange(int state, float scrollPercent) {
+
+            }
+
+            @Override
+            public void onEdgeTouch(int edgeFlag) {
+                //hide keyboard
+                View view = getCurrentFocus();
+                if (view != null) {
+                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                }
+            }
+
+            @Override
+            public void onScrollOverThreshold() {
+
+            }
+        });
+
+
 
 
 
@@ -317,9 +346,9 @@ public class MainChatActivity extends AppCompatActivity implements MessagesListA
         //hide keyboard
         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-        finish();
         startActivity(intent);
         finish();
+        overridePendingTransition(R.anim.slide_from_left,R.anim.slide_to_right);
 
         return true;
     }
@@ -331,6 +360,7 @@ public class MainChatActivity extends AppCompatActivity implements MessagesListA
         intent.putExtra("mainchat", "1");
         startActivity(intent);
         finish();
+        overridePendingTransition(R.anim.slide_from_left,R.anim.slide_to_right);
 
     }
 

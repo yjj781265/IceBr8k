@@ -661,6 +661,8 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
         i.putExtra("user2Id",dialog.getId());
         i.putExtra("user2Name",dialog.getDialogName());
         startActivity(i);
+        getActivity().overridePendingTransition(R.anim.slide_from_right,R.anim.slide_to_left);
+
 
     }
 

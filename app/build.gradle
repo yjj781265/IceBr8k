@@ -89,6 +89,7 @@ dependencies {
     compile 'com.xw.repo:bubbleseekbar:3.13-lite'
     compile 'com.beardedhen:androidbootstrap:2.3.2'
     compile 'com.github.wrdlbrnft:sorted-list-adapter:0.2.0.1'
+    compile 'me.imid.swipebacklayout.lib:library:1.1.0'
 
     implementation("com.mikepenz:materialdrawer:6.0.2@aar") {
         transitive = true

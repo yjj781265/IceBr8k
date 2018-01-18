@@ -73,21 +73,11 @@ import com.zplesac.connectionbuddy.cache.ConnectionBuddyCache;
 import com.zplesac.connectionbuddy.interfaces.ConnectivityChangeListener;
 import com.zplesac.connectionbuddy.models.ConnectivityEvent;
 import com.zplesac.connectionbuddy.models.ConnectivityState;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.UUID;
-
 import app.jayang.icebr8k.Fragments.SurveyTab_Fragment;
 import app.jayang.icebr8k.Fragments.Userstab_Fragment;
 import app.jayang.icebr8k.Fragments.chat_frag;
 import app.jayang.icebr8k.Fragments.me_frag;
-import app.jayang.icebr8k.Modle.User;
-import app.jayang.icebr8k.Modle.UserDialog;
+
 
 
 public class Homepage extends AppCompatActivity  implements
@@ -179,6 +169,7 @@ public class Homepage extends AppCompatActivity  implements
                 viewPager.setCurrentItem(2);
             }
         }
+        setScreenOnOffListener();
 
 
 
@@ -254,10 +245,9 @@ public class Homepage extends AppCompatActivity  implements
     @Override
     protected void onStart() {
         super.onStart();
-        ConnectionBuddyCache.clearLastNetworkState(this);
         showLog("onStart");
         setOnline();
-        setScreenOnOffListener();
+
 
 
 
@@ -269,7 +259,6 @@ public class Homepage extends AppCompatActivity  implements
         super.onResume();
 
         ConnectionBuddyCache.clearLastNetworkState(this);
-
         ConnectionBuddy.getInstance().registerForConnectivityEvents(this, this);
         setOnline();
         showLog("onResume");

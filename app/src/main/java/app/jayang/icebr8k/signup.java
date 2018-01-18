@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -68,11 +69,13 @@ import java.util.UUID;
 
 import app.jayang.icebr8k.Modle.User;
 import dmax.dialog.SpotsDialog;
+import me.imid.swipebacklayout.lib.SwipeBackLayout;
+import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 import pl.aprilapps.easyphotopicker.DefaultCallback;
 import pl.aprilapps.easyphotopicker.EasyImage;
 
 
-public class signup extends AppCompatActivity {
+public class signup extends SwipeBackActivity {
     private final String DEFAULT_PHOTO_URL = "https://firebasestorage.googleapis.com/v0/b/" +
             "icebr8k-98675.appspot.com/o/UserAvatars%2Fdefault_avatar.png?alt=media&token" +
             "=ccbf30ce-5cfb-493a-8c28-8bf7ee18cc9a";
@@ -87,6 +90,7 @@ public class signup extends AppCompatActivity {
     private MaterialDialog reminderDialog;
     private Intent mIntent;
     private Bitmap avatarBitmap;
+    private SwipeBackLayout mSwipeBackLayout;
     private  MultiplePermissionsListener snackbarMultiplePermissionsListener;
     private DatabaseReference mRef;
 
@@ -96,30 +100,33 @@ public class signup extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
-        avatar = findViewById(R.id.avatar_signup);
-        mToolbar = findViewById(R.id.toolbar_signup);
-        sv = findViewById(R.id.sv_signup);
+        avatar = (ImageView) findViewById(R.id.avatar_signup);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar_signup);
+        sv = (ScrollView) findViewById(R.id.sv_signup);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mIntent = new Intent(this,login_page.class);
         loadingdialog = new SpotsDialog(this,"Signing Up...");
         mRef = FirebaseDatabase.getInstance().getReference();
         defaultPhotoFlag =true;
+        mSwipeBackLayout = getSwipeBackLayout();
+        mSwipeBackLayout.setEdgeTrackingEnabled(SwipeBackLayout.EDGE_LEFT);
+
 
 
          /*edittext*/
-        email = findViewById(R.id.email_signup);
-        password = findViewById(R.id.password_signup);
-        password2 = findViewById(R.id.confirmpwd_signup);
-        username = findViewById(R.id.username_signup);
-        displayname = findViewById(R.id.fullname_signup);
+        email = (TextInputEditText) findViewById(R.id.email_signup);
+        password = (TextInputEditText) findViewById(R.id.password_signup);
+        password2 = (TextInputEditText) findViewById(R.id.confirmpwd_signup);
+        username = (TextInputEditText) findViewById(R.id.username_signup);
+        displayname = (TextInputEditText) findViewById(R.id.fullname_signup);
 
         //textinputlayout
-        email_layout = findViewById(R.id.email_layout_signup);
-        password_layout = findViewById(R.id.password_layout_signup);
-        password2_layout = findViewById(R.id.confirmpwd_layout_signup);
-        username_layout = findViewById(R.id.username_layout_signup);
-        displayname_layout = findViewById(R.id.fullname_layout_signup);
+        email_layout = (TextInputLayout) findViewById(R.id.email_layout_signup);
+        password_layout = (TextInputLayout)findViewById(R.id.password_layout_signup);
+        password2_layout = (TextInputLayout)findViewById(R.id.confirmpwd_layout_signup);
+        username_layout =(TextInputLayout) findViewById(R.id.username_layout_signup);
+        displayname_layout = (TextInputLayout)findViewById(R.id.fullname_layout_signup);
 
         password.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -360,7 +367,7 @@ public class signup extends AppCompatActivity {
         reminderDialog = new MaterialDialog.Builder(this)
                 .content("Because you didn't choose your own avatar photo, " +
                         "the default one will be used (You also can change it later)")
-                .positiveText("I am fine with it").positiveColor(getColor(R.color.colorPrimary))
+                .positiveText("I am fine with it").positiveColor(getResources().getColor(R.color.colorPrimary))
                 .negativeText("Choose my own")
                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                     @Override
@@ -382,7 +389,7 @@ public class signup extends AppCompatActivity {
 
     public void showDismissDialog(String Str){
                new MaterialDialog.Builder(this)
-                .title("Error").titleColor(getColor(R.color.red_error))
+                .title("Error").titleColor(getResources().getColor(R.color.red_error))
                 .content(Str)
                 .positiveText("okay")
                 .show();
