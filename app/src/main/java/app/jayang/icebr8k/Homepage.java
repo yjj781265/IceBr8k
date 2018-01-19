@@ -1,39 +1,24 @@
 package app.jayang.icebr8k;
-import android.*;
 import android.Manifest;
-import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.provider.ContactsContract;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.google.android.gms.auth.api.Auth;
@@ -42,29 +27,19 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
 import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
-import com.mikepenz.materialdrawer.Drawer;
-import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.onesignal.OSSubscriptionObserver;
 import com.onesignal.OSSubscriptionStateChanges;
 import com.onesignal.OneSignal;
@@ -73,6 +48,7 @@ import com.zplesac.connectionbuddy.cache.ConnectionBuddyCache;
 import com.zplesac.connectionbuddy.interfaces.ConnectivityChangeListener;
 import com.zplesac.connectionbuddy.models.ConnectivityEvent;
 import com.zplesac.connectionbuddy.models.ConnectivityState;
+
 import app.jayang.icebr8k.Fragments.SurveyTab_Fragment;
 import app.jayang.icebr8k.Fragments.Userstab_Fragment;
 import app.jayang.icebr8k.Fragments.chat_frag;
@@ -86,16 +62,12 @@ public class Homepage extends AppCompatActivity  implements
     private AHBottomNavigation homepageTab;
     private TextView noConnection_tv;
     protected myViewPager viewPager;
-    private ViewPagerAdapter mViewPagerAdapter;
     private FirebaseUser currentUser;
     private GoogleApiClient mGoogleApiClient;
     private Toolbar mToolbar;
     private DatabaseReference mRef;
     private DatabaseReference presenceRef;
-    private CoordinatorLayout mCoordinatorLayout;
-    private ScreenStateReceiver mReceiver;
-    private  MenuItem mainMenu;
-    private  Userstab_Fragment mUserstab_fragment;
+     private ScreenStateReceiver mReceiver;
     private String TAG = "homePage";
 
 
@@ -110,7 +82,6 @@ public class Homepage extends AppCompatActivity  implements
         viewPager = findViewById(R.id.homepage_viewpager);
         viewPager.setSwipeable(true);
         noConnection_tv = findViewById(R.id.noConnection_tv);
-        mCoordinatorLayout = findViewById(R.id.coordLayout);
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         mRef = FirebaseDatabase.getInstance().getReference();
         mRef.keepSynced(true);
@@ -212,7 +183,6 @@ public class Homepage extends AppCompatActivity  implements
     public boolean onCreateOptionsMenu(Menu menu) {
 
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        mainMenu = menu.findItem(R.id.main_menu);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -349,7 +319,7 @@ public class Homepage extends AppCompatActivity  implements
             public void onDataChange(DataSnapshot dataSnapshot) {
                 int count =0;
                 for(DataSnapshot chidSnapShot : dataSnapshot.getChildren()){
-                    if(chidSnapShot.child("Stats").getValue(String.class).equals("Pending")){
+                    if("Pending".equals(chidSnapShot.child("Stats").getValue(String.class))){
                         count++;
                     }
                 }
@@ -394,8 +364,7 @@ public class Homepage extends AppCompatActivity  implements
 
     private void showLog(String str){ Log.d(TAG,str);}
 
-    public void setHomepageTab(){mViewPagerAdapter =
-            new ViewPagerAdapter(getSupportFragmentManager());
+    public void setHomepageTab(){ViewPagerAdapter mViewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
         mViewPagerAdapter.addFragment(new SurveyTab_Fragment());
       mViewPagerAdapter.addFragment(new Userstab_Fragment());
       mViewPagerAdapter.addFragment(new chat_frag() );
@@ -450,19 +419,7 @@ public class Homepage extends AppCompatActivity  implements
 
 
 
-    public void updateDrawerUI(){
-        Drawer drawer= new DrawerBuilder()
-                .withActivity(this)
-                .withTranslucentStatusBar(false)
-                .withActionBarDrawerToggle(true).withToolbar(mToolbar).
-                        withActionBarDrawerToggleAnimated(true)
-                .addDrawerItems(
-                        //pass your items here
-                )
-                .build();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        drawer.getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
-    }
+
 
 
     public void deleteInChatRoomNode(){
@@ -550,7 +507,7 @@ public class Homepage extends AppCompatActivity  implements
         if(FirebaseAuth.getInstance()!=null) {
             FirebaseAuth.getInstance().signOut();
         }
-        if (currentUser.getProviders().get(0).contains("google")) {
+        if ("google".contains(currentUser.getProviders().get(0))) {
             // Google sign out
             Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
                     new ResultCallback<Status>() {

@@ -1,32 +1,17 @@
 package app.jayang.icebr8k.Fragments;
 
-import android.app.Activity;
-import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.media.MediaPlayer;
-import android.nfc.Tag;
 import android.os.Bundle;
-import android.os.health.UidHealthStats;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.PopupMenu;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.ActionMode;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -48,10 +33,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.onesignal.OneSignal;
 import com.stfalcon.chatkit.commons.ImageLoader;
-import com.stfalcon.chatkit.commons.ViewHolder;
-import com.stfalcon.chatkit.commons.models.IDialog;
-import com.stfalcon.chatkit.commons.models.IMessage;
-import com.stfalcon.chatkit.commons.models.IUser;
 import com.stfalcon.chatkit.dialogs.DialogsList;
 import com.stfalcon.chatkit.dialogs.DialogsListAdapter;
 import com.stfalcon.chatkit.utils.DateFormatter;
@@ -68,7 +49,6 @@ import app.jayang.icebr8k.Modle.ChatDialog;
 import app.jayang.icebr8k.Modle.Message;
 import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.R;
-import app.jayang.icebr8k.Viewholder;
 
 /**
  * Created by yjj781265 on 11/9/2017.
@@ -661,7 +641,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
         i.putExtra("user2Id",dialog.getId());
         i.putExtra("user2Name",dialog.getDialogName());
         startActivity(i);
-        getActivity(). overridePendingTransition(R.anim.slide_from_right,android.R.anim.fade_out);
+        getActivity().overridePendingTransition(R.anim.slide_from_right,android.R.anim.fade_out);
 
 
     }

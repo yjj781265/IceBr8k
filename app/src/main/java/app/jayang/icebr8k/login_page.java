@@ -1,104 +1,57 @@
 package app.jayang.icebr8k;
 
-import android.app.Dialog;
 
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
-
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.AsyncTask;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
-
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.widget.AppCompatButton;
 import android.text.InputType;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.dd.processbutton.ProcessButton;
-
-
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
-
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-
-
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
-import com.zplesac.connectionbuddy.ConnectionBuddy;
-import com.zplesac.connectionbuddy.cache.ConnectionBuddyCache;
-import com.zplesac.connectionbuddy.interfaces.ConnectivityChangeListener;
-import com.zplesac.connectionbuddy.models.ConnectivityEvent;
-import com.zplesac.connectionbuddy.models.ConnectivityState;
 
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 import app.jayang.icebr8k.Modle.User;
 import dmax.dialog.SpotsDialog;
@@ -124,11 +77,9 @@ public class login_page extends AppCompatActivity implements
     private TextInputLayout email_layout,password_layout;
     private TextInputEditText password,email;
     private MaterialDialog userNameDialog;
-    private  MaterialDialog.Builder userNameDialogBuilder;
 
 
-
-    @Override
+            @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_page);
@@ -168,13 +119,13 @@ public class login_page extends AppCompatActivity implements
                 md.update(signature.toByteArray());
                 Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
             }
-        } catch (PackageManager.NameNotFoundException e) {
+        } catch (PackageManager.NameNotFoundException ignored) {
 
         } catch (NoSuchAlgorithmException e) {
 
         }
 
-        mAuth = FirebaseAuth.getInstance();;
+        mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
 
 
@@ -234,6 +185,7 @@ public class login_page extends AppCompatActivity implements
             if (result.isSuccess()) {
                 // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = result.getSignInAccount();
+                if (account == null) throw new AssertionError();
                 Log.d("loginPage",account.getPhotoUrl()+"from Google");
                 firebaseAuthWithGoogle(account);
             }
@@ -364,13 +316,13 @@ public class login_page extends AppCompatActivity implements
 
     public void createUsernameDialog(final GoogleSignInAccount account){
         loadingdialog.dismiss();
-        userNameDialogBuilder = new MaterialDialog.Builder(this)
+        MaterialDialog.Builder userNameDialogBuilder = new MaterialDialog.Builder(this)
                 .title("Username").maxIconSize(60)
-                .content("Create a username for "+ mAuth.getCurrentUser().getEmail()+" \n(" +
+                .content("Create a username for " + mAuth.getCurrentUser().getEmail() + " \n(" +
                         "at least 3 characters)")
-                .inputType(InputType.TYPE_CLASS_TEXT).inputRange(3,    20,
+                .inputType(InputType.TYPE_CLASS_TEXT).inputRange(3, 20,
                         getResources().
-                        getColor(R.color.red_error)).positiveText("Confirm").positiveColor
+                                getColor(R.color.red_error)).positiveText("Confirm").positiveColor
                         (getResources().getColor(R.color.colorAccent)).negativeText("Discard").
                         negativeColor(getResources().getColor(R.color.red_error)).
                         icon(getDrawable(R.mipmap.ic_launcher));
@@ -465,7 +417,7 @@ public void usernameCreateCheck(final GoogleSignInAccount account){
                 createUsernameDialog(account);
             } else {
                 User user = new User();
-                user.setPhotourl(account.getPhotoUrl().toString());
+                user.setPhotourl(String.valueOf(account.getPhotoUrl()));
                 user.setDisplayname(account.getDisplayName());
                 user.setEmail(account.getEmail());
                 user.setUsername(dataSnapshot.getValue(String.class));
@@ -589,14 +541,11 @@ public void usernameCreateCheck(final GoogleSignInAccount account){
     public boolean checkInternet() {
         ConnectivityManager cm = (ConnectivityManager) getApplicationContext()
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        if (null != activeNetwork) {
-            return true;
-        } else {
-            return false;
-
-
+        NetworkInfo activeNetwork = null;
+        if (cm != null) {
+            activeNetwork = cm.getActiveNetworkInfo();
         }
+        return null != activeNetwork;
     }
 
 
