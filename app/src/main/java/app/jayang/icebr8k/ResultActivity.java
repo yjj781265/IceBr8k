@@ -123,7 +123,7 @@ public class ResultActivity extends AppCompatActivity {
                     mIntent.putExtra("user2Id",user2Id);
                     startActivity(mIntent);
                     finish();
-                    overridePendingTransition(R.anim.slide_from_right,R.anim.slide_to_left);
+                    overridePendingTransition(R.anim.slide_from_right,0);
 
                 }
 

@@ -562,7 +562,7 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
                     intent.putExtra("user2Name", mUser.getDisplayname());
                     startActivity(intent);
                     finish();
-                    overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
+                    overridePendingTransition(R.anim.slide_from_right, 0);
                 }
             } else if (id == R.id.addFriend_btn) {
                 if (!addFriend_btn.getText().toString().equals("Pending")) {

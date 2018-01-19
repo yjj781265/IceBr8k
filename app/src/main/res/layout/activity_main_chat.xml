@@ -50,7 +50,7 @@
         app:showAttachmentButton="true"
         app:inputButtonDefaultBgColor="@color/colorPrimary"
         app:attachmentButtonDefaultBgPressedColor="@color/accent"
-        app:inputHint="Type Here"/>
+        app:inputHint="@string/message_input_hint"/>
 
 
   <com.stfalcon.chatkit.messages.MessagesList

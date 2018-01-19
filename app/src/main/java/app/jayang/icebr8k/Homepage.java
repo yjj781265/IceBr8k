@@ -182,16 +182,17 @@ public class Homepage extends AppCompatActivity  implements
      //  Toast.makeText(getApplicationContext(),"New Intent",Toast.LENGTH_SHORT).show();
         if (intent.getExtras() != null) {
             if (intent.getExtras().getString("mainchat") != null) {
-                viewPager.setCurrentItem(2);
+                viewPager.setCurrentItem(2,false);
             }
             else {
-            viewPager.setCurrentItem(0);
+            viewPager.setCurrentItem(0,false);
 
         }
     }else{
-            viewPager.setCurrentItem(0);
+            viewPager.setCurrentItem(0,false);
         }
 
+        // handle notification clicked
         if(getIntent().getExtras()!=null) {
             if (getIntent().getExtras().getString("user2Id") != null &&
                     getIntent().getExtras().getString("user2Name") != null) {
