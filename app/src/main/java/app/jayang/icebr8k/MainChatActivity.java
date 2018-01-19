@@ -348,7 +348,7 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
         imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
         startActivity(intent);
         finish();
-        overridePendingTransition(0,R.anim.slide_to_right);
+        overridePendingTransition(android.R.anim.fade_in,R.anim.slide_to_right);
 
         return true;
     }
@@ -360,7 +360,7 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
         intent.putExtra("mainchat", "1");
         startActivity(intent);
         finish();
-        overridePendingTransition(0,R.anim.slide_to_right);
+        overridePendingTransition(android.R.anim.fade_in,R.anim.slide_to_right);
 
     }
 

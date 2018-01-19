@@ -125,7 +125,7 @@ public class login_page extends AppCompatActivity implements
     private TextInputEditText password,email;
     private MaterialDialog userNameDialog;
     private  MaterialDialog.Builder userNameDialogBuilder;
-    private    SharedPreferences sharedPref;
+
 
 
     @Override
@@ -139,8 +139,7 @@ public class login_page extends AppCompatActivity implements
         email = findViewById(R.id.email_login);
         email_layout = findViewById(R.id.email_layout_login);
         password_layout = findViewById(R.id.password_layout_login);
-        sharedPref =
-                login_page.this.getPreferences(Context.MODE_PRIVATE);
+        intent = new Intent(this,Homepage.class);
 
         sv =findViewById(R.id.mScroll);
         loginPage_Rlayout = findViewById(R.id.login_page);
@@ -197,12 +196,6 @@ public class login_page extends AppCompatActivity implements
 
     public void onStart() {
         super.onStart();
-        intent = new Intent(this, Homepage.class);
-        if(currentUser!=null){
-            loadingdialog.dismiss();
-            startActivity(intent);
-            finish();
-        }
 
 
     }

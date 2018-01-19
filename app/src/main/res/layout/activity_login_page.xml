@@ -158,6 +158,7 @@
             android:layout_width="45dp"
             android:layout_height="45dp"
             android:layout_centerHorizontal="true"
+            android:foreground="?selectableItemBackground"
             app:iconSize="30dp"
             app:roundedCorner="true"
             app:roundedCornerRadius="80dp"
