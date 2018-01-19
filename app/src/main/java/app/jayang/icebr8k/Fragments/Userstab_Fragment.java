@@ -137,6 +137,7 @@ public class Userstab_Fragment extends Fragment {
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putString("sort", "yes");
             editor.commit();
+            sortByScore =true;
         }else if(sortByScoreStr.equals("no")){
             sortByScore =false;
         }else{

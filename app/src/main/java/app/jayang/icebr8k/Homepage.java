@@ -247,6 +247,7 @@ public class Homepage extends AppCompatActivity  implements
         super.onStart();
         showLog("onStart");
         setOnline();
+        ConnectionBuddy.getInstance().registerForConnectivityEvents(this, this);
 
 
 
@@ -258,8 +259,7 @@ public class Homepage extends AppCompatActivity  implements
     protected void onResume() {
         super.onResume();
 
-        ConnectionBuddyCache.clearLastNetworkState(this);
-        ConnectionBuddy.getInstance().registerForConnectivityEvents(this, this);
+
         setOnline();
         showLog("onResume");
 
@@ -276,7 +276,9 @@ public class Homepage extends AppCompatActivity  implements
     @Override
     protected void onStop() {
         super.onStop();
-        ConnectionBuddy.getInstance().unregisterFromConnectivityEvents(this);
+        if(ConnectionBuddy.getInstance()!=null) {
+            ConnectionBuddy.getInstance().unregisterFromConnectivityEvents(this);
+        }
         showLog("onStop");
     }
 

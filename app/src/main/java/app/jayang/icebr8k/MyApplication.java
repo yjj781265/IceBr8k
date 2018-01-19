@@ -10,6 +10,7 @@ import com.onesignal.OSNotificationOpenResult;
 import com.onesignal.OneSignal;
 import com.zplesac.connectionbuddy.ConnectionBuddy;
 import com.zplesac.connectionbuddy.ConnectionBuddyConfiguration;
+import com.zplesac.connectionbuddy.cache.ConnectionBuddyCache;
 
 import cat.ereza.customactivityoncrash.config.CaocConfig;
 
@@ -58,6 +59,7 @@ public class MyApplication extends Application {
                         notifyOnlyReliableEvents(true)
                         .build();
         ConnectionBuddy.getInstance().init(networkInspectorConfiguration);
+        ConnectionBuddyCache.clearLastNetworkState(this);
     }
 
 
