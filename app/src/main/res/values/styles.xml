@@ -16,7 +16,7 @@
         <item name="android:actionBarWidgetTheme">@style/PopupMenuTextView</item>
         <!-- Change Overflow Menu ListView Item Height & Property -->
         <item name="android:listPreferredItemHeight">36dp</item>
-        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowIsTranslucent">true</item>
 
     </style>
 
@@ -69,6 +69,10 @@
     <style name="PopupMenuTextView" parent="@style/android:Theme.Holo.Light">
         <item name="android:textColor">#00FF00</item>
         <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="AppThemeMain" parent="AppTheme">
+        <item name="android:windowIsTranslucent">false</item>
     </style>
 
 

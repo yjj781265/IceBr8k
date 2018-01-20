@@ -47,8 +47,8 @@
         android:id="@+id/tabs_result"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackground"
-            app:tabBackground="@android:color/white"
+            android:background="@color/white"
+            app:tabBackground="?attr/selectableItemBackground"
             android:elevation="20dp"/>
 
 

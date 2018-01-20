@@ -507,7 +507,7 @@ public class Homepage extends AppCompatActivity  implements
         if(FirebaseAuth.getInstance()!=null) {
             FirebaseAuth.getInstance().signOut();
         }
-        if ("google".contains(currentUser.getProviders().get(0))) {
+        if (currentUser.getProviders().get(0).contains("google")) {
             // Google sign out
             Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
                     new ResultCallback<Status>() {

@@ -18,6 +18,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".login_page"
+            android:theme="@style/AppThemeMain"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateAlwaysHidden|adjustResize">
         </activity>
@@ -26,6 +27,7 @@
             android:screenOrientation="portrait"/>
         <activity
             android:name=".Homepage"
+            android:theme="@style/AppThemeMain"
             android:label="@string/app_name"
             android:launchMode="singleTask"
             android:windowSoftInputMode="stateAlwaysHidden|adjustResize"
