@@ -30,6 +30,7 @@
     <string name="sendMessageError"><![CDATA[<b><font color=#FF0000>Failed,tap to try again</font></b>]]></string>
     <string name="hint1"><i>Search Name</i></string>
     <string name="message_input_hint">Type Here</string>
+    <string name="google_maps_api_key">AIzaSyDGE7baQEbkmk4wCJZhp4V9vO9hT9_c64w</string>
 
 
 </resources>

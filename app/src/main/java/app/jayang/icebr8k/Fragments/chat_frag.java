@@ -646,8 +646,6 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
 
     }
 
-
-
     public void showToast(String str){
         Toast.makeText(getContext(),str,Toast.LENGTH_LONG).show();
     }
