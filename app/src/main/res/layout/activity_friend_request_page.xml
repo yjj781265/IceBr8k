@@ -21,6 +21,7 @@
         android:id="@+id/frt_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:nestedScrollingEnabled="false"
         android:layout_below="@id/friendRequestToolbar">
     </android.support.v7.widget.RecyclerView>
 

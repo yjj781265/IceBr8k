@@ -49,6 +49,7 @@ import com.zplesac.connectionbuddy.interfaces.ConnectivityChangeListener;
 import com.zplesac.connectionbuddy.models.ConnectivityEvent;
 import com.zplesac.connectionbuddy.models.ConnectivityState;
 
+import app.jayang.icebr8k.Fragments.PeopleNearbytab_Fragment;
 import app.jayang.icebr8k.Fragments.SurveyTab_Fragment;
 import app.jayang.icebr8k.Fragments.Userstab_Fragment;
 import app.jayang.icebr8k.Fragments.chat_frag;
@@ -369,6 +370,7 @@ public class Homepage extends AppCompatActivity  implements
       mViewPagerAdapter.addFragment(new Userstab_Fragment());
       mViewPagerAdapter.addFragment(new chat_frag() );
       mViewPagerAdapter.addFragment(new me_frag());
+      mViewPagerAdapter.addFragment(new PeopleNearbytab_Fragment());
 
       viewPager.setAdapter(mViewPagerAdapter);
 
@@ -382,14 +384,18 @@ public class Homepage extends AppCompatActivity  implements
                 R.drawable.message_selector);
         AHBottomNavigationItem item4 = new AHBottomNavigationItem("Me",
                 R.drawable.me_selector);
+        AHBottomNavigationItem item5 = new AHBottomNavigationItem("Me",
+                R.drawable.icon_map_selector);
+
         // Add items
         homepageTab.addItem(item1);
         homepageTab.addItem(item2);
         homepageTab.addItem(item3);
         homepageTab.addItem(item4);
+        homepageTab.addItem(item5);
 
         // for smooth swipe
-        viewPager.setOffscreenPageLimit(2);
+        viewPager.setOffscreenPageLimit(4);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {

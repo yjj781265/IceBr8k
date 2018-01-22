@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageButton
+        android:id="@+id/people_filter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_action_filter"
+        android:layout_margin="5dp"
+       android:background="?android:attr/selectableItemBackground"
+        android:layout_alignParentEnd="true"/>
+
+    <belka.us.androidtoggleswitch.widgets.ToggleSwitch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/people_toggle"
+        android:elevation="6dp"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="5dp"
+        android:textSize="12dp"
+        app:activeBgColor="@color/colorAccent"
+        app:activeTextColor="@android:color/white"
+        app:inactiveBgColor="@color/creamYellow"
+        app:inactiveTextColor="@android:color/black"
+        app:separatorColor="@color/lightGray"
+        app:textToggleLeft="List"
+        app:textToggleRight="Map"
+        app:toggleWidth="104dp"/>
+
+<FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/people_mapFrame"
+    android:layout_below="@id/people_toggle">
+  <com.google.android.gms.maps.MapView
+      android:id="@+id/people_mapView"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent">
+
+  </com.google.android.gms.maps.MapView>
+</FrameLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/people_recyclerView"
+        android:visibility="gone"
+        android:layout_below="@id/people_toggle">
+
+    </android.support.v7.widget.RecyclerView>
+</RelativeLayout>

@@ -53,7 +53,7 @@
     <!-- OverFlow menu Styles -->
     <style name="PopupMenuListView" parent="@style/Widget.AppCompat.Light.ListView.DropDown">
         <item name="android:divider">#D3D3D3</item>
-        <item name="android:dividerHeight">2dp</item>
+        <item name="android:dividerHeight">1dp</item>
         <item name="android:background">@color/white</item>
     </style>
 

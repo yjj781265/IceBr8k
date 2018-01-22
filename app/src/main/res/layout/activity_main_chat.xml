@@ -59,6 +59,7 @@
         android:layout_height="match_parent"
         android:layout_above="@+id/input_message"
         android:labelFor="@id/chat_toolbar"
+        android:nestedScrollingEnabled="false"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/chat_toolbar">
   </com.stfalcon.chatkit.messages.MessagesList>

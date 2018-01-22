@@ -98,9 +98,7 @@
             android:name=".SearchName"
             android:noHistory="true"
             android:screenOrientation="portrait"></activity>
-        <activity android:name=".PeopleNearby">
 
-        </activity>
     </application>
 
 </manifest>
