@@ -10,6 +10,7 @@ import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.Html;
@@ -223,7 +224,7 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
                 message.setCreatedAt(date);
                 message.setId(messageId);
                 message.setText(input.toString());
-                message.setUser(author);
+                message.setAuthor(author);
                 message.setStatus("Sending...");
                 if(checkInternet()) {
                     adapter.addToStart(message, true);
@@ -255,12 +256,7 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
                 return true;
             }
         });
-        adapter.setOnMessageLongClickListener(new MessagesListAdapter.OnMessageLongClickListener<Message>() {
-            @Override
-            public void onMessageLongClick(Message message) {
 
-            }
-        });
 
         mSwipeBackLayout.addSwipeListener(new SwipeBackLayout.SwipeListener() {
             @Override
@@ -270,12 +266,7 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
 
             @Override
             public void onEdgeTouch(int edgeFlag) {
-                //hide keyboard
-                View view = getCurrentFocus();
-                if (view != null) {
-                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                }
+              hideKeyboard();
             }
 
             @Override
@@ -284,6 +275,21 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
             }
         });
 
+       messagesList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+           @Override
+           public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+               super.onScrollStateChanged(recyclerView, newState);
+           }
+
+           @Override
+           public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+               super.onScrolled(recyclerView, dx, dy);
+               if (dy <0 && messageInput.hasFocus()) {
+                   // Scrolling dowb
+                   hideKeyboard();
+               }
+           }
+       });
 
 
 
@@ -292,6 +298,16 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
 
 
     }
+
+    private  void hideKeyboard(){
+        //hide keyboard
+        View view = getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
 
 
     @Override
@@ -411,7 +427,7 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
                     //change to recieverid for user2database node
                     Author author = new Author(recieverId,currentUser.getDisplayName(),
                             currentUser.getPhotoUrl().toString());
-                    message2.setUser(author);
+                    message2.setAuthor(author);
                     message2.setStatus(null);
                     DatabaseReference uploadMessageRef2 = mDatabase.getReference().
                             child("Messages").child(user2Id).child(currentUser.getUid()).
@@ -647,7 +663,7 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
                        String photoUrl = dataSnapshot.child("user").child("avatar").getValue(String.class);
                        Author author = new Author(message.getAuthor().getId(), message.getUser().
                                getName(), photoUrl);
-                       message.setUser(author);
+                       message.setAuthor(author);
                        showLog(message.getId() + " " + message.getAuthor().getId() + " " + message.getUser().getAvatar()
                                + " " + message.getAuthor().getName() + " " + message.getText() + " " + message.getCreatedAt());
 

@@ -1,47 +1,26 @@
 package app.jayang.icebr8k.Fragments;
 
-import android.app.SearchManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.support.annotation.NonNull;
+import android.os.SystemClock;
 import android.support.annotation.Nullable;
-import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
-import android.text.InputType;
 import android.util.Log;
-import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
-
 
 import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -53,14 +32,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import app.jayang.icebr8k.FriendRequestPage;
-import app.jayang.icebr8k.Homepage;
-import app.jayang.icebr8k.Modle.ChatDialog;
 import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.Modle.UserDialog;
 import app.jayang.icebr8k.Modle.UserQA;
@@ -68,19 +43,19 @@ import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.RecyclerAdapter;
 import app.jayang.icebr8k.SearchName;
 import app.jayang.icebr8k.SearchUser;
-import app.jayang.icebr8k.Viewholder;
 
 
 /**
  * Created by LoLJay on 10/20/2017.
  */
 
-public class Userstab_Fragment extends Fragment {
+public class Userstab_Fragment extends Fragment  {
     View view;
     String TAG ="UserFrag";
     FirebaseDatabase mDatabase;
     DatabaseReference databaseReference;
     ArrayList<UserDialog> mUserDialogArrayList;
+    RelativeLayout loadingGif;
     RecyclerView mRecyclerView;
     FirebaseUser currentUser;
     RecyclerAdapter mAdapter;
@@ -93,6 +68,8 @@ public class Userstab_Fragment extends Fragment {
     private ArrayList<UserDialog> mFilteredList;
     private Boolean sortByScore,done,newChat;
     private String sortByScoreStr;
+    private long lastClickTime = 0;
+
 
 
     private static final Comparator<UserDialog>ONLINESTATS = new Comparator<UserDialog>() {
@@ -153,6 +130,8 @@ public class Userstab_Fragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.users_tab, container, false);
         mRecyclerView = view.findViewById(R.id.recyclerView_id);
+        loadingGif =view.findViewById(R.id.loadingImg_userTab);
+        loadingGif.setVisibility(View.GONE);
         mSearchView =view.findViewById(R.id.searchview_user);
         mSearchView.setVisibility(View.GONE);
         addFriend = view.findViewById(R.id.add_friend_frag);
@@ -221,8 +200,18 @@ public class Userstab_Fragment extends Fragment {
         mSearchView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                // preventing double, using threshold of 1000 ms
+                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                    return;
+                }
+
+                lastClickTime = SystemClock.elapsedRealtime();
+
                 Intent i = new Intent(getContext(), SearchName.class);
                 i.putParcelableArrayListExtra("friendList",mUserDialogArrayList);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
+                        FLAG_ACTIVITY_REORDER_TO_FRONT );
                 startActivity(i);
             }
         });
@@ -259,7 +248,8 @@ public class Userstab_Fragment extends Fragment {
     public void populateUserDialogList() {
 
         mUserDialogArrayList.clear();
-        addFriend.setVisibility(View.VISIBLE);
+        addFriend.setVisibility(View.GONE);
+        loadingGif.setVisibility(View.VISIBLE);
         friendCount=0;
         databaseReference = mDatabase.getReference("Friends").child(currentUser.getUid());
         databaseReference.keepSynced(true);
@@ -269,7 +259,7 @@ public class Userstab_Fragment extends Fragment {
                 if(dataSnapshot.child("Stats").getValue(String.class).equals("Accepted")){
                     showLog(dataSnapshot.getKey() +" added");
                     done =false;
-                    mRefreshLayout.setRefreshing(true);
+
                    UserDialog dialog = new UserDialog();
                    dialog.setId(dataSnapshot.getKey());
                     getUserinfo(dialog);
@@ -353,9 +343,6 @@ public class Userstab_Fragment extends Fragment {
      });
 
     }
-
-
-
 
     public void compareWithUser2(UserDialog dialog) {
         pullUser1QA(dialog);
@@ -485,10 +472,14 @@ public class Userstab_Fragment extends Fragment {
         }
 
         showLog("list Size " + mUserDialogArrayList.size());
+        if(mUserDialogArrayList.isEmpty()){
+           addFriend.setVisibility(View.VISIBLE);
+        }
 
         if(mUserDialogArrayList.size()==friendCount && !done){
             done =true;
             showLog("DONE" + "LIST SIZE " + mUserDialogArrayList.size());
+            loadingGif.setVisibility(View.GONE);
          if(sortByScore){
              Collections.sort(mUserDialogArrayList,SCORE);
              mAdapter.notifyDataSetChanged();
@@ -612,23 +603,9 @@ public class Userstab_Fragment extends Fragment {
 
     }
 
-    public ArrayList<UserDialog> getUserDialogArrayList() {
-        return mUserDialogArrayList;
-    }
-
-    public RecyclerAdapter getAdapter() {
-        return mAdapter;
-    }
-
-
-    public  class swapItems extends AsyncTask<ArrayList<UserDialog>,Void,Void>{
 
 
 
-        @Override
-        protected Void doInBackground(ArrayList<UserDialog>[] arrayLists) {
-            mAdapter.swapItems(arrayLists[0]);
-            return null;
-        }
-    }
+
+
 }

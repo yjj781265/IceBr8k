@@ -122,6 +122,8 @@ public class ResultActivity extends AppCompatActivity {
                     mIntent.putExtra("user2Name",user2.getDisplayname());
                     mIntent.putExtra("user2Id",user2Id);
                     startActivity(mIntent);
+            mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
+                    FLAG_ACTIVITY_CLEAR_TASK );
                     finish();
                     overridePendingTransition(R.anim.slide_from_right,android.R.anim.fade_out);
 

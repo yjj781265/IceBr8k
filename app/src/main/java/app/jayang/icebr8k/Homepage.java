@@ -233,6 +233,7 @@ public class Homepage extends AppCompatActivity  implements
         super.onStart();
         showLog("onStart");
         setOnline();
+        ConnectionBuddyCache.clearLastNetworkState(this);
         ConnectionBuddy.getInstance().registerForConnectivityEvents(this, this);
 
 
@@ -576,6 +577,7 @@ public class Homepage extends AppCompatActivity  implements
             // device has active internet connection
             noConnection_tv.setVisibility(View.GONE);
             setOnline();
+
 
 
         }

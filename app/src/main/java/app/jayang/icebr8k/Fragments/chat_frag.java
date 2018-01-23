@@ -422,7 +422,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
                 Log.d(TAG, user.getDisplayname()+" "+ user.getDisplayname()+ " "+user.getPhotourl());
                 /************************* url is not accurate here ************************/
                 author = new Author(message.getUser().getId(),message.getUser().getName(),currrentUser.getPhotoUrl().toString());
-                message.setUser(author);
+                message.setAuthor(author);
 
                 Log.d(TAG,"after add userinfo"+ message.getId() + " "+message.getCreatedAt()+ " " +
                         "\n"+message.getText() +"\n UserInfo for lastmessage "+message.getUser().getAvatar() + " "+message.getUser().getId() + " "+ message.getUser().getName() );
@@ -640,6 +640,8 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
         Intent i = new Intent(getContext(), MainChatActivity.class);
         i.putExtra("user2Id",dialog.getId());
         i.putExtra("user2Name",dialog.getDialogName());
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
+               FLAG_ACTIVITY_REORDER_TO_FRONT );
         startActivity(i);
         getActivity().overridePendingTransition(R.anim.slide_from_right,android.R.anim.fade_out);
 

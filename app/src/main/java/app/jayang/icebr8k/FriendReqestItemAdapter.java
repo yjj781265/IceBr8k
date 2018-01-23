@@ -145,7 +145,7 @@ public class FriendReqestItemAdapter extends RecyclerView.Adapter<FriendReqestIt
                     DatabaseReference ref2 = FirebaseDatabase.getInstance().getReference().
                             child("Messages").child(uid).child(currentuser.getUid());
                     author.setId("0401");
-                    message.setUser(author);
+                    message.setAuthor(author);
                     ref2.child("chathistory").child(message.getId()).
                             setValue(message).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override

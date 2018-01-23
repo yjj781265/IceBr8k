@@ -54,7 +54,7 @@ public class Message implements IMessage,Comparable<Message> {
         this.id = id;
     }
 
-    public void setUser(Author user){this.author =user;}
+    public void setAuthor(Author user){this.author =user;}
 
     public void setText(String text) {
         this.text = text;

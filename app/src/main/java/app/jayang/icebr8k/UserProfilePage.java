@@ -376,6 +376,8 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
                                     i.putExtra("user2Id" ,uid);
                                     i.putExtra("diffAnswer1", temp1QA);
                                     i.putExtra("diffAnswer2", temp2QA);
+                                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
+                                            FLAG_ACTIVITY_CLEAR_TASK );
 
                                     startActivity(i);
                                     overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
@@ -451,6 +453,7 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
                              addFriend_btn.setVisibility(View.VISIBLE);
                              message_btn.setVisibility(View.GONE);
                              addFriend_btn.setText("Friend Request Pending");
+                             addFriend_btn.setClickable(false);
 
 
                 }else if(stats==null){
@@ -560,6 +563,8 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
                     Intent intent = new Intent(getApplicationContext(), MainChatActivity.class);
                     intent.putExtra("user2Id", uid);
                     intent.putExtra("user2Name", mUser.getDisplayname());
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
+                            FLAG_ACTIVITY_REORDER_TO_FRONT );
                     startActivity(intent);
                     finish();
                     overridePendingTransition(R.anim.slide_from_right,android.R.anim.fade_out);

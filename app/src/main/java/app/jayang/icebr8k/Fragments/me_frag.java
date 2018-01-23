@@ -2,6 +2,7 @@ package app.jayang.icebr8k.Fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -46,6 +47,8 @@ public class me_frag extends Fragment {
     private FirebaseUser currentuser;
     private LinearLayout mLinearLayout;
     private User user;
+    private long lastClickTime = 0;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,8 +75,8 @@ public class me_frag extends Fragment {
         email.setText(currentuser.getEmail());
         Glide.with(fragView).load(currentuser.getPhotoUrl()).
                 apply(RequestOptions.circleCropTransform()).into(avatar);
-        setBadge();
 
+        setBadge();
 
         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("Users").
                 child(currentuser.getUid());
@@ -97,6 +100,10 @@ public class me_frag extends Fragment {
         qrCode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                    return;
+                }
+                lastClickTime = SystemClock.elapsedRealtime();
                 Intent intent = new Intent( fragView.getContext(), ImageViewer.class);
                 startActivity(intent);
             }
@@ -105,6 +112,10 @@ public class me_frag extends Fragment {
         mLinearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                    return;
+                }
+                lastClickTime = SystemClock.elapsedRealtime();
                 Intent i = new Intent(getContext(), FriendRequestPage.class);
                 startActivity(i);
             }
