@@ -1,10 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/people_Rlayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <android.support.v7.widget.Toolbar
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        android:background="@color/primary"
+        android:layout_width="match_parent"
+        android:id="@+id/people_toolbar"
+        android:layout_height="56dp"
+        android:elevation="6dp"
+        app:title="People Nearby">
+    </android.support.v7.widget.Toolbar>
 
     <ImageButton
+        android:layout_below="@id/people_toolbar"
         android:id="@+id/people_filter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -14,16 +25,17 @@
         android:layout_alignParentEnd="true"/>
 
     <belka.us.androidtoggleswitch.widgets.ToggleSwitch
+        android:layout_below="@id/people_toolbar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/people_toggle"
-        android:elevation="6dp"
+        android:elevation="10dp"
         android:layout_centerHorizontal="true"
         android:layout_margin="5dp"
         android:textSize="12dp"
         app:activeBgColor="@color/colorAccent"
         app:activeTextColor="@android:color/white"
-        app:inactiveBgColor="@color/creamYellow"
+        app:inactiveBgColor="@color/lightGray"
         app:inactiveTextColor="@android:color/black"
         app:separatorColor="@color/lightGray"
         app:textToggleLeft="List"
@@ -35,12 +47,26 @@
     android:layout_height="match_parent"
     android:id="@+id/people_mapFrame"
     android:layout_below="@id/people_toggle">
-  <com.google.android.gms.maps.MapView
-      android:id="@+id/people_mapView"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent">
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:id="@+id/people_mapView"
+              android:name="com.google.android.gms.maps.SupportMapFragment"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"/>
 
-  </com.google.android.gms.maps.MapView>
+    <ImageButton
+        android:alpha="0.8"
+        android:id="@+id/people_myLocation"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="end"
+        android:background="@color/white"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:elevation="3dp"
+        android:src="@drawable/ic_action_mylocation"
+        android:layout_margin="13dp"/>
+
+
 </FrameLayout>
 
     <android.support.v7.widget.RecyclerView

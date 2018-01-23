@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -48,13 +49,10 @@ import com.zplesac.connectionbuddy.cache.ConnectionBuddyCache;
 import com.zplesac.connectionbuddy.interfaces.ConnectivityChangeListener;
 import com.zplesac.connectionbuddy.models.ConnectivityEvent;
 import com.zplesac.connectionbuddy.models.ConnectivityState;
-
-import app.jayang.icebr8k.Fragments.PeopleNearbytab_Fragment;
 import app.jayang.icebr8k.Fragments.SurveyTab_Fragment;
 import app.jayang.icebr8k.Fragments.Userstab_Fragment;
 import app.jayang.icebr8k.Fragments.chat_frag;
 import app.jayang.icebr8k.Fragments.me_frag;
-
 
 
 public class Homepage extends AppCompatActivity  implements
@@ -201,7 +199,23 @@ public class Homepage extends AppCompatActivity  implements
                 return true;
 
             case R.id.scan_qr:
-                checkCameraPermission();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    checkCameraPermission();
+                } else {
+                    Intent intent = new Intent(getApplicationContext(),DevoderActivity.class);
+                    startActivity(intent);
+
+                }
+                return true;
+            case R.id.people_nearby:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    checkLocationPermission();
+                } else {
+                    i = new Intent(getApplicationContext(),PeopleNearby.class);
+                    startActivity(i);
+
+                }
+
                 return true;
 
 
@@ -264,6 +278,29 @@ public class Homepage extends AppCompatActivity  implements
         showLog("onDestroy");
 
     }
+    //run time permission
+    private void checkLocationPermission() {
+        Dexter.withActivity(this)
+                .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                .withListener(new PermissionListener() {
+                    @Override
+                    public void onPermissionGranted(PermissionGrantedResponse response) {
+                        Intent i = new Intent(getApplicationContext(),PeopleNearby.class);
+                        startActivity(i);
+
+                    }
+
+                    @Override
+                    public void onPermissionDenied(PermissionDeniedResponse response) {
+                      showSnackbarWithSetting("Location access is needed for People Nearby feature",viewPager);
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
+                        token.continuePermissionRequest();
+                    }
+                }).check();
+    }
 
     public void checkCameraPermission(){
         Dexter.withActivity(this)
@@ -298,7 +335,7 @@ public class Homepage extends AppCompatActivity  implements
                 }
                 if (count > 0) {
                     homepageTab.setNotification(String.valueOf(count), 2);
-                    mToolbar.setTitle("IceBr8k"+"("+count+")");
+                    mToolbar.setTitle("IceBr8k"+" ("+count+")");
                 } else {
                     homepageTab.setNotification("", 2);
                     mToolbar.setTitle("IceBr8k");
@@ -370,7 +407,7 @@ public class Homepage extends AppCompatActivity  implements
       mViewPagerAdapter.addFragment(new Userstab_Fragment());
       mViewPagerAdapter.addFragment(new chat_frag() );
       mViewPagerAdapter.addFragment(new me_frag());
-      mViewPagerAdapter.addFragment(new PeopleNearbytab_Fragment());
+
 
       viewPager.setAdapter(mViewPagerAdapter);
 
@@ -384,15 +421,14 @@ public class Homepage extends AppCompatActivity  implements
                 R.drawable.message_selector);
         AHBottomNavigationItem item4 = new AHBottomNavigationItem("Me",
                 R.drawable.me_selector);
-        AHBottomNavigationItem item5 = new AHBottomNavigationItem("Me",
-                R.drawable.icon_map_selector);
+
 
         // Add items
         homepageTab.addItem(item1);
         homepageTab.addItem(item2);
         homepageTab.addItem(item3);
         homepageTab.addItem(item4);
-        homepageTab.addItem(item5);
+
 
         // for smooth swipe
         viewPager.setOffscreenPageLimit(4);
