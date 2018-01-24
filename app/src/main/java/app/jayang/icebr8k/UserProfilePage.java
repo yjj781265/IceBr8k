@@ -19,10 +19,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.beardedhen.androidbootstrap.api.attributes.BootstrapBrand;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.dd.processbutton.FlatButton;
 import com.dd.processbutton.iml.ActionProcessButton;
 import com.github.lzyzsd.circleprogress.ArcProgress;
 
@@ -47,7 +50,7 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
     Toolbar profileToolbar;
     ImageView mImageView,qrImage;
     ActionProcessButton  compare_btn;
-    BootstrapButton message_btn,addFriend_btn,deleteFriend_btn,reset_btn;
+    FlatButton message_btn,addFriend_btn,deleteFriend_btn,reset_btn;
     TextView displayname_profile, email_profile, username_profile;
 
 
@@ -377,7 +380,7 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
                                     i.putExtra("diffAnswer1", temp1QA);
                                     i.putExtra("diffAnswer2", temp2QA);
                                     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
-                                            FLAG_ACTIVITY_CLEAR_TASK );
+                                          FLAG_ACTIVITY_BROUGHT_TO_FRONT);
 
                                     startActivity(i);
                                     overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
@@ -410,28 +413,30 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
         DatabaseReference friendStatsRef = database.getReference().child("Friends").
                 child(currentUser.getUid()).child(uid).child("Stats");
         friendStatsRef.keepSynced(true);
-        friendStatsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        friendStatsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 String stats = dataSnapshot.getValue(String.class);
                 if(stats ==null){
                     addFriend_btn.setVisibility(View.VISIBLE);
+                    addFriend_btn.setClickable(true);
                     addFriend_btn.setText("Send Friend Request");
-                    message_btn.setVisibility(View.GONE);
+                    message_btn.setVisibility(View.VISIBLE);
                     deleteFriend_btn.setVisibility(View.GONE);
                 }else if(stats.equals("Pending")){
                     deleteFriend_btn.setVisibility(View.GONE);
                     addFriend_btn.setVisibility(View.VISIBLE);
-                    message_btn.setVisibility(View.GONE);
-                    addFriend_btn.setText("Pending");
+                    message_btn.setVisibility(View.VISIBLE);
+                    addFriend_btn.setText("Respond to Friend Request");
                 }else if(stats.equals("Accepted")){
                     addFriend_btn.setVisibility(View.GONE);
                     message_btn.setVisibility(View.VISIBLE);
                     deleteFriend_btn.setVisibility(View.VISIBLE);
                 }else{
                     addFriend_btn.setVisibility(View.VISIBLE);
+                    addFriend_btn.setClickable(true);
                     addFriend_btn.setText("Send Friend Request");
-                    message_btn.setVisibility(View.GONE);
+                    message_btn.setVisibility(View.VISIBLE);
                     deleteFriend_btn.setVisibility(View.GONE);
                 }
             }
@@ -451,17 +456,12 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
                          if(stats!=null &&  stats.equals("Pending")){
                              deleteFriend_btn.setVisibility(View.GONE);
                              addFriend_btn.setVisibility(View.VISIBLE);
-                             message_btn.setVisibility(View.GONE);
+                             message_btn.setVisibility(View.VISIBLE);
                              addFriend_btn.setText("Friend Request Pending");
                              addFriend_btn.setClickable(false);
 
 
-                }else if(stats==null){
-                             addFriend_btn.setVisibility(View.VISIBLE);
-                             addFriend_btn.setText("Send Friend Request");
-                             message_btn.setVisibility(View.GONE);
-                             deleteFriend_btn.setVisibility(View.GONE);
-                         }
+                }
             }
 
             @Override
@@ -528,6 +528,10 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     Toast.makeText(getApplicationContext(),"Friend Deleted",Toast.LENGTH_SHORT).show();
+                    addFriend_btn.setVisibility(View.VISIBLE);
+                    addFriend_btn.setText("Send Friend Request");
+                    message_btn.setVisibility(View.VISIBLE);
+                    deleteFriend_btn.setVisibility(View.GONE);
                 }
             });
 
@@ -552,7 +556,7 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
 
         if(checkInternet()) {
             if (id == R.id.reset_btn) {
-                resetQuestions();
+             showBasicDialog("Are you sure to reset all the questions?");
             } else if (id == R.id.compare_btn) {
                 if (mUser != null) {
                     compare_btn.setProgress(0);
@@ -570,8 +574,13 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
                     overridePendingTransition(R.anim.slide_from_right,android.R.anim.fade_out);
                 }
             } else if (id == R.id.addFriend_btn) {
-                if (!addFriend_btn.getText().toString().equals("Pending")) {
+                if (addFriend_btn.getText().toString().equals("Send Friend Request")) {
                      sendFriendRequest();
+                }else if(addFriend_btn.getText().toString().equals("Respond to Friend Request")){
+                    Intent intent = new Intent(getApplicationContext(),FriendRequestPage.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
+                            FLAG_ACTIVITY_REORDER_TO_FRONT );
+                    finish();
                 }
             }else if(id==R.id.deleteFriend_btn){
                  deleteFriend();
@@ -589,6 +598,19 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
             snackbar.show();
         }
 
+    }
+
+    private void showBasicDialog(String str){
+        new MaterialDialog.Builder(this)
+                .content(str).positiveColor(getResources().getColor(R.color.colorAccent))
+                .negativeColor(getResources().getColor(R.color.holo_red_light))
+                .positiveText("Yes").onPositive(new MaterialDialog.SingleButtonCallback() {
+            @Override
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                resetQuestions();
+            }
+        }).negativeText("No")
+                .show();
     }
 
     public boolean checkInternet() {

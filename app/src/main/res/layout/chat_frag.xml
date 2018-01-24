@@ -19,6 +19,7 @@
         app:dialogItemBackground="@color/white"
         app:dialogMessageTextSize="14dp"
         app:dialogTitleTextSize="16dp"
+        app:dialogDateSize="14dp"
         app:dialogUnreadBubbleBackgroundColor="@android:color/holo_red_light"
         app:dialogUnreadBubbleEnabled="true"
         app:dialogUnreadMessageTextStyle="bold"

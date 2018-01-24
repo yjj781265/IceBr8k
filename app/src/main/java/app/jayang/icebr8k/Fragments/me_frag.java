@@ -6,6 +6,7 @@ import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +15,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.dd.processbutton.FlatButton;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -41,7 +45,7 @@ import app.jayang.icebr8k.R;
 
 public class me_frag extends Fragment {
     private View fragView;
-    private BootstrapButton reset;
+    private FlatButton reset;
     private TextView displayname,username,email,badge;
     private ImageView avatar,qrCode;
     private FirebaseUser currentuser;
@@ -124,7 +128,7 @@ public class me_frag extends Fragment {
         reset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                resetQuestions();
+             showBasicDialog("Are you sure to reset all the questions ?");
             }
         });
 
@@ -175,14 +179,26 @@ public class me_frag extends Fragment {
             resetRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
-                    Intent intent = new Intent(getContext(),Homepage.class);
-                    Toast.makeText(getContext(),"Reset Success",Toast.LENGTH_SHORT).show();
-                    startActivity(intent);
-
+                    Toast.makeText(getActivity(),"Reset Sucess",Toast.LENGTH_SHORT).show();
+                    Homepage homepage= (Homepage)getActivity();
+                    homepage.getViewPager().setCurrentItem(0,false);
                 }
             });
 
 
     }
+    private void showBasicDialog(String str){
+        new MaterialDialog.Builder(getContext())
+                .content(str).positiveColor(getResources().getColor(R.color.colorAccent))
+                .negativeColor(getResources().getColor(R.color.holo_red_light))
+                .positiveText("Yes").onPositive(new MaterialDialog.SingleButtonCallback() {
+            @Override
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                resetQuestions();
+            }
+        }).negativeText("No")
+                .show();
+    }
+
 
 }

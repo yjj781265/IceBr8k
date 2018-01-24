@@ -253,9 +253,26 @@ public class Userstab_Fragment extends Fragment  {
         friendCount=0;
         databaseReference = mDatabase.getReference("Friends").child(currentUser.getUid());
         databaseReference.keepSynced(true);
+
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(mUserDialogArrayList.isEmpty()){
+                    addFriend.setVisibility(View.VISIBLE);
+                    loadingGif.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         databaseReference.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
                 if(dataSnapshot.child("Stats").getValue(String.class).equals("Accepted")){
                     showLog(dataSnapshot.getKey() +" added");
                     done =false;
@@ -270,6 +287,7 @@ public class Userstab_Fragment extends Fragment  {
 
                     showLog("friendCount "+friendCount);
                 }
+
 
             }
 
@@ -471,14 +489,14 @@ public class Userstab_Fragment extends Fragment  {
 
         }
 
+
         showLog("list Size " + mUserDialogArrayList.size());
-        if(mUserDialogArrayList.isEmpty()){
-           addFriend.setVisibility(View.VISIBLE);
-        }
+
 
         if(mUserDialogArrayList.size()==friendCount && !done){
             done =true;
             showLog("DONE" + "LIST SIZE " + mUserDialogArrayList.size());
+            addFriend.setVisibility(View.GONE);
             loadingGif.setVisibility(View.GONE);
          if(sortByScore){
              Collections.sort(mUserDialogArrayList,SCORE);

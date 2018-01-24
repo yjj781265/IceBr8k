@@ -1,5 +1,6 @@
 package app.jayang.icebr8k;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.util.DiffUtil;
@@ -47,10 +48,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
     private ArrayList<UserDialog>mUserDialogs;
     private ArrayList<UserDialog> mFilteredList;
 
-
-
-
-
     public class UserDialogViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
          private ImageView image,onlineStats;
          private TextView displayname,username,score;
@@ -78,9 +75,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
                 Intent intent = new Intent(view.getContext(), UserProfilePage.class);
                 intent.putExtra("userInfo", mUser);
                 intent.putExtra("userUid",dialog.getId());
-                context.startActivity(intent);
-
-
+                view.getContext().startActivity(intent);
             }
         }
     }

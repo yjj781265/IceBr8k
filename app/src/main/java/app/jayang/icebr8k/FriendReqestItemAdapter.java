@@ -1,6 +1,7 @@
 package app.jayang.icebr8k;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -31,6 +32,7 @@ import java.util.UUID;
 
 import app.jayang.icebr8k.Modle.Author;
 import app.jayang.icebr8k.Modle.Message;
+import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.Modle.UserDialog;
 
 /**
@@ -87,6 +89,12 @@ public class FriendReqestItemAdapter extends RecyclerView.Adapter<FriendReqestIt
             @Override
             public void onClick(View view) {
                 acceptFriend(dialog.getId(),position);
+            }
+        });
+        holder.avatar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                toUserProfilePage(dialog);
             }
         });
 
@@ -179,6 +187,16 @@ public class FriendReqestItemAdapter extends RecyclerView.Adapter<FriendReqestIt
 
         }
     }
+    public void toUserProfilePage(UserDialog dialog){
+        User mUser = new User(dialog.getName(), dialog.getUsername(),
+                dialog.getPhotoUrl(), dialog.getEmail());
+        Intent intent = new Intent(mContext, UserProfilePage.class);
+        intent.putExtra("userInfo", mUser);
+        intent.putExtra("userUid",dialog.getId());
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        mContext.startActivity(intent);
+    }
+
     public String createTransactionID() {
         return UUID.randomUUID().toString().replaceAll("-", "").substring(0,6);
     }

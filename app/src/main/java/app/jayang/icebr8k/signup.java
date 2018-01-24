@@ -317,8 +317,12 @@ public class signup extends SwipeBackActivity {
                     username_layout.setError(getString(R.string.emptyfieldError));
                     username.requestFocus();
                 }else if (usernameStr.contains(" ")) {
+                    username_layout.setErrorEnabled(true);
+                    username_layout.setError(getString(R.string.usernameError3));
+                    username.requestFocus();
+                } else if (checkFirebasePathError(usernameStr)) {
                         username_layout.setErrorEnabled(true);
-                        username_layout.setError(getString(R.string.usernameError3));
+                        username_layout.setError(getString(R.string.firebase_path_error));
                         username.requestFocus();
                 } else if (usernameStr.length() < 3 ||usernameStr.length() > 20) {
                     username_layout.setErrorEnabled(true);
@@ -415,6 +419,19 @@ public class signup extends SwipeBackActivity {
         password2.setError(null);
 
     }
+
+    public boolean checkFirebasePathError(String str){
+        char[] strArr = {'.','#','$','[',']','/'};
+        for(char s :strArr){
+            if(str.contains(String.valueOf(s))){
+                return true;
+            }
+
+        }
+        return false;
+
+    }
+
 
     public void uploadImage(Bitmap bitmap, final User user, final FirebaseUser currentUser){
         String filename = UUID.randomUUID().toString()+".PNG";

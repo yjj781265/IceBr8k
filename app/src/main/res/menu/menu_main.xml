@@ -27,7 +27,7 @@
     app:showAsAction="never"/>
 
     <item
-        android:title ="People Bearby"
+        android:title ="People Nearby"
         android:orderInCategory="100"
         android:id="@+id/people_nearby"
         android:icon="@drawable/map_icon"

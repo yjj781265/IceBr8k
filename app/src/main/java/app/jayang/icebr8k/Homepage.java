@@ -126,15 +126,7 @@ public class Homepage extends AppCompatActivity  implements
         setHomepageTab();
 
         if(getIntent().getExtras()!=null) {
-            if (getIntent().getExtras().getString("user2Id") != null &&
-                    getIntent().getExtras().getString("user2Name") != null) {
-                String user2Id = getIntent().getExtras().getString("user2Id");
-                String name = getIntent().getExtras().getString("user2Name");
-                Intent mIntent = new Intent(this, MainChatActivity.class);
-                mIntent.putExtra("user2Id", user2Id);
-                mIntent.putExtra("user2Name", name);
-                startActivity(mIntent);
-            }
+
             if (getIntent().getExtras().getString("mainchat") != null) {
                 viewPager.setCurrentItem(2);
             }
@@ -154,26 +146,22 @@ public class Homepage extends AppCompatActivity  implements
             if (intent.getExtras().getString("mainchat") != null) {
                 viewPager.setCurrentItem(2,false);
             }
-            else {
-            viewPager.setCurrentItem(0,false);
-
-        }
-    }else{
-            viewPager.setCurrentItem(0,false);
-        }
-
-        // handle notification clicked
-        if(getIntent().getExtras()!=null) {
-            if (getIntent().getExtras().getString("user2Id") != null &&
-                    getIntent().getExtras().getString("user2Name") != null) {
-                String user2Id = getIntent().getExtras().getString("user2Id");
-                String name = getIntent().getExtras().getString("user2Name");
+            // handle notification clicked
+            else if (intent.getExtras().getString("user2Id") != null &&
+                    intent.getExtras().getString("user2Name") != null){
+                String user2Id = intent.getExtras().getString("user2Id");
+                String name = intent.getExtras().getString("user2Name");
                 Intent mIntent = new Intent(this, MainChatActivity.class);
                 mIntent.putExtra("user2Id", user2Id);
                 mIntent.putExtra("user2Name", name);
                 startActivity(mIntent);
             }
+    }else{
+            viewPager.setCurrentItem(0,false);
         }
+
+
+
 
 
     }
@@ -218,8 +206,6 @@ public class Homepage extends AppCompatActivity  implements
 
                 return true;
 
-
-
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -235,6 +221,19 @@ public class Homepage extends AppCompatActivity  implements
         setOnline();
         ConnectionBuddyCache.clearLastNetworkState(this);
         ConnectionBuddy.getInstance().registerForConnectivityEvents(this, this);
+        //handle notification click
+        if (getIntent().getExtras()!=null  && getIntent().getExtras().getString("user2Id") != null &&
+                getIntent().getExtras().getString("user2Name") != null) {
+            String user2Id = getIntent().getExtras().getString("user2Id");
+            String name = getIntent().getExtras().getString("user2Name");
+            Intent mIntent = new Intent(this, MainChatActivity.class);
+            mIntent.putExtra("user2Id", user2Id);
+            mIntent.putExtra("user2Name", name);
+            startActivity(mIntent);
+        }
+
+
+
 
 
 
@@ -563,6 +562,7 @@ public class Homepage extends AppCompatActivity  implements
         Intent intent = new Intent(getApplicationContext(), login_page.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+
 
     }
     @Override

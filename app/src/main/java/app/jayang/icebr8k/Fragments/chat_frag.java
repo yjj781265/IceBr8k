@@ -3,6 +3,7 @@ package app.jayang.icebr8k.Fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -73,6 +74,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
     private Message message;
     private TextView noChat;
     private RelativeLayout loadingGif;
+    private long lastClickTime = 0;
 
 
     public chat_frag() {
@@ -159,6 +161,12 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
 
                   }
                 }else{
+                    if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                        return;
+                    }
+
+                    lastClickTime = SystemClock.elapsedRealtime();
+
                       refreshListAndToChat(dialog);
                 }
 
@@ -640,8 +648,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
         Intent i = new Intent(getContext(), MainChatActivity.class);
         i.putExtra("user2Id",dialog.getId());
         i.putExtra("user2Name",dialog.getDialogName());
-        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
-               FLAG_ACTIVITY_REORDER_TO_FRONT );
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(i);
         getActivity().overridePendingTransition(R.anim.slide_from_right,android.R.anim.fade_out);
 

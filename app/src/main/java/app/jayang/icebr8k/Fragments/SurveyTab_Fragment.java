@@ -126,14 +126,18 @@ public class SurveyTab_Fragment extends Fragment {
         mActionButton= mview.findViewById(R.id.floatingActionButton);
         skip = mview.findViewById(R.id.skip_btn);
         skip.setVisibility(View.GONE);
+        createInitQ();
         mActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mActionButton.setClickable(false);;// prevent user spam click the button ,may crash the program
                 mTextView.setVisibility(View.INVISIBLE);
                 mProgressBar2.setVisibility(View.VISIBLE);
-
                 createInitQ();
+
+
+
+
 
 
 
@@ -217,7 +221,6 @@ public class SurveyTab_Fragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        createInitQ();
         showLog("onStart");
     }
 
@@ -235,6 +238,7 @@ public class SurveyTab_Fragment extends Fragment {
 
 
 
+
     }
 
     public int dpToPx(int dp) {
@@ -247,12 +251,16 @@ public class SurveyTab_Fragment extends Fragment {
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser && getView()!=null) {
+        if (isVisibleToUser && getView()!=null ) {
             if(mTextView.getText().toString().equals(getString(R.string.check_back_later))){
-              //  createInitQ();
+                createInitQ();
             }
 
 
+
+        }else if(!isVisibleToUser && getView()!=null){
+            mTextView.setText(getString(R.string.check_back_later));
+            hideCardViewComponent();
         }
 
     }

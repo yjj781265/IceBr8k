@@ -37,6 +37,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
@@ -279,6 +280,17 @@ public class login_page extends AppCompatActivity implements
         Toast.makeText(this, "Google Play Services error.", Toast.LENGTH_SHORT).show();
     }
 
+    public boolean checkFirebasePathError(String str){
+                String [] strArr = {".","#","$","[","]","/"};
+                for(String s :strArr){
+                    if(str.contains(s)){
+                        return true;
+                    }
+                }
+                return false;
+
+            }
+
 
     public void updateDatabaseAndCurrentUser(final User user, final FirebaseUser currentUser){
         if(currentUser!=null ) {
@@ -356,6 +368,9 @@ public class login_page extends AppCompatActivity implements
                                 }else if(username.contains(" ")) {
                                     showToast(getString(R.string.usernameError3));
                                     usernameCreateCheck(account);
+                                }else if(checkFirebasePathError(username)) {
+                                        showToast(getString(R.string.firebase_path_error));
+                                        usernameCreateCheck(account);
                                 }else if(username.trim().matches("")){
                                     showToast(getString(R.string.emptyfieldError));
                                     usernameCreateCheck(account);

@@ -18,6 +18,9 @@ import com.onesignal.OneSignal;
 
 import org.json.JSONObject;
 
+import java.time.LocalDate;
+
+import app.jayang.icebr8k.Modle.Message;
 import app.jayang.icebr8k.Modle.User;
 
 
@@ -37,39 +40,15 @@ public class MyNotificationOpenedHandler implements OneSignal.NotificationOpened
             user2Id = data.optString("user2Id");
             name =data.optString("user2Name");
 
-            final DatabaseReference onLineCheck = FirebaseDatabase.getInstance().getReference().child("Users")
-                    .child(user2Id).child("onlineStats");
-            onLineCheck.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                   String online = dataSnapshot.getValue(String.class);
-                    if(!online.equals("0")){
-                        if (user2Id != null && name!=null) {
-
-                            Intent mIntent = new Intent(MyApplication.getContext(), MainChatActivity.class);
-                            mIntent.putExtra("user2Id", user2Id);
-                            mIntent.putExtra("user2Name", name);
-                            mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
+            if (user2Id != null && name!=null) {
+                Intent  mIntent = new Intent(MyApplication.getContext(), Homepage.class);
+                mIntent.putExtra("user2Id", user2Id);
+                mIntent.putExtra("user2Name", name);
+                mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
                                     FLAG_ACTIVITY_REORDER_TO_FRONT );
-                            MyApplication.getContext().startActivity(mIntent);
+                MyApplication.getContext().startActivity(mIntent);
                         }
-                    }else{
-                        if (user2Id != null && name!=null) {
-                            Intent mIntent = new Intent(MyApplication.getContext(), Homepage.class);
-                            mIntent.putExtra("user2Id", user2Id);
-                            mIntent.putExtra("user2Name", name);
-                            mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
-                                    FLAG_ACTIVITY_REORDER_TO_FRONT );
-                            MyApplication.getContext().startActivity(mIntent);
-                        }
-                    }
-                }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
 
         }else{
             Intent mIntent = new Intent(MyApplication.getContext(),Homepage.class);

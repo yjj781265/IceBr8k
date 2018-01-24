@@ -126,7 +126,11 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_marginLeft="56dp"
+
                 android:id="@+id/badge_frag"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:textSize="12dp"
                 android:gravity="center"
                 android:background="@drawable/badge_circle"
 
@@ -134,15 +138,20 @@
 
         </LinearLayout>
 
-        <com.beardedhen.androidbootstrap.BootstrapButton
+        <com.dd.processbutton.FlatButton
             android:layout_width="320dp"
-            android:layout_below="@id/frt_frag"
-            android:layout_marginTop="56dp"
+            android:shadowRadius="0"
+            android:textSize="16dp"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="20dp"
             android:layout_centerHorizontal="true"
+            android:textColor="@color/white"
             android:id="@+id/reset_frag"
             android:layout_height="42dp"
-            app:buttonMode="regular"
-            app:bootstrapBrand="danger"
+            app:pb_colorPressed="@color/darkRed"
+            android:textAllCaps="false"
+            app:pb_colorNormal="@color/holo_red_light"
             android:text="Reset Questions"
             />
 

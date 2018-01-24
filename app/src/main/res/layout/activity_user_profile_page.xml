@@ -142,73 +142,89 @@
             android:layout_gravity="center_horizontal"
             android:layout_width="320dp"
             android:layout_height="42dp"
+            style="?android:attr/borderlessButtonStyle"
             android:visibility="visible"
             android:textColor="@android:color/white"
-            android:layout_below="@id/message_btn"
+            android:textStyle="normal"
             android:layout_marginTop="15dp"
-            android:textSize="13sp"
+            android:textSize="14dp"
+            android:textAllCaps="false"
             android:text="Compare"
             app:pb_colorNormal="@color/colorPrimary"
-            app:pb_colorPressed="@color/colorPrimary"
+            app:pb_colorPressed="@color/primary_dark"
             app:pb_textProgress="Comparing..."
             app:pb_colorProgress="@color/colorAccent"
             app:pb_colorComplete="@color/colorAccent"
             app:pb_textComplete ="Done"/>
 
-        <com.beardedhen.androidbootstrap.BootstrapButton
-            android:layout_width="320dp"
-            android:layout_height="42dp"
-            android:visibility="gone"
-            android:layout_marginTop="15dp"
-            app:buttonMode="regular"
-            app:bootstrapBrand="success"
-            android:id="@+id/addFriend_btn"
-            android:layout_gravity="center_horizontal"
-            android:text="Add Friend"
-            android:textSize="13dp"
-            />
 
 
 
-    <com.beardedhen.androidbootstrap.BootstrapButton
+
+    <com.dd.processbutton.FlatButton
         android:layout_width="320dp"
         android:layout_height="42dp"
-        android:textColor="@android:color/black"
-        app:buttonMode="regular"
-        app:bootstrapBrand="success"
+        style="?android:attr/borderlessButtonStyle"
+        android:textColor="@android:color/white"
         android:id="@+id/message_btn"
         android:visibility="gone"
         android:layout_gravity="center_horizontal"
         android:text="Message"
+        android:textAllCaps="false"
+        app:pb_colorPressed="@color/colorPressed"
+        app:pb_colorNormal="@color/colorAccent"
         android:layout_marginTop="15dp"
-        android:textSize="13dp"/>
+
+        android:textSize="14dp"/>
 
 
-        <com.beardedhen.androidbootstrap.BootstrapButton
+        <com.dd.processbutton.FlatButton
             android:layout_width="320dp"
             android:layout_height="42dp"
-            android:textColor="@android:color/black"
+            android:visibility="gone"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_marginTop="15dp"
+            app:pb_colorPressed="@color/colorPressed"
+            app:pb_colorNormal="@color/accent"
+            android:id="@+id/addFriend_btn"
+            android:layout_gravity="center_horizontal"
+            android:text="Add Friend"
+            android:textColor="@color/white"
+            android:textAllCaps="false"
+            android:textSize="14dp"
+            />
+
+
+        <com.dd.processbutton.FlatButton
+            android:layout_width="320dp"
+            android:layout_height="42dp"
+            android:textColor="@android:color/white"
             android:id="@+id/deleteFriend_btn"
+            style="?android:attr/borderlessButtonStyle"
             android:visibility="gone"
             android:layout_gravity="center_horizontal"
             android:text="Delete Friend"
-            app:buttonMode="regular"
-            app:bootstrapBrand="danger"
             android:layout_marginTop="15dp"
-            android:textSize="13dp"/>
+            android:textAllCaps="false"
+            android:textSize="14dp"
+            app:pb_colorPressed="@color/darkRed"
+            app:pb_colorNormal="@color/holo_red_light"/>
 
-        <com.beardedhen.androidbootstrap.BootstrapButton
+        <com.dd.processbutton.FlatButton
             android:layout_width="320dp"
             android:layout_height="42dp"
-            android:textColor="@android:color/black"
+            style="?android:attr/borderlessButtonStyle"
+            android:textStyle="normal"
+            android:textColor="@android:color/white"
             android:id="@+id/reset_btn"
-            app:buttonMode="regular"
-            app:bootstrapBrand="danger"
             android:visibility="gone"
             android:layout_gravity="center_horizontal"
             android:text="Reset Questions"
+            android:textAllCaps="false"
             android:layout_marginTop="15dp"
-            android:textSize="13dp"/>
+            app:pb_colorPressed="@color/darkRed"
+            app:pb_colorNormal="@color/holo_red_light"
+            android:textSize="14dp"/>
 
 
 

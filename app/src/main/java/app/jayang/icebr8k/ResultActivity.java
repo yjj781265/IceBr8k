@@ -92,23 +92,7 @@ public class ResultActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.result_menu, menu);
         final MenuItem item = menu.findItem(R.id.mybutton);
-        DatabaseReference mref = FirebaseDatabase.getInstance().getReference().child("Friends").
-                child(FirebaseAuth.getInstance().getCurrentUser().getUid());
-        mref.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.hasChild(user2Id)){
-                    item.setVisible(true);
-                }else{
-                    item.setVisible(false);
-                }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -123,7 +107,7 @@ public class ResultActivity extends AppCompatActivity {
                     mIntent.putExtra("user2Id",user2Id);
                     startActivity(mIntent);
             mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
-                    FLAG_ACTIVITY_CLEAR_TASK );
+               FLAG_ACTIVITY_REORDER_TO_FRONT);
                     finish();
                     overridePendingTransition(R.anim.slide_from_right,android.R.anim.fade_out);
 

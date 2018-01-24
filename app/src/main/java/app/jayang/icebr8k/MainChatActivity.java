@@ -360,8 +360,7 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
         Intent intent = new Intent(this, Homepage.class);
         intent.putExtra("mainchat", "1");
         //hide keyboard
-        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        hideKeyboard();
         startActivity(intent);
         finish();
         overridePendingTransition(android.R.anim.fade_in,R.anim.slide_to_right);
