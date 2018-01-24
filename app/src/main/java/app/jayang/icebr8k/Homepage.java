@@ -183,6 +183,7 @@ public class Homepage extends AppCompatActivity  implements
 
             case R.id.add_friend:
              Intent i = new Intent(getApplicationContext(),SearchUser.class);
+             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
              startActivity(i);
                 return true;
 
@@ -191,6 +192,7 @@ public class Homepage extends AppCompatActivity  implements
                     checkCameraPermission();
                 } else {
                     Intent intent = new Intent(getApplicationContext(),DevoderActivity.class);
+                   intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     startActivity(intent);
 
                 }
@@ -200,6 +202,7 @@ public class Homepage extends AppCompatActivity  implements
                     checkLocationPermission();
                 } else {
                     i = new Intent(getApplicationContext(),PeopleNearby.class);
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     startActivity(i);
 
                 }
@@ -286,6 +289,7 @@ public class Homepage extends AppCompatActivity  implements
                     @Override
                     public void onPermissionGranted(PermissionGrantedResponse response) {
                         Intent i = new Intent(getApplicationContext(),PeopleNearby.class);
+                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(i);
 
                     }
@@ -308,6 +312,7 @@ public class Homepage extends AppCompatActivity  implements
                 .withListener(new PermissionListener() {
                     @Override public void onPermissionGranted(PermissionGrantedResponse response) {
                         Intent intent = new Intent(getApplicationContext(),DevoderActivity.class);
+                       intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(intent);
 
                     }

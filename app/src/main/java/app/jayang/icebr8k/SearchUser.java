@@ -37,6 +37,7 @@ public class SearchUser extends AppCompatActivity implements SearchView.OnQueryT
     private TextView username,notfound;
     private LinearLayout mLinearLayout;
     private  MaterialDialog searchingDialog;
+    private SearchView searchView;
 
 
     @Override
@@ -62,7 +63,7 @@ public class SearchUser extends AppCompatActivity implements SearchView.OnQueryT
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.search_context_menu,menu);
         final MenuItem searchItem = menu.findItem(R.id.pdf_menu_search_item);
-        SearchView searchView =(SearchView) MenuItemCompat.getActionView(searchItem);
+        searchView =(SearchView) MenuItemCompat.getActionView(searchItem);
         searchView.setIconified(false);
         searchView.setIconifiedByDefault(false);
         searchView.setQueryHint("Search Username");
@@ -75,9 +76,11 @@ public class SearchUser extends AppCompatActivity implements SearchView.OnQueryT
 
     @Override
     public boolean onSupportNavigateUp() {
-        //hide keyboard
-        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        if(searchView.hasFocus()) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+
+        }
         finish();
         return true;
     }
