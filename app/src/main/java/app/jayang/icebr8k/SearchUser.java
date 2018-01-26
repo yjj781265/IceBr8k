@@ -47,6 +47,7 @@ public class SearchUser extends AppCompatActivity implements SearchView.OnQueryT
         searchToolbar = findViewById(R.id.search_toolbar);
         setSupportActionBar(searchToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("");
 
         username = findViewById(R.id.search_username);
         mLinearLayout = findViewById(R.id.search_item);

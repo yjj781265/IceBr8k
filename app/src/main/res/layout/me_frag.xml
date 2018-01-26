@@ -138,6 +138,34 @@
 
         </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/shareLocation_frag"
+        android:layout_below="@id/frt_frag"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp"
+        android:background="@color/creamYellow"
+        android:foreground="?selectableItemBackground"
+        android:elevation="3dp"
+        android:padding="10dp">
+        <TextView
+            android:layout_marginStart="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Share My Location"
+            android:textSize="16dp"
+            android:textColor="@color/black"/>
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/switch_frag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:checked="false"
+        android:layout_marginLeft="56dp"/>
+
+    </LinearLayout>
+
         <com.dd.processbutton.FlatButton
             android:layout_width="320dp"
             android:shadowRadius="0"

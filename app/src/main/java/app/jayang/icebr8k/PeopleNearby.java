@@ -2,12 +2,16 @@ package app.jayang.icebr8k;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
@@ -15,22 +19,32 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryDataEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
@@ -50,19 +64,35 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.io.IOException;
+
+import java.sql.Timestamp;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 
-import app.jayang.icebr8k.Modle.UserMarker;
+import app.jayang.icebr8k.Modle.User;
+
+import app.jayang.icebr8k.Modle.UserLocationDialog;
+
+import app.jayang.icebr8k.Modle.UserQA;
 import belka.us.androidtoggleswitch.widgets.BaseToggleSwitch;
 import belka.us.androidtoggleswitch.widgets.ToggleSwitch;
 
 public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallback,GoogleMap.OnMyLocationButtonClickListener,
-        GoogleMap.OnMyLocationClickListener,BaseToggleSwitch.OnToggleSwitchChangeListener,
+        GoogleMap.OnMyLocationClickListener,BaseToggleSwitch.OnToggleSwitchChangeListener,GoogleMap.OnMarkerClickListener,
         GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener{
 
-    private final int MY_PERMISSION_REQUEST_CODE = 781265;
-    private final int PLAY_SERVICES_RESOLUTION_REQUEST = 950406;
     private final int UPDATE_INTERVAL = 10000; //10 sec
     private final int FASTEST_INTERVAL = 3000;
     private final int DISPLACEMENT = 5;
@@ -72,18 +102,29 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     private  FrameLayout mFrameLayout;
     private RecyclerView mRecyclerView;
     private View mCustomerMarkerView;
+    private ImageView mMarkerImageView;
     private ImageButton mLocationButton;
-    private  Marker marker;
     private LocationCallback mLocationCallback;
     private Location mCurrentLocation;
     private FusedLocationProviderClient mFusedLocationClient;
     private Boolean init = false;
+    private Double radius =1.6;
+    private float ZoomLevel =17f;
+    private MaterialDialog mProgressDialog;
+    private GeoFire geofire;
+    private Toolbar mToolbar;
+    private static DecimalFormat df2 = new DecimalFormat(".##");
 
     private SupportMapFragment mapFragment;
     private LocationRequest mLocationRequest;
     private GoogleApiClient mGoogleApiClient;
-    private HashMap<String,UserMarker> mHashMap;
-    private final String TAG = "PeopleNearby_frag";
+    private HashMap<String,Marker> mHashMap;
+    private HashMap<Marker,String> mUserIdHashMap;
+    private UserLocationDialogAdapter mLocationDialogAdapter;
+    private ArrayList<UserLocationDialog> mLocationDialogs;
+    private ImageButton mfilter;
+    private final String TAG = "PeopleNearby_IceBr8k";
+
 
 
     @Override
@@ -92,9 +133,29 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_people_nearby);
         mCustomerMarkerView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).
                 inflate(R.layout.custom_marker, null);
+        mMarkerImageView = mCustomerMarkerView.findViewById(R.id.marker_image);
         mFrameLayout =findViewById(R.id.people_mapFrame);
         mRecyclerView =findViewById(R.id.people_recyclerView);
+        mfilter =findViewById(R.id.people_filter);
+        mToolbar =findViewById(R.id.people_toolbar);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
         mLocationButton =findViewById(R.id.people_myLocation);
+        curretUser =FirebaseAuth.getInstance().getCurrentUser();
+        mHashMap =new HashMap<>();
+        mUserIdHashMap =new HashMap<>();
+        mLocationDialogs =new ArrayList<>();
+        mLocationDialogAdapter = new UserLocationDialogAdapter(mLocationDialogs);
+        mLocationDialogAdapter.setHasStableIds(true);
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        LinearLayoutManager manager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(manager);
+        mRecyclerView.setAdapter(mLocationDialogAdapter);
+        mRecyclerView.setHasFixedSize(true);
+
+
 
         // Get the SupportMapFragment and request notification
         // when the map is ready to be used.
@@ -103,6 +164,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
         mToggleSwitch = findViewById(R.id.people_toggle);
         mToggleSwitch.setOnToggleSwitchChangeListener(this);
+        //map or list
         int position = mToggleSwitch.getCheckedTogglePosition();
         setUI(position);
         if(checkGooglePlayService() ){
@@ -115,11 +177,30 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                         Log.d(TAG, "ZOOM LEVEL "+zoom);
                         LatLng latLng = new LatLng(mCurrentLocation.getLatitude(),
                                 mCurrentLocation.getLongitude());
-                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,17f));
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,20f));
                     }
                 }
             });
         }
+        if(getIntent().getExtras()!=null) {
+        String radiusString=getIntent().getExtras().getString("radius");
+          radius = convertMileStringtoKm(radiusString);
+          if(radius<2){
+              ZoomLevel =17f;
+          }else if(radius>15 && radius<32){
+              ZoomLevel =14f;
+          }else{
+              ZoomLevel =10f;
+          }
+          mProgressDialog =ProgressDialog(radiusString);
+
+        }
+        mfilter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showSingleChoiceDialog();
+            }
+        });
 
 
 
@@ -132,12 +213,13 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         if(mGoogleApiClient!=null) {
             mGoogleApiClient.reconnect();
         }
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        checkGooglePlayService();
+
     }
 
     @Override
@@ -169,8 +251,11 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                 super.onLocationResult(result);
                // mCurrentLocation = result.getLastLocation();
                 mCurrentLocation = result.getLocations().get(0);
-                LatLng latLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-                addCustomMarkerFromURL(latLng);
+
+                updateUserLocation(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(),radius);
+
+
+
               Log.d(TAG,"Current location:\n" + mCurrentLocation) ;
 
             }
@@ -199,7 +284,9 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                         != PackageManager.PERMISSION_GRANTED) {
                     return;
                 }
+                mProgressDialog.show();
                 mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
+
             }
         });
     }
@@ -212,14 +299,15 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         map.setIndoorEnabled(true);
         map.setBuildingsEnabled(true);
         map.getUiSettings().setZoomControlsEnabled(true);
+        map.setOnMarkerClickListener(this);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                         != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        map.setOnMyLocationButtonClickListener(this);
-        map.setOnMyLocationClickListener(this);
+
+
 
 
 
@@ -236,6 +324,8 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMyLocationClick(@NonNull Location location) {
        // Toast.makeText(this, "Current location:\n" + location, Toast.LENGTH_LONG).show();
+        updateUserLocation(location.getLatitude(),location.getLatitude(),radius);
+
     }
 
     @Override
@@ -266,8 +356,6 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
     private Bitmap getMarkerBitmapFromView(View view, Bitmap bitmap) {
 
-        ImageView mMarkerImageView = mCustomerMarkerView.findViewById(R.id.marker_image);
-
         mMarkerImageView.setImageBitmap(bitmap);
         view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
@@ -283,36 +371,82 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         return returnedBitmap;
 
     }
-    private void addCustomMarkerFromURL(final LatLng mDummyLatLng) {
+    private void addCustomMarkerFromURL(final LatLng mDummyLatLng,final String userUid) {
 
         if (map == null) {
             return;
         }
-        // adding a marker with image from URL using glide image loading library
-        String photourl =String.valueOf(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl());
-        Glide.with(this).asBitmap()
-                .load(photourl).apply(RequestOptions.circleCropTransform())
-                .into(new SimpleTarget<Bitmap>() {
-                    @Override
-                    public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
-                        if( marker!=null){
-                            marker.remove();
+        Log.d(TAG,"reach adding photo progress") ;
+
+        DatabaseReference urlRef = FirebaseDatabase.getInstance().getReference().child("Users")
+                .child(userUid);
+        urlRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final User user = dataSnapshot.getValue(User.class);
+                if("public".equals(user.getPrivacy())&&user.getPhotourl()!=null ){
+                    updateList(userUid,mDummyLatLng,user);
+                    String photourl = user.getPhotourl();
+                    Glide.with(getApplicationContext()).asBitmap().load(photourl).
+                            apply(RequestOptions.circleCropTransform()).into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                            if(mHashMap.containsKey(userUid)){
+                                Marker oldMarker =  mHashMap.get(userUid);
+                                if(oldMarker!=null) {
+                                    oldMarker.remove();
+                                    Log.d(TAG,"old marker removed") ;
+                                }
+
+                            }
+                            Marker marker;
+                            if(userUid.equals(curretUser.getUid())){
+                               marker=map.addMarker(new MarkerOptions().position(mDummyLatLng).snippet("I am here").title("My Current Location")
+                                        .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(mCustomerMarkerView, resource))));
+                            }else{
+                                marker=map.addMarker(new MarkerOptions().position(mDummyLatLng)
+                                        .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(mCustomerMarkerView, resource))));
+                            }
+
+                            mHashMap.put(userUid,marker);
+                            mUserIdHashMap.put(marker,userUid);
+                            Log.d(TAG,userUid+ " marker added") ;
+                            if(!init && userUid.equals(curretUser.getUid())){
+                                map.animateCamera(CameraUpdateFactory.newLatLngZoom(mDummyLatLng, ZoomLevel));
+                                init =true;
+                            }
                         }
-                        marker =map.addMarker(new MarkerOptions().position(mDummyLatLng)
-                                .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(mCustomerMarkerView, resource))));
-                        if(!init){
-                            map.animateCamera(CameraUpdateFactory.newLatLngZoom(mDummyLatLng, 17f));
-                            init =true;
-                        }else{
-
+                    });
+                }else if("private".equals(user.getPrivacy())&&user.getPhotourl()!=null){
+                    if(mHashMap.containsKey(userUid)) {
+                        Marker oldMarker = mHashMap.get(userUid);
+                        if (oldMarker != null) {
+                            oldMarker.remove();
+                            mHashMap.remove(userUid);
+                           if(mUserIdHashMap.containsKey(oldMarker)){
+                               mUserIdHashMap.remove(oldMarker);
+                           }
+                            Log.d(TAG, "old marker removed");
 
                         }
-
-
-
                     }
-                });
-     ;
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        // adding a marker with image from URL using glide image loading library
+
+
+      // map.addMarker(new MarkerOptions().position())
+
+
+
+
 
     }
 
@@ -326,6 +460,126 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
             return  true;
         }
     }
+
+    private void updateUserLocation(double lat, double lng,double radius)  {
+        Geocoder gcd = new Geocoder(this, Locale.getDefault());
+        List<Address> addresses = null;
+        try {
+            addresses = gcd.getFromLocation(lat, lng, 3);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if(addresses!=null){
+            Address address = addresses.get(0);
+            if(address.getCountryName()!=null && address.getAdminArea() !=null &&address.getLocality()!=null){
+               // Toast.makeText(this,address.getCountryName()+" "+address.getAdminArea() + " "+address.getLocality(),Toast.LENGTH_LONG).show();
+                updateLocationtoDatabase(address.getCountryName(),address.getAdminArea(),address.getLocality(),lat,lng,radius);
+            }
+
+        }
+
+
+
+    }
+
+    private void updateLocationtoDatabase(String country,String state,String city,final double lat,final double lng,double radius){
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Locations")
+                .child(country).child(state).child(city);
+         geofire = new GeoFire(ref);
+        geofire.setLocation( curretUser.getUid(), new GeoLocation(lat, lng), new GeoFire.CompletionListener() {
+            @Override
+            public void onComplete(String key, DatabaseError error) {
+                Log.d(TAG,"location is updated to firebase");
+
+            }
+        });
+       // updateTimeStamp(ref);
+        if(!init) {
+            findPeopleNearby(geofire, lat, lng, radius);
+        }
+    }
+    private void updateTimeStamp(DatabaseReference ref){
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        ref.child("timestamp").setValue(timestamp);
+
+    }
+    private void findPeopleNearby(final GeoFire geoFire, final double lat, final double lng, double radius){
+        GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(lat,lng), radius);
+        geoQuery.addGeoQueryDataEventListener(new GeoQueryDataEventListener() {
+            @Override
+            public void onDataEntered(DataSnapshot dataSnapshot, GeoLocation location) {
+                Log.d(TAG,"new key entered "+ dataSnapshot.getKey()) ;
+                if(dataSnapshot.getKey()!=null){
+                    String userUid =dataSnapshot.getKey();
+                    LatLng latLng = new LatLng(location.latitude,location.longitude);
+                    addCustomMarkerFromURL(latLng,userUid);
+                }
+
+
+
+
+            }
+
+            @Override
+            public void onDataExited(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getKey()!=null){
+                    String userUid =dataSnapshot.getKey();
+                    if(mHashMap.containsKey(userUid)){
+                        mHashMap.get(userUid).remove();
+                        mHashMap.remove(userUid);
+                    }
+                    UserLocationDialog tempDialog = new UserLocationDialog();
+                    tempDialog.setId(userUid);
+                    if(mLocationDialogs.contains(tempDialog)){
+                        mLocationDialogs.remove(tempDialog);
+                        Collections.sort(mLocationDialogs);
+                        mLocationDialogAdapter.notifyDataSetChanged();
+                    }
+
+                }
+            }
+
+            @Override
+            public void onDataMoved(DataSnapshot dataSnapshot, GeoLocation location) {
+                Log.d(TAG,"user moved "+ dataSnapshot.getKey()) ;
+                if(dataSnapshot.getKey()!=null){
+                    String userUid =dataSnapshot.getKey();
+                    LatLng latLng = new LatLng(location.latitude,location.longitude);
+                    addCustomMarkerFromURL(latLng,userUid);
+                }
+            }
+
+            @Override
+            public void onDataChanged(DataSnapshot dataSnapshot, GeoLocation location) {
+
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+                mProgressDialog.dismiss();
+
+            }
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+
+            }
+        });
+    }
+    private void getUserPhotoUrl(){
+
+    }
+
+    private Double convertMileStringtoKm(String string){
+        string = string.replaceAll("\\D+","");
+        double radius = Double.valueOf(string)*1.60934;
+        return radius;
+    }
+
+
+
+
 
 
 
@@ -347,6 +601,216 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
+   private void updateList(String userUid,LatLng latLng,User user){
+           if(!userUid.equals(curretUser.getUid())) {
+               Log.d(TAG, "reach adding item progress");
+               Location destLocaiton = new Location("");
+               destLocaiton.setLatitude(latLng.latitude);
+               destLocaiton.setLongitude(latLng.longitude);
+               float meter = mCurrentLocation.distanceTo(destLocaiton);
+               double miles = (double) meter * 0.000621371192;
 
+
+               String distance = String.valueOf(miles);
+               UserLocationDialog dialog = new UserLocationDialog(userUid, distance, user);
+               if (mLocationDialogs.contains(dialog)) {
+                   mLocationDialogs.remove(dialog);
+                   Log.d(TAG, "item  need update");
+               }
+               compareWithUser2(dialog);
+           }
+
+   }
+
+    public void compareWithUser2(UserLocationDialog dialog) {
+        pullUser1QA(dialog);
+
+    }
+
+    public void pullUser1QA(final UserLocationDialog dialog) {
+
+
+        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("" +
+                "UserQA/" + curretUser.getUid());
+        mRef.keepSynced(true);
+        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            ArrayList<UserQA> User1QA = new ArrayList<>();
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                    UserQA userQA = childSnapshot.getValue(UserQA.class);
+                    User1QA.add(userQA);
+
+                }
+
+                if (dataSnapshot.getChildrenCount() == User1QA.size()) {
+                    pullUser2QA( User1QA, dialog);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    private void pullUser2QA(final ArrayList<UserQA> user1QA, final UserLocationDialog dialog) {
+
+        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + dialog.getId());
+        mRef.keepSynced(true);
+        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            ArrayList<UserQA> User2QA = new ArrayList<>();
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                    UserQA userQA = childSnapshot.getValue(UserQA.class);
+                    User2QA.add(userQA);
+                }
+                SetScore(user1QA,User2QA, dialog);
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+
+    public void SetScore(ArrayList<UserQA> user1Arr, ArrayList<UserQA> user2Arr,
+                         UserLocationDialog dialog) {
+        int size = user1Arr.size();
+        int commonQuestionSize = 0;
+        String score;
+
+        ArrayList<String> user1StrArr = new ArrayList<>();
+        ArrayList<String> user2StrArr = new ArrayList<>();
+
+        for (UserQA userQA : user1Arr) {
+            if (!userQA.getAnswer().equals("skipped")) {
+                user1StrArr.add(userQA.getQuestionId());
+            }
+
+        }
+        for (UserQA userQA : user2Arr) {
+            if (!userQA.getAnswer().equals("skipped")) {
+                user2StrArr.add(userQA.getQuestionId());
+            }
+        }
+
+        user1StrArr.retainAll(user2StrArr);
+
+        commonQuestionSize = user1StrArr.size();
+
+        Log.d("Score", "Common Question " + commonQuestionSize);
+        user1Arr.retainAll(user2Arr);
+        Log.d("Score", String.valueOf(user1Arr.size()));
+        Log.d("Score", "Size " + size);
+        if (commonQuestionSize != 0) {
+            score = String.valueOf((int) (((double) user1Arr.size() / (double) commonQuestionSize) * 100));
+            Log.d("Score", "Score is " + score);
+
+        }else if(user1Arr.isEmpty() || user2Arr.isEmpty()){
+            score ="0";
+
+        } else {
+            score = "0";
+        }
+
+        dialog.getUser().setScore(score);
+        mLocationDialogs.add(dialog);
+        Collections.sort(mLocationDialogs);
+        mLocationDialogAdapter.notifyDataSetChanged();
+        Log.d(TAG,"new item added");
+
+        }
+
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+       if(mHashMap.containsValue(marker)){
+           final String userId = mUserIdHashMap.get(marker);
+                   if(!userId.equals(curretUser.getUid())){
+                    DatabaseReference infoRef = FirebaseDatabase.getInstance().getReference().child("Users").child(userId);
+                    infoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            User mUser =dataSnapshot.getValue(User.class);
+                            Intent intent = new Intent(PeopleNearby.this, UserProfilePage.class);
+                            intent.putExtra("userInfo", mUser);
+                            intent.putExtra("userUid",userId);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                            startActivity(intent);
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                   }
+       }
+
+        return false;
+    }
+
+    public MaterialDialog ProgressDialog(Object object){
+       String radius =String .valueOf(object);
+        MaterialDialog dialog = new MaterialDialog.Builder(this)
+                .content("Searching People Nearby in "+radius+" radius.")
+                .progress(true, 0)
+                .build();
+        dialog.setCanceledOnTouchOutside(false);
+       return dialog;
+    }
+
+
+    private void showSingleChoiceDialog() {
+
+        new MaterialDialog.Builder(this)
+                .title(R.string.radius_title)
+                .items(R.array.radius)
+                .itemsCallbackSingleChoice(0, new MaterialDialog.ListCallbackSingleChoice() {
+                    @Override
+                    public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
+                        radius = convertMileStringtoKm(String.valueOf(text));;
+                        if(radius<2){
+                            ZoomLevel =17f;
+                        }else if(radius>15 && radius<32){
+                            ZoomLevel =14f;
+                        }else{
+                            ZoomLevel =10f;
+                        }
+                        map.clear();
+                        init =false;
+                        mLocationDialogs.clear();
+                        mHashMap.clear();
+                        mUserIdHashMap.clear();
+                        mProgressDialog = ProgressDialog(text);
+                        mProgressDialog.show();
+                       updateUserLocation(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude(),radius);
+                        return true;
+                    }
+                })
+                .positiveText(R.string.ok).show();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
+    }
 }
+
 

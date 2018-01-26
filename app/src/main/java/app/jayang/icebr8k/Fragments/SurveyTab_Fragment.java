@@ -251,17 +251,6 @@ public class SurveyTab_Fragment extends Fragment {
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser && getView()!=null ) {
-            if(mTextView.getText().toString().equals(getString(R.string.check_back_later))){
-                createInitQ();
-            }
-
-
-
-        }else if(!isVisibleToUser && getView()!=null){
-            mTextView.setText(getString(R.string.check_back_later));
-            hideCardViewComponent();
-        }
 
     }
 

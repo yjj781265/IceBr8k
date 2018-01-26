@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="radius">
+        <item>1 mi</item>
+        <item>10 mi</item>
+        <item>20 mi</item>
+    </string-array>
+</resources>

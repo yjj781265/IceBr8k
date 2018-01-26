@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -52,6 +53,7 @@ import app.jayang.icebr8k.SearchUser;
 public class Userstab_Fragment extends Fragment  {
     View view;
     String TAG ="UserFrag";
+    AppBarLayout mAppBarLayout;
     FirebaseDatabase mDatabase;
     DatabaseReference databaseReference;
     ArrayList<UserDialog> mUserDialogArrayList;
@@ -60,13 +62,11 @@ public class Userstab_Fragment extends Fragment  {
     FirebaseUser currentUser;
     RecyclerAdapter mAdapter;
     Integer friendCount,counter;
-    SwipeRefreshLayout mRefreshLayout;
-    LinearLayout mSearchView;
+    RelativeLayout mSearchView;
     Button filter_btn;
     BootstrapButton addFriend;
     private SharedPreferences sharedPref;
-    private ArrayList<UserDialog> mFilteredList;
-    private Boolean sortByScore,done,newChat;
+    private Boolean sortByScore,done;
     private String sortByScoreStr;
     private long lastClickTime = 0;
 
@@ -105,7 +105,6 @@ public class Userstab_Fragment extends Fragment  {
         mUserDialogArrayList = new ArrayList<>();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         done =false;
-        newChat =false;
         friendCount=0;
         counter=0;
         sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
@@ -136,6 +135,8 @@ public class Userstab_Fragment extends Fragment  {
         mSearchView.setVisibility(View.GONE);
         addFriend = view.findViewById(R.id.add_friend_frag);
         addFriend.setVisibility(View.GONE);
+        mAppBarLayout = view.findViewById(R.id.appbar);
+        mAppBarLayout.setExpanded(false,false);
         final LinearLayoutManager manager = new LinearLayoutManager(view.getContext());
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.setHasFixedSize(true);
@@ -143,9 +144,8 @@ public class Userstab_Fragment extends Fragment  {
         mAdapter = new RecyclerAdapter(getContext(),mUserDialogArrayList);
         mAdapter.setHasStableIds(true);
         mRecyclerView.setAdapter(mAdapter);
-        mRefreshLayout =view.findViewById(R.id.swipetoRefresh);
-                filter_btn =view.findViewById(R.id.filter_btn);
-                filter_btn.setVisibility(View.GONE);
+        filter_btn =view.findViewById(R.id.filter_btn);
+
 
         populateUserDialogList();
         addQAListener();
@@ -189,13 +189,7 @@ public class Userstab_Fragment extends Fragment  {
 
 
 
-        mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-               mRefreshLayout.setRefreshing(false);
 
-            }
-        });
 
         mSearchView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -207,7 +201,6 @@ public class Userstab_Fragment extends Fragment  {
                 }
 
                 lastClickTime = SystemClock.elapsedRealtime();
-
                 Intent i = new Intent(getContext(), SearchName.class);
                 i.putParcelableArrayListExtra("friendList",mUserDialogArrayList);
                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
@@ -221,6 +214,22 @@ public class Userstab_Fragment extends Fragment  {
             public void onClick(View view) {
                 Intent i = new Intent(getContext(), SearchUser.class);
                 startActivity(i);
+            }
+        });
+        databaseReference = mDatabase.getReference("Friends").child(currentUser.getUid());
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(mAdapter.getItemCount()==0 &&done){
+                    addFriend.setVisibility(View.VISIBLE);
+                    loadingGif.setVisibility(View.GONE);
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
             }
         });
 
@@ -245,29 +254,15 @@ public class Userstab_Fragment extends Fragment  {
         Log.d(TAG,String.valueOf(str));
     }
 
-    public void populateUserDialogList() {
 
+
+    public void populateUserDialogList() {
         mUserDialogArrayList.clear();
         addFriend.setVisibility(View.GONE);
         loadingGif.setVisibility(View.VISIBLE);
         friendCount=0;
         databaseReference = mDatabase.getReference("Friends").child(currentUser.getUid());
         databaseReference.keepSynced(true);
-
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(mUserDialogArrayList.isEmpty()){
-                    addFriend.setVisibility(View.VISIBLE);
-                    loadingGif.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
 
         databaseReference.addChildEventListener(new ChildEventListener() {
             @Override
@@ -276,7 +271,6 @@ public class Userstab_Fragment extends Fragment  {
                 if(dataSnapshot.child("Stats").getValue(String.class).equals("Accepted")){
                     showLog(dataSnapshot.getKey() +" added");
                     done =false;
-
                    UserDialog dialog = new UserDialog();
                    dialog.setId(dataSnapshot.getKey());
                     getUserinfo(dialog);
@@ -284,7 +278,6 @@ public class Userstab_Fragment extends Fragment  {
                     mSearchView.setVisibility(View.VISIBLE);
                     filter_btn.setVisibility(View.VISIBLE);
                     friendCount++;
-
                     showLog("friendCount "+friendCount);
                 }
 
@@ -335,7 +328,13 @@ public class Userstab_Fragment extends Fragment  {
 
             }
         });
+
+
+
+
     }
+
+
 
     private void getUserinfo(final UserDialog dialog){
      DatabaseReference userinfoRef = mDatabase.getReference().child("Users").child(dialog.getId());
@@ -496,16 +495,19 @@ public class Userstab_Fragment extends Fragment  {
         if(mUserDialogArrayList.size()==friendCount && !done){
             done =true;
             showLog("DONE" + "LIST SIZE " + mUserDialogArrayList.size());
-            addFriend.setVisibility(View.GONE);
-            loadingGif.setVisibility(View.GONE);
+
+
          if(sortByScore){
              Collections.sort(mUserDialogArrayList,SCORE);
              mAdapter.notifyDataSetChanged();
-             mRefreshLayout.setRefreshing(false);
+             loadingGif.setVisibility(View.GONE);
+
          }else {
              Collections.sort(mUserDialogArrayList,ONLINESTATS);
              mAdapter.notifyDataSetChanged();
-             mRefreshLayout.setRefreshing(false);
+             loadingGif.setVisibility(View.GONE);
+
+
             }
 
         }

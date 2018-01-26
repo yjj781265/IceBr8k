@@ -10,7 +10,7 @@ import java.io.Serializable;
  */
 
 public class User implements Serializable,Comparable<User> {
-    private String displayname,username,photourl,email,score;
+    private String displayname,username,photourl,email,score,privacy;
     private String onlineStats ="0";
 
     public User() {
@@ -21,6 +21,14 @@ public class User implements Serializable,Comparable<User> {
         this.username = username;
         this.photourl = photourl;
         this.email = email;
+    }
+
+    public String getPrivacy() {
+        return privacy;
+    }
+
+    public void setPrivacy(String privacy) {
+        this.privacy = privacy;
     }
 
     public String getDisplayname() {

@@ -1,31 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
+
+
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/custom_marker_view"
     android:orientation="horizontal"
     android:elevation="6dp"
     android:foreground="?android:attr/selectableItemBackground"
+
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
     <ImageView
+        android:layout_width="50dp"
+        android:layout_height="66dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerInParent="true"
+        android:src="@drawable/map_marker"/>
+
+    <ImageView
+        android:src="@drawable/default_avatar"
         android:id="@+id/marker_image"
-        android:layout_gravity="center_vertical"
-        android:layout_width="42dp"
-        android:layout_height="42dp"
-        android:foreground="?android:attr/selectableItemBackground"
-        android:layout_marginRight="5dp"
-        />
-
-    <TextView
-        android:id="@+id/marker_score"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:textSize="14dp"
-        android:layout_marginEnd="5dp"
-        android:textColor="@color/black"
-        android:text="12%"/>
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="14dp"
+        android:layout_alignParentTop="true"
+        android:foreground="?android:attr/selectableItemBackground"/>
 
 
-</LinearLayout>
+
+</RelativeLayout>

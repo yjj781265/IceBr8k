@@ -436,6 +436,7 @@ public void usernameCreateCheck(final GoogleSignInAccount account){
                 user.setDisplayname(account.getDisplayName());
                 user.setEmail(account.getEmail());
                 user.setUsername(dataSnapshot.getValue(String.class));
+                user.setPrivacy("private");
 
                     updateDatabaseAndCurrentUser(user, mAuth.getCurrentUser());
 

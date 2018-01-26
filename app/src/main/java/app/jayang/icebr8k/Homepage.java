@@ -4,14 +4,26 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
+import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -20,14 +32,33 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -49,24 +80,47 @@ import com.zplesac.connectionbuddy.cache.ConnectionBuddyCache;
 import com.zplesac.connectionbuddy.interfaces.ConnectivityChangeListener;
 import com.zplesac.connectionbuddy.models.ConnectivityEvent;
 import com.zplesac.connectionbuddy.models.ConnectivityState;
+
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Locale;
+
 import app.jayang.icebr8k.Fragments.SurveyTab_Fragment;
 import app.jayang.icebr8k.Fragments.Userstab_Fragment;
 import app.jayang.icebr8k.Fragments.chat_frag;
 import app.jayang.icebr8k.Fragments.me_frag;
+import app.jayang.icebr8k.Modle.ActivityCommunicator;
 
 
 public class Homepage extends AppCompatActivity  implements
         OSSubscriptionObserver,chat_frag.OnCompleteListener,
-        GoogleApiClient.OnConnectionFailedListener,ConnectivityChangeListener{
+        GoogleApiClient.OnConnectionFailedListener,
+        ConnectivityChangeListener,
+        GoogleApiClient.ConnectionCallbacks,SharedPreferences.OnSharedPreferenceChangeListener,ActivityCommunicator {
+    private final int UPDATE_INTERVAL = 60000; //60 sec
+    private final int FASTEST_INTERVAL = 3000;
+    private final int  REQUEST_CHECK_SETTINGS =9000;
+    private final int DISPLACEMENT = 30;//30meter
+
     private AHBottomNavigation homepageTab;
+    private SwitchCompat mSwitchCompat;
+    private String radius = "1 mi";
+    private ViewPagerAdapter mViewPagerAdapter;
     private TextView noConnection_tv;
     protected myViewPager viewPager;
     private FirebaseUser currentUser;
-    private GoogleApiClient mGoogleApiClient;
+    private long lastClickTime = 0;
+    private GoogleApiClient mGoogleApiClient,mGoogleLocationApiClient;
     private Toolbar mToolbar;
     private DatabaseReference mRef;
     private DatabaseReference presenceRef;
      private ScreenStateReceiver mReceiver;
+
+    private LocationCallback mLocationCallback;
+    private LocationRequest mLocationRequest;
+    private Location mCurrentLocation;
+    private FusedLocationProviderClient mFusedLocationClient;
     private String TAG = "homePage";
 
 
@@ -103,6 +157,11 @@ public class Homepage extends AppCompatActivity  implements
                         this /* OnConnectionFailedListener */)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
+
+        if(checkGooglePlayService() ) {
+            buildGoogleLocationApiClient();
+        }
+
         /**************************************************************//////
         if (savedInstanceState != null) {
             ConnectionBuddyCache.clearLastNetworkState(this);
@@ -137,6 +196,7 @@ public class Homepage extends AppCompatActivity  implements
 
 
 
+
     }
 
     @Override
@@ -160,10 +220,6 @@ public class Homepage extends AppCompatActivity  implements
             viewPager.setCurrentItem(0,false);
         }
 
-
-
-
-
     }
 
     @Override
@@ -177,17 +233,33 @@ public class Homepage extends AppCompatActivity  implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.log_out_item:
+
+                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                    return false;
+                }
+
+                lastClickTime = SystemClock.elapsedRealtime();
                 Signout();
                  finish();
                 return true;
 
             case R.id.add_friend:
+                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                    return false;
+                }
+
+                lastClickTime = SystemClock.elapsedRealtime();
              Intent i = new Intent(getApplicationContext(),SearchUser.class);
              i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
              startActivity(i);
                 return true;
 
             case R.id.scan_qr:
+                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                    return false;
+                }
+
+                lastClickTime = SystemClock.elapsedRealtime();
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     checkCameraPermission();
                 } else {
@@ -198,14 +270,29 @@ public class Homepage extends AppCompatActivity  implements
                 }
                 return true;
             case R.id.people_nearby:
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    checkLocationPermission();
-                } else {
-                    i = new Intent(getApplicationContext(),PeopleNearby.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                    startActivity(i);
-
+                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                    return false;
                 }
+
+                lastClickTime = SystemClock.elapsedRealtime();
+
+                    // if share my postion is on
+                    if("public".equals(getPrivacySharedPreference())){
+                        showSingleChoiceDialog();
+
+
+                    }else {
+                        new MaterialDialog.Builder(this)
+                                .content("\"Share My Location\" is disabled,you can go to Me tab to enable")
+                                .positiveText(R.string.ok).onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                viewPager.setCurrentItem(3,true);
+                            }
+                        })
+                                .show();
+                    }
+
 
                 return true;
 
@@ -234,20 +321,17 @@ public class Homepage extends AppCompatActivity  implements
             mIntent.putExtra("user2Name", name);
             startActivity(mIntent);
         }
-
-
-
-
-
-
-
+        if(mGoogleApiClient!=null) {
+            mGoogleApiClient.reconnect();
+        }
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        sharedPref.registerOnSharedPreferenceChangeListener(this);
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
 
         setOnline();
         showLog("onResume");
@@ -268,6 +352,10 @@ public class Homepage extends AppCompatActivity  implements
         if(ConnectionBuddy.getInstance()!=null) {
             ConnectionBuddy.getInstance().unregisterFromConnectivityEvents(this);
         }
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        sharedPref.unregisterOnSharedPreferenceChangeListener(this);
+
+
         showLog("onStop");
     }
 
@@ -278,33 +366,11 @@ public class Homepage extends AppCompatActivity  implements
         if (mReceiver != null) {
             unregisterReceiver(mReceiver);
         }
+
         showLog("onDestroy");
 
     }
-    //run time permission
-    private void checkLocationPermission() {
-        Dexter.withActivity(this)
-                .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                .withListener(new PermissionListener() {
-                    @Override
-                    public void onPermissionGranted(PermissionGrantedResponse response) {
-                        Intent i = new Intent(getApplicationContext(),PeopleNearby.class);
-                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                        startActivity(i);
 
-                    }
-
-                    @Override
-                    public void onPermissionDenied(PermissionDeniedResponse response) {
-                      showSnackbarWithSetting("Location access is needed for People Nearby feature",viewPager);
-                    }
-
-                    @Override
-                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
-                        token.continuePermissionRequest();
-                    }
-                }).check();
-    }
 
     public void checkCameraPermission(){
         Dexter.withActivity(this)
@@ -407,7 +473,7 @@ public class Homepage extends AppCompatActivity  implements
 
     private void showLog(String str){ Log.d(TAG,str);}
 
-    public void setHomepageTab(){ViewPagerAdapter mViewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+    public void setHomepageTab(){ mViewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
         mViewPagerAdapter.addFragment(new SurveyTab_Fragment());
       mViewPagerAdapter.addFragment(new Userstab_Fragment());
       mViewPagerAdapter.addFragment(new chat_frag() );
@@ -541,9 +607,6 @@ public class Homepage extends AppCompatActivity  implements
     @Override
     public void onComplete() {
 
-
-
-
     }
 
 
@@ -564,6 +627,15 @@ public class Homepage extends AppCompatActivity  implements
                         }
                     });
         }
+
+        if(mGoogleApiClient!=null) {
+            mGoogleApiClient.disconnect();
+        }
+        if (mFusedLocationClient != null) {
+            mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+        }
+        setUserPrivacy(false);
+
         Intent intent = new Intent(getApplicationContext(), login_page.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
@@ -583,8 +655,6 @@ public class Homepage extends AppCompatActivity  implements
             noConnection_tv.setVisibility(View.GONE);
             setOnline();
 
-
-
         }
         else{
             // there is no active internet connection on this device
@@ -593,11 +663,57 @@ public class Homepage extends AppCompatActivity  implements
         }
     }
 
+    private void setUserPrivacy(boolean isChecked){
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Users").
+                child(currentUser.getUid());
+        if(isChecked) {
+            ref.child("privacy").setValue("public");
+        }else{
+            ref.child("privacy").setValue("private");
+        }
+    }
+
     public void setScreenOnOffListener(){
         IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         mReceiver = new ScreenStateReceiver();
         registerReceiver(mReceiver, intentFilter);
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        if(mGoogleApiClient!=null){
+            // if share my postion is on
+            if("public".equals(getPrivacySharedPreference())){
+                initGoogleMapLocation();
+            }
+
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+        String privacy = sharedPreferences.getString(s, null);
+        if(privacy!=null){
+            if("public".equals(privacy)){
+                initGoogleMapLocation();
+
+            }else{
+                if (mFusedLocationClient != null) {
+                    mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void passDataToActivity(View view) {
+        mSwitchCompat= (SwitchCompat) view;
     }
 
     public class ScreenStateReceiver extends BroadcastReceiver {
@@ -610,6 +726,186 @@ public class Homepage extends AppCompatActivity  implements
             } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 showLog("Screen OFF");
                 setBusy();
+            }
+        }
+    }
+    protected synchronized void buildGoogleLocationApiClient() {
+       mGoogleLocationApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleLocationApiClient.connect();
+    }
+
+    private boolean checkGooglePlayService(){
+        int response = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
+        if(response!= ConnectionResult.SUCCESS){
+            GoogleApiAvailability.getInstance().getErrorDialog(this,response,1).show();
+            return false;
+        }else{
+            return  true;
+        }
+    }
+    private void initGoogleMapLocation() {
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult result) {
+                super.onLocationResult(result);
+                mCurrentLocation = result.getLocations().get(0);
+                //update user location to firebase
+                updateUserLocation(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+
+                Log.d(TAG,"Current location:\n" + mCurrentLocation) ;
+
+            }
+        };
+
+        startLocationMonitoring();
+    }
+
+    private void startLocationMonitoring(){
+        Log.d(TAG,"startLocation called");
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY).
+                setInterval(UPDATE_INTERVAL).setFastestInterval(FASTEST_INTERVAL).setSmallestDisplacement(DISPLACEMENT);
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+        builder.addLocationRequest(mLocationRequest);
+        SettingsClient mSettingsClient = LocationServices.getSettingsClient(this);
+        LocationSettingsRequest mLocationSettingsRequest = builder.build();
+
+        Task<LocationSettingsResponse> locationResponse = mSettingsClient.checkLocationSettings(mLocationSettingsRequest);
+        locationResponse.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
+            @Override
+            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                Log.e("Response", "Successful acquisition of location information!!");
+                //
+                if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    return;
+                }
+                mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
+
+            }
+        }) .addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                if (e instanceof ResolvableApiException) {
+                    // Location settings are not satisfied, but this can be fixed
+                    // by showing the user a dialog.
+                    try {
+                        // Show the dialog by calling startResolutionForResult(),
+                        // and check the result in onActivityResult().
+                        ResolvableApiException resolvable = (ResolvableApiException) e;
+                        resolvable.startResolutionForResult(Homepage.this,
+                                REQUEST_CHECK_SETTINGS);
+                    } catch (IntentSender.SendIntentException sendEx) {
+                        // Ignore the error.
+                    }
+                }
+
+            }
+        });
+    }
+
+
+
+    private void updateUserLocation(double lat, double lng)  {
+        Geocoder gcd = new Geocoder(this, Locale.getDefault());
+        List<Address> addresses = null;
+        try {
+            addresses = gcd.getFromLocation(lat, lng, 3);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if(addresses!=null){
+            Address address = addresses.get(0);
+            if(address.getCountryName()!=null && address.getAdminArea() !=null &&address.getLocality()!=null){
+              //  Toast.makeText(this,address.getCountryName()+" "+address.getAdminArea() + " "+address.getLocality(),Toast.LENGTH_LONG).show();
+                updateLocationtoDatabase(address.getCountryName(),address.getAdminArea(),address.getLocality(),lat,lng);
+            }
+
+        }
+
+
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if(requestCode ==REQUEST_CHECK_SETTINGS && resultCode   ==RESULT_OK){
+            setSharedPreference(true);
+
+        }else if(requestCode ==REQUEST_CHECK_SETTINGS && resultCode!=RESULT_OK){
+            setSharedPreference(false);
+
+
+        }
+    }
+
+    private void updateLocationtoDatabase(String country, String state, String city, final double lat, final double lng){
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Locations")
+                .child(country).child(state).child(city);
+        final GeoFire geoFire = new GeoFire(ref);
+        geoFire.setLocation( currentUser.getUid(), new GeoLocation(lat, lng), new GeoFire.CompletionListener() {
+            @Override
+            public void onComplete(String key, DatabaseError error) {
+                Log.d(TAG,"location is updated to firebase");
+            }
+        });
+      //  updateTimeStamp(ref);
+    }
+    private void updateTimeStamp(DatabaseReference ref){
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        ref.child("timestamp").setValue(timestamp);
+
+    }
+
+
+    private String getPrivacySharedPreference(){
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        String defaultValue = "private";
+        String privacy = sharedPref.getString(currentUser.getUid()+"privacy", defaultValue);
+        return privacy;
+    }
+
+    private void showSingleChoiceDialog() {
+
+        new MaterialDialog.Builder(this)
+                .title(R.string.radius_title)
+                .items(R.array.radius)
+                .itemsCallbackSingleChoice(0, new MaterialDialog.ListCallbackSingleChoice() {
+                    @Override
+                    public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
+                        radius = String.valueOf(text);
+                        Intent intent = new Intent(getApplicationContext(),PeopleNearby.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        intent.putExtra("radius",radius);
+                         startActivity(intent);
+                        return true;
+                    }
+                })
+                .positiveText(R.string.ok).show();
+    }
+
+    private void setSharedPreference(boolean isChecked){
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        if(isChecked) {
+            editor.putString(currentUser.getUid()+"privacy", "public");
+            editor.commit();
+            if(mSwitchCompat!=null){
+                mSwitchCompat.setChecked(true);
+            }
+        }else{
+            editor.putString(currentUser.getUid()+"privacy", "private");
+            editor.commit();
+            if(mSwitchCompat!=null){
+                mSwitchCompat.setChecked(false);
             }
         }
     }

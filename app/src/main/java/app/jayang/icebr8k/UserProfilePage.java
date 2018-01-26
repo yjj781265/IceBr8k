@@ -580,6 +580,7 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
                     Intent intent = new Intent(getApplicationContext(),FriendRequestPage.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
                             FLAG_ACTIVITY_REORDER_TO_FRONT );
+                    startActivity(intent);
                     finish();
                 }
             }else if(id==R.id.deleteFriend_btn){

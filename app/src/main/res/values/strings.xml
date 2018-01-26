@@ -32,6 +32,10 @@
     <string name="message_input_hint">Type Here</string>
     <string name="google_maps_api_key">AIzaSyDGE7baQEbkmk4wCJZhp4V9vO9hT9_c64w</string>
     <string name="firebase_path_error">username should not contain character . # $ / [ ]</string>
+    <string name="location_reminder">By enabling Location Service,other IceBr8k users may be able to locate you, and it may reduce phone battery life.</string>
+    <string name="radius_title">Choose A Radius</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
 
 
 </resources>

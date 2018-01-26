@@ -10,7 +10,7 @@
 
 
     <android.support.v7.widget.Toolbar
-        app:title=""
+        app:title=" "
         android:elevation="9dp"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         android:id="@+id/search_toolbar"

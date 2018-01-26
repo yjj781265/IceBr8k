@@ -30,9 +30,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeMain"
             android:windowSoftInputMode="stateAlwaysHidden|adjustResize">
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
-            </intent-filter>
+
         </activity>
         <activity
             android:name=".ResultActivity"
@@ -97,7 +95,14 @@
         <activity
             android:name=".SearchName"
             android:noHistory="true"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data android:name="android.app.searchable"
+                       android:resource="@xml/searchable"/>
+
+        </activity>
         <activity android:name=".PeopleNearby"/>
 
     </application>

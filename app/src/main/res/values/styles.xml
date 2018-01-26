@@ -11,8 +11,8 @@
         <item name="android:dropDownListViewStyle">@style/PopupMenuListView</item>
         <item name="dropDownListViewStyle">@style/PopupMenuListView</item>
         <item name="windowActionModeOverlay">true</item>
+        <item name="android:actionModeCloseDrawable">@drawable/ic_action_close</item>
         <item name="actionModeBackground">@color/primary</item>
-
         <item name="android:actionBarWidgetTheme">@style/PopupMenuTextView</item>
         <!-- Change Overflow Menu ListView Item Height & Property -->
         <item name="android:listPreferredItemHeight">36dp</item>

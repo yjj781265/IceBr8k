@@ -74,8 +74,9 @@ public class FriendRequestPage extends AppCompatActivity {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                     if(dataSnapshot.child("Stats").getValue(String.class).equals("Pending")){
-                        addToDialog( dataSnapshot.getKey());
-                    }
+                    addToDialog( dataSnapshot.getKey());
+                }
+                noFrt.setVisibility(View.GONE);
 
             }
 
@@ -103,12 +104,15 @@ public class FriendRequestPage extends AppCompatActivity {
         requestRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                noFrt.setVisibility(View.VISIBLE);
-                for(DataSnapshot child : dataSnapshot.getChildren()) {
-                    if (child.child("Stats").getValue(String.class).equals("Pending")) {
-                        noFrt.setVisibility(View.GONE);
-                    }
-                }
+              for(DataSnapshot childSnap : dataSnapshot.getChildren()){
+                  if("Pending".equals(childSnap.child("Stats").getValue(String.class))){
+                      noFrt.setVisibility(View.GONE);
+                  }else{
+                      noFrt.setVisibility(View.VISIBLE);
+                  }
+
+              }
+
             }
 
             @Override

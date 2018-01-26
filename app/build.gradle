@@ -93,6 +93,7 @@ dependencies {
     compile 'com.github.wrdlbrnft:sorted-list-adapter:0.2.0.1'
     compile 'me.imid.swipebacklayout.lib:library:1.1.0'
     compile 'us.belka:androidtoggleswitch:1.2.2'
+    compile 'com.firebase:geofire-android:2.2.0'
 
     implementation("com.mikepenz:materialdrawer:6.0.2@aar") {
         transitive = true

@@ -274,7 +274,6 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
             switch (item.getItemId()) {
                 case R.id.action_delete:
                     showRemoveDialog();
-                    mode.finish(); // Action picked, so close the CAB
                     return true;
                 default:
                     return false;
@@ -286,15 +285,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
         public void onDestroyActionMode(ActionMode mode) {
             actionMode = null;
 
-            // reset color
-            for(ChatDialog dialog : tempChatList){
-                int poistion = mChatDialogs.indexOf(dialog);
-                View chatView = mDialogsList.getLayoutManager().findViewByPosition(poistion);
-                if(chatView!=null) {
-                    chatView.setBackgroundColor(getContext().getResources().getColor(R.color.white));
-                    chatView.setSelected(false);
-                }
-            }
+           dialogsListAdapter.setItems(mChatDialogs);
             if(mHomepage!=null) {
                 mHomepage.getViewPager().setSwipeable(true);
             }
@@ -321,6 +312,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                 dialog.cancel();
+                actionMode.finish(); // Action picked, so close the CAB
             }
         }).show();
     }
@@ -344,6 +336,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
             noChat.setVisibility(View.VISIBLE);
         }
         showToast( tempChatList.size()+" "+ conversation + " Removed");
+        actionMode.finish(); // Action picked, so close the CAB
 
     }
 
