@@ -357,11 +357,7 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
     @Override
     public boolean onSupportNavigateUp() {
 
-        Intent intent = new Intent(this, Homepage.class);
-        intent.putExtra("mainchat", "1");
-        //hide keyboard
-        hideKeyboard();
-        startActivity(intent);
+
         finish();
         overridePendingTransition(android.R.anim.fade_in,R.anim.slide_to_right);
 
@@ -371,9 +367,7 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
     @Override
     public void onBackPressed() {
 
-        Intent intent = new Intent(this, Homepage.class);
-        intent.putExtra("mainchat", "1");
-        startActivity(intent);
+
         finish();
         overridePendingTransition(android.R.anim.fade_in,R.anim.slide_to_right);
 

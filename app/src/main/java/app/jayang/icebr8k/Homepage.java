@@ -114,6 +114,7 @@ public class Homepage extends AppCompatActivity  implements
     private GoogleApiClient mGoogleApiClient,mGoogleLocationApiClient;
     private Toolbar mToolbar;
     private DatabaseReference mRef;
+    private int index =0;
     private DatabaseReference presenceRef;
      private ScreenStateReceiver mReceiver;
 
@@ -878,9 +879,10 @@ public class Homepage extends AppCompatActivity  implements
         new MaterialDialog.Builder(this)
                 .title(R.string.radius_title)
                 .items(R.array.radius)
-                .itemsCallbackSingleChoice(0, new MaterialDialog.ListCallbackSingleChoice() {
+                .itemsCallbackSingleChoice(index, new MaterialDialog.ListCallbackSingleChoice() {
                     @Override
                     public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
+                        index =which;
                         radius = String.valueOf(text);
                         Intent intent = new Intent(getApplicationContext(),PeopleNearby.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);

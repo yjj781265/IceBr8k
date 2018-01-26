@@ -570,7 +570,6 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
                             FLAG_ACTIVITY_REORDER_TO_FRONT );
                     startActivity(intent);
-                    finish();
                     overridePendingTransition(R.anim.slide_from_right,android.R.anim.fade_out);
                 }
             } else if (id == R.id.addFriend_btn) {

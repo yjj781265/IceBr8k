@@ -113,6 +113,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     private MaterialDialog mProgressDialog;
     private GeoFire geofire;
     private Toolbar mToolbar;
+    private int index =0;
     private static DecimalFormat df2 = new DecimalFormat(".##");
 
     private SupportMapFragment mapFragment;
@@ -186,13 +187,17 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         String radiusString=getIntent().getExtras().getString("radius");
           radius = convertMileStringtoKm(radiusString);
           if(radius<2){
-              ZoomLevel =17f;
+              ZoomLevel =14.5f;
+              index =0;
           }else if(radius>15 && radius<32){
-              ZoomLevel =14f;
+              index =1;
+              ZoomLevel =12f;
           }else{
-              ZoomLevel =10f;
+              index=2;
+              ZoomLevel =9f;
           }
           mProgressDialog =ProgressDialog(radiusString);
+            mProgressDialog.show();
 
         }
         mfilter.setOnClickListener(new View.OnClickListener() {
@@ -284,7 +289,6 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                         != PackageManager.PERMISSION_GRANTED) {
                     return;
                 }
-                mProgressDialog.show();
                 mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
 
             }
@@ -776,15 +780,19 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         new MaterialDialog.Builder(this)
                 .title(R.string.radius_title)
                 .items(R.array.radius)
-                .itemsCallbackSingleChoice(0, new MaterialDialog.ListCallbackSingleChoice() {
+                .itemsCallbackSingleChoice(index, new MaterialDialog.ListCallbackSingleChoice() {
                     @Override
                     public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
+                        index =which;
                         radius = convertMileStringtoKm(String.valueOf(text));;
                         if(radius<2){
-                            ZoomLevel =17f;
+
+                            ZoomLevel =14.5f;
                         }else if(radius>15 && radius<32){
+
                             ZoomLevel =14f;
                         }else{
+
                             ZoomLevel =10f;
                         }
                         map.clear();

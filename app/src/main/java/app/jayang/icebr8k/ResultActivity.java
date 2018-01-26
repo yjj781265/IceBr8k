@@ -108,7 +108,6 @@ public class ResultActivity extends AppCompatActivity {
                     startActivity(mIntent);
             mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
                FLAG_ACTIVITY_REORDER_TO_FRONT);
-                    finish();
                     overridePendingTransition(R.anim.slide_from_right,android.R.anim.fade_out);
 
                 }
