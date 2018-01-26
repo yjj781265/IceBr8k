@@ -101,17 +101,14 @@ public class FriendRequestPage extends AppCompatActivity {
             }
         });
 
-        requestRef.addValueEventListener(new ValueEventListener() {
+        requestRef.equalTo("Pending").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-              for(DataSnapshot childSnap : dataSnapshot.getChildren()){
-                  if("Pending".equals(childSnap.child("Stats").getValue(String.class))){
-                      noFrt.setVisibility(View.GONE);
-                  }else{
-                      noFrt.setVisibility(View.VISIBLE);
-                  }
-
-              }
+               if(dataSnapshot.hasChildren()){
+                   noFrt.setVisibility(View.GONE);
+               }else{
+                   noFrt.setVisibility(View.VISIBLE);
+               }
 
             }
 

@@ -3,6 +3,7 @@ package app.jayang.icebr8k;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -44,6 +45,7 @@ import com.firebase.geofire.GeoQueryDataEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationCallback;
@@ -61,6 +63,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -97,6 +100,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     private final int UPDATE_INTERVAL = 10000; //10 sec
     private final int FASTEST_INTERVAL = 3000;
     private final int DISPLACEMENT = 5;
+    private final int   REQUEST_CHECK_SETTINGS =9000;
     private FirebaseUser curretUser;
     private GoogleMap map;
     private  ToggleSwitch mToggleSwitch;
@@ -182,7 +186,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                         Log.d(TAG, "ZOOM LEVEL "+zoom);
                         LatLng latLng = new LatLng(mCurrentLocation.getLatitude(),
                                 mCurrentLocation.getLongitude());
-                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,20f));
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,18f));
                     }
                 }
             });
@@ -191,11 +195,11 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         String radiusString=getIntent().getExtras().getString("radius");
           radius = convertMileStringtoKm(radiusString);
           if(radius<2){
-              ZoomLevel =14.5f;
+              ZoomLevel =13f;
               index =0;
           }else if(radius>15 && radius<32){
               index =1;
-              ZoomLevel =12f;
+              ZoomLevel =11f;
           }else{
               index=2;
               ZoomLevel =9f;
@@ -276,7 +280,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     private void startLocationMonitoring(){
         Log.d(TAG,"startLocation called");
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY).
               setInterval(UPDATE_INTERVAL).setFastestInterval(FASTEST_INTERVAL).setSmallestDisplacement(DISPLACEMENT);
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
         builder.addLocationRequest(mLocationRequest);
@@ -296,7 +300,32 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                 mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
 
             }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                mProgressDialog.dismiss();
+             Toast.makeText(getApplicationContext(),"Unable to find location, check your location setting",Toast.LENGTH_LONG).show();
+                try {
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    ResolvableApiException resolvable = (ResolvableApiException) e;
+                    resolvable.startResolutionForResult(PeopleNearby.this,
+                           REQUEST_CHECK_SETTINGS);
+                } catch (IntentSender.SendIntentException sendEx) {
+                    // Ignore the error.
+                }
+            }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==REQUEST_CHECK_SETTINGS && resultCode == RESULT_OK){
+            init =false;
+            mProgressDialog.show();
+            initGoogleMapLocation();
+        }
     }
 
     @Override
@@ -595,6 +624,9 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
             @Override
             public void onGeoQueryError(DatabaseError error) {
+                mProgressDialog.dismiss();
+                Toast.makeText(getApplicationContext(), error.getMessage(),Toast.LENGTH_LONG).show();
+
 
             }
         });
@@ -804,6 +836,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
+
     private void showSingleChoiceDialog() {
 
         new MaterialDialog.Builder(this)
@@ -816,13 +849,13 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                         radius = convertMileStringtoKm(String.valueOf(text));;
                         if(radius<2){
 
-                            ZoomLevel =14.5f;
+                            ZoomLevel =13f;
                         }else if(radius>15 && radius<32){
 
-                            ZoomLevel =14f;
+                            ZoomLevel =11f;
                         }else{
 
-                            ZoomLevel =10f;
+                            ZoomLevel =9f;
                         }
                         map.clear();
                         init =false;

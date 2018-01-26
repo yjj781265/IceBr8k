@@ -264,6 +264,25 @@ public class Userstab_Fragment extends Fragment  {
         databaseReference = mDatabase.getReference("Friends").child(currentUser.getUid());
         databaseReference.keepSynced(true);
 
+
+        databaseReference.equalTo("Accepted").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getChildrenCount()>0){
+                   addFriend.setVisibility(View.GONE);
+
+                }else{
+                    addFriend.setVisibility(View.VISIBLE);
+                }
+                loadingGif.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         databaseReference.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
