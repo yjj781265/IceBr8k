@@ -29,6 +29,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -113,7 +114,9 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     private MaterialDialog mProgressDialog;
     private GeoFire geofire;
     private Toolbar mToolbar;
+    private TextView noUser;
     private int index =0;
+    private int counter =0;
     private static DecimalFormat df2 = new DecimalFormat(".##");
 
     private SupportMapFragment mapFragment;
@@ -139,6 +142,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         mRecyclerView =findViewById(R.id.people_recyclerView);
         mfilter =findViewById(R.id.people_filter);
         mToolbar =findViewById(R.id.people_toolbar);
+        noUser =findViewById(R.id.people_noUsers);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -344,10 +348,16 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
             case 1:
                 mFrameLayout.setVisibility(View.VISIBLE);
                 mRecyclerView.setVisibility(View.GONE);
+                noUser.setVisibility(View.GONE);
                 break;
             case 0:
                 mFrameLayout.setVisibility(View.GONE);
                 mRecyclerView.setVisibility(View.VISIBLE);
+                if(mLocationDialogAdapter.getItemCount()>0){
+                    noUser.setVisibility(View.GONE);
+                }else{
+                    noUser.setVisibility(View.VISIBLE);
+                }
                 break;
             default:
                 mFrameLayout.setVisibility(View.GONE);
@@ -430,7 +440,20 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                            if(mUserIdHashMap.containsKey(oldMarker)){
                                mUserIdHashMap.remove(oldMarker);
                            }
-                            Log.d(TAG, "old marker removed");
+                           UserLocationDialog dialog = new UserLocationDialog();
+                           dialog.setId(userUid);
+                           if(mLocationDialogs.contains(dialog)){
+                               mLocationDialogs.remove(dialog);
+                               Collections.sort(mLocationDialogs);
+                               mLocationDialogAdapter.notifyDataSetChanged();
+                               if(mLocationDialogAdapter.getItemCount()>0){
+                                   noUser.setVisibility(View.GONE);
+                               }else{
+                                   noUser.setVisibility(View.VISIBLE);
+                               }
+                           }
+
+                            Log.d(TAG, "old marker removed and list updated");
 
                         }
                     }
@@ -518,6 +541,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                     String userUid =dataSnapshot.getKey();
                     LatLng latLng = new LatLng(location.latitude,location.longitude);
                     addCustomMarkerFromURL(latLng,userUid);
+
                 }
 
 
@@ -539,6 +563,11 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                         mLocationDialogs.remove(tempDialog);
                         Collections.sort(mLocationDialogs);
                         mLocationDialogAdapter.notifyDataSetChanged();
+                        if(mLocationDialogAdapter.getItemCount()>0){
+                            noUser.setVisibility(View.GONE);
+                        }else{
+                            noUser.setVisibility(View.VISIBLE);
+                        }
                     }
 
                 }
@@ -562,7 +591,6 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onGeoQueryReady() {
                 mProgressDialog.dismiss();
-
             }
 
             @Override
@@ -731,6 +759,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         mLocationDialogs.add(dialog);
         Collections.sort(mLocationDialogs);
         mLocationDialogAdapter.notifyDataSetChanged();
+        noUser.setVisibility(View.GONE);
         Log.d(TAG,"new item added");
 
         }

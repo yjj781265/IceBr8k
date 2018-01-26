@@ -73,8 +73,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/people_recyclerView"
-        android:visibility="gone"
+        android:visibility="visible"
         android:layout_below="@id/people_toggle">
 
+
+
     </android.support.v7.widget.RecyclerView>
+
+    <TextView
+        android:id="@+id/people_noUsers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_users"
+        android:visibility="visible"
+        android:layout_centerInParent="true"/>
 </RelativeLayout>
