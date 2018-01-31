@@ -27,21 +27,20 @@
         <TextView
             android:id="@+id/name_frt"
             android:textSize="14dp"
-            android:layout_width="wrap_content"
+            android:layout_width="150dp"
             android:layout_height="wrap_content"
-            android:maxLength="15"
-            android:maxLines="1"
-            android:text="Junjie Yang1hhhhhhhhh"
+            android:text=""
+
             android:textColor="@color/black"/>
 
         <TextView
             android:id="@+id/username_frt"
-            android:layout_width="wrap_content"
+            android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:layout_below="@id/name_frt"
-            android:maxLines="1"
+            android:minLines="1"
             android:maxLength="20"
-            android:text="Junjie Yanghhhhhhhhhhhhhfdfsfsfsfds"
+            android:text=""
             android:textSize="10dp"/>
 
     </RelativeLayout>

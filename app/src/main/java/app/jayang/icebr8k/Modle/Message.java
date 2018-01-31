@@ -16,6 +16,7 @@ public class Message implements IMessage,Comparable<Message> {
     private Date createdAt;
     private Author author;
     private String status;
+    private String timestamp;
 
 
     public Message() {
@@ -26,6 +27,23 @@ public class Message implements IMessage,Comparable<Message> {
         this.text = text;
         this.createdAt = createdAt;
         this.author= author ;
+    }
+
+    public Message(String id, String text, Date createdAt, Author author, String status, String timestamp) {
+        this.id = id;
+        this.text = text;
+        this.createdAt = createdAt;
+        this.author = author;
+        this.status = status;
+        this.timestamp = timestamp;
+    }
+
+    public String getTimestamp() {
+        return  String.valueOf( createdAt.getTime());
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
     }
 
     @Override

@@ -69,6 +69,7 @@ import java.util.UUID;
 
 import app.jayang.icebr8k.Modle.User;
 import dmax.dialog.SpotsDialog;
+import id.zelory.compressor.Compressor;
 import me.imid.swipebacklayout.lib.SwipeBackLayout;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 import pl.aprilapps.easyphotopicker.DefaultCallback;
@@ -105,7 +106,7 @@ public class signup extends SwipeBackActivity {
         sv = (ScrollView) findViewById(R.id.sv_signup);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mIntent = new Intent(this,login_page.class);
+        mIntent = new Intent(this,SplashScreen.class);
         loadingdialog = new SpotsDialog(this,"Signing Up...");
         mRef = FirebaseDatabase.getInstance().getReference();
         defaultPhotoFlag =true;
@@ -202,7 +203,7 @@ public class signup extends SwipeBackActivity {
             @Override
             public void onImagePicked(File imageFile, EasyImage.ImageSource source, int type) {
                                         CropImage.activity(Uri.fromFile(imageFile)).setCropShape
-                                                (CropImageView.CropShape.OVAL).setFixAspectRatio(true).
+                                                (CropImageView.CropShape.RECTANGLE).setFixAspectRatio(true).
                                                 setAutoZoomEnabled(false)
                                                 .start(signup.this);
             }
@@ -217,8 +218,8 @@ public class signup extends SwipeBackActivity {
             if (resultCode == RESULT_OK) {
                 //uri to bitmap
                 try {
-                    avatarBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(),
-                            result.getUri());
+                    File imageFile = new File(result.getUri().getPath());
+                     avatarBitmap = new Compressor(this).compressToBitmap(imageFile);
                     Glide.with(getApplicationContext()).load(result.getUri()).
                             apply(RequestOptions.circleCropTransform()).into(avatar);
                     defaultPhotoFlag = false;
@@ -255,7 +256,7 @@ public class signup extends SwipeBackActivity {
         snackbar.show();
     }
 
-    public Bitmap getCroppedBitmap(Bitmap bitmap) {
+ /*   public Bitmap getCroppedBitmap(Bitmap bitmap) {
 
         Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
                 bitmap.getHeight(), Bitmap.Config.ARGB_8888);
@@ -275,7 +276,7 @@ public class signup extends SwipeBackActivity {
         output = Bitmap.createScaledBitmap(output, 512, 512, false);
 
         return output;
-    }
+    }*/
 
 
 
@@ -436,12 +437,12 @@ public class signup extends SwipeBackActivity {
 
 
     public void uploadImage(Bitmap bitmap, final User user, final FirebaseUser currentUser){
-        String filename = UUID.randomUUID().toString()+".PNG";
+        String filename = UUID.randomUUID().toString()+".JPEG";
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference avatarRef = storage.getReference().child("UserAvatars/"+filename);
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        getCroppedBitmap(bitmap).compress(Bitmap.CompressFormat.PNG, 75, stream);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 75, stream);
         // Get the data from an ImageView as bytes
         UploadTask uploadTask = avatarRef.putBytes(stream.toByteArray());
         uploadTask.addOnFailureListener(new OnFailureListener() {

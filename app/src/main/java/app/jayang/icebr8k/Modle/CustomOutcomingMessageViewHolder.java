@@ -9,6 +9,7 @@ import android.content.ClipboardManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -35,7 +36,7 @@ import static android.content.Context.CLIPBOARD_SERVICE;
  */
 
  public class CustomOutcomingMessageViewHolder extends MessageHolders.BaseMessageViewHolder<Message>
-        implements View.OnClickListener,DateFormatter.Formatter,View.OnLongClickListener {
+        implements View.OnClickListener,DateFormatter.Formatter,View.OnLongClickListener,View.OnTouchListener {
 
     protected ImageView userAvatar;
     protected TextView messageText, messageTime;
@@ -50,6 +51,7 @@ import static android.content.Context.CLIPBOARD_SERVICE;
 
         messageText.setOnClickListener(this);
         messageText.setLongClickable(true);
+        userAvatar.setOnTouchListener(this);
         messageText.setOnLongClickListener(this);
 
     }
@@ -136,6 +138,7 @@ import static android.content.Context.CLIPBOARD_SERVICE;
 
     @Override
     public boolean onLongClick(View view) {
+        messageText.setSelected(true);
         ClipboardManager myClipboard = (ClipboardManager) itemView.getContext().getSystemService(CLIPBOARD_SERVICE);
         String text;
         text = messageText.getText().toString();
@@ -144,7 +147,26 @@ import static android.content.Context.CLIPBOARD_SERVICE;
         myClipboard.setPrimaryClip(myClip);
 
         Toast.makeText(itemView.getContext(), "Text Copied",Toast.LENGTH_SHORT).show();
+        messageText.setSelected(false);
         return true;
+
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        if(view==userAvatar)
+        {
+            if(motionEvent.getAction() == MotionEvent.ACTION_DOWN)
+            {
+                userAvatar.setAlpha(.6f);
+            }
+            else
+            {
+                userAvatar.setAlpha(1f);
+            }
+
+        }
+        return false;
 
     }
 }

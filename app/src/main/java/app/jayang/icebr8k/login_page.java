@@ -18,9 +18,11 @@ import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.util.DiffUtil;
 import android.text.InputType;
 import android.util.Base64;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
@@ -77,7 +79,7 @@ public class login_page extends AppCompatActivity implements
     private  ScrollView sv;
     private TextInputLayout email_layout,password_layout;
     private TextInputEditText password,email;
-    private MaterialDialog userNameDialog;
+    private MaterialDialog userNameDialog,dismissDialog;
 
 
             @Override
@@ -87,6 +89,8 @@ public class login_page extends AppCompatActivity implements
         mdatabase = FirebaseDatabase.getInstance();
         myRef = mdatabase.getReference("Users");
         loadingdialog = new SpotsDialog(this,"Signing in...");
+        loadingdialog.setCanceledOnTouchOutside(false);
+
         password =findViewById(R.id.password_login);
         email = findViewById(R.id.email_login);
         email_layout = findViewById(R.id.email_layout_login);
@@ -98,6 +102,17 @@ public class login_page extends AppCompatActivity implements
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.signup_login).setOnClickListener(this);
         findViewById(R.id.login_btn).setOnClickListener(this);
+        findViewById(R.id.sign_in_button).setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View view, MotionEvent motionEvent) {
+                        if(motionEvent.getAction()==MotionEvent.ACTION_DOWN){
+                            view.setAlpha(0.5f);
+                        }else{
+                            view.setAlpha(1.0f);
+                        }
+                        return false;
+                    }
+                });
 
         password.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -143,11 +158,19 @@ public class login_page extends AppCompatActivity implements
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
+
+
     }
 
 
     public void onStart() {
         super.onStart();
+        loadingdialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialogInterface) {
+                signOut();
+            }
+        });
 
 
     }
@@ -167,9 +190,16 @@ public class login_page extends AppCompatActivity implements
     protected void onStop() {
         super.onStop();
 
-    }
 
-    public void showToast(String str){
+
+    }
+    @Override
+        protected void onDestroy() {
+                super.onDestroy();
+
+
+            }
+            public void showToast(String str){
         Toast.makeText(getApplicationContext(),str,Toast.LENGTH_LONG).show();
     }
 
@@ -179,7 +209,8 @@ public class login_page extends AppCompatActivity implements
 
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
+        if (requestCode == RC_SIGN_IN ) {
+            loadingdialog.show();
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
 
 
@@ -189,6 +220,8 @@ public class login_page extends AppCompatActivity implements
                 if (account == null) throw new AssertionError();
                 Log.d("loginPage",account.getPhotoUrl()+"from Google");
                 firebaseAuthWithGoogle(account);
+            }else{
+                loadingdialog.dismiss();
             }
         }
     }
@@ -197,11 +230,6 @@ public class login_page extends AppCompatActivity implements
     // [START auth_with_google]
     private void firebaseAuthWithGoogle( final GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
-        // [START_EXCLUDE silent]
-        //showProgressDialog();
-        // [END_EXCLUDE]
-        loadingdialog.show();
-
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -253,14 +281,14 @@ public class login_page extends AppCompatActivity implements
                     @Override
                     public void onResult(@NonNull Status status) {
 
+
                     }
                 });
 
     }
 
     private void revokeAccess() {
-        // Firebase sign out
-        mAuth.signOut();
+
 
         // Google revoke access
         Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient).setResultCallback(
@@ -278,6 +306,7 @@ public class login_page extends AppCompatActivity implements
         // be available.
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
         Toast.makeText(this, "Google Play Services error.", Toast.LENGTH_SHORT).show();
+        loadingdialog.dismiss();
     }
 
     public boolean checkFirebasePathError(String str){
@@ -292,7 +321,7 @@ public class login_page extends AppCompatActivity implements
             }
 
 
-    public void updateDatabaseAndCurrentUser(final User user, final FirebaseUser currentUser){
+    public void updateCurrentUser(final User user, final FirebaseUser currentUser){
         if(currentUser!=null ) {
             myRef.child(currentUser.getUid()).setValue(user);
             DatabaseReference userNameRef = mdatabase.getReference("Usernames");
@@ -308,19 +337,31 @@ public class login_page extends AppCompatActivity implements
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
                                 Log.d("loginPage", "profile updated " +currentUser.getPhotoUrl() );
-                                startActivity(intent);
-                                    loadingdialog.dismiss();
-                                    finish();
-                                    overridePendingTransition(android.R.anim.fade_in, android.
-                                            R.anim.fade_out);
+                                if(mGoogleApiClient.isConnected()) {
+                                    Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                                            new ResultCallback<Status>() {
+
+                                                @Override
+                                                public void onResult(@NonNull Status status) {
+                                                    startActivity(intent);
+                                                    loadingdialog.dismiss();
+                                                    finish();
+                                                    overridePendingTransition(android.R.anim.fade_in, android.
+                                                            R.anim.fade_out);
+                                                }
+                                            });
+                                }
+
 
                             }else{
-                                showDismissDialog(task.getException().getMessage());
+                                dismissDialog= showDismissDialog(task.getException().getMessage());
+                                dismissDialog.show();
                             }
                         }
                     });
         }else{
-            showDismissDialog("Error Occur, try again");
+            dismissDialog= showDismissDialog("Error Occured, try again");
+            dismissDialog.show();
         }
 
     }
@@ -376,11 +417,12 @@ public class login_page extends AppCompatActivity implements
                                     usernameCreateCheck(account);
                                 }else{
                                     User user = new User();
-                                    user.setPhotourl(account.getPhotoUrl().toString());
                                     user.setDisplayname(account.getDisplayName());
                                     user.setEmail(account.getEmail());
                                     user.setUsername(username);
-                                    updateDatabaseAndCurrentUser(user,mAuth.getCurrentUser());
+                                    user.setPhotourl(account.getPhotoUrl().toString());
+                                    user.setPrivacy("private");
+                                    updateCurrentUser(user, mAuth.getCurrentUser());
                                     dialog.dismiss();
                                 }
                             }
@@ -416,32 +458,26 @@ public class login_page extends AppCompatActivity implements
 
         userNameDialog = userNameDialogBuilder.build();
         userNameDialog.show();
-
-
     }
     //check user has username or not
 public void usernameCreateCheck(final GoogleSignInAccount account){
-    DatabaseReference mRef = mdatabase.
-            getReference("Users/"+mAuth.getCurrentUser().getUid()+"/username");
+    final DatabaseReference mRef = mdatabase.
+            getReference("Users/"+mAuth.getCurrentUser().getUid());
 
     mRef.addValueEventListener(new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            if (dataSnapshot.getValue() == null) {
+            if (dataSnapshot.child("username").getValue() == null) {
                 //user doesn't have username
                 createUsernameDialog(account);
             } else {
-                User user = new User();
-                user.setPhotourl(String.valueOf(account.getPhotoUrl()));
+                User user = dataSnapshot.getValue(User.class);
                 user.setDisplayname(account.getDisplayName());
                 user.setEmail(account.getEmail());
-                user.setUsername(dataSnapshot.getValue(String.class));
-                user.setPrivacy("private");
-
-                    updateDatabaseAndCurrentUser(user, mAuth.getCurrentUser());
-
-
+                user.setUsername(dataSnapshot.child("username").getValue(String.class));
+                updateCurrentUser(user, mAuth.getCurrentUser());
             }
+            mRef.removeEventListener(this);
         }
         @Override
         public void onCancelled(DatabaseError databaseError) {
@@ -467,7 +503,7 @@ public void usernameCreateCheck(final GoogleSignInAccount account){
                                         R.anim.fade_out);
 
                             } else {
-                             showDismissDialog(task.getException().getMessage());
+                             showDismissDialog(task.getException().getMessage()).show();
                                 loadingdialog.dismiss();
                             }
                         }
@@ -475,8 +511,7 @@ public void usernameCreateCheck(final GoogleSignInAccount account){
         }
 
     public void CheckUserInput(){
-
-            String emailstr = email.getText().toString();
+        String emailstr = email.getText().toString();
             String passwordStr = password.getText().toString();
                if (!emailstr.contains("@") && !emailstr.isEmpty()) {
                     email_layout.setErrorEnabled(true);
@@ -503,13 +538,13 @@ public void usernameCreateCheck(final GoogleSignInAccount account){
             }
 
 
-    public void showDismissDialog(String Str){
-        new MaterialDialog.Builder(this)
+    public MaterialDialog showDismissDialog(String Str){
+       return  new MaterialDialog.Builder(this)
                 .title("Error").titleColor(ContextCompat.getColor(getApplicationContext(),
                 R.color.red_error))
                 .content(Str)
-                .positiveText("okay")
-                .show();
+                .positiveText("okay").build();
+
     }
 
 

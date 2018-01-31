@@ -107,14 +107,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
 
         Log.d(TAG,"onCreate");
 
-
-
-
-
-
-
-
-}
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.chat_frag, container, false);
@@ -122,7 +115,6 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
         if(mHomepage!=null) {
             mHomepage.getViewPager().setSwipeable(true);
         }
-
         noChat = mView.findViewById(R.id.noChat_tv);
         loadingGif = mView.findViewById(R.id.loadingImg_chatTab);
         mDialogsList=  mView.findViewById(R.id.dialogsList);
@@ -388,7 +380,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
                             messageNode.hasChild("lastmessage") ){
                         message= messageNode.child("lastmessage").getValue(Message.class);
                         Log.d(TAG,message.getId() + " "+message.getCreatedAt()+ " " +
-                                "\n"+message.getText() +"\n UserInfo for lastmessage "+message.getUser().getAvatar() + " "+message.getUser().getId() + " "+ message.getUser().getName() );
+                                "\n"+message.getText() +"\n UserInfo for lastmessage "+message.getAuthor().getAvatar() + " "+message.getAuthor().getId() + " "+ message.getAuthor().getName() );
                         getUser(messageNode.getKey(),message,false);
                         messageNodeCount++;
                     }
@@ -422,11 +414,11 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
                 User user = dataSnapshot.getValue(User.class);
                 Log.d(TAG, user.getDisplayname()+" "+ user.getDisplayname()+ " "+user.getPhotourl());
                 /************************* url is not accurate here ************************/
-                author = new Author(message.getUser().getId(),message.getUser().getName(),currrentUser.getPhotoUrl().toString());
+                author = new Author(message.getAuthor().getId(),message.getAuthor().getName(),user.getPhotourl());
                 message.setAuthor(author);
 
                 Log.d(TAG,"after add userinfo"+ message.getId() + " "+message.getCreatedAt()+ " " +
-                        "\n"+message.getText() +"\n UserInfo for lastmessage "+message.getUser().getAvatar() + " "+message.getUser().getId() + " "+ message.getUser().getName() );
+                        "\n"+message.getText() +"\n UserInfo for lastmessage "+message.getAuthor().getAvatar() + " "+message.getAuthor().getId() + " "+ message.getAuthor().getName() );
                 createDialogs(message,userUid,user,newChat);
 
             }
@@ -477,9 +469,6 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
                             Log.d(TAG,"childlistnener added from null");
                         }
 
-
-
-
                     }else if(newChat){
                         Log.d(TAG, "The dialogArrList size is " + mChatDialogs.size());
                         Collections.sort(mChatDialogs);
@@ -513,7 +502,7 @@ public class chat_frag extends Fragment implements DateFormatter.Formatter{
                     if (!dataSnapshot.getKey().equals("inChatRoom") &&
                             dataSnapshot.hasChild("lastmessage")&&dataSnapshot.hasChild("unRead")) {
                         message = dataSnapshot.child("lastmessage").getValue(Message.class);
-                        Log.d(TAG, "new dialog creating " + message.getText() + " "+ message.getUser().getAvatar() + " "+ message.getUser().getName());
+                        Log.d(TAG, "new dialog creating " + message.getText() + " "+ message.getAuthor().getAvatar() + " "+ message.getAuthor().getName());
                         getUser(dataSnapshot.getKey(), message,true);
                        lastMessageRef.removeEventListener(this);
                     }

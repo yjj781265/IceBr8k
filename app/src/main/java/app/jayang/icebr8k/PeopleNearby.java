@@ -73,6 +73,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.maps.android.clustering.ClusterManager;
 
 import java.io.IOException;
 
@@ -87,6 +88,7 @@ import java.util.Locale;
 
 import app.jayang.icebr8k.Modle.User;
 
+import app.jayang.icebr8k.Modle.UserDialog;
 import app.jayang.icebr8k.Modle.UserLocationDialog;
 
 import app.jayang.icebr8k.Modle.UserQA;
@@ -97,9 +99,9 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         GoogleMap.OnMyLocationClickListener,BaseToggleSwitch.OnToggleSwitchChangeListener,GoogleMap.OnMarkerClickListener,
         GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener{
 
-    private final int UPDATE_INTERVAL = 10000; //10 sec
+    private final int UPDATE_INTERVAL = 5000; //5sec
     private final int FASTEST_INTERVAL = 3000;
-    private final int DISPLACEMENT = 5;
+    private final int DISPLACEMENT = 3;
     private final int   REQUEST_CHECK_SETTINGS =9000;
     private FirebaseUser curretUser;
     private GoogleMap map;
@@ -131,6 +133,9 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     private UserLocationDialogAdapter mLocationDialogAdapter;
     private ArrayList<UserLocationDialog> mLocationDialogs;
     private ImageButton mfilter;
+    // Declare a variable for the cluster manager.
+    private ClusterManager<MyMarker> mClusterManager;
+
     private final String TAG = "PeopleNearby_IceBr8k";
 
 
@@ -264,8 +269,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                 super.onLocationResult(result);
                // mCurrentLocation = result.getLastLocation();
                 mCurrentLocation = result.getLocations().get(0);
-
-                updateUserLocation(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(),radius);
+                updateLocationtoDatabase(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(),radius);
 
 
 
@@ -280,7 +284,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     private void startLocationMonitoring(){
         Log.d(TAG,"startLocation called");
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY).
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).
               setInterval(UPDATE_INTERVAL).setFastestInterval(FASTEST_INTERVAL).setSmallestDisplacement(DISPLACEMENT);
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
         builder.addLocationRequest(mLocationRequest);
@@ -318,6 +322,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -337,6 +342,19 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         map.setBuildingsEnabled(true);
         map.getUiSettings().setZoomControlsEnabled(true);
         map.setOnMarkerClickListener(this);
+       map.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+       @Override
+       public void onCameraMove() {
+           ZoomLevel= map.getCameraPosition().zoom;
+           //Log.d(TAG, "ZOOM LEVEL "+ZoomLevel);
+       }
+   });
+        mClusterManager = new ClusterManager<>(this,map);
+        mClusterManager.setAnimation(true);
+       map.setOnCameraIdleListener(mClusterManager);
+       map.setOnMarkerClickListener(mClusterManager);
+
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -426,63 +444,69 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         urlRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                final User user = dataSnapshot.getValue(User.class);
-                if("public".equals(user.getPrivacy())&&user.getPhotourl()!=null ){
-                    updateList(userUid,mDummyLatLng,user);
-                    String photourl = user.getPhotourl();
-                    Glide.with(getApplicationContext()).asBitmap().load(photourl).
-                            apply(RequestOptions.circleCropTransform()).into(new SimpleTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
-                            if(mHashMap.containsKey(userUid)){
-                                Marker oldMarker =  mHashMap.get(userUid);
-                                if(oldMarker!=null) {
-                                    oldMarker.remove();
-                                    Log.d(TAG,"old marker removed") ;
+                 String photoUrl =null;
+                  User user =null;
+                if(dataSnapshot.exists()){
+                   user = dataSnapshot.getValue(User.class);
+                   photoUrl = user.getPhotourl();
+                }
+                if("public".equals(user.getPrivacy())&&photoUrl!=null ){
+                    if(mHashMap.containsKey(userUid)){
+                        Log.d(TAG,userUid+ " old marker before "+  mHashMap.get(userUid).getPosition()) ;
+                        mHashMap.get(userUid).hideInfoWindow();
+                        mHashMap.get(userUid).setSnippet(user.getDisplayname());
+                        addmarkerWithTitle(mDummyLatLng,mHashMap.get(userUid));
+                        mHashMap.get(userUid).setPosition(mDummyLatLng);
+
+
+                        Log.d(TAG,userUid+ " old marker updated "+  mHashMap.get(userUid).getPosition()) ;
+
+                    }else{
+                        final User finalUser = user;
+                        Glide.with(getApplicationContext()).asBitmap().load(photoUrl).
+                                apply(RequestOptions.circleCropTransform()).into(new SimpleTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+
+                                Marker marker;
+                                marker = map.addMarker(new MarkerOptions().position(mDummyLatLng)
+                                            .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(mCustomerMarkerView, resource))));
+                                marker.setSnippet(finalUser.getDisplayname());
+                                    addmarkerWithTitle(mDummyLatLng,marker);
+                                    mHashMap.put(userUid, marker);
+                                UserLocationDialog temp = new UserLocationDialog();
+                                temp.setId(userUid);
+                                if(!mLocationDialogs.contains(temp)) {
+                                    updateList(userUid, mDummyLatLng, finalUser);
+                                    Log.d(TAG, userUid + " marker and list item added");
                                 }
 
                             }
-                            Marker marker;
-                            if(userUid.equals(curretUser.getUid())){
-                               marker=map.addMarker(new MarkerOptions().position(mDummyLatLng).snippet("I am here").title("My Current Location")
-                                        .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(mCustomerMarkerView, resource))));
-                            }else{
-                                marker=map.addMarker(new MarkerOptions().position(mDummyLatLng)
-                                        .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(mCustomerMarkerView, resource))));
-                            }
 
-                            mHashMap.put(userUid,marker);
-                            mUserIdHashMap.put(marker,userUid);
-                            Log.d(TAG,userUid+ " marker added") ;
-                            if(!init && userUid.equals(curretUser.getUid())){
-                                map.animateCamera(CameraUpdateFactory.newLatLngZoom(mDummyLatLng, ZoomLevel));
-                                init =true;
-                            }
-                        }
-                    });
-                }else if("private".equals(user.getPrivacy())&&user.getPhotourl()!=null){
+
+                        });
+                    }
+                    if(userUid.equals(curretUser.getUid())){
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(mDummyLatLng, ZoomLevel));
+
+                    }
+
+
+                }else if("private".equals(user.getPrivacy())&&photoUrl!=null){
                     if(mHashMap.containsKey(userUid)) {
                         Marker oldMarker = mHashMap.get(userUid);
                         if (oldMarker != null) {
                             oldMarker.remove();
                             mHashMap.remove(userUid);
-                           if(mUserIdHashMap.containsKey(oldMarker)){
-                               mUserIdHashMap.remove(oldMarker);
-                           }
-                           UserLocationDialog dialog = new UserLocationDialog();
-                           dialog.setId(userUid);
-                           if(mLocationDialogs.contains(dialog)){
-                               mLocationDialogs.remove(dialog);
-                               Collections.sort(mLocationDialogs);
-                               mLocationDialogAdapter.notifyDataSetChanged();
-                               if(mLocationDialogAdapter.getItemCount()>0){
-                                   noUser.setVisibility(View.GONE);
-                               }else{
-                                   noUser.setVisibility(View.VISIBLE);
-                               }
-                           }
 
-                            Log.d(TAG, "old marker removed and list updated");
+
+                         UserLocationDialog temp =new UserLocationDialog();
+                         temp.setId(userUid);
+                         if(mLocationDialogs.contains(temp)) {
+                             mLocationDialogs.remove(temp);
+                             mLocationDialogAdapter.notifyDataSetChanged();
+                             Log.d(TAG, "old marker and list item removed privacy changed" );
+                         }
 
                         }
                     }
@@ -530,7 +554,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
             Address address = addresses.get(0);
             if(address.getCountryName()!=null && address.getAdminArea() !=null &&address.getLocality()!=null){
                // Toast.makeText(this,address.getCountryName()+" "+address.getAdminArea() + " "+address.getLocality(),Toast.LENGTH_LONG).show();
-                updateLocationtoDatabase(address.getCountryName(),address.getAdminArea(),address.getLocality(),lat,lng,radius);
+               // updateLocationtoDatabase(address.getCountryName(),address.getAdminArea(),address.getLocality(),lat,lng,radius);
             }
 
         }
@@ -539,9 +563,9 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-    private void updateLocationtoDatabase(String country,String state,String city,final double lat,final double lng,double radius){
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Locations")
-                .child(country).child(state).child(city);
+    private void updateLocationtoDatabase(final double lat,final double lng,double radius){
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("GeoFireLocations");
+
          geofire = new GeoFire(ref);
         geofire.setLocation( curretUser.getUid(), new GeoLocation(lat, lng), new GeoFire.CompletionListener() {
             @Override
@@ -550,10 +574,9 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
             }
         });
-       // updateTimeStamp(ref);
-        if(!init) {
-            findPeopleNearby(geofire, lat, lng, radius);
-        }
+
+        findPeopleNearby(geofire, lat, lng, radius);
+
     }
     private void updateTimeStamp(DatabaseReference ref){
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -561,6 +584,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
     }
     private void findPeopleNearby(final GeoFire geoFire, final double lat, final double lng, double radius){
+
         GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(lat,lng), radius);
         geoQuery.addGeoQueryDataEventListener(new GeoQueryDataEventListener() {
             @Override
@@ -586,29 +610,45 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                         mHashMap.get(userUid).remove();
                         mHashMap.remove(userUid);
                     }
-                    UserLocationDialog tempDialog = new UserLocationDialog();
-                    tempDialog.setId(userUid);
-                    if(mLocationDialogs.contains(tempDialog)){
-                        mLocationDialogs.remove(tempDialog);
-                        Collections.sort(mLocationDialogs);
+                    UserLocationDialog temp =new UserLocationDialog();
+                    temp.setId(userUid);
+                    if(mLocationDialogs.contains(temp)) {
+                        mLocationDialogs.remove(temp);
                         mLocationDialogAdapter.notifyDataSetChanged();
-                        if(mLocationDialogAdapter.getItemCount()>0){
-                            noUser.setVisibility(View.GONE);
-                        }else{
-                            noUser.setVisibility(View.VISIBLE);
-                        }
                     }
+
+
 
                 }
             }
 
             @Override
             public void onDataMoved(DataSnapshot dataSnapshot, GeoLocation location) {
-                Log.d(TAG,"user moved "+ dataSnapshot.getKey()) ;
-                if(dataSnapshot.getKey()!=null){
+
+                if(dataSnapshot.getKey()!=null && !dataSnapshot.getKey().equals(curretUser.getUid())){
+                    Log.d(TAG,"user moved "+ dataSnapshot.getKey()) ;
                     String userUid =dataSnapshot.getKey();
                     LatLng latLng = new LatLng(location.latitude,location.longitude);
-                    addCustomMarkerFromURL(latLng,userUid);
+                   if(mHashMap.containsKey(userUid) && mHashMap.get(userUid)!=null){
+                       Log.d(TAG,userUid+ " old marker moved before "+  mHashMap.get(userUid).getPosition()) ;
+                       mHashMap.get(userUid).hideInfoWindow();
+                       mHashMap.get(userUid).setPosition(latLng);
+                       addmarkerWithTitle(latLng, mHashMap.get(userUid));
+
+
+                       Log.d(TAG,userUid+ " old marker moved updated "+  mHashMap.get(userUid).getPosition()) ;
+                       UserLocationDialog temp =new UserLocationDialog();
+                       temp.setId(userUid);
+                       if(mLocationDialogs.contains(temp)) {
+                          int index = mLocationDialogs.indexOf(temp);
+                          if(index!=-1) {
+                              User user = mLocationDialogs.get(index).getUser();
+                              updateList(userUid, new LatLng(location.latitude,location.longitude),user);
+                          }
+                       }
+
+
+                   }
                 }
             }
 
@@ -675,13 +715,21 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                double miles = (double) meter * 0.000621371192;
 
 
+
                String distance = String.valueOf(miles);
                UserLocationDialog dialog = new UserLocationDialog(userUid, distance, user);
-               if (mLocationDialogs.contains(dialog)) {
-                   mLocationDialogs.remove(dialog);
+               if (!mLocationDialogs.contains(dialog)) {
                    Log.d(TAG, "item  need update");
+                   compareWithUser2(dialog);
+               }else{
+                   int index = mLocationDialogs.indexOf(dialog);
+                   if(index!=-1) {
+                       mLocationDialogs.remove(dialog);
+                       compareWithUser2(dialog);
+                   }
+
                }
-               compareWithUser2(dialog);
+
            }
 
    }
@@ -788,7 +836,9 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         dialog.getUser().setScore(score);
-        mLocationDialogs.add(dialog);
+        if(!mLocationDialogs.contains(dialog)) {
+            mLocationDialogs.add(dialog);
+        }
         Collections.sort(mLocationDialogs);
         mLocationDialogAdapter.notifyDataSetChanged();
         noUser.setVisibility(View.GONE);
@@ -799,29 +849,6 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-       if(mHashMap.containsValue(marker)){
-           final String userId = mUserIdHashMap.get(marker);
-                   if(!userId.equals(curretUser.getUid())){
-                    DatabaseReference infoRef = FirebaseDatabase.getInstance().getReference().child("Users").child(userId);
-                    infoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            User mUser =dataSnapshot.getValue(User.class);
-                            Intent intent = new Intent(PeopleNearby.this, UserProfilePage.class);
-                            intent.putExtra("userInfo", mUser);
-                            intent.putExtra("userUid",userId);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                            startActivity(intent);
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-                   }
-       }
-
         return false;
     }
 
@@ -858,17 +885,43 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                             ZoomLevel =9f;
                         }
                         map.clear();
-                        init =false;
+
                         mLocationDialogs.clear();
+                        mLocationDialogAdapter.notifyDataSetChanged();
                         mHashMap.clear();
-                        mUserIdHashMap.clear();
                         mProgressDialog = ProgressDialog(text);
                         mProgressDialog.show();
-                       updateUserLocation(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude(),radius);
+                        updateLocationtoDatabase(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude(),radius);
                         return true;
                     }
                 })
                 .positiveText(R.string.ok).show();
+    }
+
+    public void addmarkerWithTitle(LatLng latLng,Marker marker){
+        Geocoder geocoder;
+
+        List<Address> yourAddresses = new ArrayList<>();
+        geocoder = new Geocoder(this, Locale.getDefault());
+        try {
+            yourAddresses= geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (yourAddresses.size() > 0)
+        {
+            String yourAddress = yourAddresses.get(0).getAddressLine(0);
+            String yourCity = yourAddresses.get(0).getAddressLine(1);
+            String yourCountry = yourAddresses.get(0).getAddressLine(2);
+            marker.setTitle(yourAddress);
+
+
+            //MyMarker offsetItem = new MyMarker(latLng.latitude, latLng.longitude,yourAddress,yourCity);
+           // mClusterManager.addItem(offsetItem);
+
+        }
+
     }
 
     @Override

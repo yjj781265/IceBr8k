@@ -21,8 +21,6 @@
     </style>
 
 
-
-
     <style name="OverflowMenu" parent="Widget.AppCompat.PopupMenu.Overflow">
         <item name="android:windowDisablePreview">true</item>
         <item name="overlapAnchor">false</item>
@@ -34,6 +32,7 @@
     <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowBackground">@drawable/splashscreen</item>
     </style>
+
     <style name="TextAppearence.App.TextInputLayout" parent="@android:style/TextAppearance">
         <item name="android:textColor">@color/black</item>
         <item name="android:textSize">14sp</item>
@@ -60,10 +59,9 @@
     </style>
 
     <style name="myPopupMenuTextAppearanceSmall"
-        parent="@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Small">
+           parent="@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Small">
         <item name="android:textColor">@color/dark_gray</item>
     </style>
-
 
 
     <!-- Change Overflow Menu ListView Text Size and Text Size -->
@@ -76,10 +74,17 @@
         <item name="android:windowIsTranslucent">false</item>
     </style>
 
+    <style name="FullscreenTheme" parent="AppTheme">
+        <item name="android:actionBarStyle">@style/FullscreenActionBarStyle</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:windowBackground">@null</item>
+        <item name="metaButtonBarStyle">?android:attr/buttonBarStyle</item>
+        <item name="metaButtonBarButtonStyle">?android:attr/buttonBarButtonStyle</item>
+    </style>
 
-
-
-
+    <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
+        <item name="android:background">@color/black_overlay</item>
+    </style>
 
 
 </resources>

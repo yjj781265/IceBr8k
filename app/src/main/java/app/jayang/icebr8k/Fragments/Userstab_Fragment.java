@@ -150,6 +150,8 @@ public class Userstab_Fragment extends Fragment  {
         populateUserDialogList();
         addQAListener();
 
+
+
         filter_btn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -486,7 +488,7 @@ public class Userstab_Fragment extends Fragment  {
         dialog.setScore(score);
         if(!done) {
             mUserDialogArrayList.add(dialog);
-            addOnLineListener(dialog);
+            addUserChangeListener(dialog);
             addUser2QAListener(dialog);
         }else if(done){
             int index;
@@ -594,18 +596,20 @@ public class Userstab_Fragment extends Fragment  {
 
 
 
-    private void addOnLineListener(final UserDialog dialog){
+    private void addUserChangeListener(final UserDialog dialog){
         DatabaseReference mref = FirebaseDatabase.getInstance().getReference().child("Users").
-                child(dialog.getId()).child("onlineStats");
+                child(dialog.getId());
         mref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 int index;
                 if(done ) {
-                    String online = dataSnapshot.getValue(String.class);
+                  User user = dataSnapshot.getValue(User.class);
                     for(index=0;index<mUserDialogArrayList.size();index++){
                         if(mUserDialogArrayList.get(index).getId().equals(dialog.getId())){
-                            dialog.setOnlineStats(online);
+                            dialog.setOnlineStats(user.getOnlineStats());
+                            dialog.setName(user.getDisplayname());
+                            dialog.setPhotoUrl(user.getPhotourl());
                             mUserDialogArrayList.set(index,dialog);
                             if(!sortByScore) {
                                 Collections.sort(mUserDialogArrayList, ONLINESTATS);
@@ -630,12 +634,6 @@ public class Userstab_Fragment extends Fragment  {
         });
 
     }
-
-
-
-
-
-
     @Override
     public void onStop() {
         super.onStop();

@@ -1,18 +1,23 @@
 package app.jayang.icebr8k;
 
+import android.*;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -30,32 +35,56 @@ import com.dd.processbutton.iml.ActionProcessButton;
 import com.github.lzyzsd.circleprogress.ArcProgress;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
+import app.jayang.icebr8k.Fragments.me_frag;
 import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.Modle.UserQA;
+import id.zelory.compressor.Compressor;
+import pl.aprilapps.easyphotopicker.DefaultCallback;
+import pl.aprilapps.easyphotopicker.EasyImage;
 
 
-public class UserProfilePage extends AppCompatActivity implements View.OnClickListener {
+public class UserProfilePage extends AppCompatActivity implements View.OnClickListener,View.OnTouchListener {
     Toolbar profileToolbar;
     ImageView mImageView,qrImage;
     ActionProcessButton  compare_btn;
     FlatButton message_btn,addFriend_btn,deleteFriend_btn,reset_btn;
     TextView displayname_profile, email_profile, username_profile;
+    MaterialDialog mProgressDialog;
 
 
     FirebaseDatabase database;
     FirebaseUser currentUser;
+    DatabaseReference mRef;
     User mUser, selfUser;
     String uid;
     Dialog dialog;
@@ -71,6 +100,10 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile_page);
+        mRef= FirebaseDatabase.getInstance().getReference();
+        mProgressDialog =  new MaterialDialog.Builder(this)
+                .content("Updating Avatar...")
+                .progress(true, 0).build();
 
 
         profileToolbar = findViewById(R.id.profileToolbar);
@@ -94,6 +127,9 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
         message_btn.setOnClickListener(this);
         deleteFriend_btn.setOnClickListener(this);
         reset_btn.setOnClickListener(this);
+        mImageView.setOnTouchListener(this);
+        mImageView.setOnClickListener(this);
+
 
 
 
@@ -115,6 +151,8 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
             updateUI(mUser);
             checkFriendStats();
 
+
+
             // uid is currentuser
         }else if(mUser != null && uid!=null && uid.equals(currentUser.getUid())){
             qrImage.setVisibility(View.VISIBLE);
@@ -124,6 +162,7 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
             deleteFriend_btn.setVisibility(View.GONE);
             reset_btn.setVisibility(View.VISIBLE);
             updateUI(mUser);
+            mImageView.setOnClickListener(this);
         }
 
 
@@ -327,11 +366,7 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
                                     User1QA.add(user1QA);
                                     temp1QA.add(user1QA);
                                 }
-
-
                             }
-
-
                         }
 
                         //find questions with the same answer
@@ -459,9 +494,7 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
                              message_btn.setVisibility(View.VISIBLE);
                              addFriend_btn.setText("Friend Request Pending");
                              addFriend_btn.setClickable(false);
-
-
-                }
+                         }
             }
 
             @Override
@@ -505,7 +538,7 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     String playerid = dataSnapshot.getValue(String.class);
-                  SendNotification.sendFriendRequestNotification(playerid,"Friend Request",  currentUser.getDisplayName()+" send you a friend request");
+                  SendNotification.sendFriendRequestNotification(playerid,"Friend Request",  currentUser.getDisplayName()+" send you a friend request.");
                 }
 
                 @Override
@@ -549,11 +582,194 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
 
     }
 
+    private void showBasicDialog(String str){
+        new MaterialDialog.Builder(this)
+                .content(str).positiveColor(getResources().getColor(R.color.colorAccent))
+                .negativeColor(getResources().getColor(R.color.holo_red_light))
+                .positiveText("Yes").onPositive(new MaterialDialog.SingleButtonCallback() {
+            @Override
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                resetQuestions();
+            }
+        }).negativeText("No")
+                .show();
+    }
+
+    public void showDismissDialog(String Str){
+        new MaterialDialog.Builder(this)
+                .title("Error").titleColor(getResources().getColor(R.color.red_error))
+                .content(Str)
+                .positiveText("okay")
+                .show();
+    }
+
+
+
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        EasyImage.handleActivityResult(requestCode, resultCode, data,
+                this, new DefaultCallback() {
+                    @Override
+                    public void onImagePicked(File imageFile, EasyImage.ImageSource source, int type) {
+                        CropImage.activity(Uri.fromFile(imageFile)).setCropShape
+                                (CropImageView.CropShape.RECTANGLE).setFixAspectRatio(true).
+                                setAutoZoomEnabled(false)
+                                .start(UserProfilePage.this);
+                    }
+                });
+        //add cropped image on avatar imageview
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+                //uri to bitmap
+                try {
+                    File imageFile = new File(result.getUri().getPath());
+                    Bitmap avatarBitmap = new Compressor(this).compressToBitmap(imageFile);
+                   mProgressDialog.show();
+                    uploadImage(avatarBitmap,currentUser);
+
+                } catch (IOException e) {
+                    showToast(e.getMessage());
+                }
+
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Exception error = result.getError();
+                showToast(error.getMessage());
+            }
+        }
+    }
+
+    public void showSnackbarWithSetting(String str, View view){
+        Snackbar snackbar = Snackbar
+                .make(view, str, Snackbar.LENGTH_LONG)
+                .setAction("Setting", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Context context = view.getContext();
+                        Intent myAppSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                Uri.parse("package:" + context.getPackageName()));
+                        myAppSettings.addCategory(Intent.CATEGORY_DEFAULT);
+                        myAppSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(myAppSettings);
+                    }
+                });
+        snackbar.show();
+    }
+
+    public void uploadImage(Bitmap bitmap, final FirebaseUser currentUser){
+        String filename = UUID.randomUUID().toString()+".JPEG";
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference avatarRef = storage.getReference().child("UserAvatars/"+filename);
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 75, stream);
+        // Get the data from an ImageView as bytes
+        UploadTask uploadTask = avatarRef.putBytes(stream.toByteArray());
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                showDismissDialog(exception.getMessage());
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                // taskSnapshot.getMetadata() contains file metadata such as size, content-type,
+                // and download URL.
+                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                updateDatabaseAndCurrentUser(downloadUrl.toString());
+            }
+        });
+
+
+    }
+
+    public void updateDatabaseAndCurrentUser(final String photoUrl){
+
+        mRef.child("Users").child(currentUser.getUid()).child("photourl").setValue(photoUrl);
+        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                .setPhotoUri(Uri.parse(photoUrl))
+                .build();
+
+        currentUser.updateProfile(profileUpdates)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            mProgressDialog.dismiss();
+                            Glide.with(getApplicationContext()).load(photoUrl).
+                                    apply(RequestOptions.circleCropTransform()).into(mImageView);
+                            showToast("Avatar Updated ");
+
+                        }else{
+                            mProgressDialog.dismiss();
+                            showDismissDialog(task.getException().getMessage());
+                        }
+                    }
+                });
+
+    }
+    public void changeAvatar() {
+        //request permission
+        Dexter.withActivity(this)
+                .withPermissions(android.Manifest.permission.CAMERA,
+                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE).withListener(
+                new MultiplePermissionsListener() {
+                    @Override
+                    public void onPermissionsChecked(MultiplePermissionsReport report) {
+                        if( report.areAllPermissionsGranted()) {
+
+                            //open camera or gallery
+                            EasyImage.openChooserWithGallery(UserProfilePage.this,
+                                    "Take or Pick a photo for your avatar", 0);
+                        }else{
+                            showSnackbarWithSetting("Camera and Storage permission are " +
+                                    "needed for your avatar",getCurrentFocus());
+                        }
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown
+                            (List<PermissionRequest> permissions, PermissionToken token) {
+                        //asker user for permission again if user denied(not ask again is unchecked)
+                        token.continuePermissionRequest();
+                    }
+                }). check();
+    }
+
+
+    public void showToast(String str){
+        Toast.makeText(getApplicationContext(),str,Toast.LENGTH_LONG).show();
+    }
+
+    public void showSignleChoiceDialog(){
+        new MaterialDialog.Builder(this)
+                .items(R.array.avatar_choice)
+                .itemsCallbackSingleChoice(0, new MaterialDialog.ListCallbackSingleChoice() {
+                    @Override
+                    public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
+                        if(which==0){
+                            changeAvatar();
+                        }else{
+                            Intent i = new Intent(getApplicationContext(),FullImageView.class);
+                            i.putExtra("photoUrl",currentUser.getPhotoUrl().toString());
+                            startActivity(i);
+                        }
+                        return true;
+                    }
+                })
+                .positiveText(R.string.ok)
+                .show();
+    }
+
+
+
 
     @Override
     public void onClick(View view) {
         int id =view.getId();
-
         if(checkInternet()) {
             if (id == R.id.reset_btn) {
              showBasicDialog("Are you sure to reset all the questions?");
@@ -567,8 +783,6 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
                     Intent intent = new Intent(getApplicationContext(), MainChatActivity.class);
                     intent.putExtra("user2Id", uid);
                     intent.putExtra("user2Name", mUser.getDisplayname());
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
-                            FLAG_ACTIVITY_REORDER_TO_FRONT );
                     startActivity(intent);
                     overridePendingTransition(R.anim.slide_from_right,android.R.anim.fade_out);
                 }
@@ -577,13 +791,27 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
                      sendFriendRequest();
                 }else if(addFriend_btn.getText().toString().equals("Respond to Friend Request")){
                     Intent intent = new Intent(getApplicationContext(),FriendRequestPage.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
-                            FLAG_ACTIVITY_REORDER_TO_FRONT );
+                    intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT );
                     startActivity(intent);
                     finish();
                 }
             }else if(id==R.id.deleteFriend_btn){
-                 deleteFriend();
+                new MaterialDialog.Builder(this)
+                        .content("Are you sure to unfriend "+mUser.getDisplayname()+" ?").positiveColor(getResources().getColor(R.color.colorAccent))
+                        .negativeColor(getResources().getColor(R.color.holo_red_light))
+                        .positiveText("Yes").onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        deleteFriend();
+                    }
+                }).negativeText("No")
+                        .show();
+
+            }else if(id == R.id.profileButton ){
+                    Intent i = new Intent(getApplicationContext(),FullImageView.class);
+                    i.putExtra("photoUrl",mUser.getPhotourl());
+                    startActivity(i);
+
             }
         }else{
             Snackbar snackbar = Snackbar
@@ -598,20 +826,13 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
             snackbar.show();
         }
 
+
     }
 
-    private void showBasicDialog(String str){
-        new MaterialDialog.Builder(this)
-                .content(str).positiveColor(getResources().getColor(R.color.colorAccent))
-                .negativeColor(getResources().getColor(R.color.holo_red_light))
-                .positiveText("Yes").onPositive(new MaterialDialog.SingleButtonCallback() {
-            @Override
-            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                resetQuestions();
-            }
-        }).negativeText("No")
-                .show();
-    }
+
+
+
+
 
     public boolean checkInternet() {
         ConnectivityManager cm = (ConnectivityManager) getApplicationContext()
@@ -624,5 +845,15 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
 
 
         }
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        if(motionEvent.getAction() == MotionEvent.ACTION_DOWN){
+           view.setAlpha(.6f);
+        }else{
+            view.setAlpha(1f);
+        }
+        return false;
     }
 }

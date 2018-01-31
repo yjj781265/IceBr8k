@@ -22,7 +22,7 @@
             android:id="@+id/toolbar_result"
             android:layout_gravity="center"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="56dp"
             app:title=""
             android:background="?attr/colorPrimary"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"

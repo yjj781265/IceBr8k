@@ -3,6 +3,7 @@ package app.jayang.icebr8k.Modle;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -23,7 +24,7 @@ import static android.content.Context.CLIPBOARD_SERVICE;
  */
 
 public class CustomIncomingMessageViewHolder extends MessageHolders.BaseMessageViewHolder<Message>
-implements View.OnClickListener,View.OnLongClickListener,DateFormatter.Formatter{
+implements View.OnClickListener,View.OnLongClickListener,DateFormatter.Formatter,View.OnTouchListener{
     protected ImageView userAvatar;
     protected TextView messageText, messageTime;
     public CustomIncomingMessageViewHolder(View itemView) {
@@ -33,6 +34,7 @@ implements View.OnClickListener,View.OnLongClickListener,DateFormatter.Formatter
         messageText = itemView.findViewById(R.id.incoming_text);
 
         messageText.setOnClickListener(this);
+        userAvatar.setOnTouchListener(this);
         messageText.setLongClickable(true);
         messageText.setOnLongClickListener(this);
     }
@@ -52,6 +54,7 @@ implements View.OnClickListener,View.OnLongClickListener,DateFormatter.Formatter
 
     @Override
     public boolean onLongClick(View view) {
+        messageText.setSelected(true);
         ClipboardManager myClipboard = (ClipboardManager) itemView.getContext().getSystemService(CLIPBOARD_SERVICE);
         String text;
         text = messageText.getText().toString();
@@ -60,6 +63,7 @@ implements View.OnClickListener,View.OnLongClickListener,DateFormatter.Formatter
         myClipboard.setPrimaryClip(myClip);
 
         Toast.makeText(itemView.getContext(), "Text Copied",Toast.LENGTH_SHORT).show();
+        messageText.setSelected(false);
         return true;
 
 
@@ -121,5 +125,22 @@ implements View.OnClickListener,View.OnLongClickListener,DateFormatter.Formatter
         } else {
             return "";
         }
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        if(view==userAvatar)
+        {
+            if(motionEvent.getAction() == MotionEvent.ACTION_DOWN)
+            {
+                userAvatar.setAlpha(.6f);
+            }
+            else
+            {
+                userAvatar.setAlpha(1f);
+            }
+
+        }
+        return false;
     }
 }

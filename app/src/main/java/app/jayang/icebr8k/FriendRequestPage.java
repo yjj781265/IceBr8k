@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -82,11 +83,28 @@ public class FriendRequestPage extends AppCompatActivity {
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                if(dataSnapshot.child("Stats").getValue(String.class).equals("Accepted")){
+                    UserDialog dialog = new UserDialog();
+                    dialog.setId(dataSnapshot.getKey());
+                    mUserDialogs.remove(dialog);
+                    mAdapter.notifyDataSetChanged();
+                    if(mAdapter.getItemCount() ==0){
+                        noFrt.setVisibility(View.VISIBLE);
+                    }
+                }
+
 
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
+                UserDialog dialog = new UserDialog();
+                dialog.setId(dataSnapshot.getKey());
+                mUserDialogs.remove(dialog);
+                mAdapter.notifyDataSetChanged();
+                if(mAdapter.getItemCount() ==0){
+                    noFrt.setVisibility(View.VISIBLE);
+                }
 
             }
 

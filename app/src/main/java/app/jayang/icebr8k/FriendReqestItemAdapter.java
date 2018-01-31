@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
@@ -97,6 +98,17 @@ public class FriendReqestItemAdapter extends RecyclerView.Adapter<FriendReqestIt
                 toUserProfilePage(dialog);
             }
         });
+        holder.avatar.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN){
+                 view.setAlpha(0.5f);
+                }else{
+                    view.setAlpha(1.0f);
+                }
+                return false;
+            }
+        });
 
     }
 
@@ -115,7 +127,7 @@ public class FriendReqestItemAdapter extends RecyclerView.Adapter<FriendReqestIt
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     Toast.makeText(mContext, "Friend Request Deleted", Toast.LENGTH_SHORT).show();
-                    removeAt(position);
+
                 }
             });
 
@@ -136,10 +148,15 @@ public class FriendReqestItemAdapter extends RecyclerView.Adapter<FriendReqestIt
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     Toast.makeText(mContext, "Friend Request Accepted", Toast.LENGTH_SHORT).show();
-                    removeAt(position);
                     Author author = new Author("0406", currentuser.getDisplayName(),
                             currentuser.getPhotoUrl().toString());
-                    final Message message = new Message(createTransactionID(), "I have accepted your friend request", new Date(), author);
+                    final Message message = new Message();
+                    message.setId(UUID.randomUUID().toString());
+                    message.setText("I have accepted your friend request.");
+                    Date date = new Date();
+                    message.setTimestamp(String.valueOf(date.getTime()));
+                    message.setAuthor(author);
+                    message.setCreatedAt(date);
                     DatabaseReference ref = FirebaseDatabase.getInstance().getReference().
                             child("Messages").child(currentuser.getUid()).
                             child(uid);
@@ -147,9 +164,6 @@ public class FriendReqestItemAdapter extends RecyclerView.Adapter<FriendReqestIt
                     ref.child("lastmessage").setValue(message);
                     ref.child("inChat").setValue(false);
                     ref.child("unRead").setValue(0);
-
-
-
                     DatabaseReference ref2 = FirebaseDatabase.getInstance().getReference().
                             child("Messages").child(uid).child(currentuser.getUid());
                     author.setId("0401");
@@ -197,9 +211,7 @@ public class FriendReqestItemAdapter extends RecyclerView.Adapter<FriendReqestIt
         mContext.startActivity(intent);
     }
 
-    public String createTransactionID() {
-        return UUID.randomUUID().toString().replaceAll("-", "").substring(0,6);
-    }
+
 
 
 

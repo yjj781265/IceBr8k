@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -68,18 +69,19 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
     private MessagesListAdapter<Message> adapter;
     private Toolbar chatToolBar;
     private Message oldMessage;
+    private String  lastMessageId;
     private  DatabaseReference settypingRef;
     private FirebaseUser currentUser;
     private FirebaseDatabase mDatabase;
-    private  DatabaseReference uploadMessageRef;
+    private  DatabaseReference uploadMessageRef, loadMessageRef,loadMoreRef;
     private ArrayList<Message> templist = new ArrayList();
-    private String user2Id,user2Name ;
+    private String user2Id,user2Name,user2Url ;
     private ArrayList<Message> mMessages;
     private ImageView inChatIndicator;
     private SwipeBackLayout mSwipeBackLayout;
     DateFormatter.Formatter formatter,formatter2;
     ImageLoader imageLoader;
-    final int COUNT_LIMT = 20;
+    final int COUNT_LIMT = 10;
     final int CHAT_MAX = 100000;
     float volume;
    private Boolean inChat,init,user2Inchat;
@@ -95,10 +97,10 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
         mMessages =new ArrayList<>();
         mp = MediaPlayer.create(this, R.raw.typing);
         inChat=false;
+        user2Inchat =false;
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         mDatabase = FirebaseDatabase.getInstance();
-
         messagesList = (MessagesList) findViewById(R.id.messagesList);
         messagesList.setHasFixedSize(true);
         messageInput =(MessageInput) findViewById(R.id.input_message);
@@ -106,26 +108,43 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
         inChatIndicator =(ImageView) findViewById(R.id.inChat_indicator);
         setSupportActionBar(chatToolBar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         mSwipeBackLayout = getSwipeBackLayout();
         mSwipeBackLayout.setEdgeTrackingEnabled(SwipeBackLayout.EDGE_LEFT);
-
-
         user2Id= getIntent().getExtras().getString("user2Id");
         user2Name = getIntent().getExtras().getString("user2Name");
-
         if(user2Id!=null) {
-            loadMessage();
-            setInchatAndUnread();
-            setSubTitle();
-            setSeenIndicator();
-            setTypingIndicator();
-            user2Inchat=false;
+            DatabaseReference mref = FirebaseDatabase.getInstance().getReference().child("Users").child(user2Id);
+            mref.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    User user=dataSnapshot.getValue(User.class);
+                    user2Url = user.getPhotourl();
+                    loadMessageRef = mDatabase.getReference().child("Messages").
+                            child(currentUser.getUid()).child(user2Id).child("chathistory");
+                    loadMoreRef = mDatabase.getReference().child("Messages").
+                            child(currentUser.getUid()).child(user2Id).child("chathistory");
+                    loadMessage();
+                    setInchatAndUnread();
+                    setSubTitle();
+                    setSeenIndicator();
+                    setTypingIndicator();
+                    user2Inchat=false;
+
+                    if(user2Name!=null){
+                        getSupportActionBar().setTitle(user2Name);
+                        addTypingListener();
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         }
-        if(user2Name!=null){
-            getSupportActionBar().setTitle(user2Name);
-            addTypingListener();
-        }
+
+
+
 
 
         formatter = new DateFormatter.Formatter() {
@@ -134,7 +153,7 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
                 if (DateFormatter.isToday(date)) {
                     return "Today " + new SimpleDateFormat("h:mm a").format(date);
                 } else if (DateFormatter.isYesterday(date)) {
-                    return getString(R.string.date_header_yesterday) ;
+                    return  getString(R.string.date_header_yesterday)+" "+new SimpleDateFormat("h:mm a").format(date) ;
                 } else {
                     return new SimpleDateFormat("MMM d " + bullet+ " yyyy").format(date);
 
@@ -217,7 +236,7 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
             @Override
             public boolean onSubmit(CharSequence input) {
                 Date date  = new Date();//
-                String messageId = createTransactionID();
+                String messageId = String.valueOf(UUID.randomUUID());
                 Author author = new Author(senderId,currentUser.getDisplayName(),
                         currentUser.getPhotoUrl().toString());
                 final Message message = new Message();
@@ -225,6 +244,7 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
                 message.setId(messageId);
                 message.setText(input.toString());
                 message.setAuthor(author);
+                message.setTimestamp(String.valueOf(date.getTime()));
                 message.setStatus("Sending...");
                 if(checkInternet()) {
                     adapter.addToStart(message, true);
@@ -290,13 +310,6 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
                }
            }
        });
-
-
-
-
-
-
-
     }
 
     private  void hideKeyboard(){
@@ -356,27 +369,28 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
 
     @Override
     public boolean onSupportNavigateUp() {
-
-
+        Intent intent = new Intent(this,Homepage.class);
+        intent.putExtra("mainchat","mainChat");
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
         finish();
         overridePendingTransition(android.R.anim.fade_in,R.anim.slide_to_right);
-
         return true;
     }
 
     @Override
     public void onBackPressed() {
-
-
+        Intent intent = new Intent(this,Homepage.class);
+        intent.putExtra("mainchat","mainChat");
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
         finish();
         overridePendingTransition(android.R.anim.fade_in,R.anim.slide_to_right);
 
     }
 
 
-    public String createTransactionID() {
-        return UUID.randomUUID().toString().replaceAll("-", "").substring(0,6);
-    }
+
 
 
     public boolean checkInternet() {
@@ -387,8 +401,6 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
             return true;
         } else {
             return false;
-
-
         }
     }
 
@@ -405,11 +417,8 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
                     message.setStatus(getResources().getString(R.string.sendMessageError));
                     adapter.update(message);
                 }else{
-
                     message.setStatus(null);
-
                     showLog("sent succssfull");
-
                     uploadMessageRef = mDatabase.getReference().child("Messages").
                             child(currentUser.getUid()).child(user2Id).child("lastmessage");
                     message.setStatus(null);
@@ -424,14 +433,14 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
                     message2.setStatus(null);
                     DatabaseReference uploadMessageRef2 = mDatabase.getReference().
                             child("Messages").child(user2Id).child(currentUser.getUid()).
-                            child("chathistory").child(message2.getId());
+                            child("chathistory").child(message.getId());
                     uploadMessageRef2.setValue(message2);
                     uploadMessageRef2 =mDatabase.getReference().child("Messages").
                             child(user2Id).child(currentUser.getUid()).child("lastmessage");
                     uploadMessageRef2.setValue(message2);
 
                     message.getAuthor().setId(senderId);
-                    if(!user2Inchat) {
+                    if(  user2Inchat==null||!user2Inchat) {
                         message.setStatus("Sent " + bullet + " "
                                 + formatter2.format(message.getCreatedAt()));
                     }else{
@@ -464,7 +473,7 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
                     showLog("User2 doesnt have unRead node");
                     checkUnreadRef.setValue(1);
                     showLog("unread set  was null");
-                }else if(!user2Inchat) {
+                }else if( user2Inchat ==null||!user2Inchat) {
                     checkUnreadRef.setValue(++unRead);
 
 
@@ -549,86 +558,89 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
 
     @Override
     public void onLoadMore(int page, int totalItemsCount) {
-        templist.clear();
+        //Toast.makeText(getApplicationContext(), "Loading Page" + page, Toast.LENGTH_SHORT).show();
+        mMessages.clear();
+        if (lastMessageId != null) {
+            loadMoreRef.orderByChild("timestamp").endAt(lastMessageId).limitToLast(COUNT_LIMT).
+                    addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            showLog(dataSnapshot.toString());
+                            for (DataSnapshot childSnap : dataSnapshot.getChildren()) {
+                                Message tempMessage = childSnap.getValue(Message.class);
+                                String photoUrl;
+                                if (senderId.equals(tempMessage.getAuthor().getId())) {
+                                    photoUrl = currentUser.getPhotoUrl().toString();
+                                } else {
+                                    photoUrl = user2Url;
+                                }
+                                Author author = new Author(tempMessage.getAuthor().getId(), tempMessage.getAuthor().getName(), photoUrl);
+                                Message message = new Message(tempMessage.getId(), tempMessage.getText(), tempMessage.getCreatedAt(), author);
+                                showLog("under LoadMOre method " + message.getId() + " " + message.getAuthor().getId() + " " + message.getAuthor().getAvatar()
+                                        + " " + message.getAuthor().getName() + " " + message.getText() + " " + message.getCreatedAt());
+                                mMessages.add(message);
+                            }
+                            // remove duplicate see firebase endat for details
+                            if(mMessages.size()>0) {
+                                mMessages.remove(mMessages.size() - 1);
+                            }
+                            if (!mMessages.isEmpty()) {
 
-       showLog("loadmore");
-       if(totalItemsCount<=CHAT_MAX && !mMessages.isEmpty()){
+                                lastMessageId = mMessages.get(0).getTimestamp();
+                                adapter.addToEnd(mMessages, true);
 
-            if(mMessages.size()>=COUNT_LIMT){
+                            } else {
+                                loadMoreRef.removeEventListener(this);
+                            }
+                            showLog(lastMessageId+ "last message id in load moare");
 
-                Handler handler = new Handler() ;
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        for(int i=0;i<5;i++){
-                            templist.add(mMessages.get(i));
                         }
-                        Collections.sort(templist);
-                        mMessages.removeAll(templist);
-                        adapter.addToEnd(templist,false);
-                        showLog("Added new 5 item");
-                    }
-                });
 
-            }else{
-                Handler handler = new Handler();
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        adapter.addToEnd(mMessages,false);
-                        showLog("Added new " + String.valueOf(mMessages.size())+"itmes");
-                        mMessages.clear();
-                    }
-                });
-            }
-       }
-       showLog(String.valueOf(totalItemsCount));
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
 
+                        }
+                    });
+
+
+        }
     }
 
 
     public void loadMessage(){
-        DatabaseReference loadMessageRef = mDatabase.getReference().child("Messages").
-                child(currentUser.getUid()).child(user2Id).child("chathistory");
-       loadMessageRef.orderByChild("createdAt").
+
+
+       loadMessageRef.orderByChild("timestamp").limitToLast(COUNT_LIMT).
                addListenerForSingleValueEvent  (new ValueEventListener() {
            @Override
            public void onDataChange(DataSnapshot dataSnapshot) {
+               showLog("my currentUser url "+currentUser.getPhotoUrl());
                for(DataSnapshot childSnap:dataSnapshot.getChildren()) {
                    Message tempMessage = childSnap.getValue(Message.class);
-                   String photoUrl = childSnap.child("user").child("avatar").getValue(String.class);
-                   Author author = new Author(tempMessage.getUser().getId(), tempMessage.getUser().getName(), photoUrl);
+                   String photoUrl;
+                   if(senderId.equals(tempMessage.getAuthor().getId())){
+                      photoUrl = currentUser.getPhotoUrl().toString();
+                   }else{
+                      photoUrl = user2Url;
+                   }
+                   Author author = new Author(tempMessage.getAuthor().getId(), tempMessage.getAuthor().getName(), photoUrl);
                    Message message = new Message(tempMessage.getId(), tempMessage.getText(), tempMessage.getCreatedAt(), author);
-                   showLog(message.getId() + " " + message.getAuthor().getId() + " " + message.getUser().getAvatar()
+                   showLog("under LoadMessage method "+message.getId() + " " + message.getAuthor().getId() + " " + message.getAuthor().getAvatar()
                            + " " + message.getAuthor().getName() + " " + message.getText() + " " + message.getCreatedAt());
+                   showLog(message.getText());
                    mMessages.add(message);
                }
-
-
-
-
-
-
-
-               showLog(String.valueOf(mMessages.size()));
-               showLog(String.valueOf(dataSnapshot.getChildrenCount()));
-               Collections.sort(mMessages);
-               if(!mMessages.isEmpty()){
-                   oldMessage = mMessages.get(0);
+               if(!mMessages.isEmpty()) {
+                   lastMessageId = mMessages.get(0).getTimestamp();
+                   oldMessage = mMessages.get(mMessages.size() - 1);
+                   showLog("lastmessageId is " + lastMessageId);
+                   adapter.addToEnd(mMessages, true);
                }
                addValueChangeListener();
-               ArrayList<Message> tempAddList = new ArrayList<>();
-               if(mMessages.size()>COUNT_LIMT) {
-                   for (int i = 0; i < COUNT_LIMT; i++) {
-                       tempAddList.add(mMessages.get(i));
-                   }
-                   adapter.addToEnd(tempAddList, false);
-                   mMessages.removeAll(tempAddList);
-               }else{
-                   adapter.addToEnd(mMessages, false);
-                   mMessages.clear();
-               }
-               showLog(String.valueOf(tempAddList.size()));
+               showLog(String.valueOf(mMessages.size()));
+               showLog(String.valueOf(dataSnapshot.getChildrenCount()));
+
+
 
 
 
@@ -653,24 +665,20 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
                public void onDataChange(DataSnapshot dataSnapshot) {
                    if (dataSnapshot.getValue() != null) {
                        Message message = dataSnapshot.getValue(Message.class);
-                       String photoUrl = dataSnapshot.child("user").child("avatar").getValue(String.class);
-                       Author author = new Author(message.getAuthor().getId(), message.getUser().
+
+
+                       String photoUrl = dataSnapshot.child("author").child("avatar").getValue(String.class);
+                       Author author = new Author(message.getAuthor().getId(), message.getAuthor().
                                getName(), photoUrl);
                        message.setAuthor(author);
-                       showLog(message.getId() + " " + message.getAuthor().getId() + " " + message.getUser().getAvatar()
+                       showLog("lastmessage "+ message.getId() + " " + message.getAuthor().getId() + " " + message.getAuthor().getAvatar()
                                + " " + message.getAuthor().getName() + " " + message.getText() + " " + message.getCreatedAt());
 
-                       //new message
-                       showLog(message.getId());
-
-                       if(message.getAuthor().getId().equals(recieverId) &&
-                               !message.getId().equals(oldMessage.getId())) {
+                       if( oldMessage!=null &&
+                               message.getAuthor().getId().equals(recieverId) && !message.getId().equals(oldMessage.getId())) {
+                           adapter.addToStart(message,true);
                            adapter.update(oldMessage);
-                           adapter.addToStart(message, true);
                            oldMessage =message;
-
-
-
                            showLog("new Chat"+message.getId());
                        }
 
@@ -776,10 +784,6 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
 
 
                }
-
-
-
-
             @Override
             public void afterTextChanged(Editable editable) {
                // showLog("after");

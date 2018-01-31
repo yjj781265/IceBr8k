@@ -1,6 +1,7 @@
 package app.jayang.icebr8k;
 
 import android.content.Intent;
+import android.os.SystemClock;
 import android.provider.ContactsContract;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
@@ -40,6 +41,7 @@ public class ResultActivity extends AppCompatActivity {
     ImageView user2Icon;
     ArrayList<UserQA> mArrayList, diffAnswer1, diffAnswer2;
     String user2Id ;
+    private long lastClickTime = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,14 +102,18 @@ public class ResultActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+        // preventing double, using threshold of 1000 ms
+        if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+            return false;
+        }
+        lastClickTime = SystemClock.elapsedRealtime();
 
         if (id == R.id.mybutton) {
             Intent mIntent = new Intent(getBaseContext(),MainChatActivity.class);
                     mIntent.putExtra("user2Name",user2.getDisplayname());
                     mIntent.putExtra("user2Id",user2Id);
                     startActivity(mIntent);
-            mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
-               FLAG_ACTIVITY_REORDER_TO_FRONT);
+            mIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     overridePendingTransition(R.anim.slide_from_right,android.R.anim.fade_out);
 
                 }

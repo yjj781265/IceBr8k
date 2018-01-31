@@ -40,7 +40,6 @@
             android:layout_height="40dp"
             android:layout_marginLeft="9dp"
             android:layout_gravity="bottom"
-
             android:src="@drawable/user_profile_icon"/>
 
 

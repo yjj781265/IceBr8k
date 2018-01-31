@@ -44,16 +44,14 @@ public class MyNotificationOpenedHandler implements OneSignal.NotificationOpened
                 Intent  mIntent = new Intent(MyApplication.getContext(), Homepage.class);
                 mIntent.putExtra("user2Id", user2Id);
                 mIntent.putExtra("user2Name", name);
-                mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
-                                    FLAG_ACTIVITY_REORDER_TO_FRONT );
+                mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT );
                 MyApplication.getContext().startActivity(mIntent);
                         }
 
 
         }else{
             Intent mIntent = new Intent(MyApplication.getContext(),Homepage.class);
-            mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
-                    FLAG_ACTIVITY_REORDER_TO_FRONT );
+            mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT );
             MyApplication.getContext().startActivity(mIntent);
         }
 

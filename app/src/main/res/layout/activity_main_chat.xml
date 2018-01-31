@@ -28,32 +28,7 @@
         android:src="@drawable/green_dot" />
     </android.support.v7.widget.Toolbar>
 
-
-
-
-
-
-
-
-    <com.stfalcon.chatkit.messages.MessageInput
-        android:animateLayoutChanges="true"
-        android:id="@+id/input_message"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:focusedByDefault="true"
-        android:background="@color/white"
-        android:elevation="6dp"
-        app:inputTextSize="16dp"
-        app:inputHintColor="@android:color/secondary_text_dark_nodisable"
-        app:showAttachmentButton="true"
-        app:inputButtonDefaultBgColor="@color/colorPrimary"
-        app:attachmentButtonDefaultBgPressedColor="@color/accent"
-        app:inputHint="@string/message_input_hint"/>
-
-
-  <com.stfalcon.chatkit.messages.MessagesList
+    <com.stfalcon.chatkit.messages.MessagesList
         android:id="@+id/messagesList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -62,7 +37,24 @@
         android:nestedScrollingEnabled="false"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/chat_toolbar">
+
   </com.stfalcon.chatkit.messages.MessagesList>
+    <com.stfalcon.chatkit.messages.MessageInput
+        android:animateLayoutChanges="true"
+        android:id="@+id/input_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:focusedByDefault="false"
+        android:background="@color/white"
+        android:elevation="6dp"
+        app:inputTextSize="16dp"
+        app:inputHintColor="@android:color/secondary_text_dark_nodisable"
+        app:showAttachmentButton="true"
+        app:inputButtonDefaultBgColor="@color/colorPrimary"
+        app:attachmentButtonDefaultBgPressedColor="@color/accent"
+        app:inputHint="@string/message_input_hint"/>
 
 
 

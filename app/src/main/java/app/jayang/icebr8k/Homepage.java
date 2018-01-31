@@ -98,10 +98,10 @@ public class Homepage extends AppCompatActivity  implements
         GoogleApiClient.OnConnectionFailedListener,
         ConnectivityChangeListener,
         GoogleApiClient.ConnectionCallbacks,SharedPreferences.OnSharedPreferenceChangeListener,ActivityCommunicator {
-    private final int UPDATE_INTERVAL = 60000; //60 sec
+    private final int UPDATE_INTERVAL = 30000; //30 sec
     private final int FASTEST_INTERVAL = 3000;
     private final int  REQUEST_CHECK_SETTINGS =9000;
-    private final int DISPLACEMENT = 30;//30meter
+    private final int DISPLACEMENT = 10;//10meter
 
     private AHBottomNavigation homepageTab;
     private SwitchCompat mSwitchCompat;
@@ -111,7 +111,7 @@ public class Homepage extends AppCompatActivity  implements
     protected myViewPager viewPager;
     private FirebaseUser currentUser;
     private long lastClickTime = 0;
-    private GoogleApiClient mGoogleApiClient,mGoogleLocationApiClient;
+    private GoogleApiClient mGoogleLocationApiClient;
     private Toolbar mToolbar;
     private DatabaseReference mRef;
     private int index =0;
@@ -153,11 +153,7 @@ public class Homepage extends AppCompatActivity  implements
                 .requestEmail()
                 .build();
 
-        mGoogleApiClient = new GoogleApiClient.Builder(getApplicationContext())
-                .enableAutoManage(this /* FragmentActivity */,
-                        this /* OnConnectionFailedListener */)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
+
 
         if(checkGooglePlayService() ) {
             buildGoogleLocationApiClient();
@@ -190,7 +186,20 @@ public class Homepage extends AppCompatActivity  implements
             if (getIntent().getExtras().getString("mainchat") != null) {
                 viewPager.setCurrentItem(2);
             }
+            if (getIntent().getExtras().getString("user2Id") != null &&
+                    getIntent().getExtras().getString("user2Name") != null){
+                String user2Id = getIntent().getExtras().getString("user2Id");
+                String name = getIntent().getExtras().getString("user2Name");
+                Intent mIntent = new Intent(this, MainChatActivity.class);
+                getIntent().addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                mIntent.putExtra("user2Id", user2Id);
+                mIntent.putExtra("user2Name", name);
+                startActivity(mIntent);
+                overridePendingTransition(R.anim.slide_from_right,0);
+            }
         }
+
+
         setScreenOnOffListener();
 
 
@@ -202,7 +211,7 @@ public class Homepage extends AppCompatActivity  implements
 
     @Override
     protected void onNewIntent(Intent intent) {
-     //  Toast.makeText(getApplicationContext(),"New Intent",Toast.LENGTH_SHORT).show();
+      //Toast.makeText(getApplicationContext(),"New Intent",Toast.LENGTH_SHORT).show();
         if (intent.getExtras() != null) {
             if (intent.getExtras().getString("mainchat") != null) {
                 viewPager.setCurrentItem(2,false);
@@ -213,13 +222,13 @@ public class Homepage extends AppCompatActivity  implements
                 String user2Id = intent.getExtras().getString("user2Id");
                 String name = intent.getExtras().getString("user2Name");
                 Intent mIntent = new Intent(this, MainChatActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 mIntent.putExtra("user2Id", user2Id);
                 mIntent.putExtra("user2Name", name);
                 startActivity(mIntent);
+                overridePendingTransition(R.anim.slide_from_right,0);
             }
-    }else{
-            viewPager.setCurrentItem(0,false);
-        }
+    }
 
     }
 
@@ -267,7 +276,6 @@ public class Homepage extends AppCompatActivity  implements
                     Intent intent = new Intent(getApplicationContext(),DevoderActivity.class);
                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     startActivity(intent);
-
                 }
                 return true;
             case R.id.people_nearby:
@@ -280,11 +288,9 @@ public class Homepage extends AppCompatActivity  implements
                     // if share my postion is on
                     if("public".equals(getPrivacySharedPreference())){
                         showSingleChoiceDialog();
-
-
                     }else {
                         new MaterialDialog.Builder(this)
-                                .content("\"Share My Location\" is disabled,you can go to Me tab to enable")
+                                .content("\"Share My Location\" is disabled, you can go to Me tab to enable.")
                                 .positiveText(R.string.ok).onPositive(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -312,18 +318,9 @@ public class Homepage extends AppCompatActivity  implements
         setOnline();
         ConnectionBuddyCache.clearLastNetworkState(this);
         ConnectionBuddy.getInstance().registerForConnectivityEvents(this, this);
-        //handle notification click
-        if (getIntent().getExtras()!=null  && getIntent().getExtras().getString("user2Id") != null &&
-                getIntent().getExtras().getString("user2Name") != null) {
-            String user2Id = getIntent().getExtras().getString("user2Id");
-            String name = getIntent().getExtras().getString("user2Name");
-            Intent mIntent = new Intent(this, MainChatActivity.class);
-            mIntent.putExtra("user2Id", user2Id);
-            mIntent.putExtra("user2Name", name);
-            startActivity(mIntent);
-        }
-        if(mGoogleApiClient!=null) {
-            mGoogleApiClient.reconnect();
+
+        if(mGoogleLocationApiClient!=null) {
+            mGoogleLocationApiClient.reconnect();
         }
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         sharedPref.registerOnSharedPreferenceChangeListener(this);
@@ -618,28 +615,20 @@ public class Homepage extends AppCompatActivity  implements
         if(FirebaseAuth.getInstance()!=null) {
             FirebaseAuth.getInstance().signOut();
         }
-        if (currentUser.getProviders().get(0).contains("google")) {
-            // Google sign out
-            Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                    new ResultCallback<Status>() {
 
-                        @Override
-                        public void onResult(@NonNull Status status) {
-                        }
-                    });
-        }
 
-        if(mGoogleApiClient!=null) {
-            mGoogleApiClient.disconnect();
+        if(mGoogleLocationApiClient!=null && mGoogleLocationApiClient.isConnected()) {
+            mGoogleLocationApiClient.disconnect();
         }
         if (mFusedLocationClient != null) {
             mFusedLocationClient.removeLocationUpdates(mLocationCallback);
         }
         setUserPrivacy(false);
 
-        Intent intent = new Intent(getApplicationContext(), login_page.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        Intent intent = new Intent(this, SplashScreen.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
+        finish();
 
 
     }
@@ -683,7 +672,7 @@ public class Homepage extends AppCompatActivity  implements
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        if(mGoogleApiClient!=null){
+        if(mGoogleLocationApiClient!=null){
             // if share my postion is on
             if("public".equals(getPrivacySharedPreference())){
                 initGoogleMapLocation();
@@ -757,7 +746,7 @@ public class Homepage extends AppCompatActivity  implements
                 super.onLocationResult(result);
                 mCurrentLocation = result.getLocations().get(0);
                 //update user location to firebase
-                updateUserLocation(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+                updateLocationtoDatabase(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
 
                 Log.d(TAG,"Current location:\n" + mCurrentLocation) ;
 
@@ -826,7 +815,7 @@ public class Homepage extends AppCompatActivity  implements
             Address address = addresses.get(0);
             if(address.getCountryName()!=null && address.getAdminArea() !=null &&address.getLocality()!=null){
               //  Toast.makeText(this,address.getCountryName()+" "+address.getAdminArea() + " "+address.getLocality(),Toast.LENGTH_LONG).show();
-                updateLocationtoDatabase(address.getCountryName(),address.getAdminArea(),address.getLocality(),lat,lng);
+               // updateLocationtoDatabase(address.getCountryName(),address.getAdminArea(),address.getLocality(),lat,lng);
             }
 
         }
@@ -837,6 +826,7 @@ public class Homepage extends AppCompatActivity  implements
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode,resultCode,data);
 
         if(requestCode ==REQUEST_CHECK_SETTINGS && resultCode   ==RESULT_OK){
             setSharedPreference(true);
@@ -848,10 +838,9 @@ public class Homepage extends AppCompatActivity  implements
         }
     }
 
-    private void updateLocationtoDatabase(String country, String state, String city, final double lat, final double lng){
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Locations")
-                .child(country).child(state).child(city);
-        final GeoFire geoFire = new GeoFire(ref);
+    private void updateLocationtoDatabase( final double lat, final double lng){
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("GeoFireLocations");
+        GeoFire geoFire = new GeoFire(ref);
         geoFire.setLocation( currentUser.getUid(), new GeoLocation(lat, lng), new GeoFire.CompletionListener() {
             @Override
             public void onComplete(String key, DatabaseError error) {
