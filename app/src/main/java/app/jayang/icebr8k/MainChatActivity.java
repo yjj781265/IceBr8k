@@ -369,10 +369,10 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
 
     @Override
     public boolean onSupportNavigateUp() {
-        Intent intent = new Intent(this,Homepage.class);
+    /*    Intent intent = new Intent(this,Homepage.class);
         intent.putExtra("mainchat","mainChat");
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
+        startActivity(intent);*/
         finish();
         overridePendingTransition(android.R.anim.fade_in,R.anim.slide_to_right);
         return true;
@@ -380,10 +380,10 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(this,Homepage.class);
+   /*     Intent intent = new Intent(this,Homepage.class);
         intent.putExtra("mainchat","mainChat");
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
+        startActivity(intent);*/
         finish();
         overridePendingTransition(android.R.anim.fade_in,R.anim.slide_to_right);
 

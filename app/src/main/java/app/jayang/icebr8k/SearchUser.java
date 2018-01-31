@@ -31,34 +31,64 @@ import com.google.firebase.database.ValueEventListener;
 import org.w3c.dom.Text;
 
 import app.jayang.icebr8k.Modle.User;
+import me.imid.swipebacklayout.lib.SwipeBackLayout;
+import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 
-public class SearchUser extends AppCompatActivity implements SearchView.OnQueryTextListener {
+public class SearchUser extends SwipeBackActivity implements SearchView.OnQueryTextListener {
     private Toolbar searchToolbar;
     private TextView username,notfound;
     private LinearLayout mLinearLayout;
     private  MaterialDialog searchingDialog;
     private SearchView searchView;
+    private SwipeBackLayout mSwipeBackLayout;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_user);
-        searchToolbar = findViewById(R.id.search_toolbar);
+        searchToolbar = (Toolbar) findViewById(R.id.search_toolbar);
         setSupportActionBar(searchToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("");
-
-        username = findViewById(R.id.search_username);
-        mLinearLayout = findViewById(R.id.search_item);
-        notfound =findViewById(R.id.search_notfound);
-
+        mSwipeBackLayout = getSwipeBackLayout();
+        mSwipeBackLayout.setEdgeTrackingEnabled(SwipeBackLayout.EDGE_LEFT);
+        username = (TextView) findViewById(R.id.search_username);
+        mLinearLayout = (LinearLayout) findViewById(R.id.search_item);
+        notfound = (TextView) findViewById(R.id.search_notfound);
         searchingDialog  = new MaterialDialog.Builder(this)
                 .content("Searching...")
                 .progress(true, 0).build();
+        mSwipeBackLayout.addSwipeListener(new SwipeBackLayout.SwipeListener() {
+            @Override
+            public void onScrollStateChange(int state, float scrollPercent) {
 
+            }
 
+            @Override
+            public void onEdgeTouch(int edgeFlag) {
+             if(edgeFlag== SwipeBackLayout.EDGE_LEFT &&searchView.hasFocus()){
+                 hideKeyboard();
+             }
+            }
+
+            @Override
+            public void onScrollOverThreshold() {
+
+            }
+        });
     }
+
+
+    private  void hideKeyboard(){
+        //hide keyboard
+        View view = getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

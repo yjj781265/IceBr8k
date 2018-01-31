@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -69,18 +70,21 @@ import app.jayang.icebr8k.Fragments.me_frag;
 import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.Modle.UserQA;
 import id.zelory.compressor.Compressor;
+import me.imid.swipebacklayout.lib.SwipeBackLayout;
+import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 import pl.aprilapps.easyphotopicker.DefaultCallback;
 import pl.aprilapps.easyphotopicker.EasyImage;
 
 
-public class UserProfilePage extends AppCompatActivity implements View.OnClickListener,View.OnTouchListener {
+public class UserProfilePage extends SwipeBackActivity implements View.OnClickListener,View.OnTouchListener {
     Toolbar profileToolbar;
     ImageView mImageView,qrImage;
     ActionProcessButton  compare_btn;
     FlatButton message_btn,addFriend_btn,deleteFriend_btn,reset_btn;
     TextView displayname_profile, email_profile, username_profile;
     MaterialDialog mProgressDialog;
-
+    SwipeBackLayout mSwipeBackLayout;
+    private long lastClickTime = 0;
 
     FirebaseDatabase database;
     FirebaseUser currentUser;
@@ -104,22 +108,24 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
         mProgressDialog =  new MaterialDialog.Builder(this)
                 .content("Updating Avatar...")
                 .progress(true, 0).build();
+        mSwipeBackLayout =getSwipeBackLayout();
+        mSwipeBackLayout.setEdgeTrackingEnabled(SwipeBackLayout.EDGE_LEFT);
 
 
-        profileToolbar = findViewById(R.id.profileToolbar);
+        profileToolbar = (Toolbar) findViewById(R.id.profileToolbar);
         setSupportActionBar(profileToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        mImageView = findViewById(R.id.profileButton);
-        qrImage = findViewById(R.id.profile_QR);
-        compare_btn = findViewById(R.id.compare_btn);
-        addFriend_btn = findViewById(R.id.addFriend_btn);
-        message_btn = findViewById(R.id.message_btn);
-        deleteFriend_btn = findViewById(R.id.deleteFriend_btn);
-        reset_btn =findViewById(R.id.reset_btn);
-        displayname_profile = findViewById(R.id.displayname_profile);
-        email_profile = findViewById(R.id.email_profile);
-        username_profile = findViewById(R.id.username_profile);
+        mImageView = (ImageView) findViewById(R.id.profileButton);
+        qrImage = (ImageView) findViewById(R.id.profile_QR);
+        compare_btn = (ActionProcessButton) findViewById(R.id.compare_btn);
+        addFriend_btn = (FlatButton) findViewById(R.id.addFriend_btn);
+        message_btn = (FlatButton) findViewById(R.id.message_btn);
+        deleteFriend_btn = (FlatButton) findViewById(R.id.deleteFriend_btn);
+        reset_btn = (FlatButton) findViewById(R.id.reset_btn);
+        displayname_profile = (TextView) findViewById(R.id.displayname_profile);
+        email_profile = (TextView) findViewById(R.id.email_profile);
+        username_profile = (TextView) findViewById(R.id.username_profile);
         database = FirebaseDatabase.getInstance();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         compare_btn.setOnClickListener(this);
@@ -770,9 +776,14 @@ public class UserProfilePage extends AppCompatActivity implements View.OnClickLi
     @Override
     public void onClick(View view) {
         int id =view.getId();
+        // preventing double, using threshold of 1000 ms
+        if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+            return;
+        }
+        lastClickTime = SystemClock.elapsedRealtime();
         if(checkInternet()) {
             if (id == R.id.reset_btn) {
-             showBasicDialog("Are you sure to reset all the questions?");
+             showBasicDialog("Are you sure to reset all the questions ?");
             } else if (id == R.id.compare_btn) {
                 if (mUser != null) {
                     compare_btn.setProgress(0);

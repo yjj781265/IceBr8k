@@ -114,7 +114,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     private LocationCallback mLocationCallback;
     private Location mCurrentLocation;
     private FusedLocationProviderClient mFusedLocationClient;
-    private Boolean init = false;
+    private Boolean center = true;
     private Double radius =1.6;
     private float ZoomLevel =17f;
     private MaterialDialog mProgressDialog;
@@ -189,6 +189,8 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                     if(mCurrentLocation!=null && map!=null){
                         float zoom = map.getCameraPosition().zoom;
                         Log.d(TAG, "ZOOM LEVEL "+zoom);
+                        Log.d(TAG, "center true");
+                        center =true;
                         LatLng latLng = new LatLng(mCurrentLocation.getLatitude(),
                                 mCurrentLocation.getLongitude());
                         map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,18f));
@@ -327,7 +329,6 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode==REQUEST_CHECK_SETTINGS && resultCode == RESULT_OK){
-            init =false;
             mProgressDialog.show();
             initGoogleMapLocation();
         }
@@ -349,6 +350,16 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
            //Log.d(TAG, "ZOOM LEVEL "+ZoomLevel);
        }
    });
+       map.setOnCameraMoveStartedListener(new GoogleMap.OnCameraMoveStartedListener() {
+           @Override
+           public void onCameraMoveStarted(int i) {
+               Log.d(TAG, "center off " + i);
+               if(i==REASON_GESTURE) {
+                   center = false;
+               }
+           }
+       });
+
         mClusterManager = new ClusterManager<>(this,map);
         mClusterManager.setAnimation(true);
        map.setOnCameraIdleListener(mClusterManager);
@@ -486,7 +497,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
                         });
                     }
-                    if(userUid.equals(curretUser.getUid())){
+                    if(userUid.equals(curretUser.getUid()) && center){
                         map.animateCamera(CameraUpdateFactory.newLatLngZoom(mDummyLatLng, ZoomLevel));
 
                     }
@@ -885,6 +896,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                             ZoomLevel =9f;
                         }
                         map.clear();
+                        center =true;
 
                         mLocationDialogs.clear();
                         mLocationDialogAdapter.notifyDataSetChanged();

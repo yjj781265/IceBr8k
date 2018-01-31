@@ -10,19 +10,23 @@ import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toolbar;
 
 import java.util.ArrayList;
 
 import app.jayang.icebr8k.Modle.UserDialog;
+import me.imid.swipebacklayout.lib.SwipeBackLayout;
+import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 
-public class SearchName extends AppCompatActivity implements SearchView.OnQueryTextListener {
+public class SearchName extends SwipeBackActivity implements SearchView.OnQueryTextListener {
   android.support.v7.widget.Toolbar mToolbar;
 
   private ArrayList<UserDialog> friendList;
   private ArrayList<UserDialog> filterdList;
   private RecyclerAdapter mAdapter;
+  private SwipeBackLayout mSwipeBackLayout;
   private RecyclerView mRecyclerView;
   private  SearchView searchView;
 
@@ -31,12 +35,14 @@ public class SearchName extends AppCompatActivity implements SearchView.OnQueryT
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_name);
-        mToolbar = findViewById(R.id.searchname_toolbar);
-        mRecyclerView = findViewById(R.id.searchname_recyclerView);
+        mToolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.searchname_toolbar);
+        mRecyclerView = (RecyclerView) findViewById(R.id.searchname_recyclerView);
         mRecyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager manager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(manager);
         filterdList =new ArrayList<>();
+        mSwipeBackLayout =getSwipeBackLayout();
+        mSwipeBackLayout.setEdgeTrackingEnabled(SwipeBackLayout.EDGE_LEFT);
 
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -47,8 +53,37 @@ public class SearchName extends AppCompatActivity implements SearchView.OnQueryT
             mAdapter = new RecyclerAdapter(getApplicationContext(), filterdList);
             mRecyclerView.setAdapter(mAdapter);
         }
+        mSwipeBackLayout.addSwipeListener(new SwipeBackLayout.SwipeListener() {
+            @Override
+            public void onScrollStateChange(int state, float scrollPercent) {
+
+            }
+
+            @Override
+            public void onEdgeTouch(int edgeFlag) {
+                if(edgeFlag== SwipeBackLayout.EDGE_LEFT &&searchView.hasFocus()){
+                    hideKeyboard();
+                }
+            }
+
+            @Override
+            public void onScrollOverThreshold() {
+
+            }
+        });
 
     }
+
+
+    private  void hideKeyboard(){
+        //hide keyboard
+        View view = getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
