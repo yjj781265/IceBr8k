@@ -95,6 +95,7 @@ dependencies {
     compile 'us.belka:androidtoggleswitch:1.2.2'
     compile 'com.firebase:geofire-android:2.2.0'
     compile 'com.google.maps.android:android-maps-utils:0.5+'
+    implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
 
     implementation("com.mikepenz:materialdrawer:6.0.2@aar") {
         transitive = true

@@ -39,6 +39,13 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
+import com.firebase.jobdispatcher.Constraint;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
+import com.firebase.jobdispatcher.Job;
+import com.firebase.jobdispatcher.Lifetime;
+import com.firebase.jobdispatcher.RetryStrategy;
+import com.firebase.jobdispatcher.Trigger;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
@@ -95,13 +102,10 @@ import app.jayang.icebr8k.Modle.ActivityCommunicator;
 
 public class Homepage extends AppCompatActivity  implements
         OSSubscriptionObserver,chat_frag.OnCompleteListener,
-        GoogleApiClient.OnConnectionFailedListener,
         ConnectivityChangeListener,
-        GoogleApiClient.ConnectionCallbacks,SharedPreferences.OnSharedPreferenceChangeListener,ActivityCommunicator {
-    private final int UPDATE_INTERVAL = 30000; //30 sec
-    private final int FASTEST_INTERVAL = 3000;
+        SharedPreferences.OnSharedPreferenceChangeListener,ActivityCommunicator {
     private final int  REQUEST_CHECK_SETTINGS =9000;
-    private final int DISPLACEMENT = 10;//10meter
+
 
     private AHBottomNavigation homepageTab;
     private SwitchCompat mSwitchCompat;
@@ -111,18 +115,17 @@ public class Homepage extends AppCompatActivity  implements
     protected myViewPager viewPager;
     private FirebaseUser currentUser;
     private long lastClickTime = 0;
-    private GoogleApiClient mGoogleLocationApiClient;
     private Toolbar mToolbar;
     private DatabaseReference mRef;
     private int index =0;
     private DatabaseReference presenceRef;
      private ScreenStateReceiver mReceiver;
 
-    private LocationCallback mLocationCallback;
-    private LocationRequest mLocationRequest;
-    private Location mCurrentLocation;
-    private FusedLocationProviderClient mFusedLocationClient;
     private String TAG = "homePage";
+
+    //job scheduler variables
+    private static final String Job_TaG ="MY_JOB_TAG";
+    private FirebaseJobDispatcher mDispatcher;
 
 
     @Override
@@ -142,6 +145,7 @@ public class Homepage extends AppCompatActivity  implements
         presenceRef = FirebaseDatabase.getInstance().getReference().child("Users").
                 child(currentUser.getUid()).child("onlineStats");
         presenceRef.keepSynced(true);
+        mDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
 
         showLog("onCreate");
         showLog(currentUser.getPhotoUrl().toString());
@@ -155,9 +159,7 @@ public class Homepage extends AppCompatActivity  implements
 
 
 
-        if(checkGooglePlayService() ) {
-            buildGoogleLocationApiClient();
-        }
+
 
         /**************************************************************//////
         if (savedInstanceState != null) {
@@ -176,6 +178,10 @@ public class Homepage extends AppCompatActivity  implements
         deleteInChatRoomNode();
         unReadCheck();
         setBadge();
+
+        if("public".equals(getPrivacySharedPreference())){
+            startJob();
+        }
 
 
         // bottom nav bar
@@ -208,6 +214,19 @@ public class Homepage extends AppCompatActivity  implements
 
 
     }
+
+    public void startJob(){
+        Job job = mDispatcher.newJobBuilder().setService(MyJobService.class).
+                setLifetime(Lifetime.FOREVER).setRecurring(true).setTag(Job_TaG).setTrigger(Trigger.executionWindow(10,15))
+                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL).setConstraints(Constraint.ON_ANY_NETWORK).setReplaceCurrent(true).build();
+        mDispatcher.mustSchedule(job);
+        Toast.makeText(this,"Job Started",Toast.LENGTH_LONG).show();
+    }
+    public void stopJob(){
+        mDispatcher.cancel(Job_TaG);
+        Toast.makeText(this,"Job Cancelled",Toast.LENGTH_LONG).show();
+    }
+
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -316,12 +335,9 @@ public class Homepage extends AppCompatActivity  implements
         super.onStart();
         showLog("onStart");
         setOnline();
-        ConnectionBuddyCache.clearLastNetworkState(this);
+
         ConnectionBuddy.getInstance().registerForConnectivityEvents(this, this);
 
-        if(mGoogleLocationApiClient!=null) {
-            mGoogleLocationApiClient.reconnect();
-        }
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         sharedPref.registerOnSharedPreferenceChangeListener(this);
 
@@ -347,9 +363,7 @@ public class Homepage extends AppCompatActivity  implements
     @Override
     protected void onStop() {
         super.onStop();
-        if(ConnectionBuddy.getInstance()!=null) {
-            ConnectionBuddy.getInstance().unregisterFromConnectivityEvents(this);
-        }
+        ConnectionBuddy.getInstance().unregisterFromConnectivityEvents(this);
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         sharedPref.unregisterOnSharedPreferenceChangeListener(this);
 
@@ -359,11 +373,14 @@ public class Homepage extends AppCompatActivity  implements
 
     @Override
     protected void onDestroy() {
+
         super.onDestroy();
+
         setOffline();
         if (mReceiver != null) {
             unregisterReceiver(mReceiver);
         }
+
 
         showLog("onDestroy");
 
@@ -617,12 +634,6 @@ public class Homepage extends AppCompatActivity  implements
         }
 
 
-        if(mGoogleLocationApiClient!=null && mGoogleLocationApiClient.isConnected()) {
-            mGoogleLocationApiClient.disconnect();
-        }
-        if (mFusedLocationClient != null) {
-            mFusedLocationClient.removeLocationUpdates(mLocationCallback);
-        }
         setUserPrivacy(false);
 
         Intent intent = new Intent(this, SplashScreen.class);
@@ -630,10 +641,6 @@ public class Homepage extends AppCompatActivity  implements
         startActivity(intent);
         finish();
 
-
-    }
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
 
@@ -670,33 +677,18 @@ public class Homepage extends AppCompatActivity  implements
         registerReceiver(mReceiver, intentFilter);
     }
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        if(mGoogleLocationApiClient!=null){
-            // if share my postion is on
-            if("public".equals(getPrivacySharedPreference())){
-                initGoogleMapLocation();
-            }
 
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
         String privacy = sharedPreferences.getString(s, null);
         if(privacy!=null){
             if("public".equals(privacy)){
-                initGoogleMapLocation();
+                //initGoogleMapLocation();
+                startJob();
 
-            }else{
-                if (mFusedLocationClient != null) {
-                    mFusedLocationClient.removeLocationUpdates(mLocationCallback);
-                }
+            }else if("private".equals(privacy)) {
+                stopJob();
             }
         }
     }
@@ -719,14 +711,6 @@ public class Homepage extends AppCompatActivity  implements
             }
         }
     }
-    protected synchronized void buildGoogleLocationApiClient() {
-       mGoogleLocationApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-        mGoogleLocationApiClient.connect();
-    }
 
     private boolean checkGooglePlayService(){
         int response = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
@@ -737,92 +721,13 @@ public class Homepage extends AppCompatActivity  implements
             return  true;
         }
     }
-    private void initGoogleMapLocation() {
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
-        mLocationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult result) {
-                super.onLocationResult(result);
-                mCurrentLocation = result.getLocations().get(0);
-                //update user location to firebase
-                updateLocationtoDatabase(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-
-                Log.d(TAG,"Current location:\n" + mCurrentLocation) ;
-
-            }
-        };
-
-        startLocationMonitoring();
-    }
-
-    private void startLocationMonitoring(){
-        Log.d(TAG,"startLocation called");
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY).
-                setInterval(UPDATE_INTERVAL).setFastestInterval(FASTEST_INTERVAL).setSmallestDisplacement(DISPLACEMENT);
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
-        builder.addLocationRequest(mLocationRequest);
-        SettingsClient mSettingsClient = LocationServices.getSettingsClient(this);
-        LocationSettingsRequest mLocationSettingsRequest = builder.build();
-
-        Task<LocationSettingsResponse> locationResponse = mSettingsClient.checkLocationSettings(mLocationSettingsRequest);
-        locationResponse.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
-            @Override
-            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                Log.e("Response", "Successful acquisition of location information!!");
-                //
-                if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    return;
-                }
-                mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
-
-            }
-        }) .addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                if (e instanceof ResolvableApiException) {
-                    // Location settings are not satisfied, but this can be fixed
-                    // by showing the user a dialog.
-                    try {
-                        // Show the dialog by calling startResolutionForResult(),
-                        // and check the result in onActivityResult().
-                        ResolvableApiException resolvable = (ResolvableApiException) e;
-                        resolvable.startResolutionForResult(Homepage.this,
-                                REQUEST_CHECK_SETTINGS);
-                    } catch (IntentSender.SendIntentException sendEx) {
-                        // Ignore the error.
-                    }
-                }
-
-            }
-        });
-    }
 
 
 
-    private void updateUserLocation(double lat, double lng)  {
-        Geocoder gcd = new Geocoder(this, Locale.getDefault());
-        List<Address> addresses = null;
-        try {
-            addresses = gcd.getFromLocation(lat, lng, 3);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if(addresses!=null){
-            Address address = addresses.get(0);
-            if(address.getCountryName()!=null && address.getAdminArea() !=null &&address.getLocality()!=null){
-              //  Toast.makeText(this,address.getCountryName()+" "+address.getAdminArea() + " "+address.getLocality(),Toast.LENGTH_LONG).show();
-               // updateLocationtoDatabase(address.getCountryName(),address.getAdminArea(),address.getLocality(),lat,lng);
-            }
-
-        }
 
 
 
-    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -836,23 +741,6 @@ public class Homepage extends AppCompatActivity  implements
 
 
         }
-    }
-
-    private void updateLocationtoDatabase( final double lat, final double lng){
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("GeoFireLocations");
-        GeoFire geoFire = new GeoFire(ref);
-        geoFire.setLocation( currentUser.getUid(), new GeoLocation(lat, lng), new GeoFire.CompletionListener() {
-            @Override
-            public void onComplete(String key, DatabaseError error) {
-                Log.d(TAG,"location is updated to firebase");
-            }
-        });
-      //  updateTimeStamp(ref);
-    }
-    private void updateTimeStamp(DatabaseReference ref){
-        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        ref.child("timestamp").setValue(timestamp);
-
     }
 
 

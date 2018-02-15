@@ -235,6 +235,7 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
         messageInput.setInputListener(new MessageInput.InputListener() {
             @Override
             public boolean onSubmit(CharSequence input) {
+
                 Date date  = new Date();//
                 String messageId = String.valueOf(UUID.randomUUID());
                 Author author = new Author(senderId,currentUser.getDisplayName(),

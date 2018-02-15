@@ -82,6 +82,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -230,7 +231,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onStart() {
         super.onStart();
-        if(mGoogleApiClient!=null) {
+        if(mGoogleApiClient!=null && !mGoogleApiClient.isConnected()) {
             mGoogleApiClient.reconnect();
         }
 
@@ -245,6 +246,12 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onStop() {
         super.onStop();
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
         if(mGoogleApiClient!=null) {
             mGoogleApiClient.disconnect();
         }
@@ -264,6 +271,26 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
     private void initGoogleMapLocation() {
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        mFusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                mCurrentLocation =location;
+                if(mCurrentLocation!=null) {
+                    findPeopleNearby(location.getLatitude(), location.getLongitude(), radius);
+                }
+
+            }
+        });
 
         mLocationCallback = new LocationCallback() {
             @Override
@@ -271,7 +298,9 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                 super.onLocationResult(result);
                // mCurrentLocation = result.getLastLocation();
                 mCurrentLocation = result.getLocations().get(0);
-                updateLocationtoDatabase(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(),radius);
+                if(mCurrentLocation!=null) {
+                    updateLocationtoDatabase(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), radius);
+                }
 
 
 
@@ -585,8 +614,9 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
             }
         });
+        ref.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("timestamp").setValue(new Date().getTime());
 
-        findPeopleNearby(geofire, lat, lng, radius);
+
 
     }
     private void updateTimeStamp(DatabaseReference ref){
@@ -594,9 +624,12 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         ref.child("timestamp").setValue(timestamp);
 
     }
-    private void findPeopleNearby(final GeoFire geoFire, final double lat, final double lng, double radius){
+    private void findPeopleNearby(final double lat, final double lng, double radius){
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("GeoFireLocations");
 
-        GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(lat,lng), radius);
+        geofire = new GeoFire(ref);
+
+        GeoQuery geoQuery = geofire.queryAtLocation(new GeoLocation(lat,lng), radius);
         geoQuery.addGeoQueryDataEventListener(new GeoQueryDataEventListener() {
             @Override
             public void onDataEntered(DataSnapshot dataSnapshot, GeoLocation location) {
@@ -636,8 +669,9 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onDataMoved(DataSnapshot dataSnapshot, GeoLocation location) {
 
-                if(dataSnapshot.getKey()!=null && !dataSnapshot.getKey().equals(curretUser.getUid())){
+                if(dataSnapshot.getKey()!=null){
                     Log.d(TAG,"user moved "+ dataSnapshot.getKey()) ;
+                    Toast.makeText(getApplicationContext(),"user moved "+ dataSnapshot.getKey(),Toast.LENGTH_LONG).show();
                     String userUid =dataSnapshot.getKey();
                     LatLng latLng = new LatLng(location.latitude,location.longitude);
                    if(mHashMap.containsKey(userUid) && mHashMap.get(userUid)!=null){
@@ -897,13 +931,18 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                         }
                         map.clear();
                         center =true;
+                        if(mRecyclerView.getVisibility() == View.VISIBLE) {
+                            noUser.setVisibility(View.VISIBLE);
+                        }else{
+                            noUser.setVisibility(View.GONE);
+                        }
 
                         mLocationDialogs.clear();
                         mLocationDialogAdapter.notifyDataSetChanged();
                         mHashMap.clear();
                         mProgressDialog = ProgressDialog(text);
                         mProgressDialog.show();
-                        updateLocationtoDatabase(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude(),radius);
+                       findPeopleNearby(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude(),radius);
                         return true;
                     }
                 })
@@ -924,8 +963,6 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         if (yourAddresses.size() > 0)
         {
             String yourAddress = yourAddresses.get(0).getAddressLine(0);
-            String yourCity = yourAddresses.get(0).getAddressLine(1);
-            String yourCountry = yourAddresses.get(0).getAddressLine(2);
             marker.setTitle(yourAddress);
 
 

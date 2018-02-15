@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -62,7 +63,7 @@ public class Userstab_Fragment extends Fragment  {
     FirebaseUser currentUser;
     RecyclerAdapter mAdapter;
     Integer friendCount,counter;
-    RelativeLayout mSearchView;
+    TextView mSearchView;
     Button filter_btn;
     BootstrapButton addFriend;
     private SharedPreferences sharedPref;
@@ -164,6 +165,7 @@ public class Userstab_Fragment extends Fragment  {
                             public boolean onMenuItemClick(MenuItem item) {
                               int id = item.getItemId();
                               if(id==R.id.score) {
+                                  //save user setting locally
                                   SharedPreferences.Editor editor = sharedPref.edit();
                                   editor.putString("sort", "yes");
                                   editor.commit();
@@ -172,6 +174,7 @@ public class Userstab_Fragment extends Fragment  {
                                   mAdapter.notifyDataSetChanged();
                               }
                                 if (id == R.id.online_stats){
+                                    //save user setting locally
                                     SharedPreferences.Editor editor = sharedPref.edit();
                                     editor.putString("sort", "no");
                                     editor.commit();
