@@ -181,6 +181,8 @@ public class Homepage extends AppCompatActivity  implements
 
         if("public".equals(getPrivacySharedPreference())){
             startJob();
+        }else if("private".equals(getPrivacySharedPreference())){
+            stopJob();
         }
 
 
@@ -230,7 +232,7 @@ public class Homepage extends AppCompatActivity  implements
 
     @Override
     protected void onNewIntent(Intent intent) {
-      //Toast.makeText(getApplicationContext(),"New Intent",Toast.LENGTH_SHORT).show();
+      Toast.makeText(getApplicationContext(),"New Intent",Toast.LENGTH_SHORT).show();
         if (intent.getExtras() != null) {
             if (intent.getExtras().getString("mainchat") != null) {
                 viewPager.setCurrentItem(2,false);

@@ -527,6 +527,8 @@ public class me_frag extends Fragment {
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                //delete the old avatar from storage
+                deleteOldAvatarFile(currentUser.getPhotoUrl().toString());
                 // taskSnapshot.getMetadata() contains file metadata such as size, content-type,
                 // and download URL.
                 Uri downloadUrl = taskSnapshot.getDownloadUrl();
@@ -562,6 +564,24 @@ public class me_frag extends Fragment {
                 });
 
     }
+
+    private void deleteOldAvatarFile(String photoUrl){
+        StorageReference photoRef = FirebaseStorage.getInstance().getReferenceFromUrl(photoUrl);
+        photoRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                // File deleted successfully
+              // showToast("File deleted");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Uh-oh, an error occurred!
+                //showToast("File deleted failed");
+            }
+        });
+    }
+
 
 
 

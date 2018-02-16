@@ -120,6 +120,7 @@
                 android:layout_marginStart="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+
                 android:text="Friend Request"
                 android:textSize="16dp"
                 android:textColor="@color/black"/>

@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "773225047243-0id6h6ug2kau9padgfpc2q4k0rks10md.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.jayang.icebr8k",
+            "certificate_hash": "36ed7c975cd6af214b50a619d0063f3e01b5eda3"
+          }
+        },
+        {
           "client_id": "773225047243-54avivj7e59hsnomfcqq6jn3201i6jmc.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -66,6 +74,13 @@
             {
               "client_id": "773225047243-a6cnkkd01vh4ddkd7msvf3npin3286au.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "773225047243-sla0md2q5rut2ejikgk1f38cr0anh50t.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.KingdomDigitalMedia.IceBr8k"
+              }
             }
           ]
         },
