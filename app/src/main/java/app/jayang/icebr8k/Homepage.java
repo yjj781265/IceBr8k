@@ -1,26 +1,24 @@
 package app.jayang.icebr8k;
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IntentSender;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
-import android.location.Location;
+import android.graphics.Color;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
 import android.os.SystemClock;
-import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
@@ -36,9 +34,6 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
-import com.firebase.geofire.GeoFire;
-import com.firebase.geofire.GeoLocation;
-import com.firebase.geofire.GeoQuery;
 import com.firebase.jobdispatcher.Constraint;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
@@ -46,26 +41,7 @@ import com.firebase.jobdispatcher.Job;
 import com.firebase.jobdispatcher.Lifetime;
 import com.firebase.jobdispatcher.RetryStrategy;
 import com.firebase.jobdispatcher.Trigger;
-import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResolvableApiException;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResponse;
-import com.google.android.gms.location.SettingsClient;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -88,16 +64,13 @@ import com.zplesac.connectionbuddy.interfaces.ConnectivityChangeListener;
 import com.zplesac.connectionbuddy.models.ConnectivityEvent;
 import com.zplesac.connectionbuddy.models.ConnectivityState;
 
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Locale;
-
+import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
 import app.jayang.icebr8k.Fragments.SurveyTab_Fragment;
 import app.jayang.icebr8k.Fragments.Userstab_Fragment;
 import app.jayang.icebr8k.Fragments.chat_frag;
 import app.jayang.icebr8k.Fragments.me_frag;
 import app.jayang.icebr8k.Modle.ActivityCommunicator;
+import app.jayang.icebr8k.Modle.myViewPager;
 
 
 public class Homepage extends AppCompatActivity  implements
@@ -178,6 +151,7 @@ public class Homepage extends AppCompatActivity  implements
         deleteInChatRoomNode();
         unReadCheck();
         setBadge();
+
 
         if("public".equals(getPrivacySharedPreference())){
             startJob();
@@ -332,12 +306,14 @@ public class Homepage extends AppCompatActivity  implements
 
 
 
+
+
     @Override
     protected void onStart() {
         super.onStart();
         showLog("onStart");
         setOnline();
-
+       //showNootification();
         ConnectionBuddy.getInstance().registerForConnectivityEvents(this, this);
 
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
@@ -552,6 +528,7 @@ public class Homepage extends AppCompatActivity  implements
 
 
 
+
     public void deleteInChatRoomNode(){
         mRef.child("Messages").child(currentUser.getUid()).child("inChatRoom").setValue(null);
     }
@@ -634,6 +611,7 @@ public class Homepage extends AppCompatActivity  implements
         if(FirebaseAuth.getInstance()!=null) {
             FirebaseAuth.getInstance().signOut();
         }
+        stopJob();
 
 
         setUserPrivacy(false);
@@ -714,15 +692,6 @@ public class Homepage extends AppCompatActivity  implements
         }
     }
 
-    private boolean checkGooglePlayService(){
-        int response = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
-        if(response!= ConnectionResult.SUCCESS){
-            GoogleApiAvailability.getInstance().getErrorDialog(this,response,1).show();
-            return false;
-        }else{
-            return  true;
-        }
-    }
 
 
 
@@ -744,6 +713,8 @@ public class Homepage extends AppCompatActivity  implements
 
         }
     }
+
+
 
 
     private String getPrivacySharedPreference(){

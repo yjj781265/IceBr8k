@@ -13,6 +13,7 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SwitchCompat;
@@ -75,6 +76,7 @@ import app.jayang.icebr8k.Modle.ActivityCommunicator;
 import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.PeopleNearby;
 import app.jayang.icebr8k.R;
+import app.jayang.icebr8k.UserChatActvity;
 import app.jayang.icebr8k.UserProfilePage;
 import id.zelory.compressor.Compressor;
 import pl.aprilapps.easyphotopicker.DefaultCallback;
@@ -179,7 +181,9 @@ public class me_frag extends Fragment {
                 }
                 lastClickTime = SystemClock.elapsedRealtime();
                 Intent intent = new Intent( fragView.getContext(), ImageViewer.class);
-                startActivity(intent);
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity(),qrCode,"qr_transition");
+                startActivity(intent, options.toBundle());
+
             }
         });
 
@@ -190,7 +194,8 @@ public class me_frag extends Fragment {
                     return;
                 }
                 lastClickTime = SystemClock.elapsedRealtime();
-                Intent i = new Intent(getContext(), FriendRequestPage.class);
+                Intent i = new Intent(getContext(), UserChatActvity.class);
+
                 startActivity(i);
             }
         });
@@ -409,7 +414,8 @@ public class me_frag extends Fragment {
                         }else{
                         Intent i = new Intent(getActivity(), FullImageView.class);
                         i.putExtra("photoUrl",currentuser.getPhotoUrl().toString());
-                        startActivity(i);
+                            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity(),avatar,"profile");
+                            startActivity(i, options.toBundle());
                         }
                         return true;
                     }

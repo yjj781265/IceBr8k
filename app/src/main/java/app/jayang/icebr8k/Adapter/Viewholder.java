@@ -1,4 +1,4 @@
-package app.jayang.icebr8k;
+package app.jayang.icebr8k.Adapter;
 
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +9,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import app.jayang.icebr8k.Modle.UserDialog;
+import app.jayang.icebr8k.R;
 
 /**
  * Created by LoLJay on 10/20/2017.

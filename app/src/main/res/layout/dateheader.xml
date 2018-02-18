@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/dateHeader"
+    android:layout_marginTop="10dp"
+    android:layout_marginBottom="10dp"
+    android:background="@color/lightGray"
+    android:layout_gravity="center_horizontal">
+    <TextView
+        android:id="@+id/dateHeader_text"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:textSize="14dp"
+        android:padding="2dp"
+        android:text="Feb 09 2017"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

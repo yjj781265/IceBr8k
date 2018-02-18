@@ -62,7 +62,6 @@ public class UserMessage {
     }
 
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -70,19 +69,12 @@ public class UserMessage {
 
         UserMessage that = (UserMessage) o;
 
-        if (timestamp != null ? !timestamp.equals(that.timestamp) : that.timestamp != null)
-            return false;
-        if (messageType != null ? !messageType.equals(that.messageType) : that.messageType != null)
-            return false;
         return messageId.equals(that.messageId);
     }
 
     @Override
     public int hashCode() {
-        int result = timestamp != null ? timestamp.hashCode() : 0;
-        result = 31 * result + (messageType != null ? messageType.hashCode() : 0);
-        result = 31 * result + messageId.hashCode();
-        return result;
+        return messageId.hashCode();
     }
 
     @Override

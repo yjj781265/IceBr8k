@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/messageDialog_containter"
+        android:id="@+id/messageDialog_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
@@ -14,7 +14,8 @@
 
         <ImageView
             android:id="@+id/messageDialog_avatar"
-            android:src="@drawable/default_avatar3"
+            android:background="@drawable/default_avatar3"
+            android:layout_weight="0"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_margin="10dp"
@@ -22,6 +23,7 @@
 
         <TextView
             android:id="@+id/messageDialog_unread"
+            android:layout_weight="0"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
@@ -36,40 +38,48 @@
             android:textStyle="bold" />
 
         <LinearLayout
-            android:layout_margin="10dp"
-            android:layout_width="200dp"
+            android:layout_weight="10"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/messageDialog_name"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:maxLines="1"
+                android:layout_weight="1"
                 android:ellipsize="end"
-                android:textSize="16dp"
-                android:text="TextView fdsfsfsfsfs" />
+                android:maxLines="1"
+                android:scrollHorizontally="true"
+                android:scrollbars="none"
+                android:text="Stephen Hearrington babdfsf"
+                android:textColor="@color/black"
+                android:textSize="16dp" />
             <TextView
                 android:id="@+id/messageDialog_lastmessage"
-                android:layout_width="match_parent"
+                android:textStyle="normal"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxLines="2"
                 android:ellipsize="end"
+                android:layout_weight="1"
                 android:textSize="12dp"
-                android:text="TextView fdsfsf  sfsfs1 2131231313313 1313123131 3113 1 1" />
+                android:text="ffffffffffffffffffffffffffffffffffffdsffsfsfsdfsfdfsdfsfsfdsffdsfsffffffffff" />
         </LinearLayout>
 
         <LinearLayout
-            android:layout_marginTop="10dp"
-            android:layout_width="wrap_content"
+            android:layout_weight="6"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="top"
+            android:layout_marginLeft="10dp"
             android:orientation="vertical">
 
             <TextView
+                android:gravity="center"
                 android:id="@+id/messageDialog_date"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:text="12/31/20172"
                 android:layout_height="wrap_content"
                 android:maxLines="1"
@@ -90,7 +100,7 @@
     </LinearLayout>
     <View
         android:id="@+id/dialogDivider"
-        android:layout_below="@id/messageDialog_containter"
+        android:layout_below="@id/messageDialog_container"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/dialog_divider"/>

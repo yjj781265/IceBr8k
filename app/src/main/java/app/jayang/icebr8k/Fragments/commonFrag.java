@@ -16,7 +16,7 @@ import java.util.Collections;
 import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.Modle.UserQA;
 import app.jayang.icebr8k.R;
-import app.jayang.icebr8k.RecyclerAdapterCommon;
+import app.jayang.icebr8k.Adapter.RecyclerAdapterCommon;
 import app.jayang.icebr8k.ResultActivity;
 
 /**

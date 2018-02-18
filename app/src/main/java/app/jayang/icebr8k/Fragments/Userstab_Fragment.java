@@ -8,7 +8,6 @@ import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
@@ -20,7 +19,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -42,7 +40,7 @@ import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.Modle.UserDialog;
 import app.jayang.icebr8k.Modle.UserQA;
 import app.jayang.icebr8k.R;
-import app.jayang.icebr8k.RecyclerAdapter;
+import app.jayang.icebr8k.Adapter.RecyclerAdapter;
 import app.jayang.icebr8k.SearchName;
 import app.jayang.icebr8k.SearchUser;
 

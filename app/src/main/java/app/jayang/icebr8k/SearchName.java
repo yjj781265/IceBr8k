@@ -2,7 +2,6 @@ package app.jayang.icebr8k;
 
 import android.content.Context;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,10 +11,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Toolbar;
 
 import java.util.ArrayList;
 
+import app.jayang.icebr8k.Adapter.RecyclerAdapter;
 import app.jayang.icebr8k.Modle.UserDialog;
 import me.imid.swipebacklayout.lib.SwipeBackLayout;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;

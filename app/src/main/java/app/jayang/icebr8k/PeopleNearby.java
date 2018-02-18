@@ -358,8 +358,27 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode==REQUEST_CHECK_SETTINGS && resultCode == RESULT_OK){
-            mProgressDialog.show();
-            initGoogleMapLocation();
+            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            mFusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    mCurrentLocation =location;
+                    if(mCurrentLocation!=null) {
+                        findPeopleNearby(location.getLatitude(), location.getLongitude(), radius);
+                    }
+
+                }
+            });
         }
     }
 
@@ -942,7 +961,9 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                         mHashMap.clear();
                         mProgressDialog = ProgressDialog(text);
                         mProgressDialog.show();
-                       findPeopleNearby(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude(),radius);
+                        if(mCurrentLocation!=null) {
+                            findPeopleNearby(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), radius);
+                        }
                         return true;
                     }
                 })

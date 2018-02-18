@@ -1,4 +1,4 @@
-package app.jayang.icebr8k;
+package app.jayang.icebr8k.Adapter;
 
 import android.content.Context;
 import android.os.Handler;
@@ -17,6 +17,7 @@ import java.util.ArrayList;
 
 import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.Modle.UserQA;
+import app.jayang.icebr8k.R;
 
 /**
  * Created by yjj781265 on 11/2/2017.

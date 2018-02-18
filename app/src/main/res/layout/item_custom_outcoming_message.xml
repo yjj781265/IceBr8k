@@ -54,7 +54,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="49dp"
         android:visibility="visible"
-        android:textSize="12sp"
+        android:textSize="12dp"
         android:layout_below="@id/incoming_main"/>
 
 

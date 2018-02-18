@@ -15,6 +15,7 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -89,7 +90,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
     FirebaseDatabase database;
     FirebaseUser currentUser;
     DatabaseReference mRef;
-    User mUser, selfUser;
+    User mUser;
     String uid;
     Dialog dialog;
     ArcProgress arcProgress;
@@ -584,7 +585,9 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
     public void qrOnClick(View view) {
      Intent intent = new Intent(getApplicationContext(),ImageViewer.class);
-     startActivity(intent);
+        ActivityOptionsCompat options = ActivityOptionsCompat.
+                makeSceneTransitionAnimation(this, findViewById(R.id.profile_QR), "qr_transition");
+        startActivity(intent,options.toBundle());
 
     }
 
@@ -750,25 +753,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         Toast.makeText(getApplicationContext(),str,Toast.LENGTH_LONG).show();
     }
 
-    public void showSignleChoiceDialog(){
-        new MaterialDialog.Builder(this)
-                .items(R.array.avatar_choice)
-                .itemsCallbackSingleChoice(0, new MaterialDialog.ListCallbackSingleChoice() {
-                    @Override
-                    public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
-                        if(which==0){
-                            changeAvatar();
-                        }else{
-                            Intent i = new Intent(getApplicationContext(),FullImageView.class);
-                            i.putExtra("photoUrl",currentUser.getPhotoUrl().toString());
-                            startActivity(i);
-                        }
-                        return true;
-                    }
-                })
-                .positiveText(R.string.ok)
-                .show();
-    }
+
 
 
 
@@ -821,7 +806,10 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
             }else if(id == R.id.profileButton ){
                     Intent i = new Intent(getApplicationContext(),FullImageView.class);
                     i.putExtra("photoUrl",mUser.getPhotourl());
-                    startActivity(i);
+                ActivityOptionsCompat options = ActivityOptionsCompat.
+                        makeSceneTransitionAnimation(this, findViewById(R.id.profileButton), "profile");
+
+                    startActivity(i,options.toBundle());
 
             }
         }else{

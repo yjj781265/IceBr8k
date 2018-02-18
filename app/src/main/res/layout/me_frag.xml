@@ -11,6 +11,7 @@
         android:gravity="fill_horizontal"
         android:id="@+id/R1"
         android:elevation="3dp"
+        android:transitionName="profile"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/profileToolbar">
@@ -50,12 +51,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textStyle="normal"
-                android:textSize="14dp"
-                android:text="Username" />
+                android:textSize="14dp" />
         </LinearLayout>
 
 
         <ImageView
+            android:transitionName="qr_transition"
             android:id="@+id/QR_frag"
             android:layout_width="30dp"
             android:layout_centerVertical="true"

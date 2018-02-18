@@ -41,6 +41,12 @@
     <string name="title_activity_full_image_view">FullImageView</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="channel_name">IceBr8k Location Service</string>
+    <string name ="channel_description">To track user location if share my location setting is on</string>
+    <string name="Icebr8k_notification_title_location_service">Location Service Disabled</string>
+    <string name="Icebr8k_notification_context_location_service">You have turned off location services,
+        we are unable to share your location to other IceBr8k users.
+        Turn location on and set it to high accuracy.</string>
 
 
 </resources>

@@ -20,6 +20,7 @@
 
 
     <ImageView
+        android:transitionName="qr_transition"
         android:id="@+id/photo_view"
         android:layout_width="260dp"
         android:layout_height="260dp"

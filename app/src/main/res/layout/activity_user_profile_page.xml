@@ -29,6 +29,7 @@
         android:background="@color/creamYellow"
         android:layout_marginTop="10dp"
         android:gravity="fill_horizontal"
+        android:transitionName="profile"
         android:id="@+id/R1"
         android:elevation="3dp"
         android:layout_width="match_parent"
@@ -77,6 +78,7 @@
 
         <ImageView
             android:id="@+id/profile_QR"
+            android:transitionName="qr_transition"
             android:layout_width="30dp"
             android:layout_centerVertical="true"
             android:layout_alignParentEnd="true"
@@ -129,7 +131,6 @@
     <LinearLayout
         android:elevation="6dp"
         android:background="@color/creamYellow"
-        android:layout_below="@id/R2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="15dp"

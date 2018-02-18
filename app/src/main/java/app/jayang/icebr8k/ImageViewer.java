@@ -67,7 +67,7 @@ public class ImageViewer extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        finish();
+        supportFinishAfterTransition();
         return true;
     }
 

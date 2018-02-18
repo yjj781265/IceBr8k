@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="app.jayang.icebr8k.UserChatActvity">
+
+
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/userChat_toolbar"
+        android:layout_width="match_parent"
+        android:background="@color/primary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:title="sdf"
+        app:subtitle="123"
+        android:layout_height="56dp">
+
+    </android.support.v7.widget.Toolbar>
+
+
+
+
+
+
+
+    <android.support.v7.widget.RecyclerView
+        android:scrollbars="none"
+        android:nestedScrollingEnabled="false"
+        android:id="@+id/userChat_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/userChat_toolbar"
+        android:layout_above="@id/userChat_input_root">
+
+    </android.support.v7.widget.RecyclerView>
+    
+    <LinearLayout
+        android:gravity="center_vertical"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/userChat_input_root"
+        android:background="@color/white"
+        android:padding="10dp"
+        android:elevation="6dp"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/userChat_attachment"
+            android:layout_gravity="bottom"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/ic_action_add_chat_selector" />
+
+        <EditText
+            android:scrollHorizontally="false"
+            android:id="@+id/userChat_input"
+            android:overScrollMode="always"
+            android:layout_gravity="center_vertical"
+            android:maxLines="6"
+            android:padding="5dp"
+            android:hint="Enter message..."
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:background="@android:color/white"
+            android:layout_weight="8"
+            android:layout_width="0dp"
+            android:inputType="textShortMessage|textAutoCorrect|textAutoComplete|textCapSentences|textMultiLine"
+            android:layout_height="wrap_content"
+            android:textSize="16dp"
+           />
+
+        <ImageView
+            android:background="@color/transparent"
+            android:id="@+id/userChat_send"
+            android:layout_gravity="bottom"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Send"
+            android:src="@drawable/ic_action_send_selector"/>
+
+
+
+    </LinearLayout>
+
+
+
+
+
+
+
+
+
+
+</RelativeLayout>

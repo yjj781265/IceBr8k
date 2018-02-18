@@ -51,4 +51,27 @@ public class UserMessageDialog {
     public void setGroupChat(Boolean groupChat) {
         this.groupChat = groupChat;
     }
+
+    @Override
+    public String toString() {
+        return "UserMessageDialog{" +
+                "id='" + id + '\'' +
+                ", dialogName='" + dialogName + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UserMessageDialog that = (UserMessageDialog) o;
+
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
 }

@@ -23,6 +23,7 @@
         android:layout_height="48dp"
         android:id="@+id/imageview_id"
         android:layout_marginLeft="10dp"
+        android:src="@drawable/default_avatar3"
 
         android:layout_gravity="center"
         android:scaleType="centerCrop"/>

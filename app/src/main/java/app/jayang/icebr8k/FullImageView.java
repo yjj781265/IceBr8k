@@ -277,4 +277,10 @@ public class FullImageView extends SwipeBackActivity {
         mediaScanIntent.setData(contentUri);
         sendBroadcast(mediaScanIntent);
     }
+
+    @Override
+    public void onBackPressed() {
+       this.supportFinishAfterTransition();
+
+    }
 }
