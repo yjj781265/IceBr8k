@@ -121,8 +121,7 @@
             android:text="yjj@gmail.com"
             android:textSize="16dp"
             android:autoLink="email"
-            android:textColor="@color/material_drawer_secondary_text"
-            android:textColorLink="@color/material_drawer_secondary_text"
+            android:textColorLink="@color/dark_gray"
             />
 
 
@@ -152,7 +151,7 @@
             android:textAllCaps="false"
             android:text="Compare"
             app:pb_colorNormal="@color/colorPrimary"
-            app:pb_colorPressed="@color/primary_dark"
+            app:pb_colorPressed="@color/colorPrimaryDark"
             app:pb_textProgress="Comparing..."
             app:pb_colorProgress="@color/colorAccent"
             app:pb_colorComplete="@color/colorAccent"
@@ -186,7 +185,7 @@
             style="?android:attr/borderlessButtonStyle"
             android:layout_marginTop="15dp"
             app:pb_colorPressed="@color/colorPressed"
-            app:pb_colorNormal="@color/accent"
+            app:pb_colorNormal="@color/colorAccent"
             android:id="@+id/addFriend_btn"
             android:layout_gravity="center_horizontal"
             android:text="Add Friend"

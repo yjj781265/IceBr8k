@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
     <android.support.v7.widget.Toolbar
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        android:background="@color/primary"
+        android:background="@color/colorPrimary"
         android:layout_width="match_parent"
         android:id="@+id/people_toolbar"
         android:layout_height="56dp"

@@ -11,7 +11,7 @@
         <item name="android:dropDownListViewStyle">@style/PopupMenuListView</item>
         <item name="dropDownListViewStyle">@style/PopupMenuListView</item>
         <item name="windowActionModeOverlay">true</item>
-        <item name="actionModeBackground">@color/primary</item>
+        <item name="actionModeBackground">@color/colorPrimary</item>
         <item name="android:actionModeCloseDrawable">@drawable/ic_action_close</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowContentTransitions">true</item>

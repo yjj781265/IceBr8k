@@ -8,6 +8,6 @@
         android:topLeftRadius="12dp"
         android:topRightRadius="12dp" />
 
-    <solid android:color="@color/primary_dark" />
+    <solid android:color="@color/colorPrimaryDark" />
 
 </shape>

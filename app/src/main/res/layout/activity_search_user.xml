@@ -16,7 +16,7 @@
         android:id="@+id/search_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/primary"></android.support.v7.widget.Toolbar>
+        android:background="@color/colorPrimary"></android.support.v7.widget.Toolbar>
 
 
     <LinearLayout
@@ -46,7 +46,7 @@
         <TextView
             android:id="@+id/search_username"
             android:paddingLeft="5dp"
-            android:textColor="@color/primary_dark"
+            android:textColor="@color/colorPrimaryDark"
             android:text="123"
             android:layout_gravity="center_vertical"
             android:layout_width="wrap_content"

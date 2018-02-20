@@ -48,7 +48,7 @@
                 android:foreground="@drawable/ic_action_download"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
-                app:pb_colorNormal="@color/accent"
+                app:pb_colorNormal="@color/colorAccent"
                 app:pb_colorPressed="@color/colorPressed"
                 />
 

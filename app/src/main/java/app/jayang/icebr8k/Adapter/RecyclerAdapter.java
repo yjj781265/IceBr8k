@@ -2,6 +2,7 @@ package app.jayang.icebr8k.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.SystemClock;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -41,6 +42,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
          private ImageView image,onlineStats;
          private TextView displayname,username,score;
          private RelativeLayout mRelativeLayout;
+         private long lastClickTime =0;
 
         public UserDialogViewHolder(View itemView) {
             super(itemView);
@@ -56,6 +58,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
 
         @Override
         public void onClick(View view) {
+            // preventing double, using threshold of 1000 ms
+            if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                return;
+            }
+            lastClickTime = SystemClock.elapsedRealtime();
             int position = getAdapterPosition(); // gets item position
             if (position != RecyclerView.NO_POSITION) { // Check if an item was deleted, but the user clicked it before the UI removed it
                 UserDialog dialog = mUserDialogs.get(position);

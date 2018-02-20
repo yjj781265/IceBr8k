@@ -15,7 +15,7 @@
         android:elevation="6dp"
         android:layout_width="match_parent"
         app:title=" "
-        android:background="@color/primary"
+        android:background="@color/colorPrimary"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         android:layout_height="56dp">
 

@@ -13,7 +13,7 @@
         android:id="@+id/imageViewer_toolbar"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="@color/primary"
+        android:background="@color/colorPrimary"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:title="My QR Code"
         app:titleTextColor="@color/white"/>

@@ -12,20 +12,21 @@
 
 
     <LinearLayout
-        android:id="@+id/incoming_main"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
-
-
         android:orientation="horizontal">
+        <LinearLayout
+            android:id="@+id/outcoming_main"
+            android:padding="10dp"
+            android:background="@drawable/outcoming_message_selector"
+            android:layout_width="wrap_content"
+            android:orientation="vertical"
+            android:layout_height="wrap_content">
       <TextView
           android:id="@+id/outcoming_text"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:layout_gravity="bottom"
-          android:background="@drawable/outcoming_message_selector"
-          android:padding="10dp"
           android:maxWidth="220dp"
           android:maxLength="500"
           android:autoLink="all"
@@ -33,6 +34,18 @@
           android:textColorLink="@color/white"
           android:textSize="16dp"
           android:text="hello."/>
+
+        <TextView
+
+            android:id="@+id/outcoming_time"
+            android:text="10:50 PM"
+            android:textColor="@color/lightGray"
+            android:layout_gravity="end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            android:textSize="12dp"/>
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/outcoming_avatar"
@@ -45,17 +58,7 @@
 
 
     </LinearLayout>
-    <TextView
 
-        android:id="@+id/outcoming_time"
-        android:text="hey daf"
-        android:layout_gravity="end"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="49dp"
-        android:visibility="visible"
-        android:textSize="12dp"
-        android:layout_below="@id/incoming_main"/>
 
 
 

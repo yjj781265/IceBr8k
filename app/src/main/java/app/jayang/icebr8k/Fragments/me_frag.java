@@ -429,8 +429,8 @@ public class me_frag extends Fragment {
     public void changeAvatar() {
         //request permission
         Dexter.withActivity(getActivity())
-                .withPermissions(android.Manifest.permission.CAMERA,
-                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE).withListener(
+                .withPermissions(Manifest.permission.CAMERA,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE).withListener(
                 new MultiplePermissionsListener() {
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
@@ -440,8 +440,8 @@ public class me_frag extends Fragment {
                             EasyImage.openChooserWithGallery(me_frag.this,
                                     "Take or Pick a photo for your avatar", 0);
                         }else{
-                            showSnackbarWithSetting("Camera and Storage permission are " +
-                                    "needed for your avatar",getActivity().getCurrentFocus());
+                            Toast.makeText(getContext(), "Camera and Storage permission are " +
+                                    "needed for your avatar", Toast.LENGTH_LONG).show();
                         }
                     }
 

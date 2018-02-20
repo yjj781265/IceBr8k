@@ -63,12 +63,13 @@ public class MyJobService extends com.firebase.jobdispatcher.JobService implemen
     public boolean onStartJob(final com.firebase.jobdispatcher.JobParameters job) {
         Toast.makeText(getApplicationContext(), "Hi Icebr8k", Toast.LENGTH_LONG).show();
         setUpLocationClientIfNeeded();
-        return true;
+        return false;
 
     }
 
     @Override
     public boolean onStopJob(com.firebase.jobdispatcher.JobParameters job) {
+
         return true;
     }
 
@@ -84,18 +85,8 @@ public class MyJobService extends com.firebase.jobdispatcher.JobService implemen
             task.addOnSuccessListener(new OnSuccessListener<LocationSettingsResponse>() {
                 @Override
                 public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                    Toast.makeText(MyJobService.this, "here ", Toast.LENGTH_SHORT).show();
-
-
                     if (ActivityCompat.checkSelfPermission(MyJobService.this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                             != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MyJobService.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        // TODO: Consider calling
-                        //    ActivityCompat#requestPermissions
-                        // here to request the missing permissions, and then overriding
-                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                        //                                          int[] grantResults)
-                        // to handle the case where the user grants the permission. See the documentation
-                        // for ActivityCompat#requestPermissions for more details.
                         showPermissionNotification();
                         return;
                     }
@@ -119,28 +110,11 @@ public class MyJobService extends com.firebase.jobdispatcher.JobService implemen
                     if (e instanceof ResolvableApiException) {
                         // Location settings are not satisfied, but this can be fixed
                         // by showing the user a dialog.
-                        Toast.makeText(MyJobService.this, "exception ", Toast.LENGTH_SHORT).show();
                         showNotification();
                     }
                 }
             });
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     }
 
@@ -165,6 +139,70 @@ public class MyJobService extends com.firebase.jobdispatcher.JobService implemen
         }else{
             initGoogleMapLocation();
         }
+    }
+
+    private  void  showPermissionNotification() {
+        // the user default notification sound
+        Uri notificaiontSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+
+        if (Build.VERSION.SDK_INT >= 26) {
+            NotificationManager mNotificationManager =
+                    (NotificationManager) getSystemService(getApplicationContext().NOTIFICATION_SERVICE);
+    // The id of the channel.
+            String id = "LocationPermission_id";
+   // The user-visible name of the channel.
+            CharSequence name = getString(R.string.channel_name);
+   // The user-visible description of the channel.
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel mChannel = new NotificationChannel(id, name, importance);
+   // Configure the notification channel.
+            mChannel.setDescription(description);
+            mChannel.enableLights(true);
+   // Sets the notification light color for notifications posted to this
+  // channel, if the device supports this feature.
+            mChannel.setLightColor(Color.RED);
+            mChannel.enableVibration(true);
+            mNotificationManager.createNotificationChannel(mChannel);
+        }
+
+
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat. Builder(this,"LocationPermssion_id")
+                        .setSmallIcon(R.drawable.ic_stat_onesignal_default)
+                        .setAutoCancel(true).setColorized(true)
+                        .setOnlyAlertOnce(true)
+                        .setColor(getResources().getColor(R.color.colorPrimary)).setSound(notificaiontSound)
+                        .setContentTitle(getString(R.string.Icebr8k_notification_title_location_permission))
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(getString(R.string.Icebr8k_notification_context_location_permission)));
+
+
+        if(Build.VERSION.SDK_INT<26){
+            mBuilder.setPriority(Notification.PRIORITY_MAX);
+        }
+
+        Intent myAppSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.parse("package:" + getApplicationContext().getPackageName()));
+        myAppSettings.addCategory(Intent.CATEGORY_DEFAULT);
+        myAppSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        PendingIntent resultPendingIntent =
+                PendingIntent.getActivity(
+                        this,
+                        0,
+                        myAppSettings,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        mBuilder.setContentIntent(resultPendingIntent);
+
+        // Sets an ID for the notification
+        int mNotificationId = 002;
+// Gets an instance of the NotificationManager service
+        NotificationManager mNotifyMgr =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+// Builds the notification and issues it.
+        mNotifyMgr.notify(mNotificationId, mBuilder.build());
+
     }
 
     private  void  showNotification() {
@@ -197,10 +235,12 @@ public class MyJobService extends com.firebase.jobdispatcher.JobService implemen
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat. Builder(this,"LocationService_id")
                         .setSmallIcon(R.drawable.ic_stat_onesignal_default)
+                        .setContentTitle(getString(R.string.Icebr8k_notification_title_location_service))
                         .setAutoCancel(true).setColorized(true)
                         .setOnlyAlertOnce(true)
-                        .setColor(getResources().getColor(R.color.primary)).setSound(notificaiontSound)
-                        .setContentTitle("Location Permission Needed");
+                        .setColor(getResources().getColor(R.color.colorPrimary)).setSound(notificaiontSound)
+                        .setStyle(new NotificationCompat.BigTextStyle().
+                                bigText(getString(R.string.Icebr8k_notification_context_location_service)));
 
 
         if(Build.VERSION.SDK_INT<26){
@@ -224,72 +264,6 @@ public class MyJobService extends com.firebase.jobdispatcher.JobService implemen
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 // Builds the notification and issues it.
         mNotifyMgr.notify(mNotificationId, mBuilder.build());
-
-    }
-
-    private  void  showPermissionNotification() {
-        // the user default notification sound
-        Uri notificaiontSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-
-
-        if (Build.VERSION.SDK_INT >= 26) {
-            NotificationManager mNotificationManager =
-                    (NotificationManager) getSystemService(getApplicationContext().NOTIFICATION_SERVICE);
-// The id of the channel.
-            String id = "LocationService_id";
-// The user-visible name of the channel.
-            CharSequence name = getString(R.string.channel_name);
-// The user-visible description of the channel.
-            String description = getString(R.string.channel_description);
-            int importance = NotificationManager.IMPORTANCE_HIGH;
-            NotificationChannel mChannel = new NotificationChannel(id, name, importance);
-// Configure the notification channel.
-            mChannel.setDescription(description);
-            mChannel.enableLights(true);
-// Sets the notification light color for notifications posted to this
-// channel, if the device supports this feature.
-            mChannel.setLightColor(Color.RED);
-            mChannel.enableVibration(true);
-            mNotificationManager.createNotificationChannel(mChannel);
-        }
-
-
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat. Builder(this,"LocationService_id")
-                        .setSmallIcon(R.drawable.ic_stat_onesignal_default)
-                        .setContentTitle(getString(R.string.Icebr8k_notification_title_location_service))
-                        .setAutoCancel(true).setColorized(true)
-                        .setOnlyAlertOnce(true)
-                        .setColor(getResources().getColor(R.color.primary)).setSound(notificaiontSound)
-                        .setStyle(new NotificationCompat.BigTextStyle().
-                                bigText(getString(R.string.Icebr8k_notification_context_location_service)));
-
-
-        if(Build.VERSION.SDK_INT<26){
-            mBuilder.setPriority(Notification.PRIORITY_MAX);
-        }
-
-        Intent myAppSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                Uri.parse("package:" + getApplicationContext().getPackageName()));
-        myAppSettings.addCategory(Intent.CATEGORY_DEFAULT);
-        myAppSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent resultPendingIntent =
-                PendingIntent.getActivity(
-                        this,
-                        0,
-                        myAppSettings,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
-        mBuilder.setContentIntent(resultPendingIntent);
-
-        // Sets an ID for the notification
-        int mNotificationId = 001;
-// Gets an instance of the NotificationManager service
-        NotificationManager mNotifyMgr =
-                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-// Builds the notification and issues it.
-        mNotifyMgr.notify(mNotificationId, mBuilder.build());
-
     }
 
 
@@ -317,7 +291,7 @@ public class MyJobService extends com.firebase.jobdispatcher.JobService implemen
 
     @Override
     public void onConnectionSuspended(int i) {
-
+     mGoogleApiClient.reconnect();
     }
 
 

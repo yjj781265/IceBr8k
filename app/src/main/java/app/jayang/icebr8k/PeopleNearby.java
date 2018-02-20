@@ -98,7 +98,7 @@ import belka.us.androidtoggleswitch.widgets.ToggleSwitch;
 
 public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallback,GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,BaseToggleSwitch.OnToggleSwitchChangeListener,GoogleMap.OnMarkerClickListener,
-        GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener{
+        GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener,GeoQueryDataEventListener {
 
     private final int UPDATE_INTERVAL = 5000; //5sec
     private final int FASTEST_INTERVAL = 3000;
@@ -134,6 +134,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     private UserLocationDialogAdapter mLocationDialogAdapter;
     private ArrayList<UserLocationDialog> mLocationDialogs;
     private ImageButton mfilter;
+    private GeoQuery geoQuery;
     // Declare a variable for the cluster manager.
     private ClusterManager<MyMarker> mClusterManager;
 
@@ -258,6 +259,10 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         if (mFusedLocationClient != null) {
             mFusedLocationClient.removeLocationUpdates(mLocationCallback);
         }
+        if(geoQuery!=null){
+           geoQuery.removeGeoQueryEventListener(this);
+
+        }
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -339,7 +344,6 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onFailure(@NonNull Exception e) {
                 mProgressDialog.dismiss();
-             Toast.makeText(getApplicationContext(),"Unable to find location, check your location setting",Toast.LENGTH_LONG).show();
                 try {
                     // Show the dialog by calling startResolutionForResult(),
                     // and check the result in onActivityResult().
@@ -358,27 +362,10 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode==REQUEST_CHECK_SETTINGS && resultCode == RESULT_OK){
-            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
+            Toast.makeText(this, "It's okay", Toast.LENGTH_SHORT).show();
+            if(checkGooglePlayService()){
+                buildGoogleApiClient();
             }
-            mFusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    mCurrentLocation =location;
-                    if(mCurrentLocation!=null) {
-                        findPeopleNearby(location.getLatitude(), location.getLongitude(), radius);
-                    }
-
-                }
-            });
         }
     }
 
@@ -647,96 +634,8 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("GeoFireLocations");
 
         geofire = new GeoFire(ref);
-
-        GeoQuery geoQuery = geofire.queryAtLocation(new GeoLocation(lat,lng), radius);
-        geoQuery.addGeoQueryDataEventListener(new GeoQueryDataEventListener() {
-            @Override
-            public void onDataEntered(DataSnapshot dataSnapshot, GeoLocation location) {
-                Log.d(TAG,"new key entered "+ dataSnapshot.getKey()) ;
-                if(dataSnapshot.getKey()!=null){
-                    String userUid =dataSnapshot.getKey();
-                    LatLng latLng = new LatLng(location.latitude,location.longitude);
-                    addCustomMarkerFromURL(latLng,userUid);
-
-                }
-
-
-
-
-            }
-
-            @Override
-            public void onDataExited(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.getKey()!=null){
-                    String userUid =dataSnapshot.getKey();
-                    if(mHashMap.containsKey(userUid)){
-                        mHashMap.get(userUid).remove();
-                        mHashMap.remove(userUid);
-                    }
-                    UserLocationDialog temp =new UserLocationDialog();
-                    temp.setId(userUid);
-                    if(mLocationDialogs.contains(temp)) {
-                        mLocationDialogs.remove(temp);
-                        mLocationDialogAdapter.notifyDataSetChanged();
-                    }
-
-
-
-                }
-            }
-
-            @Override
-            public void onDataMoved(DataSnapshot dataSnapshot, GeoLocation location) {
-
-                if(dataSnapshot.getKey()!=null){
-                    Log.d(TAG,"user moved "+ dataSnapshot.getKey()) ;
-                    Toast.makeText(getApplicationContext(),"user moved "+ dataSnapshot.getKey(),Toast.LENGTH_LONG).show();
-                    String userUid =dataSnapshot.getKey();
-                    LatLng latLng = new LatLng(location.latitude,location.longitude);
-                   if(mHashMap.containsKey(userUid) && mHashMap.get(userUid)!=null){
-                       Log.d(TAG,userUid+ " old marker moved before "+  mHashMap.get(userUid).getPosition()) ;
-                       mHashMap.get(userUid).hideInfoWindow();
-                       mHashMap.get(userUid).setPosition(latLng);
-                       addmarkerWithTitle(latLng, mHashMap.get(userUid));
-
-
-                       Log.d(TAG,userUid+ " old marker moved updated "+  mHashMap.get(userUid).getPosition()) ;
-                       UserLocationDialog temp =new UserLocationDialog();
-                       temp.setId(userUid);
-                       if(mLocationDialogs.contains(temp)) {
-                          int index = mLocationDialogs.indexOf(temp);
-                          if(index!=-1) {
-                              User user = mLocationDialogs.get(index).getUser();
-                              updateList(userUid, new LatLng(location.latitude,location.longitude),user);
-                          }
-                       }
-
-
-                   }
-                }
-            }
-
-            @Override
-            public void onDataChanged(DataSnapshot dataSnapshot, GeoLocation location) {
-
-            }
-
-            @Override
-            public void onGeoQueryReady() {
-                mProgressDialog.dismiss();
-            }
-
-            @Override
-            public void onGeoQueryError(DatabaseError error) {
-                mProgressDialog.dismiss();
-                Toast.makeText(getApplicationContext(), error.getMessage(),Toast.LENGTH_LONG).show();
-
-
-            }
-        });
-    }
-    private void getUserPhotoUrl(){
-
+        geoQuery = geofire.queryAtLocation(new GeoLocation(lat,lng), radius);
+        geoQuery.addGeoQueryDataEventListener(this);
     }
 
     private Double convertMileStringtoKm(String string){
@@ -747,11 +646,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
 
 
-
-
-
-
-//google api client call backs
+    //google api client call backs
     @Override
     public void onConnected(@Nullable Bundle bundle) {
       if(mGoogleApiClient!=null){
@@ -1003,6 +898,85 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onBackPressed() {
         finish();
+    }
+
+    @Override
+    public void onDataEntered(DataSnapshot dataSnapshot, GeoLocation location) {
+        Log.d(TAG,"new key entered "+ dataSnapshot.getKey()) ;
+        if(dataSnapshot.getKey()!=null){
+            String userUid =dataSnapshot.getKey();
+            LatLng latLng = new LatLng(location.latitude,location.longitude);
+            addCustomMarkerFromURL(latLng,userUid);
+
+        }
+    }
+
+    @Override
+    public void onDataExited(DataSnapshot dataSnapshot) {
+        if(dataSnapshot.getKey()!=null){
+            String userUid =dataSnapshot.getKey();
+            if(mHashMap.containsKey(userUid)){
+                mHashMap.get(userUid).remove();
+                mHashMap.remove(userUid);
+            }
+            UserLocationDialog temp =new UserLocationDialog();
+            temp.setId(userUid);
+            if(mLocationDialogs.contains(temp)) {
+                mLocationDialogs.remove(temp);
+                mLocationDialogAdapter.notifyDataSetChanged();
+            }
+
+
+
+        }
+    }
+
+    @Override
+    public void onDataMoved(DataSnapshot dataSnapshot, GeoLocation location) {
+        if(dataSnapshot.getKey()!=null){
+            Log.d(TAG,"user moved "+ dataSnapshot.getKey()) ;
+            Toast.makeText(getApplicationContext(),"user moved "+ dataSnapshot.getKey(),Toast.LENGTH_LONG).show();
+            String userUid =dataSnapshot.getKey();
+            LatLng latLng = new LatLng(location.latitude,location.longitude);
+            if(mHashMap.containsKey(userUid) && mHashMap.get(userUid)!=null){
+                Log.d(TAG,userUid+ " old marker moved before "+  mHashMap.get(userUid).getPosition()) ;
+                mHashMap.get(userUid).hideInfoWindow();
+                mHashMap.get(userUid).setPosition(latLng);
+                addmarkerWithTitle(latLng, mHashMap.get(userUid));
+
+
+                Log.d(TAG,userUid+ " old marker moved updated "+  mHashMap.get(userUid).getPosition()) ;
+                UserLocationDialog temp =new UserLocationDialog();
+                temp.setId(userUid);
+                if(mLocationDialogs.contains(temp)) {
+                    int index = mLocationDialogs.indexOf(temp);
+                    if(index!=-1) {
+                        User user = mLocationDialogs.get(index).getUser();
+                        updateList(userUid, new LatLng(location.latitude,location.longitude),user);
+                    }
+                }
+
+
+            }
+        }
+    }
+
+    @Override
+    public void onDataChanged(DataSnapshot dataSnapshot, GeoLocation location) {
+
+    }
+
+    @Override
+    public void onGeoQueryReady() {
+        mProgressDialog.dismiss();
+
+    }
+
+    @Override
+    public void onGeoQueryError(DatabaseError error) {
+        mProgressDialog.dismiss();
+        Toast.makeText(getApplicationContext(), error.getMessage(),Toast.LENGTH_LONG).show();
+
     }
 }
 

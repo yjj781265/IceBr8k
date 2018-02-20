@@ -55,6 +55,6 @@
         app:inputHintColor="@android:color/secondary_text_dark_nodisable"
         app:showAttachmentButton="true"
         app:inputButtonDefaultBgColor="@color/colorPrimary"
-        app:attachmentButtonDefaultBgPressedColor="@color/accent"
+        app:attachmentButtonDefaultBgPressedColor="@color/colorAccent"
         app:inputHint="@string/message_input_hint"/>
 </RelativeLayout>

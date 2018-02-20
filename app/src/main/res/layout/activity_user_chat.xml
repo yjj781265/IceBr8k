@@ -11,7 +11,7 @@
     <android.support.v7.widget.Toolbar
         android:id="@+id/userChat_toolbar"
         android:layout_width="match_parent"
-        android:background="@color/primary"
+        android:background="@color/colorPrimary"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:title="sdf"
         app:subtitle="123"
@@ -19,14 +19,8 @@
 
     </android.support.v7.widget.Toolbar>
 
-
-
-
-
-
-
     <android.support.v7.widget.RecyclerView
-        android:scrollbars="none"
+        android:scrollbars="vertical"
         android:nestedScrollingEnabled="false"
         android:id="@+id/userChat_list"
         android:layout_width="match_parent"
@@ -60,7 +54,8 @@
             android:id="@+id/userChat_input"
             android:overScrollMode="always"
             android:layout_gravity="center_vertical"
-            android:maxLines="6"
+            android:maxLines="5"
+            android:maxLength="500"
             android:padding="5dp"
             android:hint="Enter message..."
             android:layout_marginRight="10dp"

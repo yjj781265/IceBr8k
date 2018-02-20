@@ -66,6 +66,7 @@ import com.zplesac.connectionbuddy.models.ConnectivityState;
 
 import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
 import app.jayang.icebr8k.Fragments.SurveyTab_Fragment;
+import app.jayang.icebr8k.Fragments.UserMessageDialog_Frag;
 import app.jayang.icebr8k.Fragments.Userstab_Fragment;
 import app.jayang.icebr8k.Fragments.chat_frag;
 import app.jayang.icebr8k.Fragments.me_frag;
@@ -78,8 +79,6 @@ public class Homepage extends AppCompatActivity  implements
         ConnectivityChangeListener,
         SharedPreferences.OnSharedPreferenceChangeListener,ActivityCommunicator {
     private final int  REQUEST_CHECK_SETTINGS =9000;
-
-
     private AHBottomNavigation homepageTab;
     private SwitchCompat mSwitchCompat;
     private String radius = "1 mi";
@@ -120,6 +119,7 @@ public class Homepage extends AppCompatActivity  implements
         presenceRef.keepSynced(true);
         mDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
 
+
         showLog("onCreate");
         showLog(currentUser.getPhotoUrl().toString());
 
@@ -138,6 +138,7 @@ public class Homepage extends AppCompatActivity  implements
         if (savedInstanceState != null) {
             ConnectionBuddyCache.clearLastNetworkState(this);
         }
+        ConnectionBuddy.getInstance().registerForConnectivityEvents(this, this);
 
 
         //enable onesignal notification service
@@ -158,8 +159,6 @@ public class Homepage extends AppCompatActivity  implements
         }else if("private".equals(getPrivacySharedPreference())){
             stopJob();
         }
-
-
         // bottom nav bar
         setHomepageTab();
 
@@ -180,20 +179,13 @@ public class Homepage extends AppCompatActivity  implements
                 overridePendingTransition(R.anim.slide_from_right,0);
             }
         }
-
-
         setScreenOnOffListener();
-
-
-
-
-
 
     }
 
     public void startJob(){
         Job job = mDispatcher.newJobBuilder().setService(MyJobService.class).
-                setLifetime(Lifetime.FOREVER).setRecurring(true).setTag(Job_TaG).setTrigger(Trigger.executionWindow(10,15))
+                setLifetime(Lifetime.FOREVER).setRecurring(true).setTag(Job_TaG).setTrigger(Trigger.executionWindow(600,900))
                 .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL).setConstraints(Constraint.ON_ANY_NETWORK).setReplaceCurrent(true).build();
         mDispatcher.mustSchedule(job);
         Toast.makeText(this,"Job Started",Toast.LENGTH_LONG).show();
@@ -206,7 +198,7 @@ public class Homepage extends AppCompatActivity  implements
 
     @Override
     protected void onNewIntent(Intent intent) {
-      Toast.makeText(getApplicationContext(),"New Intent",Toast.LENGTH_SHORT).show();
+      //Toast.makeText(getApplicationContext(),"New Intent",Toast.LENGTH_SHORT).show();
         if (intent.getExtras() != null) {
             if (intent.getExtras().getString("mainchat") != null) {
                 viewPager.setCurrentItem(2,false);
@@ -313,8 +305,6 @@ public class Homepage extends AppCompatActivity  implements
         super.onStart();
         showLog("onStart");
         setOnline();
-       //showNootification();
-        ConnectionBuddy.getInstance().registerForConnectivityEvents(this, this);
 
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         sharedPref.registerOnSharedPreferenceChangeListener(this);
@@ -341,7 +331,7 @@ public class Homepage extends AppCompatActivity  implements
     @Override
     protected void onStop() {
         super.onStop();
-        ConnectionBuddy.getInstance().unregisterFromConnectivityEvents(this);
+
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         sharedPref.unregisterOnSharedPreferenceChangeListener(this);
 
@@ -353,6 +343,7 @@ public class Homepage extends AppCompatActivity  implements
     protected void onDestroy() {
 
         super.onDestroy();
+        ConnectionBuddy.getInstance().unregisterFromConnectivityEvents(this);
 
         setOffline();
         if (mReceiver != null) {
@@ -471,12 +462,13 @@ public class Homepage extends AppCompatActivity  implements
       mViewPagerAdapter.addFragment(new Userstab_Fragment());
       mViewPagerAdapter.addFragment(new chat_frag() );
       mViewPagerAdapter.addFragment(new me_frag());
+      mViewPagerAdapter.addFragment(new UserMessageDialog_Frag());
 
 
       viewPager.setAdapter(mViewPagerAdapter);
 
         homepageTab.setTitleState(AHBottomNavigation.TitleState.ALWAYS_SHOW);
-        homepageTab.setAccentColor(getResources().getColor(R.color.primary));
+        homepageTab.setAccentColor(getResources().getColor(R.color.colorPrimary));
         AHBottomNavigationItem item1 = new AHBottomNavigationItem("Survey",
                 R.drawable.survey_selector);
         AHBottomNavigationItem item2 = new AHBottomNavigationItem("Friends",
@@ -485,6 +477,8 @@ public class Homepage extends AppCompatActivity  implements
                 R.drawable.message_selector);
         AHBottomNavigationItem item4 = new AHBottomNavigationItem("Me",
                 R.drawable.me_selector);
+        AHBottomNavigationItem item5 = new AHBottomNavigationItem("Me2",
+                R.drawable.me_selector);
 
 
         // Add items
@@ -492,6 +486,7 @@ public class Homepage extends AppCompatActivity  implements
         homepageTab.addItem(item2);
         homepageTab.addItem(item3);
         homepageTab.addItem(item4);
+        homepageTab.addItem(item5);
 
 
         // for smooth swipe

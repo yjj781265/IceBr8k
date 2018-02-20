@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:layout_marginStart="9dp"
+    android:layout_marginBottom="8dp"
+    android:layout_marginTop="2dp">
+
+    <ImageView
+        android:id="@+id/isTyping_avatar"
+        android:background="@drawable/default_avatar3"
+        android:layout_marginRight="9dp"
+        android:layout_gravity="bottom"
+        android:layout_width="40dp"
+        android:layout_height="40dp"/>
+
+
+    <RelativeLayout
+        android:layout_gravity="bottom"
+        android:padding="10dp"
+        android:background="@drawable/incoming_bubble"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    <com.github.silvestrpredko.dotprogressbar.DotProgressBar
+        android:layout_gravity="bottom"
+        android:padding="10dp"
+        android:id="@+id/dot_progress_bar"
+        android:layout_width="60dp"
+        android:layout_height="14dp"
+       custom:amount="3"
+       custom:duration="@android:integer/config_mediumAnimTime"
+       custom:endColor="@color/creamYellow"
+       custom:startColor="@color/creamYellow"
+       custom:animationDirection="left"/>
+    </RelativeLayout>
+
+</LinearLayout>

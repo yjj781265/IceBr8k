@@ -5,14 +5,15 @@ package app.jayang.icebr8k.Modle;
  */
 
 public class UserMessage {
-    private String text, senderId, timestamp, messageType, messageId;
+    private String text, senderId, messageType, messageId;
+    private Long timestamp;
 
 
 
     public UserMessage() {
     }
 
-    public UserMessage(String text, String senderId, String timestamp, String messageType, String messageId) {
+    public UserMessage(String text, String senderId, Long timestamp, String messageType, String messageId) {
         this.text = text;
         this.senderId = senderId;
         this.timestamp = timestamp;
@@ -37,11 +38,11 @@ public class UserMessage {
         this.senderId = senderId;
     }
 
-    public String getTimestamp() {
+    public Long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(String timestamp) {
+    public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
     }
 

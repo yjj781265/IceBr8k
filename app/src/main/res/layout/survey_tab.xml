@@ -121,7 +121,7 @@
                 app:bsb_min="1"
                app:bsb_seek_by_section="true"
                 app:bsb_progress="5"
-                app:bsb_second_track_color="@color/accent"
+                app:bsb_second_track_color="@color/colorAccent"
                 app:bsb_section_count="9"
                 app:bsb_show_thumb_text="false"
                 app:bsb_show_section_text ="true"

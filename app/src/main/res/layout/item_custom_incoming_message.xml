@@ -11,7 +11,7 @@
 
 
     <LinearLayout
-        android:id="@+id/incoming_main"
+
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="start"
@@ -26,13 +26,19 @@
             android:layout_marginRight="9dp"
             android:layout_gravity="bottom"
             android:src="@drawable/user_profile_icon"/>
+
+        <LinearLayout
+            android:id="@+id/incoming_main"
+            android:padding="10dp"
+            android:background="@drawable/incoming_message_selector"
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
         <TextView
             android:id="@+id/incoming_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:background="@drawable/incoming_message_selector"
-            android:padding="10dp"
             android:maxWidth="220dp"
             android:maxLength="500"
             android:autoLink="all"
@@ -40,23 +46,24 @@
             android:textColorLink="@color/black"
             android:textSize="16dp"
             android:text="hello."/>
+        <TextView
+
+            android:id="@+id/incoming_time"
+            android:text="10:30 PM"
+            android:layout_gravity="start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            android:textSize="12dp"
+            android:layout_below="@id/incoming_text"/>
+        </LinearLayout>
 
 
 
 
 
     </LinearLayout>
-    <TextView
 
-        android:id="@+id/incoming_time"
-        android:text="hey daf"
-        android:layout_gravity="start"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="49dp"
-        android:visibility="visible"
-        android:textSize="12dp"
-        android:layout_below="@id/incoming_main"/>
 
 
 

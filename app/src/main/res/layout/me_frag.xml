@@ -100,8 +100,7 @@
             android:text="yjj@gmail.com"
             android:textSize="16dp"
             android:autoLink="email"
-            android:textColor="@color/material_drawer_secondary_text"
-            android:textColorLink="@color/material_drawer_secondary_text"
+            android:textColorLink="@color/dark_gray"
             />
 
 

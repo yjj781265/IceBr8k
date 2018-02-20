@@ -9,6 +9,9 @@ import android.widget.ImageView;
 import android.widget.Toolbar;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.github.sumimakito.awesomeqr.AwesomeQRCode;
 import com.google.firebase.auth.FirebaseAuth;
@@ -38,32 +41,45 @@ public class ImageViewer extends AppCompatActivity {
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         photourl  =currentUser.getPhotoUrl().toString();
         mDialog = new MaterialDialog.Builder(this)
-                .content("Loading")
+                .content("Loading..").canceledOnTouchOutside(false)
                 .progress(true, 0)
                 .build();
 
         if(photourl!=null){
             mDialog.show();
-            new DownloadFilesTask().execute(photourl);
+            Glide.with(getApplicationContext()).asBitmap().load(photourl).into(new SimpleTarget<Bitmap>() {
+                @Override
+                public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                    new AwesomeQRCode.Renderer()
+                            .contents(currentUser.getUid()).logo(resource)
+                            .size(800).margin(20)
+                            .renderAsync(new AwesomeQRCode.Callback() {
+                                @Override
+                                public void onRendered(final AwesomeQRCode.Renderer renderer, final Bitmap bitmap) {
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            // Tip: here we use runOnUiThread(...) to avoid the problems caused by operating UI elements from a non-UI thread.
+                                            photoView.setImageBitmap(bitmap);
+                                            mDialog.dismiss();
+                                        }
+                                    });
+                                }
+
+                                @Override
+                                public void onError(AwesomeQRCode.Renderer renderer, Exception e) {
+                                    e.printStackTrace();
+                                }
+                            });
+                }
+            });
+
         }
 
 
     }
 
-    public Bitmap getBitmapFromURL(String src) {
-        try {
-            URL url = new URL(src);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoInput(true);
-            connection.connect();
-            InputStream input = connection.getInputStream();
-            Bitmap myBitmap = BitmapFactory.decodeStream(input);
-            return myBitmap;
-        } catch (IOException e) {
-            // Log exception
-            return null;
-        }
-    }
+
 
     @Override
     public boolean onSupportNavigateUp() {
@@ -71,41 +87,10 @@ public class ImageViewer extends AppCompatActivity {
         return true;
     }
 
-    private class DownloadFilesTask extends AsyncTask<String, Integer, Bitmap> {
-        protected  Bitmap  doInBackground(String... urls) {
 
-            return getBitmapFromURL(urls[0]);
-        }
-
-        protected void onProgressUpdate(Integer... progress) {
-
-
-        }
-
-        protected void onPostExecute(Bitmap result) {
-            new AwesomeQRCode.Renderer()
-                    .contents(currentUser.getUid()).logo(result)
-                    .size(800).margin(20)
-                    .renderAsync(new AwesomeQRCode.Callback() {
-                        @Override
-                        public void onRendered(final AwesomeQRCode.Renderer renderer, final Bitmap bitmap) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // Tip: here we use runOnUiThread(...) to avoid the problems caused by operating UI elements from a non-UI thread.
-                                    photoView.setImageBitmap(bitmap);
-                                    mDialog.dismiss();
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onError(AwesomeQRCode.Renderer renderer, Exception e) {
-                            e.printStackTrace();
-                        }
-                    });
-
-        }
+    @Override
+    public void onBackPressed() {
+        supportFinishAfterTransition();
+       // finish();
     }
-
 }
