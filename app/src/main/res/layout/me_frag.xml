@@ -44,14 +44,14 @@
                 android:layout_toRightOf="@id/avatar_frag"
 
                 android:textColor="@android:color/black"
-                android:textSize="20dp"/>
+                android:textSize="20sp"/>
 
             <TextView
                 android:id="@+id/username_frag"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textStyle="normal"
-                android:textSize="14dp" />
+                android:textSize="14sp" />
         </LinearLayout>
 
 
@@ -85,7 +85,7 @@
             android:id="@+id/email_tv"
             android:layout_marginLeft="20dp"
             android:layout_centerVertical="true"
-            android:textSize="16dp"
+            android:textSize="16sp"
 
             android:textColor="@android:color/black"/>
         <TextView
@@ -98,7 +98,7 @@
             android:layout_alignParentStart="true"
             android:layout_marginStart="96dp"
             android:text="yjj@gmail.com"
-            android:textSize="16dp"
+            android:textSize="16sp"
             android:autoLink="email"
             android:textColorLink="@color/dark_gray"
             />
@@ -122,7 +122,7 @@
                 android:layout_height="wrap_content"
 
                 android:text="Friend Request"
-                android:textSize="16dp"
+                android:textSize="16sp"
                 android:textColor="@color/black"/>
             <TextView
                 android:layout_width="wrap_content"
@@ -131,7 +131,7 @@
                 android:id="@+id/badge_frag"
                 android:textColor="@color/white"
                 android:textStyle="bold"
-                android:textSize="12dp"
+                android:textSize="12sp"
                 android:gravity="center"
                 android:background="@drawable/badge_circle"
 
@@ -155,7 +155,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Share My Location"
-            android:textSize="16dp"
+            android:textSize="16sp"
             android:textColor="@color/black"/>
     <android.support.v7.widget.SwitchCompat
         android:id="@+id/switch_frag"
@@ -170,7 +170,7 @@
         <com.dd.processbutton.FlatButton
             android:layout_width="320dp"
             android:shadowRadius="0"
-            android:textSize="16dp"
+            android:textSize="16sp"
             style="?android:attr/borderlessButtonStyle"
             android:layout_alignParentBottom="true"
             android:layout_marginBottom="20dp"

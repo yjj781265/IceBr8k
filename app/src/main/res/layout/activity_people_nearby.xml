@@ -32,7 +32,7 @@
         android:elevation="10dp"
         android:layout_centerHorizontal="true"
         android:layout_margin="5dp"
-        android:textSize="12dp"
+        android:textSize="12sp"
         app:activeBgColor="@color/colorAccent"
         app:activeTextColor="@android:color/white"
         app:inactiveBgColor="@color/lightGray"

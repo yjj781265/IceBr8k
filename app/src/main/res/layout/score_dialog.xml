@@ -18,7 +18,7 @@
         android:text="Compare with yjj950406"
         android:gravity="center"
         android:layout_centerHorizontal="true"
-        android:textSize="22dp"
+        android:textSize="22sp"
         android:layout_marginTop="20dp"
         android:background="@color/colorPrimary"
         android:textColor="@android:color/white"/>
@@ -32,7 +32,7 @@
         android:layout_height="150dp"
         custom:arc_text_color="@color/colorAccent"
         custom:arc_bottom_text_size="20sp"
-        custom:arc_text_size="60dp"
+        custom:arc_text_size="60sp"
         custom:arc_suffix_text_size="25sp"
         custom:arc_progress="55"
         custom:arc_bottom_text="Score"
@@ -48,7 +48,7 @@
         android:alpha="0.9"
         android:textColor="@android:color/white"
         android:clickable="true"
-        android:textSize="16dp"
+        android:textSize="16sp"
         android:layout_alignParentRight="true"
         android:paddingRight="12dp"
         android:background="?attr/selectableItemBackgroundBorderless"
@@ -65,7 +65,7 @@
         android:textColor="@android:color/white"
         android:clickable="true"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:textSize="16dp"
+        android:textSize="16sp"
         android:layout_toLeftOf="@id/details_btn"
         android:layout_margin="20dp"/>
    </RelativeLayout>

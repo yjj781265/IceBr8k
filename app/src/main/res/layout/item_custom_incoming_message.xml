@@ -2,11 +2,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_marginBottom="8dp"
     android:layout_marginTop="2dp"
+    tools:ignore="HardcodedText"
     android:animateLayoutChanges="true"
-    android:orientation="vertical"
-    android:layout_marginStart="9dp">
+    android:layout_marginStart="9dp"
+    android:orientation="vertical">
 
 
 
@@ -15,8 +17,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="start"
-
-
         android:orientation="horizontal">
 
         <ImageView
@@ -44,18 +44,17 @@
             android:autoLink="all"
             android:textColor="@color/black"
             android:textColorLink="@color/black"
-            android:textSize="16dp"
-            android:text="hello."/>
+            android:textSize="16sp"
+            android:text="hellodfsfsfsfsdf."/>
         <TextView
-
             android:id="@+id/incoming_time"
+            android:layout_marginTop="5dp"
             android:text="10:30 PM"
-            android:layout_gravity="start"
+            android:layout_gravity="end"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="visible"
-            android:textSize="12dp"
-            android:layout_below="@id/incoming_text"/>
+            android:textSize="12sp"/>
         </LinearLayout>
 
 

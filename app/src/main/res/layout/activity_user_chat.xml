@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+                android:animateLayoutChanges="false"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="app.jayang.icebr8k.UserChatActvity">
@@ -13,9 +14,12 @@
         android:layout_width="match_parent"
         android:background="@color/colorPrimary"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:title="sdf"
+        app:titleTextAppearance="@style/ActionBarTitleText"
+        app:subtitleTextAppearance="@style/ActionBarSubTitleText"
         app:subtitle="123"
+        app:title="IceBr8k"
         android:layout_height="56dp">
+
 
     </android.support.v7.widget.Toolbar>
 
@@ -32,11 +36,13 @@
     
     <LinearLayout
         android:gravity="center_vertical"
-        android:layout_alignParentBottom="true"
+        android:layout_alignWithParentIfMissing="true"
+
+       android:layout_above="@id/GridLayout1"
         android:id="@+id/userChat_input_root"
         android:background="@color/white"
         android:padding="10dp"
-        android:elevation="6dp"
+        android:elevation="1dp"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -63,9 +69,9 @@
             android:background="@android:color/white"
             android:layout_weight="8"
             android:layout_width="0dp"
-            android:inputType="textShortMessage|textAutoCorrect|textAutoComplete|textCapSentences|textMultiLine"
+            android:inputType="textShortMessage|textCapSentences|textMultiLine"
             android:layout_height="wrap_content"
-            android:textSize="16dp"
+            android:textSize="16sp"
            />
 
         <ImageView
@@ -82,6 +88,38 @@
 
     </LinearLayout>
 
+    <GridLayout
+        android:layout_alignParentBottom="true"
+        android:visibility="gone"
+        android:layout_marginTop="15dp"
+        android:padding="10dp"
+                android:id="@+id/GridLayout1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="2"
+                android:rowCount="2"
+                android:orientation="horizontal"
+                >
+        <Button
+            android:id="@+id/button1"
+            android:layout_gravity="center"
+            android:text="Button" />
+
+        <Button
+            android:id="@+id/button2"
+            android:layout_gravity="left|top"
+            android:text="Button" />
+
+        <Button
+            android:id="@+id/button3"
+            android:layout_gravity="left|top"
+            android:text="Button" />
+
+        <Button
+            android:id="@+id/button4"
+            android:layout_gravity="left|top"
+            android:text="Button" />
+    </GridLayout>
 
 
 

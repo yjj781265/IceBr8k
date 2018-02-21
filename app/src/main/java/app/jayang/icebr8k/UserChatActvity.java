@@ -10,9 +10,13 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -26,6 +30,7 @@ import java.util.UUID;
 
 import app.jayang.icebr8k.Adapter.RecyclerAdapter;
 import app.jayang.icebr8k.Adapter.UserMessageAdapter;
+import app.jayang.icebr8k.Modle.MyDateFormatter;
 import app.jayang.icebr8k.Modle.OnLoadMoreListener;
 import app.jayang.icebr8k.Modle.UserMessage;
 import me.imid.swipebacklayout.lib.SwipeBackLayout;
@@ -40,19 +45,24 @@ public class UserChatActvity extends SwipeBackActivity {
     private final String VIEWTYPE_DATE = "date";
     private final String VIEWTYPE_TYPE = "type";
     private final String LOAD_ID ="loading";
+    private final String TYPE_ID ="typing";
 
 
     private EditText editText;
     private FirebaseUser currentUser;
     private RecyclerView mRecyclerView;
     private android.support.v7.widget.Toolbar toolbar;
+    private GridLayout mGridLayout;
     private ImageView send,attachment;
     private Boolean typingStarted =false;
     private SwipeBackLayout swipeBackLayout;
     private ArrayList<UserMessage> mMessages;
     private UserMessageAdapter mAdapter;
     private LinearLayoutManager mLayoutManager;
+    private   MenuItem inChatItem;
+    private boolean on =true;
     protected Handler handler;
+    private   UserMessage isTypingMessage, loadingMessage;
 
 
     @Override
@@ -66,10 +76,24 @@ public class UserChatActvity extends SwipeBackActivity {
         toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.userChat_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("Stephen Hearrington");
+        mGridLayout = (GridLayout) findViewById(R.id.GridLayout1);
+
+
 
         mMessages =new ArrayList<>();
         handler = new Handler();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
+       //istyping message
+        isTypingMessage = new UserMessage();
+        isTypingMessage.setMessageId(TYPE_ID);
+        isTypingMessage.setMessageType(VIEWTYPE_TYPE);
+
+        //isloading message
+        loadingMessage = new UserMessage();
+        loadingMessage.setMessageId(LOAD_ID);
+        loadingMessage.setMessageType(VIEWTYPE_LOAD);
 
 
 
@@ -93,28 +117,33 @@ public class UserChatActvity extends SwipeBackActivity {
             mRecyclerView.scrollToPosition(0);
         }
 
-
+/*
       mAdapter.setOnLoadMoreListener(new OnLoadMoreListener() {
           @Override
           public void onLoadMore() {
               final UserMessage loadMessage = new UserMessage();
              loadMessage.setMessageId(LOAD_ID);
               loadMessage.setMessageType(VIEWTYPE_LOAD);
-              mMessages.add(loadMessage);
-              mRecyclerView.post(new Runnable() {
-                  @Override
-                  public void run() {
-                      mAdapter.notifyItemInserted(mMessages.size()-1);
-                  }
-              });
+              if(!mMessages.contains(loadMessage) && !mMessages.isEmpty()){
+                  mMessages.add(loadMessage);
+                  mRecyclerView.post(new Runnable() {
+                      @Override
+                      public void run() {
+                          mAdapter.notifyItemInserted(mMessages.size()-1);
+                      }
+                  });
+              }
+
+
+
 
               handler.postDelayed(new Runnable() {
                   @Override
                   public void run() {
                       if(!mMessages.isEmpty()){
                          mMessages.remove(mMessages.size()-1);
-                          mAdapter.notifyItemRemoved(mMessages.size());
-                          loadMessages2();
+                          mAdapter.notifyDataSetChanged();
+                        //  loadMessages2();
                           mAdapter.setLoaded();
                       }
 
@@ -122,7 +151,7 @@ public class UserChatActvity extends SwipeBackActivity {
               },2000);
 
           }
-      });
+      });*/
 
 
 
@@ -171,18 +200,14 @@ public class UserChatActvity extends SwipeBackActivity {
             @Override
             public void afterTextChanged( Editable editable) {
                 if (!TextUtils.isEmpty(editable.toString()) &&
-                        editable.toString().trim().length() == 1) {
+                        editable.toString().trim().length() ==1  &&!typingStarted) {
 
                     //Log.i(TAG, “typing started event…”);
+                    addIsTypingMessage();
+                    typingStarted =true;
 
                    // Toast.makeText(UserChatActvity.this, "typing", Toast.LENGTH_SHORT).show();
-                    UserMessage isTypingMessage = new UserMessage();
-                    isTypingMessage.setMessageId(LOAD_ID);
-                    isTypingMessage.setMessageType(VIEWTYPE_TYPE);
-                    mMessages.add(0,isTypingMessage);
-                    mAdapter.notifyItemInserted(0);
-                    mRecyclerView.scrollToPosition(0);
-                    typingStarted =true;
+
 
                     //send typing started status
 
@@ -190,8 +215,8 @@ public class UserChatActvity extends SwipeBackActivity {
 
                     //Log.i(TAG, “typing stopped event…”);
                    // Toast.makeText(UserChatActvity.this, "not typing", Toast.LENGTH_SHORT).show();
-                    mMessages.remove(0);
-                    mAdapter.notifyItemRemoved(0);
+                    removeIsTypingMessage();
+
                     typingStarted = false;
 
                     //send typing stopped status
@@ -204,6 +229,9 @@ public class UserChatActvity extends SwipeBackActivity {
             @Override
             public void onFocusChange(View view, boolean b) {
                 Toast.makeText(UserChatActvity.this, String.valueOf(b), Toast.LENGTH_SHORT).show();
+                if(!b){
+                    typingStarted = false;
+                }
             }
         });
 
@@ -220,6 +248,15 @@ public class UserChatActvity extends SwipeBackActivity {
         attachment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(mGridLayout.getVisibility() == View.GONE){
+                 mGridLayout.setVisibility(View.VISIBLE);
+                 attachment.setSelected(true);
+                 hideKeyboard();
+                }else{
+                    mGridLayout.setVisibility(View.GONE);
+                    attachment.setSelected(false);
+                    hideKeyboard();
+                }
 
             }
         });
@@ -234,6 +271,45 @@ public class UserChatActvity extends SwipeBackActivity {
         });
 
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.one_to_one_chat_menu, menu);
+        final MenuItem item = menu.findItem(R.id.notification_switch);
+       inChatItem = menu.findItem(R.id.inChat_indicator);
+        //make inchat Indicator onclickable
+        inChatItem.setEnabled(false);
+        if(on){
+           item.setIcon(R.drawable.icon_notificastion_on_light);
+
+            on =false;
+        }else{
+         item.setIcon(R.drawable.icon_notification_off_light);
+
+            on =true;
+        }
+
+        // return true so that the menu pop up is opened
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()){
+            case R.id.notification_switch:
+                if(on){
+                  item.setIcon(R.drawable.icon_notificastion_on_light);
+                  on =false;
+                }else{
+                    item.setIcon(R.drawable.icon_notification_off_light);
+                  on =true;
+                }
+                return  true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -275,10 +351,57 @@ public class UserChatActvity extends SwipeBackActivity {
                 new Date().getTime(),VIEWTYPE_TEXT,UUID.randomUUID().toString());
         editText.setText("");
         mMessages.add(0,message1);
-        mAdapter.notifyItemInserted(0);
+        generateDateHeaders(mMessages);
         mRecyclerView.scrollToPosition(0);
 
     }
+
+    private void addIsTypingMessage(){
+
+        if(!mMessages.contains(isTypingMessage)) {
+            mMessages.add(0, isTypingMessage);
+            mAdapter.notifyItemInserted(0);
+            mRecyclerView.scrollToPosition(0);
+        }
+
+    }
+
+    private void removeIsTypingMessage(){
+        int index = mMessages.indexOf(isTypingMessage);
+        mMessages.remove(index);
+        mAdapter.notifyItemRemoved(index);
+    }
+
+    private void generateDateHeaders(ArrayList<UserMessage> messages) {
+
+        for (int i = 0; i < messages.size(); i++) {
+            UserMessage message = messages.get(i);
+            if (messages.size() > i + 1) {
+                UserMessage nextMessage = messages.get(i + 1);
+
+                if (message.getMessageType().equals(VIEWTYPE_TEXT) && nextMessage.getMessageType().equals(VIEWTYPE_TEXT) &&
+                        !MyDateFormatter.isSameDay(new Date(message.getTimestamp()),new Date(nextMessage.getTimestamp()))) {
+                    UserMessage dateHeaderMessage = new UserMessage();
+                    dateHeaderMessage.setMessageId(VIEWTYPE_DATE + UUID.randomUUID().toString());
+                    dateHeaderMessage.setMessageType(VIEWTYPE_DATE);
+                    mMessages.add(i + 1, dateHeaderMessage);
+
+                }
+            }else {
+
+                if(message.getMessageType().equals(VIEWTYPE_TEXT)){
+                    UserMessage dateHeaderMessage = new UserMessage();
+                    dateHeaderMessage.setMessageId(VIEWTYPE_DATE + UUID.randomUUID().toString());
+                    dateHeaderMessage.setTimestamp(message.getTimestamp());
+                    dateHeaderMessage.setMessageType(VIEWTYPE_DATE);
+                    mMessages.add(dateHeaderMessage);
+                }
+
+            }
+        }
+        mAdapter.notifyDataSetChanged();
+    }
+
 
     private void loadMessages(){
         UserMessage message1 = new UserMessage(UUID.randomUUID().toString(),currentUser.getUid(),
@@ -294,18 +417,14 @@ public class UserChatActvity extends SwipeBackActivity {
         mRecyclerView.post(new Runnable() {
             @Override
             public void run() {
-                mAdapter.notifyDataSetChanged();
+                generateDateHeaders(mMessages);
+
             }
         });
 
     }
 
     private void loadMessages2(){
-
-
-
-         int oldSize = mMessages.size();
-
         for(int i =0 ; i<2; i++){
             UserMessage message1 = new UserMessage(String.valueOf(i),currentUser.getUid(),
                     new Date().getTime(),VIEWTYPE_TEXT,UUID.randomUUID().toString());
@@ -313,10 +432,9 @@ public class UserChatActvity extends SwipeBackActivity {
                     new Date().getTime(),VIEWTYPE_TEXT,UUID.randomUUID().toString());
             mMessages.add(message1);
             mMessages.add(message2);
-
-
         }
-        mAdapter.notifyItemRangeInserted(oldSize, mMessages.size() - oldSize);
+        generateDateHeaders(mMessages);
+
 
 
 

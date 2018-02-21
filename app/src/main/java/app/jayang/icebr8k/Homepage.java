@@ -314,6 +314,7 @@ public class Homepage extends AppCompatActivity  implements
     @Override
     protected void onResume() {
         super.onResume();
+        ConnectionBuddyCache.clearLastNetworkState(this);
 
         setOnline();
         showLog("onResume");

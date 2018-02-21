@@ -32,8 +32,8 @@
                 android:layout_alignParentLeft="true"
                 android:gravity="center_vertical"
                 android:layout_marginLeft="10dp"
-                autofit:autoSizeMinTextSize="14dp"
-                android:textSize="16dp"/>
+                autofit:autoSizeMinTextSize="14sp"
+                android:textSize="16sp"/>
 
 
             <ImageView
@@ -60,7 +60,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
-                android:textSize="13dp"
+                android:textSize="13sp"
                 android:layout_toRightOf="@id/user1_pic_diff"
                 android:layout_marginLeft="10dp"
                 android:layout_centerVertical="true"
@@ -71,7 +71,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
-                android:textSize="13dp"
+                android:textSize="13sp"
                 android:layout_toRightOf="@id/user2_pic_diff"
                 android:layout_marginLeft="10dp"
                 android:layout_centerVertical="true"

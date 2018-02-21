@@ -123,14 +123,11 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     private Toolbar mToolbar;
     private TextView noUser;
     private int index =0;
-    private int counter =0;
-    private static DecimalFormat df2 = new DecimalFormat(".##");
 
     private SupportMapFragment mapFragment;
     private LocationRequest mLocationRequest;
     private GoogleApiClient mGoogleApiClient;
     private HashMap<String,Marker> mHashMap;
-    private HashMap<Marker,String> mUserIdHashMap;
     private UserLocationDialogAdapter mLocationDialogAdapter;
     private ArrayList<UserLocationDialog> mLocationDialogs;
     private ImageButton mfilter;
@@ -161,7 +158,6 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         mLocationButton =findViewById(R.id.people_myLocation);
         curretUser =FirebaseAuth.getInstance().getCurrentUser();
         mHashMap =new HashMap<>();
-        mUserIdHashMap =new HashMap<>();
         mLocationDialogs =new ArrayList<>();
         mLocationDialogAdapter = new UserLocationDialogAdapter(mLocationDialogs);
         mLocationDialogAdapter.setHasStableIds(true);
@@ -801,6 +797,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         Collections.sort(mLocationDialogs);
         mLocationDialogAdapter.notifyDataSetChanged();
         noUser.setVisibility(View.GONE);
+        mProgressDialog.dismiss();
         Log.d(TAG,"new item added");
 
         }
@@ -968,7 +965,10 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onGeoQueryReady() {
-        mProgressDialog.dismiss();
+        if(mLocationDialogs.isEmpty()){
+            mProgressDialog.dismiss();
+        }
+
 
     }
 

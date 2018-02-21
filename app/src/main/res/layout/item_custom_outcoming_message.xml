@@ -32,19 +32,20 @@
           android:autoLink="all"
           android:textColor="@color/white"
           android:textColorLink="@color/white"
-          android:textSize="16dp"
+          android:textSize="16sp"
           android:text="hello."/>
 
         <TextView
 
             android:id="@+id/outcoming_time"
+            android:layout_marginTop="5dp"
             android:text="10:50 PM"
             android:textColor="@color/lightGray"
             android:layout_gravity="end"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="visible"
-            android:textSize="12dp"/>
+            android:textSize="12sp"/>
         </LinearLayout>
 
         <ImageView
@@ -61,7 +62,15 @@
 
 
 
-
+<TextView
+    android:layout_marginEnd="50dp"
+    android:id="@+id/outcoming_status"
+    android:visibility="visible"
+    android:text="Sending.."
+    android:layout_gravity="end"
+    android:textSize="14sp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"/>
 
 
 </LinearLayout>

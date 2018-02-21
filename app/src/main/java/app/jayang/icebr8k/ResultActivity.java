@@ -83,7 +83,7 @@ public class ResultActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.result_menu, menu);
-        final MenuItem item = menu.findItem(R.id.mybutton);
+
 
         return super.onCreateOptionsMenu(menu);
     }

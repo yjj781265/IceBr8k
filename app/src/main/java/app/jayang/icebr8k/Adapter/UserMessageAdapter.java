@@ -17,6 +17,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 
+import app.jayang.icebr8k.Modle.MyDateFormatter;
 import app.jayang.icebr8k.Modle.OnLoadMoreListener;
 import app.jayang.icebr8k.Modle.UserMessage;
 import app.jayang.icebr8k.R;
@@ -50,9 +51,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private final String VIEWTYPE_DATE_STR = "date";
 
     private boolean loading;
-    private int visibleItemCount;
-    private int totalItemCount;
-    private int previousTotalItemCount = 0;
+    private int lastVisibleItem, totalItemCount;
     private OnLoadMoreListener onLoadMoreListener;
 
     public UserMessageAdapter(ArrayList<UserMessage> messages,RecyclerView recyclerView) {
@@ -69,13 +68,14 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
 
-                    if(onLoadMoreListener!=null){
-                        //Tocheck if  recycler is on top
-                        if(!loading && linearLayoutManager.findLastCompletelyVisibleItemPosition()==mMessages.size()-1){
-                         //Its at top ..
-                          //  Toast.makeText(getContext(), "erer", Toast.LENGTH_SHORT).show();
-                            onLoadMoreListener.onLoadMore();
-                            loading=true;
+                    if(onLoadMoreListener!=null) {
+                        totalItemCount = linearLayoutManager.getItemCount();
+                        lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition();
+                        if (!loading && totalItemCount <= (lastVisibleItem+5)) {
+                            if (onLoadMoreListener != null) {
+                                onLoadMoreListener.onLoadMore();
+                            }
+                            loading = true;
                         }
                     }
 
@@ -124,16 +124,34 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if(holder instanceof LoadMoreViewHolder){
             ((LoadMoreViewHolder) holder).mProgressBar.setIndeterminate(true);
+
         }else if(holder instanceof IncomingTextMessageViewHolder){
             UserMessage message = mMessages.get(position);
             ((IncomingTextMessageViewHolder) holder).text_in.setText(message.getText());
+            if(message.getTimestamp()!=null) {
+                ((IncomingTextMessageViewHolder) holder).date_in.setText(MyDateFormatter.
+                        timeStampToDateConverter(message.getTimestamp(), false));
+            }
+
         }else if(holder instanceof OutcomingTextMessageViewHolder){
             UserMessage message = mMessages.get(position);
             ((OutcomingTextMessageViewHolder) holder).text_out.setText(message.getText());
+            if(message.getTimestamp()!=null) {
+                ((OutcomingTextMessageViewHolder) holder).date_out.setText(MyDateFormatter.
+                        timeStampToDateConverter(message.getTimestamp(), false));
+            }
+
         }else if(holder instanceof TypingViewHolder){
             Glide.with(getContext()).load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl())
                     .apply(RequestOptions.circleCropTransform())
                     .into(((TypingViewHolder) holder).avatar);
+        }else if(holder instanceof DateHeaderViewHolder){
+            if(!mMessages.isEmpty() ) {
+                UserMessage message = mMessages.get(position);
+                if(message.getTimestamp()!=null) {
+                    ((DateHeaderViewHolder) holder).dateHeader.setText(MyDateFormatter.timeStampToDateConverter(message.getTimestamp(), true));
+                }
+            }
         }
 
 

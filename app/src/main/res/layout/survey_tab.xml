@@ -75,7 +75,7 @@
                 android:layout_margin="5dp"
                 android:shadowColor="@android:color/darker_gray"
                 android:text="1:Hate it  10:Love it"
-                android:textSize="14dp"
+                android:textSize="14sp"
                 android:visibility="invisible"/>
 
             <RadioGroup
@@ -137,7 +137,7 @@
                 android:id="@+id/submitBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14dp"
+                android:textSize="14sp"
                 app:bootstrapBrand="success"
                 app:roundedCorners="true"
                 app:buttonMode="regular"
@@ -159,7 +159,7 @@
                 android:clickable="true"
                 android:text="Skip"
                 android:textColor="@color/colorPrimary"
-                android:textSize="16dp"
+                android:textSize="16sp"
                 android:visibility="visible"/>
 
 
