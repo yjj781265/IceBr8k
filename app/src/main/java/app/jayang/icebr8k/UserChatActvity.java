@@ -13,6 +13,7 @@ import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -36,7 +37,7 @@ import app.jayang.icebr8k.Modle.UserMessage;
 import me.imid.swipebacklayout.lib.SwipeBackLayout;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 
-public class UserChatActvity extends SwipeBackActivity {
+public class UserChatActvity extends SwipeBackActivity implements View.OnTouchListener {
     private final String VIEWTYPE_TEXT = "text";
     private final String VIEWTYPE_VIDEO = "video";
     private final String VIEWTYPE_IMAGE= "image";
@@ -52,8 +53,8 @@ public class UserChatActvity extends SwipeBackActivity {
     private FirebaseUser currentUser;
     private RecyclerView mRecyclerView;
     private android.support.v7.widget.Toolbar toolbar;
-    private GridLayout mGridLayout;
-    private ImageView send,attachment;
+    private android.support.v7.widget.GridLayout mGridLayout;
+    private ImageView send,attachment,voice,voiceChat,image,video;
     private Boolean typingStarted =false;
     private SwipeBackLayout swipeBackLayout;
     private ArrayList<UserMessage> mMessages;
@@ -72,12 +73,16 @@ public class UserChatActvity extends SwipeBackActivity {
         editText = (EditText) findViewById(R.id.userChat_input);
         send = (ImageView) findViewById(R.id.userChat_send);
         attachment = (ImageView) findViewById(R.id.userChat_attachment);
+
+        voice = (ImageView) findViewById(R.id.userChat_voicemessage);
+        voice.setOnTouchListener(this);
+
         send.setEnabled(false);
         toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.userChat_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Stephen Hearrington");
-        mGridLayout = (GridLayout) findViewById(R.id.GridLayout1);
+        mGridLayout = (android.support.v7.widget.GridLayout) findViewById(R.id.gridLayout_attachments);
 
 
 
@@ -117,41 +122,32 @@ public class UserChatActvity extends SwipeBackActivity {
             mRecyclerView.scrollToPosition(0);
         }
 
-/*
+
       mAdapter.setOnLoadMoreListener(new OnLoadMoreListener() {
           @Override
           public void onLoadMore() {
-              final UserMessage loadMessage = new UserMessage();
-             loadMessage.setMessageId(LOAD_ID);
-              loadMessage.setMessageType(VIEWTYPE_LOAD);
-              if(!mMessages.contains(loadMessage) && !mMessages.isEmpty()){
-                  mMessages.add(loadMessage);
-                  mRecyclerView.post(new Runnable() {
-                      @Override
-                      public void run() {
-                          mAdapter.notifyItemInserted(mMessages.size()-1);
-                      }
-                  });
+              Toast.makeText(UserChatActvity.this, "more ", Toast.LENGTH_SHORT).show();
+              if(!mMessages.isEmpty()){
+                  mMessages.add(loadingMessage);
+                  mAdapter.notifyItemInserted(mMessages.size()-1);
+
               }
+             handler.postDelayed(new Runnable() {
+                 @Override
+                 public void run() {
+                     int index = mMessages.indexOf(loadingMessage);
+                     mMessages.remove(index);
+                     mAdapter.notifyDataSetChanged();
+
+                     loadMessages();
 
 
 
 
-              handler.postDelayed(new Runnable() {
-                  @Override
-                  public void run() {
-                      if(!mMessages.isEmpty()){
-                         mMessages.remove(mMessages.size()-1);
-                          mAdapter.notifyDataSetChanged();
-                        //  loadMessages2();
-                          mAdapter.setLoaded();
-                      }
-
-                  }
-              },2000);
-
+                 }
+             },3000);
           }
-      });*/
+      });
 
 
 
@@ -170,6 +166,10 @@ public class UserChatActvity extends SwipeBackActivity {
             public void onEdgeTouch(int edgeFlag) {
                 hideKeyboard();
                 editText.clearFocus();
+                mGridLayout.setVisibility(View.GONE);
+                attachment.setSelected(false);
+
+
 
             }
 
@@ -231,9 +231,14 @@ public class UserChatActvity extends SwipeBackActivity {
                 Toast.makeText(UserChatActvity.this, String.valueOf(b), Toast.LENGTH_SHORT).show();
                 if(!b){
                     typingStarted = false;
+
+                }else{
+                    mGridLayout.setVisibility(View.GONE);
                 }
+
             }
         });
+
 
 
         send.setOnClickListener(new View.OnClickListener() {
@@ -248,6 +253,7 @@ public class UserChatActvity extends SwipeBackActivity {
         attachment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                editText.clearFocus();;
                 if(mGridLayout.getVisibility() == View.GONE){
                  mGridLayout.setVisibility(View.VISIBLE);
                  attachment.setSelected(true);
@@ -400,6 +406,7 @@ public class UserChatActvity extends SwipeBackActivity {
             }
         }
         mAdapter.notifyDataSetChanged();
+        mAdapter.setLoaded();
     }
 
 
@@ -422,6 +429,7 @@ public class UserChatActvity extends SwipeBackActivity {
             }
         });
 
+
     }
 
     private void loadMessages2(){
@@ -443,4 +451,17 @@ public class UserChatActvity extends SwipeBackActivity {
 
     }
 
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+
+            if(motionEvent.getAction() == MotionEvent.ACTION_DOWN)
+            {
+                view.setAlpha(0.6f);
+            } else {
+                view.setAlpha(1f);
+            }
+
+
+        return true;
+    }
 }

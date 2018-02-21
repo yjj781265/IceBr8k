@@ -38,7 +38,7 @@
         android:gravity="center_vertical"
         android:layout_alignWithParentIfMissing="true"
 
-       android:layout_above="@id/GridLayout1"
+       android:layout_above="@id/gridLayout_attachments"
         android:id="@+id/userChat_input_root"
         android:background="@color/white"
         android:padding="10dp"
@@ -63,7 +63,7 @@
             android:maxLines="5"
             android:maxLength="500"
             android:padding="5dp"
-            android:hint="Enter message..."
+            android:hint="@string/enter_message"
             android:layout_marginRight="10dp"
             android:layout_marginLeft="10dp"
             android:background="@android:color/white"
@@ -81,46 +81,134 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Send"
             android:src="@drawable/ic_action_send_selector"/>
 
 
 
     </LinearLayout>
 
-    <GridLayout
-        android:layout_alignParentBottom="true"
+    <android.support.v7.widget.GridLayout
         android:visibility="gone"
-        android:layout_marginTop="15dp"
+        android:id="@+id/gridLayout_attachments"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:columnCount="4"
+        app:rowCount="4"
         android:padding="10dp"
-                android:id="@+id/GridLayout1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:columnCount="2"
-                android:rowCount="2"
-                android:orientation="horizontal"
-                >
-        <Button
-            android:id="@+id/button1"
-            android:layout_gravity="center"
-            android:text="Button" />
+        app:alignmentMode="alignBounds"
+        app:orientation="horizontal"
+        app:useDefaultMargins="true">
 
-        <Button
-            android:id="@+id/button2"
-            android:layout_gravity="left|top"
-            android:text="Button" />
 
-        <Button
-            android:id="@+id/button3"
-            android:layout_gravity="left|top"
-            android:text="Button" />
+        <RelativeLayout
 
-        <Button
-            android:id="@+id/button4"
-            android:layout_gravity="left|top"
-            android:text="Button" />
-    </GridLayout>
+            app:layout_rowWeight="1"
+            app:layout_columnWeight="1"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            app:layout_gravity="fill"
+            >
+            <ImageView
+                android:id="@+id/userChat_image"
+                android:layout_centerHorizontal="true"
+                android:padding="10dp"
+                android:foreground="?attr/selectableItemBackground"
+                android:background="@drawable/round_rectangle_border"
+                android:src="@drawable/ic_action_photo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
+            <TextView
+                android:layout_centerHorizontal="true"
+                android:gravity="center"
+                android:layout_below="@id/userChat_image"
+                android:layout_width="wrap_content"
+                android:text="@string/image"
+                android:layout_height="wrap_content"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            app:layout_rowWeight="1"
+            app:layout_columnWeight="1"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            app:layout_gravity="fill"
+            >
+            <ImageView
+                android:id="@+id/userChat_voicemessage"
+                android:layout_centerHorizontal="true"
+                android:padding="10dp"
+                android:background="@drawable/round_rectangle_border"
+                android:foreground="?attr/selectableItemBackground"
+                android:src="@drawable/ic_action_voice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:layout_centerHorizontal="true"
+                android:gravity="center"
+                android:layout_below="@id/userChat_voicemessage"
+                android:layout_width="wrap_content"
+                android:text="@string/voice"
+                android:layout_height="wrap_content"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            app:layout_rowWeight="1"
+            app:layout_columnWeight="1"
+
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            app:layout_gravity="fill"
+            >
+            <ImageView
+                android:id="@+id/userChat_voicechat"
+                android:padding="10dp"
+                android:background="@drawable/round_rectangle_border"
+                android:foreground="?attr/selectableItemBackground"
+                android:src="@drawable/ic_action_voicechat"
+                android:layout_centerHorizontal="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:layout_centerHorizontal="true"
+                android:gravity="center"
+                android:layout_below="@id/userChat_voicechat"
+                android:layout_width="wrap_content"
+                android:text="@string/voice_chat"
+                android:layout_height="wrap_content"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            app:layout_rowWeight="1"
+            app:layout_columnWeight="1"
+
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            app:layout_gravity="fill"
+            >
+            <ImageView
+                android:layout_centerHorizontal="true"
+                android:id="@+id/userChat_video"
+                android:layout_gravity="center"
+                android:padding="10dp"
+                android:background="@drawable/round_rectangle_border"
+                android:foreground="?attr/selectableItemBackground"
+                android:src="@drawable/ic_action_video"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:layout_centerHorizontal="true"
+                android:gravity="center"
+                android:layout_below="@id/userChat_video"
+                android:layout_width="wrap_content"
+                android:text="@string/video_chat"
+                android:layout_height="wrap_content"/>
+        </RelativeLayout>
+    </android.support.v7.widget.GridLayout>
 
 
 

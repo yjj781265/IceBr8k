@@ -11,7 +11,7 @@
 
     <ImageView
         android:id="@+id/isTyping_avatar"
-        android:background="@drawable/default_avatar3"
+        android:src="@drawable/default_avatar3"
         android:layout_marginRight="9dp"
         android:layout_gravity="bottom"
         android:layout_width="40dp"

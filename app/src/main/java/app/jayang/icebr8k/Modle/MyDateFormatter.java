@@ -9,6 +9,7 @@ import java.util.Date;
  */
 
 public class MyDateFormatter {
+    private final static String  bullet = " \u2022 ";
 
     public static boolean isSameDay(Date date1, Date date2) {
         if (date1 == null || date2 == null) {
@@ -92,7 +93,26 @@ public class MyDateFormatter {
         } else {
             String pattern = "h:mm a";
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-            return simpleDateFormat.format(date);
+            String time =simpleDateFormat.format(date);
+
+            String pattern2 = "MM/dd/yyyy";
+            SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat(pattern2);
+            String dateStr = simpleDateFormat2.format(date);
+
+            String pattern3 = "MM/dd";
+            SimpleDateFormat simpleDateFormat3 = new SimpleDateFormat(pattern3);
+            String dateStrSameYear = simpleDateFormat3.format(date);
+
+            if(isYesterday(date)){
+                return "Yesterday"+ bullet + time;
+            }else if(isSameYear(date,new Date()) && !isToday(date)){
+                return dateStrSameYear + bullet + time;
+            }else if(isToday(date)) {
+                return  "Today"+bullet+time;
+            }else{
+                return dateStr+bullet+time;
+            }
+
         }
     }
 

@@ -61,6 +61,7 @@ dependencies {
     compile 'com.github.lzyzsd:circleprogress:1.2.1'
     compile 'com.github.javiersantos:MaterialStyledDialogs:2.1'
     compile 'com.android.support:recyclerview-v7:26.1.0'
+    compile 'com.android.support:gridlayout-v7:26.1.0'
     compile 'com.android.support:cardview-v7:26.1.0'
     compile 'com.simplecityapps:recyclerview-fastscroll:1.0.16'
     compile 'com.android.support:support-compat:26.1.0'

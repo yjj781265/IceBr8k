@@ -50,6 +50,11 @@
 <string name="Icebr8k_notification_title_location_permission">Location Permission Needed</string>
 <string name="Icebr8k_notification_context_location_permission">You have not granted location permission,
         we are unable to share your location to other IceBr8k users.</string>
+    <string name="video_chat">Video Chat</string>
+    <string name="voice_chat">Voice Chat</string>
+    <string name="voice">Voice</string>
+    <string name="image">Image</string>
+    <string name="enter_message">Enter a message...</string>
 
 
 </resources>

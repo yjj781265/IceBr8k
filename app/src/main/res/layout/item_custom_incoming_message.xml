@@ -24,8 +24,8 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginRight="9dp"
-            android:layout_gravity="bottom"
-            android:src="@drawable/user_profile_icon"/>
+            android:src="@drawable/default_avatar3"
+            android:layout_gravity="bottom"/>
 
         <LinearLayout
             android:id="@+id/incoming_main"

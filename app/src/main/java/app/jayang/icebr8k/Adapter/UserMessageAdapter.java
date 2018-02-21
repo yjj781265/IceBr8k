@@ -2,6 +2,7 @@ package app.jayang.icebr8k.Adapter;
 
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,6 +53,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     private boolean loading;
     private int lastVisibleItem, totalItemCount;
+    private int threshHold =1;
     private OnLoadMoreListener onLoadMoreListener;
 
     public UserMessageAdapter(ArrayList<UserMessage> messages,RecyclerView recyclerView) {
@@ -68,16 +70,19 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
 
-                    if(onLoadMoreListener!=null) {
+                    if(onLoadMoreListener!=null && dy<=0) {
                         totalItemCount = linearLayoutManager.getItemCount();
-                        lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition();
-                        if (!loading && totalItemCount <= (lastVisibleItem+5)) {
+                        lastVisibleItem = linearLayoutManager.findLastCompletelyVisibleItemPosition();
+                        if (!loading && totalItemCount <= (lastVisibleItem+threshHold)) {
                             if (onLoadMoreListener != null) {
                                 onLoadMoreListener.onLoadMore();
                             }
                             loading = true;
                         }
                     }
+                    Log.d("myAdapter","total"+totalItemCount);
+                    Log.d("myAdapter","last"+lastVisibleItem);
+
 
 
 
