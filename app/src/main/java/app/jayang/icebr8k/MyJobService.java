@@ -61,7 +61,7 @@ public class MyJobService extends com.firebase.jobdispatcher.JobService implemen
 
     @Override
     public boolean onStartJob(final com.firebase.jobdispatcher.JobParameters job) {
-        Toast.makeText(getApplicationContext(), "Hi Icebr8k", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "IceBr8k Background Job Service Activated", Toast.LENGTH_LONG).show();
         setUpLocationClientIfNeeded();
         return false;
 
@@ -125,7 +125,7 @@ public class MyJobService extends com.firebase.jobdispatcher.JobService implemen
                 new GeoLocation(lat, lng), new GeoFire.CompletionListener() {
             @Override
             public void onComplete(String key, DatabaseError error) {
-                Toast.makeText(getApplicationContext(),"location is updated to firebase",Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(),"last location is updated to firebase",Toast.LENGTH_LONG).show();
             }
         });
         ref.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("timestamp").setValue(new Date().getTime());

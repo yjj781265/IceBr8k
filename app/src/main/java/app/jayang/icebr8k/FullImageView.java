@@ -280,7 +280,7 @@ public class FullImageView extends SwipeBackActivity {
 
     @Override
     public void onBackPressed() {
-       this.supportFinishAfterTransition();
+        supportFinishAfterTransition();
 
     }
 }

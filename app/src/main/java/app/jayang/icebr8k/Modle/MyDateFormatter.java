@@ -103,12 +103,12 @@ public class MyDateFormatter {
             SimpleDateFormat simpleDateFormat3 = new SimpleDateFormat(pattern3);
             String dateStrSameYear = simpleDateFormat3.format(date);
 
-            if(isYesterday(date)){
-                return "Yesterday"+ bullet + time;
-            }else if(isSameYear(date,new Date()) && !isToday(date)){
-                return dateStrSameYear + bullet + time;
+            if(isYesterday(date)) {
+                return "Yesterday" + bullet + time;
             }else if(isToday(date)) {
-                return  "Today"+bullet+time;
+                return  time;
+            }else if(isSameYear(date,new Date())){
+                return dateStrSameYear + bullet + time;
             }else{
                 return dateStr+bullet+time;
             }

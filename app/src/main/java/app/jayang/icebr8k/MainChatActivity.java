@@ -324,6 +324,8 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
 
 
 
+
+
     @Override
     protected void onStart() {
         super.onStart();

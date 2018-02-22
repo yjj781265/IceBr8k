@@ -40,7 +40,7 @@
             android:minLines="1"
             android:maxLength="20"
             android:text=""
-            android:textSize="10dp"/>
+            android:textSize="10sp"/>
 
 
     <LinearLayout

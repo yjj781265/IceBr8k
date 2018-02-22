@@ -27,6 +27,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Random;
 import java.util.UUID;
 
 import app.jayang.icebr8k.Adapter.RecyclerAdapter;
@@ -42,6 +43,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
     private final String VIEWTYPE_VIDEO = "video";
     private final String VIEWTYPE_IMAGE= "image";
     private final String VIEWTYPE_VOICE = "voice";
+
     private final String VIEWTYPE_LOAD = "load";
     private final String VIEWTYPE_DATE = "date";
     private final String VIEWTYPE_TYPE = "type";
@@ -73,9 +75,20 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         editText = (EditText) findViewById(R.id.userChat_input);
         send = (ImageView) findViewById(R.id.userChat_send);
         attachment = (ImageView) findViewById(R.id.userChat_attachment);
+        //attachment.setOnTouchListener(this);
 
         voice = (ImageView) findViewById(R.id.userChat_voicemessage);
         voice.setOnTouchListener(this);
+
+        image = (ImageView) findViewById(R.id.userChat_image);
+        image.setOnTouchListener(this);
+
+        voiceChat = (ImageView) findViewById(R.id.userChat_voicechat);
+        voiceChat.setOnTouchListener(this);
+
+        video = (ImageView) findViewById(R.id.userChat_video);
+        video.setOnTouchListener(this);
+
 
         send.setEnabled(false);
         toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.userChat_toolbar);
@@ -103,6 +116,9 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
 
 
+
+
+
         mRecyclerView = (RecyclerView) findViewById(R.id.userChat_list);
         mLayoutManager = new LinearLayoutManager(this);
         mLayoutManager.setReverseLayout(true);
@@ -113,11 +129,13 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         mAdapter = new UserMessageAdapter(mMessages,mRecyclerView);
         mAdapter.setHasStableIds(true);
         // set the adapter object to the Recyclerview
+
+        loadMessages();
         mRecyclerView.setAdapter(mAdapter);
 
         //  mAdapter.notifyDataSetChanged();
 
-        loadMessages();
+
         if(!mMessages.isEmpty()){
             mRecyclerView.scrollToPosition(0);
         }
@@ -126,7 +144,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
       mAdapter.setOnLoadMoreListener(new OnLoadMoreListener() {
           @Override
           public void onLoadMore() {
-              Toast.makeText(UserChatActvity.this, "more ", Toast.LENGTH_SHORT).show();
+              Toast.makeText(UserChatActvity.this, "loading more messages ", Toast.LENGTH_SHORT).show();
               if(!mMessages.isEmpty()){
                   mMessages.add(loadingMessage);
                   mAdapter.notifyItemInserted(mMessages.size()-1);
@@ -137,7 +155,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
                  public void run() {
                      int index = mMessages.indexOf(loadingMessage);
                      mMessages.remove(index);
-                     mAdapter.notifyDataSetChanged();
+                     mAdapter.notifyItemRemoved(index);
 
                      loadMessages();
 
@@ -166,8 +184,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
             public void onEdgeTouch(int edgeFlag) {
                 hideKeyboard();
                 editText.clearFocus();
-                mGridLayout.setVisibility(View.GONE);
-                attachment.setSelected(false);
+                hideAttachment();
 
 
 
@@ -201,10 +218,13 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
             public void afterTextChanged( Editable editable) {
                 if (!TextUtils.isEmpty(editable.toString()) &&
                         editable.toString().trim().length() ==1  &&!typingStarted) {
+                    final int length =editable.toString().trim().length();
 
                     //Log.i(TAG, “typing started event…”);
                     addIsTypingMessage();
                     typingStarted =true;
+
+
 
                    // Toast.makeText(UserChatActvity.this, "typing", Toast.LENGTH_SHORT).show();
 
@@ -228,7 +248,6 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                Toast.makeText(UserChatActvity.this, String.valueOf(b), Toast.LENGTH_SHORT).show();
                 if(!b){
                     typingStarted = false;
 
@@ -259,8 +278,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
                  attachment.setSelected(true);
                  hideKeyboard();
                 }else{
-                    mGridLayout.setVisibility(View.GONE);
-                    attachment.setSelected(false);
+                  hideAttachment();
                     hideKeyboard();
                 }
 
@@ -272,6 +290,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 if(dy<0){
                     hideKeyboard();
+                    hideAttachment();
                 }
             }
         });
@@ -328,9 +347,14 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        editText.clearFocus();
-        overridePendingTransition(0,R.anim.slide_to_right);
+        if(mGridLayout.getVisibility() ==View.VISIBLE){
+            hideAttachment();
+        }else{
+            hideKeyboard();
+            finish();
+            overridePendingTransition(0,R.anim.slide_to_right);
+        }
+
     }
 
     private  void hideKeyboard(){
@@ -339,6 +363,13 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         if (view != null) {
             InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    private  void hideAttachment(){
+        if(mGridLayout.getVisibility() == View.VISIBLE){
+            mGridLayout.setVisibility(View.GONE);
+            attachment.setSelected(false);
         }
     }
 
@@ -389,8 +420,9 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
                         !MyDateFormatter.isSameDay(new Date(message.getTimestamp()),new Date(nextMessage.getTimestamp()))) {
                     UserMessage dateHeaderMessage = new UserMessage();
                     dateHeaderMessage.setMessageId(VIEWTYPE_DATE + UUID.randomUUID().toString());
+                    dateHeaderMessage.setTimestamp(message.getTimestamp());
                     dateHeaderMessage.setMessageType(VIEWTYPE_DATE);
-                    mMessages.add(i + 1, dateHeaderMessage);
+                    mMessages.add(i+1, dateHeaderMessage);
 
                 }
             }else {
@@ -411,23 +443,22 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
 
     private void loadMessages(){
+
+        Random rnd = new Random();
+        Date date = new Date(Math.abs(System.currentTimeMillis() - rnd.nextLong()));
+        Date date2 = new Date(Math.abs(System.currentTimeMillis() - rnd.nextLong()));
         UserMessage message1 = new UserMessage(UUID.randomUUID().toString(),currentUser.getUid(),
-                new Date().getTime(),VIEWTYPE_TEXT,UUID.randomUUID().toString());
+                date.getTime(),VIEWTYPE_TEXT,UUID.randomUUID().toString());
         UserMessage message2 = new UserMessage(UUID.randomUUID().toString(),"HISs3hwOwdN2HEy1ZdpNo7XjsxZ2",
-                new Date().getTime(),VIEWTYPE_TEXT,UUID.randomUUID().toString());
+               date2.getTime(),VIEWTYPE_TEXT,UUID.randomUUID().toString());
 
         for(int i =0 ; i<10; i++){
             mMessages.add(message1);
             mMessages.add(message2);
         }
+        generateDateHeaders(mMessages);
 
-        mRecyclerView.post(new Runnable() {
-            @Override
-            public void run() {
-                generateDateHeaders(mMessages);
 
-            }
-        });
 
 
     }
@@ -464,4 +495,5 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
         return true;
     }
+
 }

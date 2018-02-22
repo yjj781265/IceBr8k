@@ -188,11 +188,11 @@ public class Homepage extends AppCompatActivity  implements
                 setLifetime(Lifetime.FOREVER).setRecurring(true).setTag(Job_TaG).setTrigger(Trigger.executionWindow(600,900))
                 .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL).setConstraints(Constraint.ON_ANY_NETWORK).setReplaceCurrent(true).build();
         mDispatcher.mustSchedule(job);
-        Toast.makeText(this,"Job Started",Toast.LENGTH_LONG).show();
+        Toast.makeText(this,"Sharing Location in the background ",Toast.LENGTH_LONG).show();
     }
     public void stopJob(){
         mDispatcher.cancel(Job_TaG);
-        Toast.makeText(this,"Job Cancelled",Toast.LENGTH_LONG).show();
+        Toast.makeText(this,"Sharing Location off",Toast.LENGTH_LONG).show();
     }
 
 

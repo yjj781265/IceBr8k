@@ -140,9 +140,9 @@
         <com.dd.processbutton.iml.ActionProcessButton
             android:id="@+id/compare_btn"
             android:layout_gravity="center_horizontal"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_width="320dp"
+            android:layout_width="match_parent"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
             android:layout_height="42dp"
             style="?android:attr/borderlessButtonStyle"
             android:visibility="visible"
@@ -164,7 +164,6 @@
 
 
     <com.dd.processbutton.FlatButton
-        android:layout_width="320dp"
         android:layout_height="42dp"
         style="?android:attr/borderlessButtonStyle"
         android:textColor="@android:color/white"
@@ -176,16 +175,17 @@
         app:pb_colorPressed="@color/colorPressed"
         app:pb_colorNormal="@color/colorAccent"
         android:layout_marginTop="15dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
+        android:layout_width="match_parent"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
 
         android:textSize="14sp"/>
 
 
         <com.dd.processbutton.FlatButton
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_width="320dp"
+            android:layout_width="match_parent"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
             android:layout_height="42dp"
             android:visibility="gone"
             style="?android:attr/borderlessButtonStyle"
@@ -202,9 +202,9 @@
 
 
         <com.dd.processbutton.FlatButton
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_width="320dp"
+            android:layout_width="match_parent"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
             android:layout_height="42dp"
             android:textColor="@android:color/white"
             android:id="@+id/deleteFriend_btn"
@@ -219,9 +219,9 @@
             app:pb_colorNormal="@color/holo_red_light"/>
 
         <com.dd.processbutton.FlatButton
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_width="320dp"
+            android:layout_width="match_parent"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
             android:layout_height="42dp"
             style="?android:attr/borderlessButtonStyle"
             android:textStyle="normal"
