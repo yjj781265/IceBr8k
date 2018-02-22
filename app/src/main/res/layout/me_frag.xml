@@ -184,6 +184,7 @@
            android:layout_marginEnd="20dp"
            android:layout_marginStart="20dp"
            android:layout_marginTop="120dp"
+           android:layout_marginBottom="20dp"
            android:shadowRadius="0"
            android:text="Reset Questions"
            android:textAllCaps="false"
