@@ -17,6 +17,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:layout_below="@id/profileToolbar">
 
 
@@ -128,10 +129,11 @@
     </RelativeLayout>
 
     <LinearLayout
-        android:elevation="6dp"
+        android:elevation="1dp"
         android:background="@color/creamYellow"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
         android:paddingBottom="15dp"
         android:gravity="center"
         android:orientation="vertical"

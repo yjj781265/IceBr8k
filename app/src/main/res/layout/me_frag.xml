@@ -19,7 +19,7 @@
         android:layout_marginTop="10dp"
         android:gravity="fill_horizontal"
         android:id="@+id/R1"
-        android:elevation="3dp"
+        android:elevation="1dp"
         android:transitionName="profile"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -78,7 +78,7 @@
     </RelativeLayout>
 
     <RelativeLayout
-        android:elevation="3dp"
+        android:elevation="1dp"
         android:background="@color/creamYellow"
         android:layout_marginTop="10dp"
         android:id="@+id/R2"
@@ -124,7 +124,7 @@
             android:layout_marginTop="10dp"
             android:background="@color/creamYellow"
             android:foreground="?selectableItemBackground"
-            android:elevation="3dp"
+            android:elevation="1dp"
             android:padding="10dp">
             <TextView
                 android:layout_marginStart="10dp"
@@ -158,7 +158,7 @@
         android:layout_marginTop="10dp"
         android:background="@color/creamYellow"
         android:foreground="?selectableItemBackground"
-        android:elevation="3dp"
+        android:elevation="1dp"
         android:padding="10dp">
         <TextView
             android:layout_marginStart="10dp"
