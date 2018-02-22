@@ -196,6 +196,7 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
                          Intent i = new Intent(getBaseContext(),UserProfilePage.class);
                          i.putExtra("userInfo",user);
                          i.putExtra("userUid",user2Id);
+                         i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                          startActivity(i);
                      }
 
@@ -219,6 +220,7 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
                          Intent i = new Intent(getBaseContext(),UserProfilePage.class);
                          i.putExtra("userInfo",user);
                          i.putExtra("userUid",currentUser.getUid());
+                         i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                          startActivity(i);
                      }
 

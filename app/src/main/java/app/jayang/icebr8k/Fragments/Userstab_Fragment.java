@@ -206,8 +206,8 @@ public class Userstab_Fragment extends Fragment  {
                 lastClickTime = SystemClock.elapsedRealtime();
                 Intent i = new Intent(getContext(), SearchName.class);
                 i.putParcelableArrayListExtra("friendList",mUserDialogArrayList);
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
-                        FLAG_ACTIVITY_REORDER_TO_FRONT );
+                i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                mAppBarLayout.setExpanded(false,true);
                 startActivity(i);
             }
         });

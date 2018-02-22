@@ -48,6 +48,7 @@
         </activity>
         <activity
             android:name=".MainChatActivity"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
@@ -94,6 +95,8 @@
         <activity
             android:name=".SearchName"
             android:noHistory="true"
+            android:theme="@style/Theme.AppCompat.Translucent"
+
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />

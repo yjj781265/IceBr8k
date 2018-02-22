@@ -779,6 +779,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                     Intent intent = new Intent(getApplicationContext(), MainChatActivity.class);
                     intent.putExtra("user2Id", uid);
                     intent.putExtra("user2Name", mUser.getDisplayname());
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     startActivity(intent);
                     overridePendingTransition(R.anim.slide_from_right,android.R.anim.fade_out);
                 }

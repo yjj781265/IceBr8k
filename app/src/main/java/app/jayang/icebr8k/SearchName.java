@@ -99,18 +99,22 @@ public class SearchName extends SwipeBackActivity implements SearchView.OnQueryT
 
     @Override
     public void onBackPressed() {
+        hideKeyboard();
+        overridePendingTransition(0,0);
         finish();
+
     }
 
     @Override
     public boolean onSupportNavigateUp() {
         //hide keyboard
         if(searchView.hasFocus()) {
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+         hideKeyboard();
 
         }
+        overridePendingTransition(0,0);
         finish();
+
         return true;
     }
 
@@ -129,7 +133,12 @@ public class SearchName extends SwipeBackActivity implements SearchView.OnQueryT
                 filterdList.add(dialog);
             }
         }
-        mAdapter.notifyDataSetChanged();
+        if(!filterdList.isEmpty()) {
+            mAdapter.notifyDataSetChanged();
+            mRecyclerView.setVisibility(View.VISIBLE);
+        }else{
+            mRecyclerView.setVisibility(View.INVISIBLE);
+        }
         Log.d("SearchName123","Changed");
 
         return true;

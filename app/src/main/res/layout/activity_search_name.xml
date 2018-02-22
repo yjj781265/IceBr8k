@@ -6,13 +6,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/transparent"
     tools:context="app.jayang.icebr8k.SearchName">
 
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/searchname_toolbar"
-        android:elevation="6dp"
+        android:elevation="3dp"
         android:layout_width="match_parent"
         app:title=" "
         android:background="@color/colorPrimary"
@@ -22,8 +21,9 @@
     </android.support.v7.widget.Toolbar>
 
     <android.support.v7.widget.RecyclerView
+        android:visibility="gone"
         android:id="@+id/searchname_recyclerView"
-        android:background="@color/transparent"
+        android:background="@color/white"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
     </android.support.v7.widget.RecyclerView>

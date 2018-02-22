@@ -6,9 +6,9 @@
               android:layout_width="match_parent"
               android:animateLayoutChanges="true"
     android:layout_height="wrap_content"
+    android:theme="@style/AppTheme"
     android:gravity="start"
-
-    android:background="?android:attr/selectableItemBackground"
+    android:background="?attr/selectableItemBackground"
     android:clickable="true"
     >
 
@@ -59,6 +59,7 @@
             tools:fontFamily="sans-serif"/>
 
         <TextView
+            android:textColor="@android:color/tab_indicator_text"
             android:id="@+id/username_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -71,6 +72,7 @@
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:id="@+id/score"
+            android:textColor="@android:color/tab_indicator_text"
             android:layout_alignParentEnd="true"
             android:text="30%"
             android:layout_marginRight="30dp"
