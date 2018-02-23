@@ -130,7 +130,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         mAdapter.setHasStableIds(true);
         // set the adapter object to the Recyclerview
 
-        loadMessages();
+        //loadMessages();
         mRecyclerView.setAdapter(mAdapter);
 
         //  mAdapter.notifyDataSetChanged();

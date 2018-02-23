@@ -42,6 +42,7 @@
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowIsFloating">false</item>
         <item name="android:noHistory">true</item>
+        <item name="colorAccent">@color/colorAccent</item>
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowIsTranslucent">true</item>

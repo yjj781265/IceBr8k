@@ -60,7 +60,7 @@
                 android:id="@+id/question_id"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/survey_progressBar"
+                android:layout_below="@id/favorite_btn"
                 android:layout_margin="5dp"
                 android:fontFamily="sans-serif"
                 android:gravity="left"
@@ -139,6 +139,10 @@
                 android:id="@+id/submitBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_above="@id/skip_btn"
+
+
+                android:layout_centerHorizontal="true"
                 android:textSize="14sp"
                 app:bootstrapBrand="success"
                 app:roundedCorners="true"
@@ -164,6 +168,15 @@
                 android:textSize="16sp"
                 android:visibility="visible"/>
 
+            <ImageView
+                android:id="@+id/favorite_btn"
+                android:layout_below="@id/survey_progressBar"
+                android:layout_alignParentEnd="true"
+                android:visibility="visible"
+                android:src="@drawable/ic_action_star_selected"
+                android:layout_width="30dp"
+                android:layout_height="30dp"/>
+
 
         </RelativeLayout>
         </ScrollView>
@@ -185,6 +198,8 @@
         android:clickable="true"
         app:backgroundTint="@color/colorPrimary"
         app:srcCompat="@android:drawable/ic_input_add"/>
+
+
 
 
 </RelativeLayout>

@@ -148,8 +148,13 @@ public class SearchUser extends SwipeBackActivity implements SearchView.OnQueryT
         return false;
     }
 
-    private void searchUser(String usernameStr){
-
+    private void searchUser(final String usernameStr){
+        if(!checkString(usernameStr))  {
+            searchingDialog.dismiss();
+            mLinearLayout.setVisibility(View.GONE);
+            notfound.setVisibility(View.VISIBLE);
+            return;
+        }
         DatabaseReference usernameRef = FirebaseDatabase.getInstance().getReference().
                 child("Usernames").child(usernameStr);
 
@@ -198,6 +203,15 @@ public class SearchUser extends SwipeBackActivity implements SearchView.OnQueryT
 
             }
         });
+    }
+
+    private boolean checkString(String str){
+        if(str.contains(".")||str.contains("#")||str.contains("$")||str.contains("{")
+                ||str.contains("}")){
+            return  false;
+        }else{
+            return  true;
+        }
     }
 }
 

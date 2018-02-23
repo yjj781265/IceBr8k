@@ -1,4 +1,4 @@
-package app.jayang.icebr8k;
+package app.jayang.icebr8k.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -8,8 +8,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +33,9 @@ import app.jayang.icebr8k.Modle.Author;
 import app.jayang.icebr8k.Modle.Message;
 import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.Modle.UserDialog;
+import app.jayang.icebr8k.R;
+import app.jayang.icebr8k.SendNotification;
+import app.jayang.icebr8k.UserProfilePage;
 
 /**
  * Created by yjj781265 on 1/3/2018.

@@ -11,6 +11,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.RingtoneManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -138,7 +140,7 @@ public class Homepage extends AppCompatActivity  implements
         if (savedInstanceState != null) {
             ConnectionBuddyCache.clearLastNetworkState(this);
         }
-        ConnectionBuddy.getInstance().registerForConnectivityEvents(this, this);
+
 
 
         //enable onesignal notification service
@@ -305,9 +307,19 @@ public class Homepage extends AppCompatActivity  implements
         super.onStart();
         showLog("onStart");
         setOnline();
-
+        ConnectionBuddy.getInstance().registerForConnectivityEvents(this, this);
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         sharedPref.registerOnSharedPreferenceChangeListener(this);
+        if(checkInternet()){
+            // device has active internet connection
+            noConnection_tv.setVisibility(View.GONE);
+            setOnline();
+
+        }
+        else{
+            // there is no active internet connection on this device
+            noConnection_tv.setVisibility(View.VISIBLE);
+        }
 
     }
 
@@ -332,7 +344,7 @@ public class Homepage extends AppCompatActivity  implements
     @Override
     protected void onStop() {
         super.onStop();
-
+        ConnectionBuddy.getInstance().unregisterFromConnectivityEvents(this);
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         sharedPref.unregisterOnSharedPreferenceChangeListener(this);
 
@@ -344,7 +356,7 @@ public class Homepage extends AppCompatActivity  implements
     protected void onDestroy() {
 
         super.onDestroy();
-        ConnectionBuddy.getInstance().unregisterFromConnectivityEvents(this);
+
 
         setOffline();
         if (mReceiver != null) {
@@ -651,6 +663,16 @@ public class Homepage extends AppCompatActivity  implements
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         mReceiver = new ScreenStateReceiver();
         registerReceiver(mReceiver, intentFilter);
+    }
+
+    private  boolean checkInternet(){
+        ConnectivityManager cm =
+                (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        return  isConnected;
     }
 
 

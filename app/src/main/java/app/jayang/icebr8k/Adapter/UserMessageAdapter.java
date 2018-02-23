@@ -4,6 +4,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -29,7 +30,7 @@ import static app.jayang.icebr8k.MyApplication.getContext;
  * Created by yjj781265 on 2/19/2018.
  */
 
-public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnTouchListener {
     private ArrayList<UserMessage> mMessages;
     private final int VIEWTYPE_TEXT_IN = 0;
     private final int VIEWTYPE_TEXT_OUT = 1;
@@ -42,12 +43,16 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private final int VIEWTYPE_IMAGE_OUT= 8;
     private final int VIEWTYPE_VOICE_OUT = 9;
     private final int VIEWTYPE_TYPING = 10;
+    private final int VIEWTYPE_TEXT_OUT_PENDING = 11;
 
     private final String VIEWTYPE_TEXT = "text";
+    private final String VIEWTYPE_TEXT_PENDING = "text_pend";
     private final String VIEWTYPE_TYPING_STR = "type";
+
     private final String VIEWTYPE_VIDEO = "video";
     private final String VIEWTYPE_IMAGE= "image";
     private final String VIEWTYPE_VOICE = "voice";
+
     private final String VIEWTYPE_LOAD_STR = "load";
     private final String VIEWTYPE_DATE_STR = "date";
 
@@ -70,7 +75,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
 
-                    if(onLoadMoreListener!=null && dy<=0) {
+                    if(onLoadMoreListener!=null &&!mMessages.isEmpty() && dy<=0) {
                         totalItemCount = linearLayoutManager.getItemCount();
                         lastVisibleItem = linearLayoutManager.findLastCompletelyVisibleItemPosition();
                         if (!loading && totalItemCount <= (lastVisibleItem+threshHold)) {
@@ -121,6 +126,10 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             View v = LayoutInflater.from(parent.getContext()).inflate(
                     R.layout.istyping, parent, false);
             return new TypingViewHolder(v);
+        }else if(viewType ==VIEWTYPE_TEXT_OUT_PENDING) {
+            View v = LayoutInflater.from(parent.getContext()).inflate(
+                    R.layout.istyping, parent, false);
+            return new TypingViewHolder(v);
         }
         return  null;
     }
@@ -132,19 +141,32 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         }else if(holder instanceof IncomingTextMessageViewHolder){
             UserMessage message = mMessages.get(position);
+
             ((IncomingTextMessageViewHolder) holder).text_in.setText(message.getText());
+            ((IncomingTextMessageViewHolder) holder).avatar_in.setOnTouchListener(this);
             if(message.getTimestamp()!=null) {
                 ((IncomingTextMessageViewHolder) holder).date_in.setText(MyDateFormatter.
                         timeStampToDateConverter(message.getTimestamp(), false));
             }
 
-        }else if(holder instanceof OutcomingTextMessageViewHolder){
+        }else if(holder instanceof OutcomingTextMessageViewHolder) {
             UserMessage message = mMessages.get(position);
             ((OutcomingTextMessageViewHolder) holder).text_out.setText(message.getText());
-            if(message.getTimestamp()!=null) {
+            ((OutcomingTextMessageViewHolder) holder).date_out.setVisibility(View.VISIBLE);
+            ((OutcomingTextMessageViewHolder) holder).status.setVisibility(View.GONE);
+            ((OutcomingTextMessageViewHolder) holder).avatar_out.setOnTouchListener(this);
+
+            if (message.getTimestamp() != null) {
                 ((OutcomingTextMessageViewHolder) holder).date_out.setText(MyDateFormatter.
                         timeStampToDateConverter(message.getTimestamp(), false));
             }
+        }else if(holder instanceof OutcomingTextPendingMessageViewHolder){
+                UserMessage message = mMessages.get(position);
+                ((OutcomingTextPendingMessageViewHolder) holder).text_out.setText(message.getText());
+             ((OutcomingTextPendingMessageViewHolder) holder).date_out.setVisibility(View.GONE);
+            ((OutcomingTextPendingMessageViewHolder) holder).status.setVisibility(View.VISIBLE);
+            ((OutcomingTextPendingMessageViewHolder) holder).avatar_out.setOnTouchListener(this);
+            ((OutcomingTextPendingMessageViewHolder) holder).status.setText("Sending...");
 
         }else if(holder instanceof TypingViewHolder){
             Glide.with(getContext()).load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl())
@@ -195,6 +217,8 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 break;
             case VIEWTYPE_TYPING_STR: viewType =VIEWTYPE_TYPING;
                 break;
+            case VIEWTYPE_TEXT_PENDING: viewType =VIEWTYPE_TEXT_OUT_PENDING;
+                break;
             default: viewType = VIEWTYPE_DATE;
                 break;
         }
@@ -215,6 +239,19 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
     public void setLoaded() {
         loading = false;
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        if(motionEvent.getAction() == MotionEvent.ACTION_DOWN)
+        {
+            view.setAlpha(0.6f);
+        } else {
+            view.setAlpha(1f);
+        }
+
+        return true;
+
     }
 
     //incoming text message
@@ -240,10 +277,10 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
     }
 
-    //incoming text message
+    //outcoming text message
     public class OutcomingTextMessageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView avatar_out;
-        private TextView text_out,date_out;
+        private TextView text_out,date_out,status;
         private LinearLayout text_container_out;
 
         public OutcomingTextMessageViewHolder(View itemView) {
@@ -251,6 +288,32 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             avatar_out = itemView.findViewById(R.id.outcoming_avatar);
             date_out = itemView.findViewById(R.id.outcoming_time);
             text_out = itemView.findViewById(R.id.outcoming_text);
+            status = itemView.findViewById(R.id.outcoming_status);
+            text_container_out = itemView.findViewById(R.id.outcoming_main);
+            text_container_out.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            if(view.getId() == text_container_out.getId()){
+                Toast.makeText(view.getContext(), "clicked", Toast.LENGTH_SHORT).show();
+            }
+
+        }
+    }
+
+    //outcoming text pending message
+    public class OutcomingTextPendingMessageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        private ImageView avatar_out;
+        private TextView text_out,date_out,status;
+        private LinearLayout text_container_out;
+
+        public OutcomingTextPendingMessageViewHolder(View itemView) {
+            super(itemView);
+            avatar_out = itemView.findViewById(R.id.outcoming_avatar);
+            date_out = itemView.findViewById(R.id.outcoming_time);
+            text_out = itemView.findViewById(R.id.outcoming_text);
+            status = itemView.findViewById(R.id.outcoming_status);
             text_container_out = itemView.findViewById(R.id.outcoming_main);
             text_container_out.setOnClickListener(this);
         }

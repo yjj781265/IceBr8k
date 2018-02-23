@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
@@ -392,43 +393,9 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                             Toast.makeText(getBaseContext(), mUser.getDisplayname() + " hasn't answered any questions yet", Toast.LENGTH_LONG).show();
                             compare_btn.setProgress(0);
                         } else {
-                            dialog = new Dialog(UserProfilePage.this);
-                            dialog.setCanceledOnTouchOutside(true);
-                            dialog.setContentView(R.layout.score_dialog);
-                            TextView textview = dialog.findViewById(R.id.compareText);
-                            textview.setText("Compare with " + mUser.getUsername()+"\n\t\t"+User1QA.size()+"/"+User2QA.size());
-                            TextView cancel = dialog.findViewById(R.id.cancel_btn);
-                            TextView details = dialog.findViewById(R.id.details_btn);
-                            arcProgress = dialog.findViewById(R.id.arc_progress);
-                            arcProgress.setProgress(score);
-                            dialog.show();
-                           compare_btn.setProgress(0);
-                            cancel.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    dialog.dismiss();
-                                    compare_btn.setProgress(0);
-                                }
-                            });
+                            setProgressDialog(score);
 
-                            details.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    // send user QA data to the result details activity
-                                    Intent i = new Intent(getApplicationContext(), ResultActivity.class);
-                                    i.putExtra("sameAnswer", User1QA);
-                                    i.putExtra("user2", mUser);
-                                    i.putExtra("user2Id" ,uid);
-                                    i.putExtra("diffAnswer1", temp1QA);
-                                    i.putExtra("diffAnswer2", temp2QA);
-                                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
-                                          FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-
-                                    startActivity(i);
-                                    overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
-                                    dialog.dismiss();
-                                }
-                            });
+                            compare_btn.setProgress(0);
                         }
 
                     }
@@ -451,6 +418,72 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
     }
 
+    private void setProgressDialog(int Score){
+        Handler mHandler = new Handler();
+
+        dialog = new Dialog(UserProfilePage.this);
+        dialog.setCanceledOnTouchOutside(true);
+        dialog.setContentView(R.layout.score_dialog);
+        TextView textview = dialog.findViewById(R.id.compareText);
+        textview.setText("Compare with " + mUser.getUsername()+"\n\t\t"+User1QA.size()+"/"+User2QA.size());
+        TextView cancel = dialog.findViewById(R.id.cancel_btn);
+        TextView details = dialog.findViewById(R.id.details_btn);
+        arcProgress = dialog.findViewById(R.id.arc_progress);
+        dialog.show();
+
+        arcProgress.setProgress(0);
+
+        for(int i =0 ; i<Score+1;i++){
+            final int finalI = i;
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    arcProgress.setProgress(finalI);
+                }
+            },20*i);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+                compare_btn.setProgress(0);
+            }
+        });
+
+        details.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // send user QA data to the result details activity
+                Intent i = new Intent(getApplicationContext(), ResultActivity.class);
+                i.putExtra("sameAnswer", User1QA);
+                i.putExtra("user2", mUser);
+                i.putExtra("user2Id" ,uid);
+                i.putExtra("diffAnswer1", temp1QA);
+                i.putExtra("diffAnswer2", temp2QA);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
+                        FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+
+                startActivity(i);
+                overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
+                dialog.dismiss();
+            }
+        });
+    }
+
+
     private void checkFriendStats(){
         DatabaseReference friendStatsRef = database.getReference().child("Friends").
                 child(currentUser.getUid()).child(uid).child("Stats");
@@ -470,6 +503,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                     addFriend_btn.setVisibility(View.VISIBLE);
                     message_btn.setVisibility(View.VISIBLE);
                     addFriend_btn.setText("Respond to Friend Request");
+                    addFriend_btn.setBackgroundColor(getResources().getColor(R.color.darkOrange));
                 }else if(stats.equals("Accepted")){
                     addFriend_btn.setVisibility(View.GONE);
                     message_btn.setVisibility(View.VISIBLE);
@@ -500,6 +534,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                              addFriend_btn.setVisibility(View.VISIBLE);
                              message_btn.setVisibility(View.VISIBLE);
                              addFriend_btn.setText("Friend Request Pending");
+                             addFriend_btn.setBackgroundColor(getResources().getColor(R.color.darkOrange));
                              addFriend_btn.setClickable(false);
                          }
             }
@@ -779,7 +814,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                     Intent intent = new Intent(getApplicationContext(), MainChatActivity.class);
                     intent.putExtra("user2Id", uid);
                     intent.putExtra("user2Name", mUser.getDisplayname());
-                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     startActivity(intent);
                     overridePendingTransition(R.anim.slide_from_right,android.R.anim.fade_out);
                 }

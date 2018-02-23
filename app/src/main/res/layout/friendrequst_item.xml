@@ -19,7 +19,7 @@
 
         <TextView
             android:layout_gravity="center_vertical"
-            android:layout_weight="5"
+            android:layout_weight="4"
             android:id="@+id/name_frt"
             android:textSize="14sp"
             android:layout_width="0dp"

@@ -72,6 +72,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
                 Intent intent = new Intent(view.getContext(), UserProfilePage.class);
                 intent.putExtra("userInfo", mUser);
                 intent.putExtra("userUid",dialog.getId());
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 hideKeyboard(view);
                 view.getContext().startActivity(intent);
 

@@ -78,9 +78,9 @@ public class MyDateFormatter {
         return isSameYear(calendar, Calendar.getInstance());
     }
 
-    public static String timeStampToDateConverter(long timeStamp, boolean dateHeader) {
+    public static String timeStampToDateConverter(long timeStamp, boolean isDateHeader) {
         Date date = new Date(timeStamp);
-        if (dateHeader) {
+        if (isDateHeader) {
             if (isToday(date)) {
                 return "Today";
             } else if (isYesterday(date)) {
