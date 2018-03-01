@@ -24,14 +24,13 @@ import app.jayang.icebr8k.Modle.UserLocationDialog;
 
 public class SplashScreen extends AppCompatActivity {
     private final String TAG ="SplashScreen";
-    private final int NUM=100000;
-    private long time =System.currentTimeMillis();
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d("holy shit",toISO8601UTC(new Date()));
+
 
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
 
@@ -50,12 +49,7 @@ public class SplashScreen extends AppCompatActivity {
 
         }
 
-    public static String toISO8601UTC(Date date) {
 
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-
-        return df.format(date);
-    }
     }
 
 

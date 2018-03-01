@@ -236,6 +236,8 @@ public class Userstab_Fragment extends Fragment  {
             }
         });
 
+
+
         return view;
     }
 
@@ -290,7 +292,7 @@ public class Userstab_Fragment extends Fragment  {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
-                if(dataSnapshot.child("Stats").getValue(String.class).equals("Accepted")){
+                if(dataSnapshot.child("stats").getValue(String.class).equals("Accepted")){
                     showLog(dataSnapshot.getKey() +" added");
                     done =false;
                    UserDialog dialog = new UserDialog();
@@ -309,7 +311,7 @@ public class Userstab_Fragment extends Fragment  {
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 showLog("Changed "+dataSnapshot.getKey());
-                if(dataSnapshot.child("Stats").getValue(String.class).equals("Accepted")){
+                if(dataSnapshot.child("stats").getValue(String.class).equals("Accepted")){
                     showLog(dataSnapshot.getKey() +" added");
                     done =false;
                     UserDialog dialog = new UserDialog();
@@ -368,7 +370,6 @@ public class Userstab_Fragment extends Fragment  {
              dialog.setUsername(user.getUsername());
              dialog.setPhotoUrl(user.getPhotourl());
              dialog.setEmail(user.getEmail());
-             dialog.setOnlineStats(user.getOnlineStats());
              compareWithUser2(dialog);
 
 
@@ -487,10 +488,13 @@ public class Userstab_Fragment extends Fragment  {
             dialog.setOnlineStats("0");
         }
         dialog.setScore(score);
+        if(dialog.getId()!=null) {
+            setScoreNode(dialog.getId(), score);
+        }
         if(!done) {
             mUserDialogArrayList.add(dialog);
             addUserChangeListener(dialog);
-            addUser2QAListener(dialog);
+
         }else if(done){
             int index;
             for(index =0; index<mUserDialogArrayList.size();index++ ){
@@ -569,31 +573,25 @@ public class Userstab_Fragment extends Fragment  {
         });
     }
 
-    private void addUser2QAListener(final UserDialog dialog){
-        DatabaseReference mref = FirebaseDatabase.getInstance().getReference().child("UserQA")
-                .child(dialog.getId());
-        mref.keepSynced(true);
-        mref.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(done) {
-                    showLog("New Question with User2 Id" + dataSnapshot.getKey());
 
-                        compareWithUser2(dialog);
+    public void setScoreNode(String user2Uid,String score){
+        DatabaseReference scoreRef = FirebaseDatabase.getInstance().getReference()
+                .child("Friends")
+                .child(currentUser.getUid())
+                .child(user2Uid)
+                .child("score");
+        scoreRef.setValue(score);
 
+        DatabaseReference scoreRef2 = FirebaseDatabase.getInstance().getReference()
+                .child("Friends")
+                .child(user2Uid)
+                .child(currentUser.getUid())
+                .child("score");
 
-
-
-                }
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        scoreRef2.setValue(score);
     }
+
+
 
 
 
@@ -608,7 +606,7 @@ public class Userstab_Fragment extends Fragment  {
                   User user = dataSnapshot.getValue(User.class);
                     for(index=0;index<mUserDialogArrayList.size();index++){
                         if(mUserDialogArrayList.get(index).getId().equals(dialog.getId())){
-                            dialog.setOnlineStats(user.getOnlineStats());
+                            dialog.setOnlineStats(user.getOnlinestats());
                             dialog.setName(user.getDisplayname());
                             dialog.setPhotoUrl(user.getPhotourl());
                             mUserDialogArrayList.set(index,dialog);

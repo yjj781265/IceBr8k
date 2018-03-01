@@ -140,11 +140,11 @@ public class FriendReqestItemAdapter extends RecyclerView.Adapter<FriendReqestIt
         final FirebaseUser currentuser = FirebaseAuth.getInstance().getCurrentUser();
         if (uid != null && !uid.equals(currentuser.getUid())) {
             DatabaseReference acceptRef = FirebaseDatabase.getInstance().getReference().child("Friends").child(currentuser.getUid())
-                    .child(uid).child("Stats");
+                    .child(uid).child("stats");
             acceptRef.setValue("Accepted");
 
             DatabaseReference acceptRef2 = FirebaseDatabase.getInstance().getReference().child("Friends")
-                    .child(uid).child(currentuser.getUid()).child("Stats");
+                    .child(uid).child(currentuser.getUid()).child("stats");
             acceptRef2.setValue("Accepted").addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
@@ -208,7 +208,7 @@ public class FriendReqestItemAdapter extends RecyclerView.Adapter<FriendReqestIt
         Intent intent = new Intent(mContext, UserProfilePage.class);
         intent.putExtra("userInfo", mUser);
         intent.putExtra("userUid",dialog.getId());
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT|Intent.FLAG_ACTIVITY_NEW_TASK );
         mContext.startActivity(intent);
     }
 

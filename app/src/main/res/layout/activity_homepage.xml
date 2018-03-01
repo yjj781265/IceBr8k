@@ -6,7 +6,6 @@
     android:animateLayoutChanges="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@style/AppTheme"
 
     tools:context="app.jayang.icebr8k.Homepage">
 
@@ -19,11 +18,10 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_gravity="top"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:popupTheme="@style/AppTheme"
         android:background="@color/colorPrimary"
         app:title="IceBr8k"
-        app:titleTextColor="@android:color/white">
+        app:titleTextColor="@color/creamYellow">
 
     </android.support.v7.widget.Toolbar>
 

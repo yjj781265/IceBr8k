@@ -1,8 +1,12 @@
-package app.jayang.icebr8k.Modle;
+package app.jayang.icebr8k.Utility;
+
+import android.util.Log;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by yjj781265 on 2/20/2018.
@@ -78,8 +82,8 @@ public class MyDateFormatter {
         return isSameYear(calendar, Calendar.getInstance());
     }
 
-    public static String timeStampToDateConverter(long timeStamp, boolean isDateHeader) {
-        Date date = new Date(timeStamp);
+    public static String timeStampToDateConverter(long timestamp, boolean isDateHeader) {
+        Date date = new Date(timestamp);
         if (isDateHeader) {
             if (isToday(date)) {
                 return "Today";
@@ -115,6 +119,85 @@ public class MyDateFormatter {
 
         }
     }
+
+    public static String lastSeenConverter(long timestamp){
+        String  string = "Online";;
+        long milliseconds = new Date().getTime() - timestamp;
+        long days =0;
+        long months =0;
+
+        Log.d("timestamp","timestamp "+ milliseconds);
+        if(milliseconds>0){
+            long minutes = TimeUnit.MILLISECONDS.toMinutes(milliseconds);
+
+            if(minutes<60 && minutes>0){
+                string ="Last seen " +minutes+" min ago";
+            }else if(minutes>=60 && minutes<1440){
+                long hours = TimeUnit.MINUTES.toHours(minutes);
+                if(hours==0){
+                    hours =1;
+                }
+                string = "Last seen "+hours+" hr ago";
+            }else if(minutes >=1440 && minutes <525600) {
+                days = TimeUnit.MINUTES.toHours(minutes);
+                if (days == 0) {
+                    days = 1;
+                }
+                string = "Last seen " + days + " d ago";
+            }else if(days>=30){
+                months = days/30;
+                string = "Last seen " + months + " mo ago";
+            }else if(months>=12){
+                long years = months / 12;
+                string = "Last seen "+years+" yr ago";
+            }else{
+                string = "offline";
+            }
+
+        }
+
+        return  string;
+    };
+
+
+    public static String lastSeenConverterShort(long timestamp){
+        String  string = "";
+        long milliseconds = new Date().getTime() - timestamp;
+        long days =0;
+        long months =0;
+
+        Log.d("timestamp","timestamp "+ milliseconds);
+        if(milliseconds>0){
+            long minutes = TimeUnit.MILLISECONDS.toMinutes(milliseconds);
+
+            if(minutes<60 && minutes>0){
+                string = +minutes+" min";
+            }else if(minutes>=60 && minutes<1440){
+                long hours = TimeUnit.MINUTES.toHours(minutes);
+                if(hours==0){
+                    hours =1;
+                }
+                string = hours+" hr";
+            }else if(minutes >=1440 && minutes <525600) {
+                days = TimeUnit.MINUTES.toHours(minutes);
+                if (days == 0) {
+                    days = 1;
+                }
+                string = days + " d";
+            }else if(days>=30){
+                months = days/30;
+                string =  months + " mo";
+            }else if(months>=12){
+                long years = months / 12;
+                string = +years+" yr";
+            }else{
+                string = "offline";
+            }
+
+        }
+
+        return  string;
+    };
 
 
 }

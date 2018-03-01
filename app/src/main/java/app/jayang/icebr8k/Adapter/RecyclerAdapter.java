@@ -39,6 +39,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
     private ArrayList<UserDialog>mUserDialogs;
     private ArrayList<UserDialog> mFilteredList;
 
+
     public class UserDialogViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
          private ImageView image,onlineStats;
          private TextView displayname,username,score;

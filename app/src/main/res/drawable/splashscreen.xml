@@ -6,8 +6,8 @@
 
     <item>
         <bitmap
-            android:gravity="center_horizontal"
-            android:src="@drawable/icebr8k_logo2"/>
+            android:gravity="center"
+            android:src="@mipmap/ic_launcher"/>
     </item>
 
 

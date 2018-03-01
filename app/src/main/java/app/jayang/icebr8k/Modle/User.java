@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 public class User implements Serializable,Comparable<User> {
     private String displayname,username,photourl,email,score,privacy;
-    private String onlineStats ="0";
+    private String onlinestats;
 
     public User() {
     }
@@ -71,22 +71,19 @@ public class User implements Serializable,Comparable<User> {
         this.score = score;
     }
 
-    public String getOnlineStats() {
-        return onlineStats;
+    public String getOnlinestats() {
+        return onlinestats;
     }
 
-    public void setOnlineStats(String onlineStats) {
-        if(onlineStats==null) {
-            onlineStats = "0";
-        }
-        this.onlineStats = onlineStats;
+    public void setOnlinestats(String onlinestats) {
+        this.onlinestats = onlinestats;
     }
 
     @Override
     public int compareTo(@NonNull User user) {
         int result;
-        Integer user1 =  Integer.valueOf(onlineStats);
-        Integer user2 =  Integer.valueOf(user.getOnlineStats());
+        Integer user1 =  Integer.valueOf(onlinestats);
+        Integer user2 =  Integer.valueOf(user.getOnlinestats());
         result = user2.compareTo(user1);
         if(result==0 ){
             result = Integer.valueOf(score).compareTo(Integer.valueOf(user.getScore()));

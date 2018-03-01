@@ -8,11 +8,13 @@
     tools:ignore="HardcodedText"
     android:animateLayoutChanges="true"
     android:layout_marginStart="9dp"
+
     android:orientation="vertical">
 
 
 
     <LinearLayout
+        android:elevation="3dp"
 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -23,6 +25,7 @@
             android:id="@+id/incoming_avatar"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:elevation="3dp"
             android:layout_marginRight="9dp"
             android:src="@drawable/default_avatar3"
             android:layout_gravity="bottom"/>
@@ -39,6 +42,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
+            android:elevation="3dp"
             android:maxWidth="220dp"
             android:maxLength="500"
             android:autoLink="all"

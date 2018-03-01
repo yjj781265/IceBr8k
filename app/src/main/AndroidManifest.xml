@@ -24,6 +24,7 @@
             android:windowSoftInputMode="stateAlwaysHidden|adjustResize" />
         <activity
             android:name=".UserProfilePage"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
             android:name=".Homepage"
@@ -76,6 +77,7 @@
             android:windowSoftInputMode="stateAlwaysHidden|adjustResize" />
         <activity
             android:name=".FriendRequestPage"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
             android:name=".SearchUser"

@@ -61,20 +61,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/favorite_btn"
-                android:layout_margin="5dp"
-                android:fontFamily="sans-serif"
+                android:layout_marginBottom="5dp"
+                android:paddingStart="9dp"
                 android:gravity="left"
-                android:textSize="24sp"
+                android:textColor="@color/black"
                 android:textStyle="bold"
-                android:maxLines="4"
-                app:minTextSize="13sp"/>
+                android:textSize="23sp"
+                android:maxLines="3"
+                app:minTextSize="16sp"/>
 
             <TextView
                 android:id="@+id/sub_question_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/question_id"
-                android:layout_margin="5dp"
+                android:paddingStart="9dp"
                 android:shadowColor="@android:color/darker_gray"
                 android:text="1:Hate it  10:Love it"
                 android:textSize="14sp"
@@ -116,8 +117,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/question_id"
                 android:layout_marginBottom="30dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:layout_marginTop="40dp"
                 app:bsb_max="10"
                 app:bsb_min="1"
@@ -193,11 +194,13 @@
         android:layout_alignRight="@+id/cardView"
         android:layout_below="@+id/cardView"
         android:layout_marginEnd="35dp"
+        app:pressedTranslationZ="12dp"
         android:layout_marginRight="35dp"
         android:layout_marginTop="23dp"
         android:clickable="true"
-        app:backgroundTint="@color/colorPrimary"
-        app:srcCompat="@android:drawable/ic_input_add"/>
+        android:src="@drawable/ic_action_refresh"
+        app:backgroundTint="@color/colorPrimaryDark"/>
+
 
 
 

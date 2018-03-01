@@ -1,7 +1,5 @@
 <resources>
 <string name="app_name">IceBr8k</string>
-<string name="facebook_app_id">124487118178181</string>
-<string name="fb_login_protocol_scheme">fb124487118178181</string>
 <string name="error_field_required">This field is required</string>
 <string name="error_field_nospace">No space in username</string>
 <string name="error_invalid_username">Username needs at least 5 characters</string>

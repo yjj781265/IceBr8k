@@ -34,7 +34,7 @@
        custom:duration="@android:integer/config_mediumAnimTime"
        custom:endColor="@color/creamYellow"
        custom:startColor="@color/creamYellow"
-       custom:animationDirection="left"/>
+       custom:animationDirection="right"/>
     </RelativeLayout>
 
 </LinearLayout>

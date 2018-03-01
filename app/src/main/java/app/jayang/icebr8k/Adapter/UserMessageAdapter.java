@@ -1,5 +1,6 @@
 package app.jayang.icebr8k.Adapter;
 
+
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -16,10 +17,17 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
-import app.jayang.icebr8k.Modle.MyDateFormatter;
+import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.Utility.MyDateFormatter;
 import app.jayang.icebr8k.Modle.OnLoadMoreListener;
 import app.jayang.icebr8k.Modle.UserMessage;
 import app.jayang.icebr8k.R;
@@ -55,14 +63,18 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     private final String VIEWTYPE_LOAD_STR = "load";
     private final String VIEWTYPE_DATE_STR = "date";
+    private final String Default_Url = "https://firebasestorage.googleapis.com/v0/b/icebr8k-98675.appspot.com/o/UserAvatars%2Fdefault_avatar.png?alt=media&token=ccbf30ce-5cfb-493a-8c28-8bf7ee18cc9a";
 
     private boolean loading;
+    private User user =null;
     private int lastVisibleItem, totalItemCount;
     private int threshHold =1;
+    private HashMap<String,String> userPhotoUrlMap;
     private OnLoadMoreListener onLoadMoreListener;
 
-    public UserMessageAdapter(ArrayList<UserMessage> messages,RecyclerView recyclerView) {
+    public UserMessageAdapter(ArrayList<UserMessage> messages,RecyclerView recyclerView, HashMap<String,String> userPhotoUrlMap) {
         mMessages = messages;
+        this.userPhotoUrlMap =userPhotoUrlMap;
 
         if(recyclerView.getLayoutManager() instanceof LinearLayoutManager){
             final LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView
@@ -75,11 +87,12 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
 
-                    if(onLoadMoreListener!=null &&!mMessages.isEmpty() && dy<=0) {
+                    if(onLoadMoreListener!=null &&!mMessages.isEmpty() && dy<-2) {
                         totalItemCount = linearLayoutManager.getItemCount();
                         lastVisibleItem = linearLayoutManager.findLastCompletelyVisibleItemPosition();
                         if (!loading && totalItemCount <= (lastVisibleItem+threshHold)) {
                             if (onLoadMoreListener != null) {
+
                                 onLoadMoreListener.onLoadMore();
                             }
                             loading = true;
@@ -87,6 +100,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     }
                     Log.d("myAdapter","total"+totalItemCount);
                     Log.d("myAdapter","last"+lastVisibleItem);
+                    Log.d("myAdapter Scroll","dy "+dy);
 
 
 
@@ -128,53 +142,78 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             return new TypingViewHolder(v);
         }else if(viewType ==VIEWTYPE_TEXT_OUT_PENDING) {
             View v = LayoutInflater.from(parent.getContext()).inflate(
-                    R.layout.istyping, parent, false);
-            return new TypingViewHolder(v);
+                    R.layout.item_custom_outcoming_message, parent, false);
+            return new OutcomingTextMessageViewHolder(v);
         }
         return  null;
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+
+        UserMessage message = mMessages.get(position);
+
+
         if(holder instanceof LoadMoreViewHolder){
             ((LoadMoreViewHolder) holder).mProgressBar.setIndeterminate(true);
 
         }else if(holder instanceof IncomingTextMessageViewHolder){
-            UserMessage message = mMessages.get(position);
-
             ((IncomingTextMessageViewHolder) holder).text_in.setText(message.getText());
             ((IncomingTextMessageViewHolder) holder).avatar_in.setOnTouchListener(this);
             if(message.getTimestamp()!=null) {
                 ((IncomingTextMessageViewHolder) holder).date_in.setText(MyDateFormatter.
                         timeStampToDateConverter(message.getTimestamp(), false));
             }
-
+            String url =userPhotoUrlMap.get(message.getSenderid());
+            if(url!=null && !url.isEmpty()) {
+                Glide.with(getContext()).load(url)
+                        .apply(RequestOptions.circleCropTransform())
+                        .into(((IncomingTextMessageViewHolder) holder).avatar_in);
+            }else{
+                Glide.with(getContext()).load(Default_Url)
+                        .apply(RequestOptions.circleCropTransform())
+                        .into(((IncomingTextMessageViewHolder) holder).avatar_in);
+            }
         }else if(holder instanceof OutcomingTextMessageViewHolder) {
-            UserMessage message = mMessages.get(position);
+
             ((OutcomingTextMessageViewHolder) holder).text_out.setText(message.getText());
             ((OutcomingTextMessageViewHolder) holder).date_out.setVisibility(View.VISIBLE);
-            ((OutcomingTextMessageViewHolder) holder).status.setVisibility(View.GONE);
             ((OutcomingTextMessageViewHolder) holder).avatar_out.setOnTouchListener(this);
-
-            if (message.getTimestamp() != null) {
-                ((OutcomingTextMessageViewHolder) holder).date_out.setText(MyDateFormatter.
-                        timeStampToDateConverter(message.getTimestamp(), false));
+            if(message.getMessagetype().equals(VIEWTYPE_TEXT_PENDING)) {
+                ((OutcomingTextMessageViewHolder) holder).date_out.setText("Sending...");
+            }else{
+                if (message.getTimestamp() != null) {
+                    ((OutcomingTextMessageViewHolder) holder).date_out.setText(MyDateFormatter.
+                            timeStampToDateConverter(message.getTimestamp(), false));
+                }
             }
-        }else if(holder instanceof OutcomingTextPendingMessageViewHolder){
-                UserMessage message = mMessages.get(position);
-                ((OutcomingTextPendingMessageViewHolder) holder).text_out.setText(message.getText());
-             ((OutcomingTextPendingMessageViewHolder) holder).date_out.setVisibility(View.GONE);
-            ((OutcomingTextPendingMessageViewHolder) holder).status.setVisibility(View.VISIBLE);
-            ((OutcomingTextPendingMessageViewHolder) holder).avatar_out.setOnTouchListener(this);
-            ((OutcomingTextPendingMessageViewHolder) holder).status.setText("Sending...");
 
+
+            //update avatar image
+            String url =FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString();
+            if(url!=null && !url.isEmpty()) {
+                Glide.with(getContext()).load(url)
+                        .apply(RequestOptions.circleCropTransform())
+                        .into(((OutcomingTextMessageViewHolder) holder).avatar_out);
+            }else{
+                Glide.with(getContext()).load(Default_Url)
+                        .apply(RequestOptions.circleCropTransform())
+                        .into(((OutcomingTextMessageViewHolder) holder).avatar_out);
+            }
         }else if(holder instanceof TypingViewHolder){
-            Glide.with(getContext()).load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl())
-                    .apply(RequestOptions.circleCropTransform())
-                    .into(((TypingViewHolder) holder).avatar);
+           //set image for avatar
+            String url =userPhotoUrlMap.get(message.getSenderid());
+            if(url!=null && !url.isEmpty()) {
+                Glide.with(getContext()).load(url)
+                        .apply(RequestOptions.circleCropTransform())
+                        .into(((TypingViewHolder) holder).avatar);
+            }else{
+                Glide.with(getContext()).load(Default_Url)
+                        .apply(RequestOptions.circleCropTransform())
+                        .into(((TypingViewHolder) holder).avatar);
+            }
         }else if(holder instanceof DateHeaderViewHolder){
             if(!mMessages.isEmpty() ) {
-                UserMessage message = mMessages.get(position);
                 if(message.getTimestamp()!=null) {
                     ((DateHeaderViewHolder) holder).dateHeader.setText(MyDateFormatter.timeStampToDateConverter(message.getTimestamp(), true));
                 }
@@ -191,12 +230,12 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     @Override
     public int getItemViewType(int position) {
-        String messageType = mMessages.get(position).getMessageType();
+        String messageType = mMessages.get(position).getMessagetype();
         int viewType;
         boolean income;
         // check is income or outcome message
         if(!FirebaseAuth.getInstance().getCurrentUser().getUid().
-                equals(mMessages.get(position).getSenderId())){
+                equals(mMessages.get(position).getSenderid())){
            income =true;
         }else{
             income =false;
@@ -229,17 +268,10 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     }
 
-    @Override
-    public long getItemId(int position) {
-        return mMessages.get(position).getMessageId().hashCode();
-    }
 
-    public void setOnLoadMoreListener(OnLoadMoreListener onLoadMoreListener) {
-        this.onLoadMoreListener = onLoadMoreListener;
-    }
-    public void setLoaded() {
-        loading = false;
-    }
+
+
+
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -253,6 +285,16 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         return true;
 
     }
+
+    public void setOnLoadMoreListener(OnLoadMoreListener onLoadMoreListener) {
+        this.onLoadMoreListener = onLoadMoreListener;
+    }
+    public void setLoaded() {
+        loading = false;
+    }
+
+
+
 
     //incoming text message
     public class IncomingTextMessageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -288,7 +330,6 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             avatar_out = itemView.findViewById(R.id.outcoming_avatar);
             date_out = itemView.findViewById(R.id.outcoming_time);
             text_out = itemView.findViewById(R.id.outcoming_text);
-            status = itemView.findViewById(R.id.outcoming_status);
             text_container_out = itemView.findViewById(R.id.outcoming_main);
             text_container_out.setOnClickListener(this);
         }
@@ -313,9 +354,9 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             avatar_out = itemView.findViewById(R.id.outcoming_avatar);
             date_out = itemView.findViewById(R.id.outcoming_time);
             text_out = itemView.findViewById(R.id.outcoming_text);
-            status = itemView.findViewById(R.id.outcoming_status);
             text_container_out = itemView.findViewById(R.id.outcoming_main);
             text_container_out.setOnClickListener(this);
+
         }
 
         @Override
@@ -353,6 +394,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         }
     }
+
 
 
 

@@ -25,6 +25,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -208,7 +209,8 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
              }
          });
 
-         adapter.registerViewClickListener(R.id.outcoming_avatar, new MessagesListAdapter.OnMessageViewClickListener<Message>() {
+         adapter.registerViewClickListener(R.id.outcoming_avatar,
+                 new MessagesListAdapter.OnMessageViewClickListener<Message>() {
              @Override
              public void onMessageViewClick(View view, Message message) {
                  DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Users")
@@ -615,6 +617,8 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
     public void loadMessage(){
 
 
+
+
        loadMessageRef.orderByChild("timestamp").limitToLast(COUNT_LIMT).
                addListenerForSingleValueEvent  (new ValueEventListener() {
            @Override
@@ -705,7 +709,7 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
     }
 
     private void setSubTitle(){
-        DatabaseReference titleRef = mDatabase.getReference().child("Users").child(user2Id).child("onlineStats");
+        DatabaseReference titleRef = mDatabase.getReference().child("Users").child(user2Id).child("onlinestats");
         titleRef.keepSynced(true);
         titleRef.addValueEventListener(new ValueEventListener() {
             @Override

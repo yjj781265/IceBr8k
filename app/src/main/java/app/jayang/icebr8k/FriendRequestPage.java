@@ -74,7 +74,7 @@ public class FriendRequestPage extends AppCompatActivity {
         requestRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    if(dataSnapshot.child("Stats").getValue(String.class).equals("Pending")){
+                    if(dataSnapshot.child("stats").getValue(String.class).equals("Pending")){
                     addToDialog( dataSnapshot.getKey());
                 }
                 noFrt.setVisibility(View.GONE);
@@ -83,7 +83,7 @@ public class FriendRequestPage extends AppCompatActivity {
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                if(dataSnapshot.child("Stats").getValue(String.class).equals("Accepted")){
+                if(dataSnapshot.child("stats").getValue(String.class).equals("Accepted")){
                     UserDialog dialog = new UserDialog();
                     dialog.setId(dataSnapshot.getKey());
                     mUserDialogs.remove(dialog);

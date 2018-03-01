@@ -265,7 +265,7 @@ public class me_frag extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 int count =0;
              for(DataSnapshot chidSnapShot : dataSnapshot.getChildren()){
-                 if("Pending".equals(chidSnapShot.child("Stats").getValue(String.class))){
+                 if("Pending".equals(chidSnapShot.child("stats").getValue(String.class))){
                     count++;
                  }
              }

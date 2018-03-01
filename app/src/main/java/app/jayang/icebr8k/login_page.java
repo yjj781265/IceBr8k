@@ -80,6 +80,7 @@ public class login_page extends AppCompatActivity implements
     private TextInputLayout email_layout,password_layout;
     private TextInputEditText password,email;
     private MaterialDialog userNameDialog,dismissDialog;
+    private final String DEFAULT_PHOTO_URL = "https://firebasestorage.googleapis.com/v0/b/icebr8k-98675.appspot.com/o/UserAvatars%2Fdefault_avatar.png?alt=media&token=dc892e95-1eec-41aa-9859-bb95cd0d823d";
 
 
             @Override
@@ -330,7 +331,7 @@ public class login_page extends AppCompatActivity implements
                     .setDisplayName(user.getDisplayname())
                     .setPhotoUri(Uri.parse(user.getPhotourl()))
                     .build();
-//update currentuser with the newest photo from google
+
             currentUser.updateProfile(profileUpdates)
                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
@@ -420,7 +421,7 @@ public class login_page extends AppCompatActivity implements
                                     user.setDisplayname(account.getDisplayName());
                                     user.setEmail(account.getEmail());
                                     user.setUsername(username);
-                                    user.setPhotourl(account.getPhotoUrl().toString());
+                                    user.setPhotourl(DEFAULT_PHOTO_URL);
                                     user.setPrivacy("private");
                                     updateCurrentUser(user, mAuth.getCurrentUser());
                                     dialog.dismiss();
@@ -467,7 +468,7 @@ public void usernameCreateCheck(final GoogleSignInAccount account){
     mRef.addValueEventListener(new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            if (dataSnapshot.child("username").getValue() == null) {
+            if (!dataSnapshot.hasChild("username")) {
                 //user doesn't have username
                 createUsernameDialog(account);
             } else {

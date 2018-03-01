@@ -91,7 +91,7 @@ public class UserLocationDialogAdapter extends RecyclerView.Adapter<UserLocation
                 if(user2!=null){
 
 
-                    String online =user2.getOnlineStats();
+                    String online =user2.getOnlinestats();
                     if(online!=null){
                         if(holder.image.getAlpha()!=1.0f) {
                             holder.image.setAlpha(1.0f);

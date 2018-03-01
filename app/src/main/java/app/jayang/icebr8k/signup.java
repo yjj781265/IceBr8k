@@ -77,9 +77,7 @@ import pl.aprilapps.easyphotopicker.EasyImage;
 
 
 public class signup extends SwipeBackActivity {
-    private final String DEFAULT_PHOTO_URL = "https://firebasestorage.googleapis.com/v0/b/" +
-            "icebr8k-98675.appspot.com/o/UserAvatars%2Fdefault_avatar.png?alt=media&token" +
-            "=ccbf30ce-5cfb-493a-8c28-8bf7ee18cc9a";
+    private final String DEFAULT_PHOTO_URL = "https://firebasestorage.googleapis.com/v0/b/icebr8k-98675.appspot.com/o/UserAvatars%2Fdefault_avatar.png?alt=media&token=dc892e95-1eec-41aa-9859-bb95cd0d823d";
     private ImageView avatar;
     private ScrollView sv;
     private Boolean flag,defaultPhotoFlag;
@@ -154,7 +152,7 @@ public class signup extends SwipeBackActivity {
                 return true;
             }
         });
-
+       Glide.with(this).load(DEFAULT_PHOTO_URL).apply(RequestOptions.circleCropTransform()).into(avatar);
 
 
 

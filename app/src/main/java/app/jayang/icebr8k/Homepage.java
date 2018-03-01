@@ -50,6 +50,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
@@ -92,7 +93,7 @@ public class Homepage extends AppCompatActivity  implements
     private Toolbar mToolbar;
     private DatabaseReference mRef;
     private int index =0;
-    private DatabaseReference presenceRef;
+    private DatabaseReference presenceRef,lastSeenRef;
      private ScreenStateReceiver mReceiver;
 
     private String TAG = "homePage";
@@ -117,9 +118,14 @@ public class Homepage extends AppCompatActivity  implements
         mRef = FirebaseDatabase.getInstance().getReference();
         mRef.keepSynced(true);
         presenceRef = FirebaseDatabase.getInstance().getReference().child("Users").
-                child(currentUser.getUid()).child("onlineStats");
-        presenceRef.keepSynced(true);
+                child(currentUser.getUid()).child("onlinestats");
+
+        lastSeenRef = FirebaseDatabase.getInstance().getReference().child("Users").
+                child(currentUser.getUid()).child("lastseen");
+        lastSeenRef.keepSynced(true);
+
         mDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
+
 
 
         showLog("onCreate");
@@ -140,6 +146,7 @@ public class Homepage extends AppCompatActivity  implements
         if (savedInstanceState != null) {
             ConnectionBuddyCache.clearLastNetworkState(this);
         }
+        ConnectionBuddy.getInstance().registerForConnectivityEvents(this, this);
 
 
 
@@ -307,7 +314,7 @@ public class Homepage extends AppCompatActivity  implements
         super.onStart();
         showLog("onStart");
         setOnline();
-        ConnectionBuddy.getInstance().registerForConnectivityEvents(this, this);
+
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         sharedPref.registerOnSharedPreferenceChangeListener(this);
         if(checkInternet()){
@@ -326,9 +333,7 @@ public class Homepage extends AppCompatActivity  implements
     @Override
     protected void onResume() {
         super.onResume();
-        ConnectionBuddyCache.clearLastNetworkState(this);
 
-        setOnline();
         showLog("onResume");
 
     }
@@ -344,7 +349,7 @@ public class Homepage extends AppCompatActivity  implements
     @Override
     protected void onStop() {
         super.onStop();
-        ConnectionBuddy.getInstance().unregisterFromConnectivityEvents(this);
+
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         sharedPref.unregisterOnSharedPreferenceChangeListener(this);
 
@@ -356,6 +361,10 @@ public class Homepage extends AppCompatActivity  implements
     protected void onDestroy() {
 
         super.onDestroy();
+        if(ConnectionBuddy.getInstance()!=null){
+            ConnectionBuddy.getInstance().unregisterFromConnectivityEvents(this);
+        }
+
 
 
         setOffline();
@@ -425,7 +434,7 @@ public class Homepage extends AppCompatActivity  implements
             public void onDataChange(DataSnapshot dataSnapshot) {
                 int count =0;
                 for(DataSnapshot chidSnapShot : dataSnapshot.getChildren()){
-                    if("Pending".equals(chidSnapShot.child("Stats").getValue(String.class))){
+                    if("Pending".equals(chidSnapShot.child("stats").getValue(String.class))){
                         count++;
                     }
                 }
@@ -557,6 +566,8 @@ public class Homepage extends AppCompatActivity  implements
     public void setOffline(){
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             presenceRef.setValue("0");
+            lastSeenRef.setValue(ServerValue.TIMESTAMP);
+
         }
 
     }

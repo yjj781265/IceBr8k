@@ -188,7 +188,8 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
 
     public void updateUI(User user) {
-        getSupportActionBar().setTitle(user.getDisplayname());
+        getSupportActionBar().setTitle("Profile");
+
         Glide.with(getBaseContext()).load(user.getPhotourl()).
                 apply(RequestOptions.circleCropTransform()).into(mImageView);
         displayname_profile.setText(user.getDisplayname());
@@ -486,7 +487,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
     private void checkFriendStats(){
         DatabaseReference friendStatsRef = database.getReference().child("Friends").
-                child(currentUser.getUid()).child(uid).child("Stats");
+                child(currentUser.getUid()).child(uid).child("stats");
         friendStatsRef.keepSynced(true);
         friendStatsRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -496,6 +497,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                     addFriend_btn.setVisibility(View.VISIBLE);
                     addFriend_btn.setClickable(true);
                     addFriend_btn.setText("Send Friend Request");
+                    addFriend_btn.setBackgroundColor(getResources().getColor(R.color.colorAccent));
                     message_btn.setVisibility(View.VISIBLE);
                     deleteFriend_btn.setVisibility(View.GONE);
                 }else if(stats.equals("Pending")){
@@ -503,6 +505,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                     addFriend_btn.setVisibility(View.VISIBLE);
                     message_btn.setVisibility(View.VISIBLE);
                     addFriend_btn.setText("Respond to Friend Request");
+                    addFriend_btn.setOnTouchListener(UserProfilePage.this);
                     addFriend_btn.setBackgroundColor(getResources().getColor(R.color.darkOrange));
                 }else if(stats.equals("Accepted")){
                     addFriend_btn.setVisibility(View.GONE);
@@ -512,6 +515,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                     addFriend_btn.setVisibility(View.VISIBLE);
                     addFriend_btn.setClickable(true);
                     addFriend_btn.setText("Send Friend Request");
+                    addFriend_btn.setBackgroundColor(getResources().getColor(R.color.colorAccent));
                     message_btn.setVisibility(View.VISIBLE);
                     deleteFriend_btn.setVisibility(View.GONE);
                 }
@@ -524,7 +528,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         });
 
         DatabaseReference friendStatsRef2 = database.getReference().child("Friends").
-              child(uid).child(currentUser.getUid()).child("Stats");
+              child(uid).child(currentUser.getUid()).child("stats");
         friendStatsRef2.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -566,7 +570,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
     private void sendFriendRequest(){
         if( uid !=null && !uid.equals(currentUser.getUid())){
             DatabaseReference setUser2FriendRef = database.getReference().child("Friends").child(uid)
-                    .child(currentUser.getUid()).child("Stats");
+                    .child(currentUser.getUid()).child("stats");
             setUser2FriendRef.setValue("Pending").addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
@@ -604,7 +608,10 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                 public void onComplete(@NonNull Task<Void> task) {
                     Toast.makeText(getApplicationContext(),"Friend Deleted",Toast.LENGTH_SHORT).show();
                     addFriend_btn.setVisibility(View.VISIBLE);
+
                     addFriend_btn.setText("Send Friend Request");
+                    addFriend_btn.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+
                     message_btn.setVisibility(View.VISIBLE);
                     deleteFriend_btn.setVisibility(View.GONE);
                 }
@@ -814,7 +821,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                     Intent intent = new Intent(getApplicationContext(), MainChatActivity.class);
                     intent.putExtra("user2Id", uid);
                     intent.putExtra("user2Name", mUser.getDisplayname());
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT|Intent.FLAG_ACTIVITY_NEW_TASK );
                     startActivity(intent);
                     overridePendingTransition(R.anim.slide_from_right,android.R.anim.fade_out);
                 }
@@ -823,9 +830,8 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                      sendFriendRequest();
                 }else if(addFriend_btn.getText().toString().equals("Respond to Friend Request")){
                     Intent intent = new Intent(getApplicationContext(),FriendRequestPage.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT );
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT|Intent.FLAG_ACTIVITY_NEW_TASK );
                     startActivity(intent);
-                    finish();
                 }
             }else if(id==R.id.deleteFriend_btn){
                 new MaterialDialog.Builder(this)

@@ -14,9 +14,9 @@
         android:layout_width="match_parent"
         android:background="@color/colorPrimary"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:titleTextColor="@color/creamYellow"
         app:titleTextAppearance="@style/ActionBarTitleText"
         app:subtitleTextAppearance="@style/ActionBarSubTitleText"
-        app:subtitle="123"
         app:title="IceBr8k"
         android:layout_height="56dp">
 
@@ -24,6 +24,7 @@
     </android.support.v7.widget.Toolbar>
 
     <android.support.v7.widget.RecyclerView
+
         android:scrollbars="vertical"
         android:nestedScrollingEnabled="false"
         android:id="@+id/userChat_list"
@@ -55,7 +56,7 @@
             android:layout_weight="1"
             android:src="@drawable/ic_action_add_chat_selector" />
 
-        <EditText
+        <app.jayang.icebr8k.Modle.MyEditText
             android:scrollHorizontally="false"
             android:id="@+id/userChat_input"
             android:overScrollMode="always"
@@ -75,13 +76,15 @@
            />
 
         <ImageView
-            android:background="@color/transparent"
+            android:layout_weight="1.0"
             android:id="@+id/userChat_send"
-            android:layout_gravity="bottom"
+            android:gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless"
+
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_height="match_parent"
             android:src="@drawable/ic_action_send_selector"/>
+
 
 
 

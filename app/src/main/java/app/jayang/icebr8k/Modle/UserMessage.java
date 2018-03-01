@@ -5,7 +5,7 @@ package app.jayang.icebr8k.Modle;
  */
 
 public class UserMessage {
-    private String text, senderId, messageType, messageId;
+    private String text, senderid, messagetype, messageid;
     private Long timestamp;
 
 
@@ -13,13 +13,12 @@ public class UserMessage {
     public UserMessage() {
     }
 
-    public UserMessage(String text, String senderId, Long timestamp, String messageType, String messageId) {
+    public UserMessage(String text, String senderid, String messagetype, String messageid, Long timestamp) {
         this.text = text;
-        this.senderId = senderId;
+        this.senderid = senderid;
+        this.messagetype = messagetype;
+        this.messageid = messageid;
         this.timestamp = timestamp;
-        this.messageType = messageType;
-        this.messageId = messageId;
-
     }
 
     public String getText() {
@@ -30,12 +29,28 @@ public class UserMessage {
         this.text = text;
     }
 
-    public String getSenderId() {
-        return senderId;
+    public String getSenderid() {
+        return senderid;
     }
 
-    public void setSenderId(String senderId) {
-        this.senderId = senderId;
+    public void setSenderid(String senderid) {
+        this.senderid = senderid;
+    }
+
+    public String getMessagetype() {
+        return messagetype;
+    }
+
+    public void setMessagetype(String messagetype) {
+        this.messagetype = messagetype;
+    }
+
+    public String getMessageid() {
+        return messageid;
+    }
+
+    public void setMessageid(String messageid) {
+        this.messageid = messageid;
     }
 
     public Long getTimestamp() {
@@ -46,23 +61,6 @@ public class UserMessage {
         this.timestamp = timestamp;
     }
 
-    public String getMessageType() {
-        return messageType;
-    }
-
-    public void setMessageType(String messageType) {
-        this.messageType = messageType;
-    }
-
-    public String getMessageId() {
-        return messageId;
-    }
-
-    public void setMessageId(String messageId) {
-        this.messageId = messageId;
-    }
-
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -70,22 +68,22 @@ public class UserMessage {
 
         UserMessage that = (UserMessage) o;
 
-        return messageId.equals(that.messageId);
+        return messageid.equals(that.messageid);
     }
 
     @Override
     public int hashCode() {
-        return messageId.hashCode();
+        return messageid.hashCode();
     }
 
     @Override
     public String toString() {
         return "UserMessage{" +
                 "text='" + text + '\'' +
-                ", senderId='" + senderId + '\'' +
+                ", senderId='" + senderid + '\'' +
                 ", timestamp='" + timestamp + '\'' +
-                ", messageType='" + messageType + '\'' +
-                ", messageId='" + messageId + '\'' +
+                ", messageType='" + messagetype + '\'' +
+                ", messageId='" + messageid + '\'' +
                 '}';
     }
 }
