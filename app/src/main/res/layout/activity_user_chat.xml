@@ -164,7 +164,7 @@
                 android:layout_centerHorizontal="true"
                 android:padding="10dp"
                 android:background="@drawable/round_rectangle_border"
-                android:foreground="?attr/selectableItemBackground"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_action_voice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
@@ -191,7 +191,7 @@
                 android:id="@+id/userChat_voicechat"
                 android:padding="10dp"
                 android:background="@drawable/round_rectangle_border"
-                android:foreground="?attr/selectableItemBackground"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_action_voicechat"
                 android:layout_centerHorizontal="true"
                 android:layout_width="wrap_content"
@@ -221,7 +221,7 @@
                 android:layout_gravity="center"
                 android:padding="10dp"
                 android:background="@drawable/round_rectangle_border"
-                android:foreground="?attr/selectableItemBackground"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_action_video"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
