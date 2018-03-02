@@ -1,6 +1,8 @@
 package app.jayang.icebr8k.Adapter;
 
 
+import android.content.Intent;
+import android.os.SystemClock;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -23,10 +25,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.Modle.UserDialog;
+import app.jayang.icebr8k.UserProfilePage;
 import app.jayang.icebr8k.Utility.MyDateFormatter;
 import app.jayang.icebr8k.Modle.OnLoadMoreListener;
 import app.jayang.icebr8k.Modle.UserMessage;
@@ -43,7 +48,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private final int VIEWTYPE_TEXT_IN = 0;
     private final int VIEWTYPE_TEXT_OUT = 1;
     private final int VIEWTYPE_LOAD = 2;
-    private final int VIEWTYPE_DATE = 3;
+    private final int VIEWTYPE_HEADER = 3;
     private final int VIEWTYPE_VIDEO_IN = 4;
     private final int VIEWTYPE_IMAGE_IN= 5;
     private final int VIEWTYPE_VOICE_IN = 6;
@@ -62,10 +67,11 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private final String VIEWTYPE_VOICE = "voice";
 
     private final String VIEWTYPE_LOAD_STR = "load";
-    private final String VIEWTYPE_DATE_STR = "date";
+    private final String VIEWTYPE_HEADER_STR = "header";
     private final String Default_Url = "https://firebasestorage.googleapis.com/v0/b/icebr8k-98675.appspot.com/o/UserAvatars%2Fdefault_avatar.png?alt=media&token=ccbf30ce-5cfb-493a-8c28-8bf7ee18cc9a";
 
     private boolean loading;
+    private long lastClickTime =0;
     private User user =null;
     private int lastVisibleItem, totalItemCount;
     private int threshHold =1;
@@ -87,7 +93,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
 
-                    if(onLoadMoreListener!=null &&!mMessages.isEmpty() && dy<-2) {
+                    if(onLoadMoreListener!=null &&!mMessages.isEmpty() && dy<-1) {
                         totalItemCount = linearLayoutManager.getItemCount();
                         lastVisibleItem = linearLayoutManager.findLastCompletelyVisibleItemPosition();
                         if (!loading && totalItemCount <= (lastVisibleItem+threshHold)) {
@@ -126,7 +132,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     R.layout.item_custom_outcoming_message, parent, false);
 
             return new OutcomingTextMessageViewHolder(v);
-        }else if(viewType == VIEWTYPE_DATE){
+        }else if(viewType == VIEWTYPE_HEADER){
             View v = LayoutInflater.from(parent.getContext()).inflate(
                     R.layout.dateheader, parent, false);
 
@@ -250,7 +256,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         // add more view type here//////////////////////////
 
         switch (messageType){
-            case VIEWTYPE_DATE_STR: viewType =VIEWTYPE_DATE;
+            case VIEWTYPE_HEADER_STR: viewType =VIEWTYPE_HEADER;
             break;
             case VIEWTYPE_LOAD_STR: viewType =VIEWTYPE_LOAD;
                 break;
@@ -258,7 +264,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 break;
             case VIEWTYPE_TEXT_PENDING: viewType =VIEWTYPE_TEXT_OUT_PENDING;
                 break;
-            default: viewType = VIEWTYPE_DATE;
+            default: viewType = VIEWTYPE_HEADER;
                 break;
         }
 
@@ -282,7 +288,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             view.setAlpha(1f);
         }
 
-        return true;
+        return false;
 
     }
 
@@ -308,16 +314,52 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             text_in = itemView.findViewById(R.id.incoming_text);
             text_container_in = itemView.findViewById(R.id.incoming_main);
             text_container_in.setOnClickListener(this);
+            avatar_in.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
             if(view.getId() == text_container_in.getId()){
                 Toast.makeText(view.getContext(), "clicked", Toast.LENGTH_SHORT).show();
+            }else if(view.getId() == avatar_in.getId()){
+               int postion = getAdapterPosition();
+               if(postion != RecyclerView.NO_POSITION){
+                   UserMessage message = mMessages.get(postion);
+                   toUserProfilePage(message);
+               }
             }
 
         }
     }
+
+    private void toUserProfilePage(UserMessage message){
+        // preventing double, using threshold of 1000 ms
+        if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+            return;
+        }
+        lastClickTime = SystemClock.elapsedRealtime();
+        final String uid = message.getSenderid();
+        DatabaseReference infoRef = FirebaseDatabase.getInstance().getReference()
+                .child("Users").child(uid);
+        infoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User mUser = dataSnapshot.getValue(User.class);
+                Intent intent = new Intent(getContext(), UserProfilePage.class);
+                intent.putExtra("userInfo", mUser);
+                intent.putExtra("userUid",uid);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                getContext().startActivity(intent);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
 
     //outcoming text message
     public class OutcomingTextMessageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -332,12 +374,19 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             text_out = itemView.findViewById(R.id.outcoming_text);
             text_container_out = itemView.findViewById(R.id.outcoming_main);
             text_container_out.setOnClickListener(this);
+            avatar_out.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
             if(view.getId() == text_container_out.getId()){
                 Toast.makeText(view.getContext(), "clicked", Toast.LENGTH_SHORT).show();
+            }else if(view.getId() == avatar_out.getId()){
+                int postion = getAdapterPosition();
+                if(postion != RecyclerView.NO_POSITION){
+                    UserMessage message = mMessages.get(postion);
+                    toUserProfilePage(message);
+                }
             }
 
         }

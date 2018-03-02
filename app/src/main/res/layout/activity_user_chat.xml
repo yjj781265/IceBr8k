@@ -18,10 +18,15 @@
         app:titleTextAppearance="@style/ActionBarTitleText"
         app:subtitleTextAppearance="@style/ActionBarSubTitleText"
         app:title="IceBr8k"
+        android:elevation="3dp"
         android:layout_height="56dp">
 
 
     </android.support.v7.widget.Toolbar>
+
+
+
+
 
     <android.support.v7.widget.RecyclerView
 
@@ -34,6 +39,21 @@
         android:layout_above="@id/userChat_input_root">
 
     </android.support.v7.widget.RecyclerView>
+    <TextView
+        android:id="@+id/userChat_toast"
+        android:alpha="0.8"
+        android:layout_below="@id/userChat_toolbar"
+        android:layout_marginEnd="100dp"
+        android:layout_marginRight="100dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp"
+        android:layout_width="match_parent"
+        android:textColor="@color/dark_gray"
+        android:background="@drawable/round_rectangle_orange_border"
+        android:text="New Message"
+        android:gravity="center"
+        android:padding="6dp"
+        android:layout_height="wrap_content"/>
     
     <LinearLayout
         android:gravity="center_vertical"

@@ -16,7 +16,7 @@ public class MyDateFormatter {
     private final static String  bullet = " \u2022 ";
 
     public static boolean isSameDay(Date date1, Date date2) {
-        if (date1 == null || date2 == null) {
+        if (date1 ==null || date2== null) {
             throw new IllegalArgumentException("Dates must not be null");
         }
         Calendar cal1 = Calendar.getInstance();
@@ -121,7 +121,7 @@ public class MyDateFormatter {
     }
 
     public static String lastSeenConverter(long timestamp){
-        String  string = "Online";;
+        String  string = "offline";
         long milliseconds = new Date().getTime() - timestamp;
         long days =0;
         long months =0;

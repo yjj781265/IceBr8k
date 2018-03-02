@@ -615,10 +615,6 @@ public class MainChatActivity extends SwipeBackActivity implements MessagesListA
 
 
     public void loadMessage(){
-
-
-
-
        loadMessageRef.orderByChild("timestamp").limitToLast(COUNT_LIMT).
                addListenerForSingleValueEvent  (new ValueEventListener() {
            @Override

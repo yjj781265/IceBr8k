@@ -317,6 +317,12 @@ public class Homepage extends AppCompatActivity  implements
 
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         sharedPref.registerOnSharedPreferenceChangeListener(this);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         if(checkInternet()){
             // device has active internet connection
             noConnection_tv.setVisibility(View.GONE);
@@ -328,11 +334,6 @@ public class Homepage extends AppCompatActivity  implements
             noConnection_tv.setVisibility(View.VISIBLE);
         }
 
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
 
         showLog("onResume");
 
@@ -354,16 +355,22 @@ public class Homepage extends AppCompatActivity  implements
         sharedPref.unregisterOnSharedPreferenceChangeListener(this);
 
 
+
+
         showLog("onStop");
     }
 
     @Override
     protected void onDestroy() {
+        try {
+            if (ConnectionBuddy.getInstance() != null) {
+                ConnectionBuddy.getInstance().unregisterFromConnectivityEvents(this);
+            }
+        }catch (Exception e){
 
-        super.onDestroy();
-        if(ConnectionBuddy.getInstance()!=null){
-            ConnectionBuddy.getInstance().unregisterFromConnectivityEvents(this);
         }
+        super.onDestroy();
+
 
 
 
@@ -554,6 +561,7 @@ public class Homepage extends AppCompatActivity  implements
     public void setOnline(){
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             presenceRef.setValue("2");
+            lastSeenRef.removeValue();
         }
     }
 
@@ -624,7 +632,7 @@ public class Homepage extends AppCompatActivity  implements
 
 
     public void Signout() {
-       setOffline();
+         setOffline();
         //user will not receive notification
         OneSignal.setSubscription(false);
         if(FirebaseAuth.getInstance()!=null) {
