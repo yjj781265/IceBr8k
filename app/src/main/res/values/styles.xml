@@ -60,11 +60,11 @@
 
     <style name="ActionBarTitleText" parent="@android:style/TextAppearance.DeviceDefault.Widget.ActionBar.Title">
         <item name="android:textColor">@color/creamYellow</item>
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">18dp</item>
     </style>
 
     <style name="ActionBarSubTitleText" parent="@android:style/TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle">
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">14dp</item>
     </style>
 
     <style name="OverFlow" parent="@style/Widget.AppCompat.Light.ActionButton.Overflow">

@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="us.belka:androidtoggleswitch-1.2.2">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/androidtoggleswitch-1.2.2.aar/d08821d0847ca9ead7918bb6d99668bb/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/androidtoggleswitch-1.2.2.aar/d08821d0847ca9ead7918bb6d99668bb/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/androidtoggleswitch-1.2.2.aar/37406f8d460cfe0ba4d71158df38a9f6/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/androidtoggleswitch-1.2.2.aar/37406f8d460cfe0ba4d71158df38a9f6/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

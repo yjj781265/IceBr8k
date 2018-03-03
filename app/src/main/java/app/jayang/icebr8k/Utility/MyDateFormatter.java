@@ -121,7 +121,7 @@ public class MyDateFormatter {
     }
 
     public static String lastSeenConverter(long timestamp){
-        String  string = "offline";
+        String  string = "Offline";
         long milliseconds = new Date().getTime() - timestamp;
         long days =0;
         long months =0;
