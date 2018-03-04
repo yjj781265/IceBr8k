@@ -4,8 +4,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -33,6 +37,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.onesignal.OneSignal;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,6 +50,7 @@ import app.jayang.icebr8k.Utility.MyDateFormatter;
 import app.jayang.icebr8k.Modle.MyEditText;
 import app.jayang.icebr8k.Modle.OnLoadMoreListener;
 import app.jayang.icebr8k.Modle.UserMessage;
+import app.jayang.icebr8k.Utility.SendNotification;
 import me.imid.swipebacklayout.lib.SwipeBackLayout;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 
@@ -63,12 +69,13 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
     private final String LOAD_ID = "loading";
     private final String TYPE_ID = "typing";
 
-    private final String user2Uid = "WDmiRBfGNORfyc5di1YzOMeAeVr2";
+    private  String user2Uid = "WDmiRBfGNORfyc5di1YzOMeAeVr2";
     //EUcJQFrdj5g7MA4Xkyzc57UnjKt1
     //WDmiRBfGNORfyc5di1YzOMeAeVr2
 
     private MyEditText editText;
     private TextView toast;
+    private ValueEventListener mListener;
     private Long lastTimeStamp;
     private FirebaseUser currentUser;
     private RecyclerView mRecyclerView;
@@ -89,7 +96,8 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
     private Long lastSeen;
     private Integer firstVisablePos =0 , lastVisablePos =0,toastThreshhold =3;
     private String  name;
-    private DatabaseReference senderMessageRef, receiverMessageRef, isTypingRef, inChatRef, muteRef;
+    private DatabaseReference senderMessageRef, receiverMessageRef, isTypingRef, inChatRef, muteRef
+            , subTitleRef,titleRef,user2InchatRef;
 
 
     @Override
@@ -102,6 +110,21 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         toast = (TextView)findViewById(R.id.userChat_toast);
         toast.setVisibility(View.GONE);
         toast.setOnTouchListener(this);
+        if(getIntent()!=null) {
+            user2Uid = getIntent().getExtras().getString("chatId");
+            name = getIntent().getExtras().getString("chatName");
+        }
+        mListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
 
 
         voice = (ImageView) findViewById(R.id.userChat_voicemessage);
@@ -123,8 +146,6 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         video.setOnTouchListener(this);
         video.setOnClickListener(this);
         video.setOnLongClickListener(this);
-
-
         send.setEnabled(false);
 
         toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.userChat_toolbar);
@@ -182,11 +203,18 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         inChatRef = senderMessageRef.child("inchat");
         muteRef = senderMessageRef.child("mute");
 
+        subTitleRef = FirebaseDatabase.getInstance().getReference().child("Users").child(user2Uid);
+        titleRef = FirebaseDatabase.getInstance().getReference().child("Users").
+                child(user2Uid).child("displayname");
+         user2InchatRef = receiverMessageRef.child("inchat");
+
 ////////////////////////////////////////////////Custom Methods/////////////////////////////////////
-        setIstypingListener();
-        loadMessages();
-        setTitle();
-        setSubTitle();
+        if(name!=null && user2Uid!=null) {
+            setIstypingListener();
+            loadMessages();
+            setTitle();
+            setSubTitle();
+        }
 
 
 //////////////////////////////////////////////////Listeners///////////////////////////////////////
@@ -266,6 +294,9 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
                 } else {
                     hideAttachment();
+                    if(!editText.getText().toString().trim().isEmpty()){
+                        updateIsTyping(true);
+                    }
                 }
 
             }
@@ -275,7 +306,22 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sendMessage();
+                if(checkInternet()){
+                    sendMessage();
+                }else{
+                    Snackbar snackbar = Snackbar
+                            .make(mRecyclerView, "No Internet Connection", Snackbar.LENGTH_LONG)
+                            .setAction("Setting", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    startActivity(new Intent(Settings.ACTION_SETTINGS));
+                                }
+                            });
+
+                    snackbar.show();
+                }
+
+
 
             }
         });
@@ -461,8 +507,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
     }
 
     private void setTitle(){
-        DatabaseReference titleRef = FirebaseDatabase.getInstance().getReference().child("Users").
-                child(user2Uid).child("displayname");
+
         titleRef.keepSynced(true);
         titleRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -483,9 +528,8 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
     }
 
     private void setSubTitle(){
-        DatabaseReference titleRef = FirebaseDatabase.getInstance().getReference().child("Users").child(user2Uid);
-        titleRef.keepSynced(true);
-        titleRef.addValueEventListener(new ValueEventListener() {
+        subTitleRef.keepSynced(true);
+        subTitleRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.hasChild("lastseen")){
@@ -572,19 +616,18 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
     }
 
     private void setInChatListener(){
-        final DatabaseReference userInchatRef = receiverMessageRef.child("inchat");
-        userInchatRef.addValueEventListener(new ValueEventListener() {
+        user2InchatRef.keepSynced(true);
+        user2InchatRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                user2Inchat = dataSnapshot.getValue(Boolean.class);
                if(user2Inchat == null){
-                   userInchatRef.setValue(false);
+                   user2InchatRef.setValue(false);
                    user2Inchat =false;
                }
                if(user2Inchat){
                    inChatItem.setVisible(true);
                    if(name!=null) {
-                       Toast.makeText(UserChatActvity.this, name +" joined the chat room", Toast.LENGTH_SHORT).show();
                    }
 
                }else{
@@ -675,6 +718,25 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
                     }
                 });
+                DatabaseReference user2Mute = receiverMessageRef.child("mute");
+                user2Mute.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Boolean user2Mute = dataSnapshot.getValue(Boolean.class);
+                        if(user2Mute==null){
+                            user2Mute =false;
+                        }
+                        if(!user2Inchat && !user2Mute) {
+                            SendNotification.sendNotificationTo(currentUser.getDisplayName(), message.getText(), user2Uid);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
 
             }
         });
@@ -1020,19 +1082,40 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         return false;
     }
 
+
+    public boolean checkInternet() {
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        if (null != activeNetwork) {
+            return true;
+        } else {
+            return false;
+
+
+        }
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
         inChat(true);
         clearUnread();
+        OneSignal.clearOneSignalNotifications();
 
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        updateIsTyping(false);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         inChat(false);
-        updateIsTyping(false);
+
 
     }
 
@@ -1040,6 +1123,8 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
     protected void onDestroy() {
        removeTimeChangeListener();
         super.onDestroy();
+
+
 
 
     }

@@ -1,39 +1,26 @@
 package app.jayang.icebr8k.Fragments;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.PowerManager;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.BootstrapButton;
-import com.daimajia.androidanimations.library.Techniques;
-import com.daimajia.androidanimations.library.YoYo;
-import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
-import com.github.javiersantos.materialstyleddialogs.enums.Style;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -45,11 +32,8 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.xw.repo.BubbleSeekBar;
 
-
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Random;
-import java.util.UUID;
 
 import app.jayang.icebr8k.Modle.SurveyQ;
 import app.jayang.icebr8k.Modle.UserQA;
@@ -60,28 +44,33 @@ import app.jayang.icebr8k.R;
  * Created by LoLJay on 10/22/2017.
  */
 
-public class SurveyTab_Fragment extends Fragment {
+public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
     View mview;
-    BubbleSeekBar mSeekBar;
-    TextView mTextView,msubTextview;
-    RadioGroup mRadioGroup;
-    BootstrapButton mSubmit;
-    CardView mCardView;
-    TextView skip;
-    FloatingActionButton mActionButton;
-    String TAG = "surveyFrag";
+    private BubbleSeekBar mSeekBar;
+    private TextView mTextView, msubTextview, progressText;
+    private ImageView favorite_btn;
+    private RadioGroup mRadioGroup;
+    private BootstrapButton mSubmit;
+    private ImageView backArrow;
+    private CardView mCardView;
+    private TextView skip;
+    private int index =0;
+    private FloatingActionButton mActionButton;
+    private String TAG = "surveyFrag";
+    private DatabaseReference userQARef;
+    private final String MC_TYPE = "mc";
+    private final String SC_TYPE = "sc";
+    private final String SP_TYPE = "sp";
 
 
-    ArrayList<SurveyQ> surveyQArrayList,temp; // for unpdating UI
-    ArrayList<String> userQlist;
-    ArrayList<String> surveyQlist; // for comparing with userQArraylist
+    private  ArrayList<SurveyQ> surveyList; // for unpdating UI
+    private ArrayList<String> userQlist;
 
-    ProgressBar mProgressBar,mProgressBar2;
-    Spinner mSpinner;
-   RelativeLayout mRelativeLayout;
-    RelativeLayout mlayout;
-    FirebaseUser currentUser;
-    int index  ;
+    private ArrayList<String> surveyQlist; // for comparing with userQArraylist
+
+    private ProgressBar mProgressBar;
+    private  Spinner mSpinner;
+    private  FirebaseUser currentUser;
     public SurveyTab_Fragment() {
 
     }
@@ -91,17 +80,12 @@ public class SurveyTab_Fragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        setHasOptionsMenu(true);
+        userQlist = new ArrayList<>();
+        surveyQlist = new ArrayList<>();
+        surveyList =  new ArrayList<>();
 
+        userQARef = FirebaseDatabase.getInstance().getReference().child("UserQA").child(currentUser.getUid());
 
-        index =0;
-       // new UploadQ().updataQdatabase(FirebaseDatabase.getInstance().getReference());
-
-        ArrayList<String> answers = new ArrayList();
-        answers.add("A");
-        answers.add("B");
-        SurveyQ q8 = new SurveyQ("mc","A or B?", UUID.randomUUID().toString(),answers);
-       // mRef.child("Questions_8").child(q8.getQuestionId()).setValue(q8);
        showLog("onCreate");
     }
 
@@ -112,105 +96,79 @@ public class SurveyTab_Fragment extends Fragment {
       mview = inflater.inflate(R.layout.survey_tab,container,false);
         mSubmit = mview.findViewById(R.id.submitBtn);
         mSubmit.setVisibility(View.GONE);
+        backArrow = mview.findViewById(R.id.backarrow_survey);
+        backArrow.setVisibility(View.GONE);
+        mProgressBar = mview.findViewById(R.id.loading_progressbar);
+        mProgressBar.setVisibility(View.INVISIBLE);
+
         mSeekBar = mview.findViewById(R.id.seekBar);
+        mSeekBar.setVisibility(View.INVISIBLE);
         mTextView = mview.findViewById(R.id.question_id);
+        mTextView.setVisibility(View.INVISIBLE);
         mRadioGroup =mview.findViewById(R.id.radioGroup);
-        mProgressBar = mview.findViewById(R.id.survey_progressBar);
+        mRadioGroup.setVisibility(View.GONE);
         mSpinner=mview.findViewById(R.id.spinner_id);
+        mSpinner.setVisibility(View.GONE);
         msubTextview = mview.findViewById(R.id.sub_question_id);
+        msubTextview.setVisibility(View.GONE);
+        progressText = mview.findViewById(R.id.progress_text);
+        progressText.setVisibility(View.INVISIBLE);
         mCardView =mview.findViewById(R.id.cardView);
-        mlayout = mview.findViewById(R.id.cardView_RLayout);
-        mProgressBar2= mview.findViewById(R.id.progressBar2);
-        mProgressBar2.setVisibility(View.VISIBLE);
-        mRelativeLayout = mview.findViewById(R.id.cardView_RLayout);
+        favorite_btn = mview.findViewById(R.id.favorite_btn);
+        favorite_btn.setVisibility(View.GONE);
         mActionButton= mview.findViewById(R.id.floatingActionButton);
+        mActionButton.setVisibility(View.GONE);
         skip = mview.findViewById(R.id.skip_btn);
         skip.setVisibility(View.GONE);
-        createInitQ();
+
+        mSeekBar.setOnProgressChangedListener(new BubbleSeekBar.OnProgressChangedListener() {
+            @Override
+            public void onProgressChanged(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
+               // Toast.makeText(getContext(), "changed "+progress + progressFloat, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void getProgressOnActionUp(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
+               showLog(String.valueOf(progressFloat));
+               mSeekBar.setProgress(progressFloat);
+            }
+
+            @Override
+            public void getProgressOnFinally(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
+                //Toast.makeText(getContext(), "finally "+progress + progressFloat, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
         mActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mActionButton.setClickable(false);;// prevent user spam click the button ,may crash the program
                 mTextView.setVisibility(View.INVISIBLE);
-                mProgressBar2.setVisibility(View.VISIBLE);
-                createInitQ();
-
-
-
-
-
-
-
+                initQuestions();
             }
         });
 
-
-        mSubmit.setOnClickListener(new View.OnClickListener() {
-
+        backArrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Toast.makeText(mview.getContext(),String.valueOf(index),Toast.LENGTH_SHORT).show();
-                //Toast.makeText(mview.getContext(),"SQ List "+surveyQArrayList.size(),Toast.LENGTH_SHORT).show();
-                if(mRadioGroup.getCheckedRadioButtonId()==-1&& mRadioGroup.getVisibility()==View.VISIBLE){
-                    Toast.makeText(getContext(),"Make a selection",Toast.LENGTH_SHORT).show();
-
-                }else if(mRadioGroup.getCheckedRadioButtonId()!=-1&& mRadioGroup.getVisibility()==View.VISIBLE){
-                    int id= mRadioGroup.getCheckedRadioButtonId();
-                    View radioButton = mRadioGroup.findViewById(id);
-                    int radioId = mRadioGroup.indexOfChild(radioButton);
-                    RadioButton btn = (RadioButton) mRadioGroup.getChildAt(radioId);
-                    String selection = (String) btn.getText();
-                    pushUserQA(surveyQArrayList.get(index),selection);
-                    updateCardView();
-
-                }else if(mSpinner.getVisibility()==View.VISIBLE) {
-                    String text = mSpinner.getSelectedItem().toString();
-                    pushUserQA(surveyQArrayList.get(index),text);
-                    updateCardView();
-
-
-                }else if(mSeekBar.getVisibility()==View.VISIBLE){
-
-                   String answer = String.valueOf(mSeekBar.getProgress());
-                 //  Toast.makeText(getContext(),answer,Toast.LENGTH_SHORT).show();
-              pushUserQA(surveyQArrayList.get(index),answer);
-                    updateCardView();
-
-
+                if(index>1 && !surveyList.isEmpty()){
+                    updateUI(surveyList.get(index-2));
 
                 }
             }
         });
 
-
-        skip.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(surveyQArrayList!=null || !surveyQArrayList.isEmpty()) {
-                    pushUserQA(surveyQArrayList.get(index), "skipped");
-                    updateCardView();
-                }
+        initQuestions();
 
 
-            }
-        });
 
-        mSeekBar.setOnProgressChangedListener(new BubbleSeekBar.OnProgressChangedListener() {
-            @Override
-            public void onProgressChanged(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
 
-            }
 
-            @Override
-            public void getProgressOnActionUp(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
-                mSeekBar.setProgress(progressFloat);
-            }
 
-            @Override
-            public void getProgressOnFinally(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
 
-            }
-        });
+
+
         showLog("onCreateView");
         return  mview;
     }
@@ -241,10 +199,6 @@ public class SurveyTab_Fragment extends Fragment {
 
     }
 
-    public int dpToPx(int dp) {
-        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
-        return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
-    }
 
 
     // this method is triggered once the survey fragment is appeared to the user
@@ -254,338 +208,575 @@ public class SurveyTab_Fragment extends Fragment {
 
     }
 
-    public void setBelowSeekbar(){
-        RelativeLayout.LayoutParams params= new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.addRule(RelativeLayout.BELOW, R.id.seekBar);
-        params.setMargins(20,20,20,20);
-        mSeekBar.setVisibility(View.VISIBLE);
-        msubTextview.setVisibility(View.VISIBLE);
-
-        params.addRule(RelativeLayout.CENTER_HORIZONTAL);
-        mRadioGroup.setVisibility(View.INVISIBLE);
-        mSpinner.setVisibility(View.INVISIBLE);
-        mSubmit.setLayoutParams(params);
-        setSkipbtn();
-
-    }
-
-    public void setBelowRadioGroup(){
-        RelativeLayout.LayoutParams params= new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.addRule(RelativeLayout.BELOW, R.id.radioGroup);
-        params.setMargins(15,15,15,15);
-        mRadioGroup.setVisibility(View.VISIBLE);
-
-        params.addRule(RelativeLayout.CENTER_HORIZONTAL);
-        mSeekBar.setVisibility(View.INVISIBLE);
-        mSpinner.setVisibility(View.INVISIBLE);
-        msubTextview.setVisibility(View.INVISIBLE);
-
-        mSubmit.setLayoutParams(params);
-        setSkipbtn();
-
-    }
-
-    public  void setSkipbtn(){
-        RelativeLayout.LayoutParams params= new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.addRule(RelativeLayout.BELOW, R.id.submitBtn);
-        params.addRule(RelativeLayout.ALIGN_END,R.id.question_id);
-        params.addRule(RelativeLayout.ALIGN_RIGHT,R.id.question_id);
-        params.setMargins(0,0,5,10);
-        skip.setLayoutParams(params);
-        skip.setVisibility(View.VISIBLE);
-    }
 
 
-    public void setBelowSpinner(){
-        RelativeLayout.LayoutParams params= new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.addRule(RelativeLayout.BELOW, R.id.spinner_id);
-        params.setMargins(15,15,15,15);
-        mSpinner.setVisibility(View.VISIBLE);
-        mRadioGroup.setVisibility(View.INVISIBLE);
-        mSeekBar.setVisibility(View.INVISIBLE);
-        msubTextview.setVisibility(View.INVISIBLE);
 
-        params.addRule(RelativeLayout.CENTER_HORIZONTAL);
-        mSubmit.setLayoutParams(params);
-        setSkipbtn();
 
-    }
 
-    public void updateUI(SurveyQ surveyQ){
+    public void initQuestions(){
+    userQlist = new ArrayList<>();
+    index =0;
+    mProgressBar.setIndeterminate(true);
+    mProgressBar.setVisibility(View.VISIBLE);
 
-        mRadioGroup.removeAllViews();
-        mRadioGroup.clearCheck();
-        if(index == surveyQArrayList.size()-1 ){
-            mProgressBar.setProgress(100);
-        }else {
-            mProgressBar.incrementProgressBy( (100 / surveyQArrayList.size()));
+    // get all the questions user answered
+    DatabaseReference mref = FirebaseDatabase.getInstance().getReference
+            ("UserQA/"+currentUser.getUid());
+    mref.addChildEventListener(new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            showLog(dataSnapshot.toString());
+            userQlist.add(dataSnapshot.getKey());
+
         }
 
-        if(surveyQ.getType().equals("mc")) {
-            setBelowRadioGroup();
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    });
+
+    mref.addListenerForSingleValueEvent(new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+
+            pullDatabaseQuesteions();
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    });
+
+
+}
+
+    // create initial question;
+    public void pullDatabaseQuesteions(){
+        surveyList .clear();
+        DatabaseReference mRef= FirebaseDatabase.getInstance().getReference("Questions_8");
+        mRef.keepSynced(true);
+        mRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if(!userQlist.contains(dataSnapshot.getKey())){
+                    ArrayList<String> answer = null;
+
+
+                    String type = dataSnapshot.child("type").getValue(String.class);
+                    String question = dataSnapshot.child("question").getValue(String.class);
+                    String question_id = dataSnapshot.child("questionId").getValue(String.class);
+                    if(dataSnapshot.hasChild("answer") ) {
+                        GenericTypeIndicator<ArrayList<String>> t = new GenericTypeIndicator<ArrayList<String>>(){};
+                        answer = dataSnapshot.child("answer").getValue(t);
+                        showLog(answer.toString());
+                    }
+
+                    SurveyQ surveyQ = new SurveyQ(type, question, question_id, answer);
+                    if( surveyList.size()<8){
+                        surveyList.add(surveyQ);
+                    }
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(!surveyList.isEmpty()){
+                    mActionButton.setVisibility(View.GONE);
+                    Collections.shuffle(surveyList);
+                    updateUI(surveyList.get(0));
+                }else if(surveyList.isEmpty()){
+                    mTextView.setText(getString(R.string.no_question_left));
+                    hideCardViewComponent();
+
+                }
+                mProgressBar.setVisibility(View.GONE);
+
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void updateUI(SurveyQ surveyQ) {
+        if(surveyList.indexOf(surveyQ) ==0){
+            backArrow.setVisibility(View.GONE);
+        }else{
+            backArrow.setVisibility(View.VISIBLE);
+        }
+        mTextView.setTypeface(Typeface.DEFAULT_BOLD);
+            String type = surveyQ.getType();
+            switch(type){
+                case  MC_TYPE:
+                    isMultipleChoic(surveyQ);
+                    break;
+                case  SC_TYPE:
+                    isScaleQuestion(surveyQ);
+                    break;
+                case  SP_TYPE:
+                    isSpinnerQuestion(surveyQ);
+                    break;
+                default: isMultipleChoic(surveyQ);
+                break;
+            }
+
+
+    }
+
+    private void isMultipleChoic(SurveyQ surveyQ) {
+        if(surveyQ.getType().equals(MC_TYPE) && surveyList.contains(surveyQ)) {
+            index = surveyList.indexOf(surveyQ)+1;
+            mTextView.setVisibility(View.VISIBLE);
             mTextView.setText(surveyQ.getQuestion());
+            progressText .setVisibility(View.VISIBLE);
+            progressText.setText(index +"/"+surveyList.size());
+            skip.setVisibility(View.VISIBLE);
+            favorite_btn.setVisibility(View.VISIBLE);
+            favorite_btn.setSelected(false);
+            mSubmit.setVisibility(View.VISIBLE);
+            mSeekBar.setVisibility(View.GONE);
+            mSpinner.setVisibility(View.GONE);
+
+            msubTextview.setVisibility(View.GONE);
+
+            mRadioGroup.removeAllViews();
+            mRadioGroup.clearCheck();
+            mRadioGroup.setVisibility(View.VISIBLE);
+
+
+          ;
+          //Ui Stuff
             for (int i = 0; i < surveyQ.getAnswer().size(); i++) {
                 RadioButton button = new RadioButton(mview.getContext());
                 button.setText(surveyQ.getAnswer().get(i).toString());
                 mRadioGroup.addView(button);
             }
-        }else if(surveyQ.getType().equals("sp")){
-            setBelowSpinner();
-            mTextView.setText(surveyQ.getQuestion());
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_dropdown_item,surveyQ.getAnswer());
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            mSpinner.setAdapter(adapter);
-            // String selected = sItems.getSelectedItem().toString();
-
-
-        }else{
-            setBelowSeekbar();
-            mTextView.setText(surveyQ.getQuestion());
-
-        }
-    }
-    public void updateCardView(){
-
-        index = (index + 1);
-        if(index >= surveyQArrayList.size()){
-            mProgressBar.setProgress(0);
-            hideCardViewComponent();
-
-            mTextView.setText(getString(R.string.check_back_later));
-            mActionButton.setClickable(true);
-            YoYo.with(Techniques.FadeIn).duration(1000).repeat(0).playOn(mActionButton);
-            mActionButton.setVisibility(View.VISIBLE);
-            surveyQArrayList.clear();
-
-        }else {
-            YoYo.with(randomAnime())
-                    .duration(500)
-                    .repeat(0)
-                    .playOn(mCardView);
-
-            updateUI(surveyQArrayList.get(index));
-        }
-
-
-    }
-
-    // create initial question;
-public void createInitQ(){
-
-    mProgressBar.setProgress(0);
-
-    surveyQlist = new ArrayList<>();
-
-    DatabaseReference mRef= FirebaseDatabase.getInstance().getReference("Questions_8");
-    mRef.keepSynced(true);
-
-    mRef.addListenerForSingleValueEvent(new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-
-            surveyQlist.clear();
-// pull all the questions from questions table just hte questions id
-            for (DataSnapshot surveySnapshot : dataSnapshot.getChildren()) {
-
-
-               /* GenericTypeIndicator<ArrayList<String>> t = new GenericTypeIndicator<ArrayList<String>>() {};
-                ArrayList<String> answer = surveySnapshot.child("answer").getValue(t);*/
-                String q_id = surveySnapshot.child("questionId").getValue(String.class);
-
-                surveyQlist.add(q_id);
-            }
-
-            createUserQList();
-
-
-
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-
-        }
-    });
-
-
-
-}
-// push the user survy data to the userQA doc in firebase
-public void pushUserQA(SurveyQ surveyQ,String answer) {
-    DatabaseReference mReference = FirebaseDatabase.getInstance().getReference("UserQA");
-    mReference.keepSynced(true);
-    UserQA userQA = new UserQA(surveyQ.getQuestionId(),answer,surveyQ.getQuestion());
-    mReference.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(userQA.getQuestionId()).setValue(userQA);
-
-}
-
-public void createUserQList(){
-    userQlist = new ArrayList<>();
-    // get all the questions user answered
-    DatabaseReference mref = FirebaseDatabase.getInstance().getReference
-            ("UserQA/"+FirebaseAuth.getInstance().getCurrentUser().getUid());
-    mref.keepSynced(true);
-    mref.addListenerForSingleValueEvent(new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            userQlist.clear();
-            for(DataSnapshot questionSnapchat: dataSnapshot.getChildren()){
-
-               UserQA  userQA = questionSnapchat.getValue(UserQA.class);
-                if(!userQA.getQuestionId().isEmpty()) {
-
-                    userQlist.add(userQA.getQuestionId());
-
-
-                }
-            }
-            if(userQlist.isEmpty()){
-                skip.setVisibility(View.GONE);
-                new MaterialStyledDialog.Builder(getContext())
-                        .setTitle("IceBr8k!")
-                        .setDescription("Welcome to the IceBr8k, please answer some simple questions to get this wonderful journey started")
-                        .setStyle(Style.HEADER_WITH_TITLE)
-                        .setPositiveText("Okay").onPositive(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-
-                        dialog.dismiss();
-                    }
-                })
-                        .show();
-
-            }
-
-
-
-
-            initQuestionPool(); // updateUI
-
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-
-        }
-    });
-
-}
-    public void initQuestionPool(){
-        surveyQArrayList = new ArrayList<>();
-        surveyQlist.removeAll(userQlist);
-        // remove all the question user Answered from the list
-
-        Log.d("debug","After Removal"+surveyQlist);
-
-
-
-            DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Questions_8");
-            mRef.keepSynced(true);
-            mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            final UserQA userQA = new UserQA();
+            userQA.setQuestion(surveyQ.getQuestion());
+            userQA.setQuestionId(surveyQ.getQuestionId());
+            //default is false;
+            userQA.setFavorite(false);
+            //update Database
+            favorite_btn.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
+                public void onClick(View view) {
+                 if(favorite_btn.isSelected()){
+                     favorite_btn.setSelected(false);
+                     userQA.setFavorite(false);
+                 }else{
+                     favorite_btn.setSelected(true);
+                     userQA.setFavorite(true);
+                 }
+                }
+            });
 
-                    temp = new ArrayList<>();
-                    for(DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                        GenericTypeIndicator<ArrayList<String>> t = new GenericTypeIndicator<ArrayList<String>>() {};
-                        ArrayList<String> answer = childSnapshot.child("answer").getValue(t);
+            skip.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    userQA.setFavorite(false);
+                    userQA.setAnswer("skipped");
+                    userQARef.child(userQA.getQuestionId()).setValue(userQA).addOnSuccessListener(SurveyTab_Fragment.this);
+                    if(index<surveyList.size() && index!=0){
+                        updateUI(surveyList.get(index));
+                    }else if(index == surveyList.size()){
+                        hideCardViewComponent();
+                    }
+                }
+            });
 
-                        String type = childSnapshot.child("type").getValue(String.class);
-                        String question = childSnapshot.child("question").getValue(String.class);
-                        String question_id = childSnapshot.child("questionId").getValue(String.class);
+            mSubmit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(mRadioGroup.getCheckedRadioButtonId()==-1&& mRadioGroup.getVisibility()==View.VISIBLE){
+                        Toast.makeText(getContext(),"Make a selection",Toast.LENGTH_SHORT).show();
 
-                        SurveyQ surveyQ = new SurveyQ(type, question, question_id, answer);
-                        Log.d("debug2",surveyQlist.toString());
-
-
-                        if(surveyQlist.contains(surveyQ.getQuestionId())) {
-                            temp.add(surveyQ);
-
+                    }else if(mRadioGroup.getCheckedRadioButtonId()!=-1&& mRadioGroup.getVisibility()==View.VISIBLE){
+                        int id= mRadioGroup.getCheckedRadioButtonId();
+                        View radioButton = mRadioGroup.findViewById(id);
+                        int radioId = mRadioGroup.indexOfChild(radioButton);
+                        RadioButton btn = (RadioButton) mRadioGroup.getChildAt(radioId);
+                        String selection = (String) btn.getText();
+                        userQA.setAnswer(selection);
+                        userQARef.child(userQA.getQuestionId()).setValue(userQA).addOnSuccessListener(SurveyTab_Fragment.this);
+                        if(index<surveyList.size() && index!=0){
+                            updateUI(surveyList.get(index));
+                        }else if(index == surveyList.size()){
+                            hideCardViewComponent();
                         }
-
 
                     }
+                }
+            });
 
-                   if(temp.size()>=8){
-                        Collections.shuffle(temp);
-                        for(int i=0; i<8;i++){
-                            surveyQArrayList.add(temp.get(i));
-                        }
+
+        }
+
+
+    }
+    private  void isScaleQuestion(SurveyQ surveyQ){
+        if(surveyQ.getType().equals(SC_TYPE) && surveyList.contains(surveyQ)){
+            index = surveyList.indexOf(surveyQ)+1;
+            mTextView.setVisibility(View.VISIBLE);
+            mTextView.setText(surveyQ.getQuestion());
+            progressText .setVisibility(View.VISIBLE);
+            progressText.setText(index +"/"+surveyList.size());
+            skip.setVisibility(View.VISIBLE);
+
+            mSeekBar.setVisibility(View.VISIBLE);
+            mSeekBar.setProgress(5f);
+            mSpinner.setVisibility(View.GONE);
+            mRadioGroup.setVisibility(View.GONE);
+
+            favorite_btn.setVisibility(View.VISIBLE);
+            favorite_btn.setSelected(false);
+            mSubmit.setVisibility(View.VISIBLE);
+            msubTextview.setVisibility(View.VISIBLE);
+
+
+
+
+            final UserQA userQA = new UserQA();
+            userQA.setQuestion(surveyQ.getQuestion());
+            userQA.setQuestionId(surveyQ.getQuestionId());
+            //default is false;
+            userQA.setFavorite(false);
+
+            //update Database
+            favorite_btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(favorite_btn.isSelected()){
+                        favorite_btn.setSelected(false);
+                        userQA.setFavorite(false);
                     }else{
-                        surveyQArrayList =temp;
+                        favorite_btn.setSelected(true);
+                        userQA.setFavorite(true);
                     }
-                    Log.d("debug",String.valueOf(surveyQArrayList.size()));
-                   //user has some question didint answer
-                    if(!surveyQArrayList.isEmpty() && surveyQArrayList!=null) {
-                        mTextView.setVisibility(View.VISIBLE);
-                        index =0;
-                        Collections.shuffle(surveyQArrayList);
-                        hideCardViewComponent();
-                        mProgressBar.setVisibility(View.VISIBLE);
-                        mActionButton.setVisibility(View.GONE);
-                        mSubmit.setVisibility(View.VISIBLE);
-                        updateUI(surveyQArrayList.get(index));
-                    }else{ // no questions
-                        hideCardViewComponent();
-                        mTextView.setVisibility(View.VISIBLE);
-                        mActionButton.setVisibility(View.VISIBLE);
-                        mTextView.setText(getString(R.string.check_back_later));
-                        mActionButton.setClickable(true);
-
-                    }
-
                 }
-
-
+            });
+            skip.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onCancelled(DatabaseError databaseError) {
-
+                public void onClick(View view) {
+                    userQA.setFavorite(false);
+                    userQA.setAnswer("skipped");
+                    userQARef.child(userQA.getQuestionId()).setValue(userQA).addOnSuccessListener(SurveyTab_Fragment.this);
+                    if(index<surveyList.size()&& index!=0){
+                        updateUI(surveyList.get(index));
+                    }else if(index == surveyList.size()){
+                        hideCardViewComponent();
+                    }
                 }
+            });
 
+            mSubmit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    String answer = String.valueOf( mSeekBar.getProgress());
+                    userQA.setAnswer(answer);
+                    userQARef.child(userQA.getQuestionId()).setValue(userQA).addOnSuccessListener(SurveyTab_Fragment.this);
+                    if(index<surveyList.size() && index!=0){
+                        updateUI(surveyList.get(index));
+                    }else if(index ==surveyList.size()){
+                        hideCardViewComponent();
+                    }
+                }
             });
 
 
 
+        }
+
+    }
+    private  void isSpinnerQuestion(SurveyQ surveyQ){
+        if(surveyQ.getType().equals(SP_TYPE) && surveyList.contains(surveyQ)){
+            index = surveyList.indexOf(surveyQ)+1;
+            mTextView.setVisibility(View.VISIBLE);
+            mTextView.setText(surveyQ.getQuestion());
+            progressText .setVisibility(View.VISIBLE);
+            progressText.setText(index +"/"+surveyList.size());
+            skip.setVisibility(View.VISIBLE);
+
+            mSeekBar.setVisibility(View.GONE);
+            mSpinner.setVisibility(View.VISIBLE);
+            mRadioGroup.setVisibility(View.GONE);
+
+            favorite_btn.setVisibility(View.VISIBLE);
+            favorite_btn.setSelected(false);
+            mSubmit.setVisibility(View.VISIBLE);
+            msubTextview.setVisibility(View.GONE);
+        }
+
+        if(!surveyQ.getAnswer().isEmpty()) {
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_dropdown_item, surveyQ.getAnswer());
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            mSpinner.setAdapter(adapter);
 
 
+            final UserQA userQA = new UserQA();
+            userQA.setQuestion(surveyQ.getQuestion());
+            userQA.setQuestionId(surveyQ.getQuestionId());
+            //default is false;
+            userQA.setFavorite(false);
+            String text = mSpinner.getSelectedItem().toString();
+            userQA.setAnswer(text);
 
-        Log.d("size123",String.valueOf(surveyQArrayList.size()));
+            //update Database
+            favorite_btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(favorite_btn.isSelected()){
+                        favorite_btn.setSelected(false);
+                        userQA.setFavorite(false);
+                    }else{
+                        favorite_btn.setSelected(true);
+                        userQA.setFavorite(true);
+                    }
+                }
+            });
+            skip.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    userQA.setAnswer("skipped");
+                    userQA.setFavorite(false);
+                    userQARef.child(userQA.getQuestionId()).setValue(userQA).addOnSuccessListener(SurveyTab_Fragment.this);
+                    if(index<surveyList.size() && index!=0){
+                        updateUI(surveyList.get(index));
+                    }else if(index == surveyList.size()){
+                        hideCardViewComponent();
+                    }
+                }
+            });
 
+            mSubmit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    userQARef.child(userQA.getQuestionId()).setValue(userQA).addOnSuccessListener(SurveyTab_Fragment.this);
 
-
+                    if(index<surveyList.size()&& index!=0){
+                        updateUI(surveyList.get(index));
+                    }else if(index ==surveyList.size()){
+                        hideCardViewComponent();
+                    }
+                }
+            });
+        }
 
 
     }
 
-    public  static Techniques randomAnime(){
-       ArrayList<Techniques> techniquesArrayList = new ArrayList<>();
-        techniquesArrayList.add(Techniques.FadeIn);
-        techniquesArrayList.add(Techniques.Bounce);
-         int index = new Random().nextInt(techniquesArrayList.size()-1);
 
-        return techniquesArrayList.get(index);
 
-    }
+
 
     private void hideCardViewComponent(){
+        mTextView.setText(getString(R.string.no_question_left));
+        mTextView.setTypeface(Typeface.DEFAULT);
+        progressText.setVisibility(View.GONE);
+        mTextView.setVisibility(View.VISIBLE);
         mSpinner.setVisibility(View.GONE);
-        mProgressBar.setVisibility(View.GONE);
-        mProgressBar2.setVisibility(View.GONE);
+        mProgressBar.setVisibility(View.INVISIBLE);
         mRadioGroup.setVisibility(View.GONE);
         mSubmit.setVisibility(View.GONE);
         msubTextview.setVisibility(View.GONE);
         mSeekBar.setVisibility(View.INVISIBLE);
+        mActionButton.setVisibility(View.VISIBLE);
+        mActionButton.setClickable(true);
         skip.setVisibility(View.GONE);
-
+        backArrow.setVisibility(View.GONE);
+        favorite_btn.setVisibility(View.GONE);
+        progressText.setVisibility(View.GONE);
     }
 
     public void showLog(String str){
         Log.d(TAG,str);
     }
 
+    public void compareWithFriends() {
+
+        DatabaseReference mFriendRef = FirebaseDatabase.getInstance().getReference()
+                .child("UserFriends").child(currentUser.getUid());
+        mFriendRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+              for(DataSnapshot childSnapshot : dataSnapshot.getChildren()){
+                  if( childSnapshot.hasChild("stats") &&
+                          childSnapshot.child("stats").getValue(String.class).equals("accepted")){
+                      pullUser1QA(childSnapshot.getKey());
+                  }
+              }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+    }
+
+    public void pullUser1QA(final String user2Uid) {
+
+
+        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("" +
+                "UserQA/" + currentUser.getUid());
+        mRef.keepSynced(true);
+        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            ArrayList<UserQA> User1QA = new ArrayList<>();
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                    UserQA userQA = childSnapshot.getValue(UserQA.class);
+                    User1QA.add(userQA);
+
+                }
+
+                if (dataSnapshot.getChildrenCount() == User1QA.size()) {
+                    pullUser2QA( User1QA, user2Uid);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    private void pullUser2QA(final ArrayList<UserQA> user1QA, final String user2Uid) {
+
+        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + user2Uid);
+        mRef.keepSynced(true);
+        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            ArrayList<UserQA> User2QA = new ArrayList<>();
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                    UserQA userQA = childSnapshot.getValue(UserQA.class);
+                    User2QA.add(userQA);
+                }
+                SetScore(user1QA,User2QA,user2Uid);
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+
+    public void SetScore(ArrayList<UserQA> user1Arr, ArrayList<UserQA> user2Arr, String user2Uid) {
+        int size = user1Arr.size();
+        int commonQuestionSize = 0;
+        String score;
+
+        ArrayList<String> user1StrArr = new ArrayList<>();
+        ArrayList<String> user2StrArr = new ArrayList<>();
+
+        for (UserQA userQA : user1Arr) {
+            if (!userQA.getAnswer().equals("skipped")) {
+                user1StrArr.add(userQA.getQuestionId());
+            }
+
+        }
+        for (UserQA userQA : user2Arr) {
+            if (!userQA.getAnswer().equals("skipped")) {
+                user2StrArr.add(userQA.getQuestionId());
+            }
+        }
+
+        user1StrArr.retainAll(user2StrArr);
+
+        commonQuestionSize = user1StrArr.size();
+
+        Log.d("Score", "Common Question " + commonQuestionSize);
+        user1Arr.retainAll(user2Arr);
+        Log.d("Score", String.valueOf(user1Arr.size()));
+        Log.d("Score", "Size " + size);
+        if (commonQuestionSize != 0) {
+            score = String.valueOf((int) (((double) user1Arr.size() / (double) commonQuestionSize) * 100));
+            Log.d("Score", "Score is " + score);
+
+        }else if(user1Arr.isEmpty() || user2Arr.isEmpty()){
+            score ="0";
+
+        } else {
+            score = "0";
+        }
+        setScoreNode(user2Uid,score);
 
 
 
+    }
 
+    public void setScoreNode(String user2Uid,String score){
+        DatabaseReference scoreRef = FirebaseDatabase.getInstance().getReference()
+                .child("UserFriends")
+                .child(currentUser.getUid())
+                .child(user2Uid)
+                .child("score");
+        scoreRef.setValue(score);
+
+        DatabaseReference scoreRef2 = FirebaseDatabase.getInstance().getReference()
+                .child("UserFriends")
+                .child(user2Uid)
+                .child(currentUser.getUid())
+                .child("score");
+
+        scoreRef2.setValue(score);
+    }
+
+
+    @Override
+    public void onSuccess(Object o) {
+        compareWithFriends();
+    }
 }

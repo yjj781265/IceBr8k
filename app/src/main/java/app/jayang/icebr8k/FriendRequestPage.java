@@ -17,6 +17,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.onesignal.OneSignal;
 
 import java.util.ArrayList;
 
@@ -51,6 +52,7 @@ public class FriendRequestPage extends AppCompatActivity {
         getData();
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        OneSignal.clearOneSignalNotifications();
     }
 
 
@@ -67,14 +69,14 @@ public class FriendRequestPage extends AppCompatActivity {
     }
 
     private void getData(){
-        DatabaseReference requestRef = FirebaseDatabase.getInstance().getReference().child("Friends")
+        DatabaseReference requestRef = FirebaseDatabase.getInstance().getReference().child("UserFriends")
                 .child(currentUser.getUid());
         requestRef.keepSynced(true);
 
         requestRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    if(dataSnapshot.child("stats").getValue(String.class).equals("Pending")){
+                    if("pending".equals(dataSnapshot.child("stats").getValue(String.class))){
                     addToDialog( dataSnapshot.getKey());
                 }
                 noFrt.setVisibility(View.GONE);
@@ -83,7 +85,7 @@ public class FriendRequestPage extends AppCompatActivity {
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                if(dataSnapshot.child("stats").getValue(String.class).equals("Accepted")){
+                if("accepted".equals(dataSnapshot.child("stats").getValue(String.class))){
                     UserDialog dialog = new UserDialog();
                     dialog.setId(dataSnapshot.getKey());
                     mUserDialogs.remove(dialog);
@@ -119,7 +121,7 @@ public class FriendRequestPage extends AppCompatActivity {
             }
         });
 
-        requestRef.equalTo("Pending").addValueEventListener(new ValueEventListener() {
+        requestRef.equalTo("pending").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                if(dataSnapshot.hasChildren()){
@@ -151,8 +153,8 @@ public class FriendRequestPage extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
-                UserDialog dialog  =new UserDialog(user2Uid,user.getDisplayname(),user.getUsername()
-                ,user.getPhotourl(), null,null,user.getEmail());
+                UserDialog dialog  =new UserDialog(user.getDisplayname(),user.getUsername()
+                ,user.getPhotourl(), null,null,user.getEmail(),user2Uid,null);
                 mUserDialogs.add(dialog);
                 noFrt.setVisibility(View.GONE);
                  mAdapter.notifyDataSetChanged();

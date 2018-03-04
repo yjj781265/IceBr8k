@@ -842,11 +842,8 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                         }
                         map.clear();
                         center =true;
-                        if(mRecyclerView.getVisibility() == View.VISIBLE) {
-                            noUser.setVisibility(View.VISIBLE);
-                        }else{
-                            noUser.setVisibility(View.GONE);
-                        }
+                        noUser.setVisibility(View.GONE);
+
 
                         mLocationDialogs.clear();
                         mLocationDialogAdapter.notifyDataSetChanged();
@@ -932,7 +929,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     public void onDataMoved(DataSnapshot dataSnapshot, GeoLocation location) {
         if(dataSnapshot.getKey()!=null){
             Log.d(TAG,"user moved "+ dataSnapshot.getKey()) ;
-            Toast.makeText(getApplicationContext(),"user moved "+ dataSnapshot.getKey(),Toast.LENGTH_LONG).show();
+            // .makeText(getApplicationContext(),"user moved "+ dataSnapshot.getKey(),Toast.LENGTH_LONG).show();
             String userUid =dataSnapshot.getKey();
             LatLng latLng = new LatLng(location.latitude,location.longitude);
             if(mHashMap.containsKey(userUid) && mHashMap.get(userUid)!=null){
@@ -965,9 +962,15 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onGeoQueryReady() {
-        if(mLocationDialogs.isEmpty()){
+        if(mLocationDialogAdapter.getItemCount()>0 && !mLocationDialogs.isEmpty()){
             mProgressDialog.dismiss();
+            noUser.setVisibility(View.GONE);
+        }else if(mLocationDialogs.isEmpty() && mRecyclerView.getVisibility() == View.VISIBLE){
+            noUser.setVisibility(View.VISIBLE);
+        }else{
+            noUser.setVisibility(View.GONE);
         }
+
 
 
     }

@@ -196,7 +196,6 @@
             app:pb_colorNormal="@color/colorAccent"
             android:id="@+id/addFriend_btn"
             android:layout_gravity="center_horizontal"
-            android:text="Add Friend"
             android:textColor="@color/white"
             android:textAllCaps="false"
             android:textSize="14sp"

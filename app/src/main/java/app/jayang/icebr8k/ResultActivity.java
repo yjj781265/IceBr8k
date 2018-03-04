@@ -99,9 +99,9 @@ public class ResultActivity extends AppCompatActivity {
         lastClickTime = SystemClock.elapsedRealtime();
 
         if (id == R.id.mybutton) {
-            Intent mIntent = new Intent(getBaseContext(),MainChatActivity.class);
-                    mIntent.putExtra("user2Name",user2.getDisplayname());
-                    mIntent.putExtra("user2Id",user2Id);
+            Intent mIntent = new Intent(getBaseContext(),UserChatActvity.class);
+                    mIntent.putExtra("chatName",user2.getDisplayname());
+                    mIntent.putExtra("chatId",user2Id);
                     startActivity(mIntent);
             mIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     overridePendingTransition(R.anim.slide_from_right,android.R.anim.fade_out);

@@ -1,6 +1,5 @@
 package app.jayang.icebr8k;
 
-import android.*;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -11,26 +10,21 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.provider.ContactsContract;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.beardedhen.androidbootstrap.BootstrapButton;
-import com.beardedhen.androidbootstrap.api.attributes.BootstrapBrand;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.dd.processbutton.FlatButton;
@@ -52,11 +46,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.karumi.dexter.Dexter;
-import com.karumi.dexter.MultiplePermissionsReport;
-import com.karumi.dexter.PermissionToken;
-import com.karumi.dexter.listener.PermissionRequest;
-import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -65,12 +54,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Date;
 import java.util.UUID;
 
-import app.jayang.icebr8k.Fragments.me_frag;
 import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.Modle.UserMessage;
 import app.jayang.icebr8k.Modle.UserQA;
+import app.jayang.icebr8k.Utility.SendNotification;
 import id.zelory.compressor.Compressor;
 import me.imid.swipebacklayout.lib.SwipeBackLayout;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
@@ -87,6 +77,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
     MaterialDialog mProgressDialog;
     SwipeBackLayout mSwipeBackLayout;
     private long lastClickTime = 0;
+    DatabaseReference senderMessageRef, receiverMessageRef;
 
     FirebaseDatabase database;
     FirebaseUser currentUser;
@@ -132,6 +123,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         compare_btn.setOnClickListener(this);
         addFriend_btn.setOnClickListener(this);
+        addFriend_btn.setOnTouchListener(UserProfilePage.this);
         message_btn.setOnClickListener(this);
         deleteFriend_btn.setOnClickListener(this);
         reset_btn.setOnClickListener(this);
@@ -142,10 +134,15 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
 
 
+
+
+
         Intent i = getIntent();
         if(i!=null) {
             mUser = (User) i.getSerializableExtra("userInfo"); //user2
             uid = i.getStringExtra("userUid");
+            senderMessageRef = FirebaseDatabase.getInstance().getReference().child("UserMessages").child(currentUser.getUid()).child(uid);
+            receiverMessageRef = FirebaseDatabase.getInstance().getReference().child("UserMessages").child(uid).child(currentUser.getUid());
         }
 
 
@@ -486,7 +483,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
 
     private void checkFriendStats(){
-        DatabaseReference friendStatsRef = database.getReference().child("Friends").
+        DatabaseReference friendStatsRef = database.getReference().child("UserFriends").
                 child(currentUser.getUid()).child(uid).child("stats");
         friendStatsRef.keepSynced(true);
         friendStatsRef.addValueEventListener(new ValueEventListener() {
@@ -498,16 +495,17 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                     addFriend_btn.setClickable(true);
                     addFriend_btn.setText("Send Friend Request");
                     addFriend_btn.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+
                     message_btn.setVisibility(View.VISIBLE);
                     deleteFriend_btn.setVisibility(View.GONE);
-                }else if(stats.equals("Pending")){
+                }else if(stats.equals("pending")){
                     deleteFriend_btn.setVisibility(View.GONE);
                     addFriend_btn.setVisibility(View.VISIBLE);
                     message_btn.setVisibility(View.VISIBLE);
                     addFriend_btn.setText("Respond to Friend Request");
                     addFriend_btn.setOnTouchListener(UserProfilePage.this);
                     addFriend_btn.setBackgroundColor(getResources().getColor(R.color.darkOrange));
-                }else if(stats.equals("Accepted")){
+                }else if(stats.equals("accepted")){
                     addFriend_btn.setVisibility(View.GONE);
                     message_btn.setVisibility(View.VISIBLE);
                     deleteFriend_btn.setVisibility(View.VISIBLE);
@@ -516,6 +514,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                     addFriend_btn.setClickable(true);
                     addFriend_btn.setText("Send Friend Request");
                     addFriend_btn.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+                    addFriend_btn.setOnTouchListener(UserProfilePage.this);
                     message_btn.setVisibility(View.VISIBLE);
                     deleteFriend_btn.setVisibility(View.GONE);
                 }
@@ -527,13 +526,13 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
             }
         });
 
-        DatabaseReference friendStatsRef2 = database.getReference().child("Friends").
+        DatabaseReference friendStatsRef2 = database.getReference().child("UserFriends").
               child(uid).child(currentUser.getUid()).child("stats");
         friendStatsRef2.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                  String stats = dataSnapshot.getValue(String.class);
-                         if(stats!=null &&  stats.equals("Pending")){
+                         if(stats!=null &&  stats.equals("pending")){
                              deleteFriend_btn.setVisibility(View.GONE);
                              addFriend_btn.setVisibility(View.VISIBLE);
                              message_btn.setVisibility(View.VISIBLE);
@@ -567,29 +566,15 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         }
     }
 
-    private void sendFriendRequest(){
-        if( uid !=null && !uid.equals(currentUser.getUid())){
-            DatabaseReference setUser2FriendRef = database.getReference().child("Friends").child(uid)
+    private void sendFriendRequest() {
+        if (uid != null && !uid.equals(currentUser.getUid())) {
+            DatabaseReference setUser2FriendRef = database.getReference().child("UserFriends").child(uid)
                     .child(currentUser.getUid()).child("stats");
-            setUser2FriendRef.setValue("Pending").addOnCompleteListener(new OnCompleteListener<Void>() {
+            setUser2FriendRef.setValue("pending").addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
-                    Toast.makeText(getApplicationContext(),"Request Sent",Toast.LENGTH_SHORT).show();
-                }
-            });
-
-            DatabaseReference playerIdRef = database.getReference().child("Notification").child(uid).
-                    child("player_id");
-            playerIdRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    String playerid = dataSnapshot.getValue(String.class);
-                  SendNotification.sendFriendRequestNotification(playerid,"Friend Request",  currentUser.getDisplayName()+" send you a friend request.");
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
+                    SendNotification.sendFriendRequestNotification(uid,"Friend Request",  currentUser.getDisplayName()+" send you a friend request.");
+                    Toast.makeText(getApplicationContext(), "Request Sent", Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -599,10 +584,10 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
     private void deleteFriend(){
         if(uid!=null && !uid.equals(currentUser.getUid())) {
-            DatabaseReference deleteRef = database.getReference().child("Friends").child(currentUser.getUid())
+            DatabaseReference deleteRef = database.getReference().child("UserFriends").child(currentUser.getUid())
                     .child(uid);
             deleteRef.removeValue();
-            DatabaseReference deleteRef2 = database.getReference().child("Friends").child(uid).child(currentUser.getUid());
+            DatabaseReference deleteRef2 = database.getReference().child("UserFriends").child(uid).child(currentUser.getUid());
             deleteRef2.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
@@ -762,38 +747,77 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                 });
 
     }
-    public void changeAvatar() {
-        //request permission
-        Dexter.withActivity(this)
-                .withPermissions(android.Manifest.permission.CAMERA,
-                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE).withListener(
-                new MultiplePermissionsListener() {
-                    @Override
-                    public void onPermissionsChecked(MultiplePermissionsReport report) {
-                        if( report.areAllPermissionsGranted()) {
 
-                            //open camera or gallery
-                            EasyImage.openChooserWithGallery(UserProfilePage.this,
-                                    "Take or Pick a photo for your avatar", 0);
-                        }else{
-                            showSnackbarWithSetting("Camera and Storage permission are " +
-                                    "needed for your avatar",getCurrentFocus());
-                        }
-                    }
-
-                    @Override
-                    public void onPermissionRationaleShouldBeShown
-                            (List<PermissionRequest> permissions, PermissionToken token) {
-                        //asker user for permission again if user denied(not ask again is unchecked)
-                        token.continuePermissionRequest();
-                    }
-                }). check();
-    }
 
 
     public void showToast(String str){
         Toast.makeText(getApplicationContext(),str,Toast.LENGTH_LONG).show();
     }
+
+    public void showGreetingDialog(){
+        new MaterialDialog.Builder(this)
+                .title("Greeting Message")
+                .inputType(InputType.TYPE_CLASS_TEXT ).inputRange(0,30)
+                .input(null, null, new MaterialDialog.InputCallback() {
+                    @Override
+                    public void onInput(MaterialDialog dialog, CharSequence input) {
+                        if(!input.toString().trim().isEmpty()){
+                            String text = input.toString();
+                          UserMessage message = new UserMessage(text, currentUser.getUid(),
+                                    "text", UUID.randomUUID().toString().replaceAll("-", ""),
+                                    new Date().getTime());
+                          updateMessagetoFirebase(message);
+                        }
+                        sendFriendRequest();
+                    }
+                }).show();
+    }
+
+    private void updateMessagetoFirebase(final UserMessage message) {
+        senderMessageRef.child("chathistory").
+                child(message.getMessageid()).setValue(message).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+
+                receiverMessageRef.child("chathistory").
+                        child(message.getMessageid()).setValue(message);
+                setLastMessageNode(message);
+                setUnread();
+
+            }
+        });
+    }
+
+    private void setUnread(){
+        final DatabaseReference checkUnreadRef = receiverMessageRef.child("unread");
+        checkUnreadRef.keepSynced(true);
+        checkUnreadRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Integer unRead = dataSnapshot.getValue(Integer.class);
+                if(unRead==null){
+                    checkUnreadRef.setValue(1);
+                }else{
+                    checkUnreadRef.setValue(++unRead);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+    }
+
+    private void setLastMessageNode(UserMessage message){
+        DatabaseReference lastMegNode = senderMessageRef.child("lastmessage");
+        lastMegNode.setValue(message);
+        DatabaseReference lastmessage2 = receiverMessageRef.child("lastmessage");
+        lastmessage2.setValue(message);
+    }
+
 
 
 
@@ -818,16 +842,16 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                 }
             } else if (id == R.id.message_btn) {
                 if (!uid.equals(currentUser.getUid())) {
-                    Intent intent = new Intent(getApplicationContext(), MainChatActivity.class);
-                    intent.putExtra("user2Id", uid);
-                    intent.putExtra("user2Name", mUser.getDisplayname());
-                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT|Intent.FLAG_ACTIVITY_NEW_TASK );
+                    Intent intent = new Intent(getApplicationContext(), UserChatActvity.class);
+                    intent.putExtra("chatId", uid);
+                    intent.putExtra("chatName", mUser.getDisplayname());
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     startActivity(intent);
                     overridePendingTransition(R.anim.slide_from_right,android.R.anim.fade_out);
                 }
             } else if (id == R.id.addFriend_btn) {
                 if (addFriend_btn.getText().toString().equals("Send Friend Request")) {
-                     sendFriendRequest();
+                     showGreetingDialog();
                 }else if(addFriend_btn.getText().toString().equals("Respond to Friend Request")){
                     Intent intent = new Intent(getApplicationContext(),FriendRequestPage.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT|Intent.FLAG_ACTIVITY_NEW_TASK );

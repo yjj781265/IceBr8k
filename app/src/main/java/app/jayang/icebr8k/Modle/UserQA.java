@@ -10,14 +10,24 @@ import android.support.annotation.NonNull;
 
 public class UserQA implements Parcelable,Comparable<UserQA> {
     private String questionId,answer,question;
+    private Boolean favorite;
 
     public UserQA(){}
 
 
-    public UserQA(String questionId, String answer, String question) {
+    public UserQA(String questionId, String answer, String question, Boolean favorite) {
         this.questionId = questionId;
         this.answer = answer;
         this.question = question;
+        this.favorite = favorite;
+    }
+
+    public Boolean getFavorite() {
+        return favorite;
+    }
+
+    public void setFavorite(Boolean favorite) {
+        this.favorite = favorite;
     }
 
     public String getQuestionId() {

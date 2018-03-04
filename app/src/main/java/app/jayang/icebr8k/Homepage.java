@@ -1,16 +1,14 @@
 package app.jayang.icebr8k;
 import android.Manifest;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
+import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.media.RingtoneManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -20,11 +18,11 @@ import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -71,14 +69,14 @@ import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
 import app.jayang.icebr8k.Fragments.SurveyTab_Fragment;
 import app.jayang.icebr8k.Fragments.UserMessageDialog_Frag;
 import app.jayang.icebr8k.Fragments.Userstab_Fragment;
-import app.jayang.icebr8k.Fragments.chat_frag;
 import app.jayang.icebr8k.Fragments.me_frag;
 import app.jayang.icebr8k.Modle.ActivityCommunicator;
 import app.jayang.icebr8k.Modle.myViewPager;
+import app.jayang.icebr8k.Utility.MyJobService;
 
 
 public class Homepage extends AppCompatActivity  implements
-        OSSubscriptionObserver,chat_frag.OnCompleteListener,
+        OSSubscriptionObserver,
         ConnectivityChangeListener,
         SharedPreferences.OnSharedPreferenceChangeListener,ActivityCommunicator {
     private final int  REQUEST_CHECK_SETTINGS =9000;
@@ -158,7 +156,6 @@ public class Homepage extends AppCompatActivity  implements
 
 
         initialiseOnlinePresence();
-        deleteInChatRoomNode();
         unReadCheck();
         setBadge();
 
@@ -176,14 +173,14 @@ public class Homepage extends AppCompatActivity  implements
             if (getIntent().getExtras().getString("mainchat") != null) {
                 viewPager.setCurrentItem(2);
             }
-            if (getIntent().getExtras().getString("user2Id") != null &&
-                    getIntent().getExtras().getString("user2Name") != null){
-                String user2Id = getIntent().getExtras().getString("user2Id");
-                String name = getIntent().getExtras().getString("user2Name");
-                Intent mIntent = new Intent(this, MainChatActivity.class);
+            if (getIntent().getExtras().getString("chatId") != null &&
+                    getIntent().getExtras().getString("chatName") != null){
+                String chatId = getIntent().getExtras().getString("chatId");
+                String name = getIntent().getExtras().getString("chatName");
+                Intent mIntent = new Intent(this, UserChatActvity.class);
                 getIntent().addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                mIntent.putExtra("user2Id", user2Id);
-                mIntent.putExtra("user2Name", name);
+                mIntent.putExtra("chatId", chatId);
+                mIntent.putExtra("chatName", name);
                 startActivity(mIntent);
                 overridePendingTransition(R.anim.slide_from_right,0);
             }
@@ -197,11 +194,11 @@ public class Homepage extends AppCompatActivity  implements
                 setLifetime(Lifetime.FOREVER).setRecurring(true).setTag(Job_TaG).setTrigger(Trigger.executionWindow(600,900))
                 .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL).setConstraints(Constraint.ON_ANY_NETWORK).setReplaceCurrent(true).build();
         mDispatcher.mustSchedule(job);
-        Toast.makeText(this,"Sharing Location in the background ",Toast.LENGTH_LONG).show();
+        //Toast.makeText(this,"Sharing Location in the background ",Toast.LENGTH_LONG).show();
     }
     public void stopJob(){
         mDispatcher.cancel(Job_TaG);
-        Toast.makeText(this,"Sharing Location off",Toast.LENGTH_LONG).show();
+       // Toast.makeText(this,"Sharing Location off",Toast.LENGTH_LONG).show();
     }
 
 
@@ -213,14 +210,14 @@ public class Homepage extends AppCompatActivity  implements
                 viewPager.setCurrentItem(2,false);
             }
             // handle notification clicked
-            else if (intent.getExtras().getString("user2Id") != null &&
-                    intent.getExtras().getString("user2Name") != null){
-                String user2Id = intent.getExtras().getString("user2Id");
-                String name = intent.getExtras().getString("user2Name");
-                Intent mIntent = new Intent(this, MainChatActivity.class);
+            else if (intent.getExtras().getString("chatId") != null &&
+                    intent.getExtras().getString("chatName") != null){
+                String chatId = intent.getExtras().getString("chatId");
+                String name = intent.getExtras().getString("chatName");
+                Intent mIntent = new Intent(this, UserChatActvity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                mIntent.putExtra("user2Id", user2Id);
-                mIntent.putExtra("user2Name", name);
+                mIntent.putExtra("chatId", chatId);
+                mIntent.putExtra("chatName", name);
                 startActivity(mIntent);
                 overridePendingTransition(R.anim.slide_from_right,0);
             }
@@ -314,6 +311,13 @@ public class Homepage extends AppCompatActivity  implements
         super.onStart();
         showLog("onStart");
         setOnline();
+        Bitmap icon = BitmapFactory.decodeResource(this.getResources(),
+                R.drawable.ic_stat_onesignal_default);
+        String label =Html.fromHtml("<font color=\"#fffff4\">" + "IceBr8k"+ "</font>").toString();
+        ActivityManager.TaskDescription taskDescription = new ActivityManager.
+
+                TaskDescription(label, icon, getResources().getColor(R.color.colorPrimary));
+        ((Activity)this).setTaskDescription(taskDescription);
 
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         sharedPref.registerOnSharedPreferenceChangeListener(this);
@@ -406,13 +410,13 @@ public class Homepage extends AppCompatActivity  implements
 
     public void unReadCheck() {
         DatabaseReference unReadcountRef = FirebaseDatabase.getInstance().
-                getReference("Messages/" + currentUser.getUid());
+                getReference("UserMessages/" + currentUser.getUid());
         unReadcountRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 int count = 0;
                 for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                    Integer i = childSnapshot.child("unRead").getValue(Integer.class);
+                    Integer i = childSnapshot.child("unread").getValue(Integer.class);
                     if (i != null) {
                         count = count + i;
                     }
@@ -432,7 +436,7 @@ public class Homepage extends AppCompatActivity  implements
     }
 
     private void setBadge(){
-        DatabaseReference badgeRef = FirebaseDatabase.getInstance().getReference().child("Friends")
+        DatabaseReference badgeRef = FirebaseDatabase.getInstance().getReference().child("UserFriends")
                 .child(currentUser.getUid());
         badgeRef.keepSynced(true);
 
@@ -441,7 +445,7 @@ public class Homepage extends AppCompatActivity  implements
             public void onDataChange(DataSnapshot dataSnapshot) {
                 int count =0;
                 for(DataSnapshot chidSnapShot : dataSnapshot.getChildren()){
-                    if("Pending".equals(chidSnapShot.child("stats").getValue(String.class))){
+                    if("pending".equals(chidSnapShot.child("stats").getValue(String.class))){
                         count++;
                     }
                 }
@@ -488,10 +492,9 @@ public class Homepage extends AppCompatActivity  implements
 
     public void setHomepageTab(){ mViewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
         mViewPagerAdapter.addFragment(new SurveyTab_Fragment());
-      mViewPagerAdapter.addFragment(new Userstab_Fragment());
-      mViewPagerAdapter.addFragment(new chat_frag() );
+      mViewPagerAdapter.addFragment(new Userstab_Fragment());mViewPagerAdapter.addFragment(new UserMessageDialog_Frag());
       mViewPagerAdapter.addFragment(new me_frag());
-      mViewPagerAdapter.addFragment(new UserMessageDialog_Frag());
+
 
 
       viewPager.setAdapter(mViewPagerAdapter);
@@ -506,8 +509,7 @@ public class Homepage extends AppCompatActivity  implements
                 R.drawable.message_selector);
         AHBottomNavigationItem item4 = new AHBottomNavigationItem("Me",
                 R.drawable.me_selector);
-        AHBottomNavigationItem item5 = new AHBottomNavigationItem("Me2",
-                R.drawable.me_selector);
+
 
 
         // Add items
@@ -515,11 +517,11 @@ public class Homepage extends AppCompatActivity  implements
         homepageTab.addItem(item2);
         homepageTab.addItem(item3);
         homepageTab.addItem(item4);
-        homepageTab.addItem(item5);
+
 
 
         // for smooth swipe
-        viewPager.setOffscreenPageLimit(4);
+        viewPager.setOffscreenPageLimit(3);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -553,9 +555,7 @@ public class Homepage extends AppCompatActivity  implements
 
 
 
-    public void deleteInChatRoomNode(){
-        mRef.child("Messages").child(currentUser.getUid()).child("inChatRoom").setValue(null);
-    }
+
 
 
     public void setOnline(){
@@ -563,6 +563,22 @@ public class Homepage extends AppCompatActivity  implements
             presenceRef.setValue("2");
             lastSeenRef.removeValue();
         }
+        final DatabaseReference oldOnLineref = FirebaseDatabase.getInstance().getReference()
+                .child("Users")
+                .child(currentUser.getUid());
+        oldOnLineref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChild("onlineStats")){
+                    oldOnLineref.child("onlineStats").removeValue();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     public void setBusy(){
@@ -625,10 +641,7 @@ public class Homepage extends AppCompatActivity  implements
 
 
 
-    @Override
-    public void onComplete() {
 
-    }
 
 
     public void Signout() {

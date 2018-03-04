@@ -82,9 +82,9 @@ public class MyDateFormatter {
         return isSameYear(calendar, Calendar.getInstance());
     }
 
-    public static String timeStampToDateConverter(long timestamp, boolean isDateHeader) {
+    public static String timeStampToDateConverter(long timestamp, boolean isDialogDate) {
         Date date = new Date(timestamp);
-        if (isDateHeader) {
+        if (isDialogDate) {
             if (isToday(date)) {
                 return "Today";
             } else if (isYesterday(date)) {
@@ -161,7 +161,7 @@ public class MyDateFormatter {
 
 
     public static String lastSeenConverterShort(long timestamp){
-        String  string = "";
+        String  string = "offline";
         long milliseconds = new Date().getTime() - timestamp;
         long days =0;
         long months =0;

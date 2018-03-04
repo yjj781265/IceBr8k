@@ -1,27 +1,13 @@
 package app.jayang.icebr8k;
 
 import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.onesignal.OSNotificationAction;
 import com.onesignal.OSNotificationOpenResult;
 import com.onesignal.OneSignal;
 
 import org.json.JSONObject;
-
-import java.time.LocalDate;
-
-import app.jayang.icebr8k.Modle.Message;
-import app.jayang.icebr8k.Modle.User;
 
 
 /**
@@ -37,13 +23,13 @@ public class MyNotificationOpenedHandler implements OneSignal.NotificationOpened
         final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         final String user2Id ,name;
         if (data != null) {
-            user2Id = data.optString("user2Id");
-            name =data.optString("user2Name");
+            user2Id = data.optString("chatId");
+            name =data.optString("chatName");
 
             if (user2Id != null && name!=null) {
                 Intent  mIntent = new Intent(MyApplication.getContext(), Homepage.class);
-                mIntent.putExtra("user2Id", user2Id);
-                mIntent.putExtra("user2Name", name);
+                mIntent.putExtra("chatId", user2Id);
+                mIntent.putExtra("chatName", name);
                 mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT );
                 MyApplication.getContext().startActivity(mIntent);
                         }

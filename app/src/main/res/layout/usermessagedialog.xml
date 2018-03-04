@@ -2,8 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/messageDialog"
     android:background="?attr/selectableItemBackground"
-                android:layout_marginTop="5dp"
-
+                android:paddingTop="5dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -25,23 +24,29 @@
             android:layout_height="48dp"
             android:scaleType="centerCrop" />
 
+
+    </LinearLayout>
         <TextView
             android:id="@+id/messageDialog_unread"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
-            android:gravity="center"
+            android:layout_marginLeft="-25dp"
+            android:layout_marginTop="2dp"
             android:background="@drawable/badge_circle"
-            android:layout_marginLeft="-10dp"
-            android:padding="5dp"
+            android:gravity="center"
+            android:padding="2dp"
             android:text="99"
             android:textColor="#FFF"
-            android:textSize="8dp"
-            android:textStyle="bold" />
-    </LinearLayout>
+            android:textSize="12dp"
+            android:textStyle="bold"/>
+
+
+
 
         <LinearLayout
             android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
             android:layout_width="match_parent"
             android:orientation="vertical"
             android:layout_height="wrap_content">
@@ -61,7 +66,7 @@
             android:scrollHorizontally="true"
             android:scrollbars="none"
             android:textColor="@color/black"
-            android:textSize="16dp" />
+            android:textSize="16sp" />
 
 
 
@@ -75,7 +80,7 @@
             android:layout_height="wrap_content"
             android:maxLines="1"
             android:ellipsize="end"
-            android:textSize="14dp" />
+            android:textSize="14sp" />
 
 
     </LinearLayout>
@@ -97,7 +102,7 @@
                 android:ellipsize="end"
                 android:layout_weight="6"
                 android:layout_marginTop="6dp"
-                android:textSize="12sp"
+                android:textSize="14sp"
                 android:text="HOw is the project going , and the fu1231231321nd best d d d? d" />
         <ImageView
 

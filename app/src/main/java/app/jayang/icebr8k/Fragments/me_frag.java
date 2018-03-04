@@ -139,8 +139,26 @@ public class me_frag extends Fragment {
         badge.setVisibility(View.INVISIBLE);
         displayname.setText(currentuser.getDisplayName());
         email.setText(currentuser.getEmail());
-        Glide.with(fragView).load(currentuser.getPhotoUrl()).
-                apply(RequestOptions.circleCropTransform()).into(avatar);
+
+        DatabaseReference photoUrlref = FirebaseDatabase.getInstance().getReference().child("Users")
+                .child(currentuser.getUid()).child("photourl");
+        photoUrlref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String photourl = dataSnapshot.getValue(String.class);
+                if(photourl!=null){
+                    Glide.with(fragView).load(photourl).
+                            apply(RequestOptions.circleCropTransform()).into(avatar);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
 
         setBadge();
         //set switchcompat state base on user's choice history
@@ -187,6 +205,7 @@ public class me_frag extends Fragment {
             }
         });
 
+        //friendrequest button
         mLinearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -194,7 +213,7 @@ public class me_frag extends Fragment {
                     return;
                 }
                 lastClickTime = SystemClock.elapsedRealtime();
-                Intent i = new Intent(getContext(), UserChatActvity.class);
+                Intent i = new Intent(getContext(), FriendRequestPage.class);
 
                 startActivity(i);
             }
@@ -256,7 +275,7 @@ public class me_frag extends Fragment {
     }
 
     private void setBadge(){
-        DatabaseReference badgeRef = FirebaseDatabase.getInstance().getReference().child("Friends")
+        DatabaseReference badgeRef = FirebaseDatabase.getInstance().getReference().child("UserFriends")
                 .child(currentuser.getUid());
         badgeRef.keepSynced(true);
 
@@ -265,7 +284,7 @@ public class me_frag extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 int count =0;
              for(DataSnapshot chidSnapShot : dataSnapshot.getChildren()){
-                 if("Pending".equals(chidSnapShot.child("stats").getValue(String.class))){
+                 if("pending".equals(chidSnapShot.child("stats").getValue(String.class))){
                     count++;
                  }
              }

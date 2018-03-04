@@ -48,10 +48,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainChatActivity"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait" />
-        <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />
 
@@ -115,14 +111,16 @@
             android:screenOrientation="portrait"></activity>
 
         <service
-            android:name=".MyJobService"
+            android:name=".Utility.MyJobService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
             </intent-filter>
         </service>
 
-        <activity android:name=".UserChatActvity"></activity>
+        <activity android:name=".UserChatActvity"
+                  android:launchMode="singleTask"></activity>
+
     </application>
 
 </manifest>

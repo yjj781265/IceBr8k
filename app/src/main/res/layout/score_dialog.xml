@@ -41,7 +41,7 @@
             custom:arc_finished_color="@color/colorAccent"
             custom:arc_unfinished_color="@color/gray_light"/>
         <LinearLayout
-
+            android:paddingTop="15dp"
             android:layout_width="match_parent"
             android:layout_below="@id/arc_progress"
             android:orientation="horizontal"
@@ -58,7 +58,7 @@
             android:layout_marginEnd="20dp"
             android:layout_toStartOf="@+id/details_btn"
             android:alpha="0.9"
-            android:background="?attr/selectableItemBackground"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:text="Cancel"
             android:textColor="@android:color/white"
@@ -71,7 +71,7 @@
                 android:layout_below="@id/arc_progress"
                 android:layout_marginBottom="20dp"
                 android:alpha="0.9"
-                android:background="?attr/selectableItemBackground"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:layout_marginRight="20dp"
 

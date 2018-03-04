@@ -52,4 +52,22 @@ public class SurveyQ {
     public void setAnswer(ArrayList answer) {
         this.answer = answer;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SurveyQ surveyQ = (SurveyQ) o;
+
+        if (type != null ? !type.equals(surveyQ.type) : surveyQ.type != null) return false;
+        return questionId.equals(surveyQ.questionId);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = type != null ? type.hashCode() : 0;
+        result = 31 * result + questionId.hashCode();
+        return result;
+    }
 }

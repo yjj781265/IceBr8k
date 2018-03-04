@@ -5,19 +5,39 @@ package app.jayang.icebr8k.Modle;
  */
 
 public class UserMessageDialog {
-    private String id,dialogName;
+    private String id,dialogName,photoUrl;
     private UserMessage lastMessage;
-    private Boolean groupChat;
+    private Integer unRead;
+    private Boolean groupchat,muted;
 
     public UserMessageDialog() {
     }
 
 
-    public UserMessageDialog(String id, String dialogName, UserMessage lastMessage, Boolean groupChat) {
+    public UserMessageDialog(String id, String dialogName, String photoUrl, UserMessage lastMessage, Integer unRead, Boolean groupchat, Boolean muted) {
         this.id = id;
         this.dialogName = dialogName;
+        this.photoUrl = photoUrl;
         this.lastMessage = lastMessage;
-        this.groupChat = groupChat;
+        this.unRead = unRead;
+        this.groupchat = groupchat;
+        this.muted = muted;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
+    }
+
+    public Integer getUnRead() {
+        return unRead;
+    }
+
+    public void setUnRead(Integer unRead) {
+        this.unRead = unRead;
     }
 
     public String getDialogName() {
@@ -44,12 +64,21 @@ public class UserMessageDialog {
         this.lastMessage = lastMessage;
     }
 
-    public Boolean getGroupChat() {
-        return groupChat;
+
+    public Boolean getGroupchat() {
+        return groupchat;
     }
 
-    public void setGroupChat(Boolean groupChat) {
-        this.groupChat = groupChat;
+    public void setGroupchat(Boolean groupchat) {
+        this.groupchat = groupchat;
+    }
+
+    public Boolean getMuted() {
+        return muted;
+    }
+
+    public void setMuted(Boolean muted) {
+        this.muted = muted;
     }
 
     @Override

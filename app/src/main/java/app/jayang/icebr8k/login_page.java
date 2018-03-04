@@ -11,6 +11,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -66,6 +67,8 @@ public class login_page extends AppCompatActivity implements
 
     private static final String TAG = "loginPage";
     private static final int RC_SIGN_IN = 9001;
+
+    private long lastClickTime =0;
     // [START declare_auth]
     private FirebaseAuth mAuth;
     // [END declare_auth]
@@ -80,7 +83,7 @@ public class login_page extends AppCompatActivity implements
     private TextInputLayout email_layout,password_layout;
     private TextInputEditText password,email;
     private MaterialDialog userNameDialog,dismissDialog;
-    private final String DEFAULT_PHOTO_URL = "https://firebasestorage.googleapis.com/v0/b/icebr8k-98675.appspot.com/o/UserAvatars%2Fdefault_avatar.png?alt=media&token=dc892e95-1eec-41aa-9859-bb95cd0d823d";
+    private final String DEFAULT_PHOTO_URL = "https://i.imgur.com/zI4v7oF.png";
 
 
             @Override
@@ -553,7 +556,10 @@ public void usernameCreateCheck(final GoogleSignInAccount account){
 
     @Override
     public void onClick(View view) {
-
+        if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+            return;
+        }
+        lastClickTime = SystemClock.elapsedRealtime();
         if (view.getId() == R.id.sign_in_button && mAuth.getCurrentUser()==null) {
             if(checkInternet()) {
                 signIn();

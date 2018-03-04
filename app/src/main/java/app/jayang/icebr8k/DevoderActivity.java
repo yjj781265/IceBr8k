@@ -57,6 +57,7 @@ public class DevoderActivity extends AppCompatActivity  implements ZXingScannerV
                         overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
                     } else {
                         Toast.makeText(getApplicationContext(),"Sorry, not a valid IceBr8k QR code, try it again", Toast.LENGTH_SHORT).show();
+                        mScannerView.resumeCameraPreview(DevoderActivity.this);
 
                     }
                 }

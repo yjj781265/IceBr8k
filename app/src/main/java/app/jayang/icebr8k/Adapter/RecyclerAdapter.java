@@ -3,7 +3,7 @@ package app.jayang.icebr8k.Adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.os.SystemClock;
-import android.support.v7.util.DiffUtil;
+
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,7 +22,6 @@ import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 
-import app.jayang.icebr8k.Modle.UserDialogsChange;
 import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.Modle.UserDialog;
 import app.jayang.icebr8k.R;
@@ -42,7 +41,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
 
     public class UserDialogViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
          private ImageView image,onlineStats;
-         private TextView displayname,username,score;
+         private TextView displayname,username,score,lastSeen;
          private RelativeLayout mRelativeLayout;
          private long lastClickTime =0;
 
@@ -51,9 +50,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
             image = itemView.findViewById(R.id.imageview_id);
             displayname =itemView.findViewById(R.id.displayname_textview);
             username=itemView.findViewById(R.id.username_textview);
-            mRelativeLayout =itemView.findViewById(R.id.user_item_RLayout);
             score = itemView.findViewById(R.id.score);
             onlineStats =itemView.findViewById(R.id.onlineStats);
+            lastSeen = itemView.findViewById(R.id.lastseen);
             itemView.setOnClickListener(this);
 
         }
@@ -114,53 +113,70 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
     public void onBindViewHolder(final UserDialogViewHolder holder, int position) {
         final UserDialog dialog = mUserDialogs.get(position);
         Log.d("UserFrag","onBind "+ dialog.getId());
-        holder.username.setText(dialog.getUsername());
-        holder.displayname.setText(dialog.getName());
-        if(holder.image.getAlpha()!=1.0f) {
-            holder.image.setAlpha(1.0f);
+        if(dialog.getUsername()!=null) {
+            holder.username.setText(dialog.getUsername());
         }
-        Glide.with(holder.image.getContext()).load(dialog.getPhotoUrl()).
-                apply(RequestOptions.circleCropTransform()).into(holder.image);
+
+        if(dialog.getName()!=null){
+            holder.displayname.setText(dialog.getName());
+        }
+
+
+        if(dialog.getPhotoUrl()!=null){
+            Glide.with(holder.image.getContext()).load(dialog.getPhotoUrl()).
+                    apply(RequestOptions.circleCropTransform()).into(holder.image);
+        }
+
 
         if ( dialog.getScore()!=null && dialog.getScore().equals("")) {
-            holder.score.setVisibility(View.INVISIBLE);
+            holder.score.setVisibility(View.GONE);
         } else {
+            holder.score.setVisibility(View.VISIBLE);
             holder.score.setText(dialog.getScore() + "%");
 
         }
-        String online =dialog.getOnlineStats();
+        String lastseen = dialog.getLastseen();
+        if(lastseen!=null){
+            holder.lastSeen.setVisibility(View.VISIBLE);
+            holder.lastSeen.setText(lastseen);
+        }else{
+            holder.lastSeen.setVisibility(View.GONE);
+        }
+
+
+        String online =dialog.getOnlinestats();
            if(online!=null){
                     if (online.equals("2")) {
                         holder.onlineStats.setImageResource(R.drawable.green_dot);
                         holder.onlineStats.setVisibility(View.VISIBLE);
-                        if(holder.mRelativeLayout.getAlpha()!=1.0f) {
-                            holder.mRelativeLayout.setAlpha(1.0f);
-                        }
+                        holder.itemView.setAlpha(1.0f);
+
 
 
 
                     } else if (online.equals("1")) {
                         holder.onlineStats.setImageResource(R.drawable.circle_shape_busy);
                         holder.onlineStats.setVisibility(View.VISIBLE);
-                        if(holder.mRelativeLayout.getAlpha()!=1.0f) {
-                            holder.mRelativeLayout.setAlpha(1.0f);
-                        }
+                        holder.itemView.setAlpha(1.0f);
+
+
+
 
 
 
 
                     } else {
                         holder.onlineStats.setVisibility(View.INVISIBLE);
-                        holder.image.setAlpha(0.5f);
-                        holder.mRelativeLayout.setAlpha(0.5f);
+                        holder.itemView.setAlpha(0.5f);
+
 
                     }
 
                 } else {
                     // null
                     holder.onlineStats.setVisibility(View.INVISIBLE);
-                    holder.image.setAlpha(0.5f);
-                    holder.mRelativeLayout.setAlpha(0.5f);
+                    holder.itemView.setAlpha(0.5f);
+
                 }
 
 
@@ -179,18 +195,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
         return  (mUserDialogs.get(position).getId()).hashCode() ;
     }
 
-    public void swapItems(ArrayList<UserDialog> dialogs) {
-        // compute diffs
-        final UserDialogsChange diffCallback = new UserDialogsChange(mUserDialogs,dialogs);
-        final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
 
-        // clear contacts and add
-       mUserDialogs.clear();
-       mUserDialogs.addAll(dialogs);
-
-        diffResult.dispatchUpdatesTo(this);
-        // calls adapter's notify methods after diff is computed
-    }
     @Override
     public Filter getFilter() {
         return new Filter() {

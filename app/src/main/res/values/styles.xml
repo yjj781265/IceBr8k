@@ -89,7 +89,7 @@
     </style>
 
     <style name="myPopupMenuTextAppearanceSmall" parent="@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Small">
-        <item name="android:textColor">@color/dark_gray</item>
+        <item name="android:textColor">@color/black_overlay</item>
     </style>
 
 

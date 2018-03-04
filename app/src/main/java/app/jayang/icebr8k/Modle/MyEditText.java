@@ -52,9 +52,10 @@ public class MyEditText extends AppCompatEditText{
 
                         // read and display inputContentInfo asynchronously.
                         // call inputContentInfo.releasePermission() as needed.
-                        Toast.makeText(getContext(), inputContentInfo.getLinkUri().toString(), Toast.LENGTH_SHORT).show();
 
-                        return true;  // return true if succeeded
+                        Toast.makeText(getContext(), "Gif image is not currently support", Toast.LENGTH_SHORT).show();
+
+                        return false;  // return true if succeeded
                     }
                 };
         return InputConnectionCompat.createWrapper(ic, editorInfo, callback);

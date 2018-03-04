@@ -77,7 +77,7 @@ import pl.aprilapps.easyphotopicker.EasyImage;
 
 
 public class signup extends SwipeBackActivity {
-    private final String DEFAULT_PHOTO_URL = "https://firebasestorage.googleapis.com/v0/b/icebr8k-98675.appspot.com/o/UserAvatars%2Fdefault_avatar.png?alt=media&token=dc892e95-1eec-41aa-9859-bb95cd0d823d";
+    private final String DEFAULT_PHOTO_URL = "https://i.imgur.com/zI4v7oF.png";
     private ImageView avatar;
     private ScrollView sv;
     private Boolean flag,defaultPhotoFlag;

@@ -35,6 +35,7 @@
 <string name="cancel">Cancel</string>
 <string name="no_users">No Users Found</string>
 <string name="ok">OK</string>
+    <string name="no_question_left">No more questions, try your luck with refresh button ☺ </string>
 
 <string name="title_activity_full_image_view">FullImageView</string>
 <string name="dummy_button">Dummy Button</string>

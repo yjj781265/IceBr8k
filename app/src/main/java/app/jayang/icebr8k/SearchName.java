@@ -100,8 +100,9 @@ public class SearchName extends SwipeBackActivity implements SearchView.OnQueryT
     @Override
     public void onBackPressed() {
         hideKeyboard();
-        overridePendingTransition(0,0);
+
         finish();
+        overridePendingTransition(0,0);
 
     }
 
@@ -112,8 +113,9 @@ public class SearchName extends SwipeBackActivity implements SearchView.OnQueryT
          hideKeyboard();
 
         }
-        overridePendingTransition(0,0);
+
         finish();
+        overridePendingTransition(0,0);
 
         return true;
     }

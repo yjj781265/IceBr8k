@@ -61,7 +61,7 @@
             android:id="@+id/email_login"
             android:layout_width="300dp"
             android:layout_height="50dp"
-            android:inputType="textVisiblePassword"
+            android:inputType="textEmailAddress"
             android:maxLines="1"
             />
 

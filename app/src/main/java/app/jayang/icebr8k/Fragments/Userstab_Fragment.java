@@ -1,7 +1,9 @@
 package app.jayang.icebr8k.Fragments;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -43,6 +45,7 @@ import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.Adapter.RecyclerAdapter;
 import app.jayang.icebr8k.SearchName;
 import app.jayang.icebr8k.SearchUser;
+import app.jayang.icebr8k.Utility.MyDateFormatter;
 
 
 /**
@@ -64,6 +67,7 @@ public class Userstab_Fragment extends Fragment  {
     TextView mSearchView;
     Button filter_btn;
     BootstrapButton addFriend;
+    private BroadcastReceiver tickReceiver;
     private SharedPreferences sharedPref;
     private Boolean sortByScore,done;
     private String sortByScoreStr;
@@ -74,8 +78,11 @@ public class Userstab_Fragment extends Fragment  {
     private static final Comparator<UserDialog>ONLINESTATS = new Comparator<UserDialog>() {
         @Override
         public int compare(UserDialog dialog, UserDialog t1) {
-           int result= Integer.valueOf(t1.getOnlineStats()).
-                    compareTo( Integer.valueOf(dialog.getOnlineStats()));
+            int result =0;
+            if(t1.getOnlinestats()!=null && dialog.getOnlinestats()!=null) {
+                result = Integer.valueOf(t1.getOnlinestats()).
+                        compareTo(Integer.valueOf(dialog.getOnlinestats()));
+            }
             if(result==0){
                 result =dialog.getName().compareTo(t1.getName());
             }
@@ -86,10 +93,17 @@ public class Userstab_Fragment extends Fragment  {
     private static final Comparator<UserDialog> SCORE = new Comparator<UserDialog>() {
         @Override
         public int compare(UserDialog dialog, UserDialog t1) {
-          int  result= Integer.valueOf(t1.getScore()).
-                    compareTo( Integer.valueOf(dialog.getScore()));
+            int result =0;
+            if(t1.getScore()!=null &&dialog.getScore()!=null){
+            result= Integer.valueOf(t1.getScore()).
+                        compareTo( Integer.valueOf(dialog.getScore()));
+            }
+
           if(result==0){
-              result =dialog.getName() .compareTo(t1.getName());
+              if(t1.getName()!=null &&dialog.getName()!=null){
+                  result =dialog.getName() .compareTo(t1.getName());
+              }
+
           }
           return result;
         };
@@ -131,11 +145,10 @@ public class Userstab_Fragment extends Fragment  {
         loadingGif =view.findViewById(R.id.loadingImg_userTab);
         loadingGif.setVisibility(View.GONE);
         mSearchView =view.findViewById(R.id.searchview_user);
-        mSearchView.setVisibility(View.GONE);
         addFriend = view.findViewById(R.id.add_friend_frag);
         addFriend.setVisibility(View.GONE);
         mAppBarLayout = view.findViewById(R.id.appbar);
-        mAppBarLayout.setExpanded(false,false);
+        mAppBarLayout.setExpanded(false);
         final LinearLayoutManager manager = new LinearLayoutManager(view.getContext());
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.setHasFixedSize(true);
@@ -147,7 +160,6 @@ public class Userstab_Fragment extends Fragment  {
 
 
         populateUserDialogList();
-        addQAListener();
 
 
 
@@ -209,6 +221,7 @@ public class Userstab_Fragment extends Fragment  {
                 i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 mAppBarLayout.setExpanded(false,true);
                 startActivity(i);
+                getActivity().overridePendingTransition(0,0);
             }
         });
 
@@ -217,22 +230,6 @@ public class Userstab_Fragment extends Fragment  {
             public void onClick(View view) {
                 Intent i = new Intent(getContext(), SearchUser.class);
                 startActivity(i);
-            }
-        });
-        databaseReference = mDatabase.getReference("Friends").child(currentUser.getUid());
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(mAdapter.getItemCount()==0 &&done){
-                    addFriend.setVisibility(View.VISIBLE);
-                    loadingGif.setVisibility(View.GONE);
-
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
             }
         });
 
@@ -265,64 +262,52 @@ public class Userstab_Fragment extends Fragment  {
         mUserDialogArrayList.clear();
         addFriend.setVisibility(View.GONE);
         loadingGif.setVisibility(View.VISIBLE);
-        friendCount=0;
-        databaseReference = mDatabase.getReference("Friends").child(currentUser.getUid());
+        databaseReference = mDatabase.getReference("UserFriends").child(currentUser.getUid());
         databaseReference.keepSynced(true);
 
 
-        databaseReference.equalTo("Accepted").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.getChildrenCount()>0){
-                   addFriend.setVisibility(View.GONE);
-
-                }else{
-                    addFriend.setVisibility(View.VISIBLE);
-                }
-                loadingGif.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
 
         databaseReference.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
-                if(dataSnapshot.child("stats").getValue(String.class).equals("Accepted")){
+                if(dataSnapshot.hasChild("stats")){
                     showLog(dataSnapshot.getKey() +" added");
-                    done =false;
-                   UserDialog dialog = new UserDialog();
-                   dialog.setId(dataSnapshot.getKey());
-                    getUserinfo(dialog);
-                    addFriend.setVisibility(View.GONE);
-                    mSearchView.setVisibility(View.VISIBLE);
-                    filter_btn.setVisibility(View.VISIBLE);
-                    friendCount++;
-                    showLog("friendCount "+friendCount);
-                }
+                    if(dataSnapshot.child("stats").getValue(String.class).equals("accepted")){
+                     UserDialog dialog = new UserDialog();
+                     dialog.setId(dataSnapshot.getKey());
+                      if(!mUserDialogArrayList.contains(dialog)){
+                          mUserDialogArrayList.add(dialog);
+                          addFriend.setVisibility(View.GONE);
+                          mAppBarLayout.setExpanded(false);
+                          mAppBarLayout.setVisibility(View.VISIBLE);
+                          getUserinfo(dialog);
 
+                      }
+                    }
+                }
 
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 showLog("Changed "+dataSnapshot.getKey());
-                if(dataSnapshot.child("stats").getValue(String.class).equals("Accepted")){
+                if(dataSnapshot.hasChild("stats")){
                     showLog(dataSnapshot.getKey() +" added");
-                    done =false;
-                    UserDialog dialog = new UserDialog();
-                    dialog.setId(dataSnapshot.getKey());
-                    getUserinfo(dialog);
-                    addFriend.setVisibility(View.GONE);
-                    mSearchView.setVisibility(View.VISIBLE);
-                    filter_btn.setVisibility(View.VISIBLE);
-                    friendCount++;
+                    if(dataSnapshot.child("stats").getValue(String.class).equals("accepted")){
+                        UserDialog dialog = new UserDialog();
+                        dialog.setId(dataSnapshot.getKey());
+                        if(!mUserDialogArrayList.contains(dialog)){
+                            mUserDialogArrayList.add(dialog);
+                            getUserinfo(dialog);
+                            mAppBarLayout.setExpanded(false);
+                            mAppBarLayout.setVisibility(View.VISIBLE);
+                            loadingGif.setVisibility(View.GONE);
+                            addFriend.setVisibility(View.GONE);
 
-                    showLog("friendCount "+friendCount);
+
+                        }
+                    }
                 }
             }
 
@@ -330,13 +315,15 @@ public class Userstab_Fragment extends Fragment  {
             public void onChildRemoved(DataSnapshot dataSnapshot) {
                UserDialog dialog = new UserDialog();
                dialog.setId(dataSnapshot.getKey());
-               mUserDialogArrayList.remove(dialog);
-               friendCount = mUserDialogArrayList.size();
+               if(mUserDialogArrayList.contains(dialog)) {
+                   mUserDialogArrayList.remove(dialog);
+               }
                mAdapter.notifyDataSetChanged();
-               if(mAdapter.getItemCount()==0){
+               if(mUserDialogArrayList.isEmpty()){
                    addFriend.setVisibility(View.VISIBLE);
-                   mSearchView.setVisibility(View.GONE);
-                   filter_btn.setVisibility(View.GONE);
+                   mAppBarLayout.setExpanded(false);
+                   mAppBarLayout.setVisibility(View.GONE);
+
                }
 
                showLog("Child Removed"+dataSnapshot.getKey());
@@ -352,9 +339,60 @@ public class Userstab_Fragment extends Fragment  {
 
             }
         });
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(!mUserDialogArrayList.isEmpty()){
+                    mAppBarLayout.setExpanded(false);
+                    mAppBarLayout.setVisibility(View.VISIBLE);
+
+                    addFriend.setVisibility(View.GONE);
+                    for(UserDialog dialog :mUserDialogArrayList){
+                        getUserinfo(dialog);
+                    }
+                }else{
+                    mAppBarLayout.setExpanded(false);
+                    mAppBarLayout.setVisibility(View.GONE);
+
+                    addFriend.setVisibility(View.VISIBLE);
+                }
+                done =true;
+                loadingGif.setVisibility(View.GONE);
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
 
 
+
+    }
+
+    private void setTimeChsngeListener(final UserDialog dialog, final Long lastSeen) {
+        tickReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().compareTo(Intent.ACTION_TIME_TICK) == 0) {
+                   dialog.setLastseen(MyDateFormatter.lastSeenConverterShort(lastSeen));
+                   if(mUserDialogArrayList.contains(dialog)){
+                       int index = mUserDialogArrayList.indexOf(dialog);
+                       mUserDialogArrayList.set(index,dialog);
+                   }
+                    if(!sortByScore){
+                      Collections.sort(mUserDialogArrayList,ONLINESTATS);
+                   }else{
+                        Collections.sort(mUserDialogArrayList,SCORE);
+                    }
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
+        };
+
+     getActivity().registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK)); // register the broadcast receiver to receive TIME_TICK
 
     }
 
@@ -362,19 +400,29 @@ public class Userstab_Fragment extends Fragment  {
 
     private void getUserinfo(final UserDialog dialog){
      DatabaseReference userinfoRef = mDatabase.getReference().child("Users").child(dialog.getId());
-     userinfoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+     userinfoRef.addValueEventListener(new ValueEventListener() {
          @Override
          public void onDataChange(DataSnapshot dataSnapshot) {
              User user = dataSnapshot.getValue(User.class);
+             if(dataSnapshot.hasChild("lastseen") && "0".equals(user.getOnlinestats())){
+                 Long timestamp = dataSnapshot.child("lastseen").getValue(Long.class);
+                 dialog.setLastseen(MyDateFormatter.lastSeenConverterShort(timestamp));
+                 setTimeChsngeListener(dialog,timestamp);
+             }else{
+                 dialog.setLastseen(null);
+             }
              dialog.setName(user.getDisplayname());
+             dialog.setOnlinestats(user.getOnlinestats());
              dialog.setUsername(user.getUsername());
              dialog.setPhotoUrl(user.getPhotourl());
-             dialog.setEmail(user.getEmail());
-             compareWithUser2(dialog);
+             dialog.setEmail(user.getEmail());;
+             addScoreListener(dialog);
 
 
 
          }
+
+
 
          @Override
          public void onCancelled(DatabaseError databaseError) {
@@ -382,6 +430,39 @@ public class Userstab_Fragment extends Fragment  {
          }
      });
 
+    }
+
+    private void addScoreListener(final UserDialog dialog) {
+        DatabaseReference scoreRef = FirebaseDatabase.getInstance().getReference()
+                .child("UserFriends")
+                .child(currentUser.getUid())
+                .child(dialog.getId());
+        scoreRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChild("score")){
+                    String score =dataSnapshot.child("score").getValue(String.class);
+                    dialog.setScore(score);
+                    if(mUserDialogArrayList.contains(dialog)){
+                        int index = mUserDialogArrayList.indexOf(dialog);
+                        mUserDialogArrayList.set(index,dialog);
+                        if(sortByScore){
+                            Collections.sort(mUserDialogArrayList,SCORE);
+                        }else{
+                            Collections.sort(mUserDialogArrayList,ONLINESTATS);
+                        }
+                        mAdapter.notifyDataSetChanged();
+                    }
+                }else if(dataSnapshot!=null && dataSnapshot.hasChild("stats")){
+                    compareWithUser2(dialog);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     public void compareWithUser2(UserDialog dialog) {
@@ -484,38 +565,30 @@ public class Userstab_Fragment extends Fragment  {
         } else {
             score = "0";
         }
-        if(dialog.getOnlineStats()==null){
-            dialog.setOnlineStats("0");
+        if(dialog.getOnlinestats()==null){
+            dialog.setOnlinestats("0");
         }
         dialog.setScore(score);
         if(dialog.getId()!=null) {
             setScoreNode(dialog.getId(), score);
         }
-        if(!done) {
-            mUserDialogArrayList.add(dialog);
-            addUserChangeListener(dialog);
+         if(mUserDialogArrayList.contains(dialog)){
+            int index = mUserDialogArrayList.indexOf(dialog);
+            mUserDialogArrayList.set(index,dialog);
+         }
 
-        }else if(done){
-            int index;
-            for(index =0; index<mUserDialogArrayList.size();index++ ){
-               if(mUserDialogArrayList.get(index).getId().equals(dialog.getId())){
-                   mUserDialogArrayList.set(index,dialog);
-                   if(sortByScore){
-                       Collections.sort(mUserDialogArrayList,SCORE);
-                       mAdapter.notifyDataSetChanged();
-                       showLog("resorted by score");
-                   }else{
-                       mAdapter.notifyDataSetChanged();
-                       showLog("updated at "+ index); //update score
-                   }
-               }
-           }
-
-
+         if(sortByScore){
+             Collections.sort(mUserDialogArrayList,SCORE);
+         }else {
+             Collections.sort(mUserDialogArrayList,ONLINESTATS);
         }
+        mAdapter.notifyDataSetChanged();
 
 
-        showLog("list Size " + mUserDialogArrayList.size());
+
+
+
+
 
 
         if(mUserDialogArrayList.size()==friendCount && !done){
@@ -532,58 +605,26 @@ public class Userstab_Fragment extends Fragment  {
              Collections.sort(mUserDialogArrayList,ONLINESTATS);
              mAdapter.notifyDataSetChanged();
              loadingGif.setVisibility(View.GONE);
-
-
-            }
+         }
 
         }
 
-
-
-
-
-
     }
 
 
-    private void addQAListener(){
-        FirebaseUser currentUser =FirebaseAuth.getInstance().getCurrentUser();
-        DatabaseReference mref = FirebaseDatabase.getInstance().getReference().child("UserQA")
-                .child(currentUser.getUid());
-        mref.keepSynced(true);
-        mref.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(done) {
-                    showLog("New Question with User Id" + dataSnapshot.getKey());
-                  for(UserDialog dialog : mUserDialogArrayList){
-                      compareWithUser2(dialog);
 
-                  }
-
-
-                }
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
 
 
     public void setScoreNode(String user2Uid,String score){
         DatabaseReference scoreRef = FirebaseDatabase.getInstance().getReference()
-                .child("Friends")
+                .child("UserFriends")
                 .child(currentUser.getUid())
                 .child(user2Uid)
                 .child("score");
         scoreRef.setValue(score);
 
         DatabaseReference scoreRef2 = FirebaseDatabase.getInstance().getReference()
-                .child("Friends")
+                .child("UserFriends")
                 .child(user2Uid)
                 .child(currentUser.getUid())
                 .child("score");
@@ -595,53 +636,21 @@ public class Userstab_Fragment extends Fragment  {
 
 
 
-    private void addUserChangeListener(final UserDialog dialog){
-        DatabaseReference mref = FirebaseDatabase.getInstance().getReference().child("Users").
-                child(dialog.getId());
-        mref.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                int index;
-                if(done ) {
-                  User user = dataSnapshot.getValue(User.class);
-                    for(index=0;index<mUserDialogArrayList.size();index++){
-                        if(mUserDialogArrayList.get(index).getId().equals(dialog.getId())){
-                            dialog.setOnlineStats(user.getOnlinestats());
-                            dialog.setName(user.getDisplayname());
-                            dialog.setPhotoUrl(user.getPhotourl());
-                            mUserDialogArrayList.set(index,dialog);
-                            if(!sortByScore) {
-                                Collections.sort(mUserDialogArrayList, ONLINESTATS);
-                                mAdapter.notifyDataSetChanged();
-                                showLog("online changed");
-                            }else{
-                                mAdapter.notifyDataSetChanged();
-                                showLog("online updated");
-                            }
-
-                        }
-                    }
-
-
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-    }
     @Override
     public void onStop() {
         super.onStop();
 
     }
 
-
-
-
-
-
+    @Override
+    public void onDestroy() {
+        try {
+            if (tickReceiver != null) {
+              getActivity().unregisterReceiver(tickReceiver);
+            }
+        } catch (IllegalArgumentException e) {
+            tickReceiver = null;
+        }
+        super.onDestroy();
+    }
 }

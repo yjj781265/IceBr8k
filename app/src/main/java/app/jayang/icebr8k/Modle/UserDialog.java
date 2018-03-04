@@ -14,22 +14,42 @@ import com.github.wrdlbrnft.sortedlistadapter.SortedListAdapter;
  */
 
 public class UserDialog implements Parcelable{
-    private String name, username,photoUrl,score,onlinestats,email,id;
+    private String name, username,photoUrl,score,onlinestats,email,id,lastseen;
 
 
     public UserDialog() {
     }
 
-    public UserDialog(String id , String name, String username, String photoUrl, String score, String onlinestats
-            , String email) {
-        this.id =id;
+    public UserDialog(String name, String username, String photoUrl, String score, String onlinestats, String email, String id, String lastseen) {
         this.name = name;
         this.username = username;
         this.photoUrl = photoUrl;
         this.score = score;
         this.onlinestats = onlinestats;
-        this.email =email;
+        this.email = email;
+        this.id = id;
+        this.lastseen = lastseen;
+    }
 
+
+    public String getOnlinestats() {
+        return onlinestats;
+    }
+
+    public void setOnlinestats(String onlinestats) {
+        this.onlinestats = onlinestats;
+    }
+
+    public String getLastseen() {
+        return lastseen;
+    }
+
+    public void setLastseen(String lastseen) {
+        this.lastseen = lastseen;
+    }
+
+    public static Creator getCREATOR() {
+        return CREATOR;
     }
 
     public String getName() {
@@ -64,13 +84,6 @@ public class UserDialog implements Parcelable{
         this.score = score;
     }
 
-    public String getOnlineStats() {
-        return onlinestats;
-    }
-
-    public void setOnlineStats(String onlinestats) {
-        this.onlinestats = onlinestats;
-    }
 
     public String getEmail() {
         return email;
@@ -111,11 +124,15 @@ public class UserDialog implements Parcelable{
                 "name='" + name + '\'' +
                 ", username='" + username + '\'' +
                 ", photoUrl='" + photoUrl + '\'' +
-                ", onlineStats='" + onlinestats + '\'' +
+                ", score='" + score + '\'' +
+                ", onlinestats='" + onlinestats + '\'' +
                 ", email='" + email + '\'' +
                 ", id='" + id + '\'' +
+                ", lastseen='" + lastseen + '\'' +
                 '}';
     }
+
+
 
 
     @Override
@@ -131,6 +148,7 @@ public class UserDialog implements Parcelable{
         this.score = in.readString();
         this.onlinestats = in.readString();
         this.email = in.readString();
+        this.lastseen = in.readString();
 
 
     }
@@ -145,6 +163,7 @@ public class UserDialog implements Parcelable{
         parcel.writeString(this.score);
         parcel.writeString(this.onlinestats);
         parcel.writeString(this.email);
+        parcel.writeString(this.lastseen);
 
     }
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {

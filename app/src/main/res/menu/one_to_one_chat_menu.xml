@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@id/inChat_indicator"
+        android:id="@+id/inChat_indicator"
         android:icon="@drawable/inchat_indicator_dot"
         android:title="inChat indicator"
         app:showAsAction="ifRoom"

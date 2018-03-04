@@ -8,7 +8,7 @@ import java.util.Comparator;
  * Created by yjj781265 on 1/25/2018.
  */
 
-public class UserLocationDialog implements Comparable<UserLocationDialog>,Comparator<UserLocationDialog> {
+public class UserLocationDialog implements Comparable<UserLocationDialog> {
     private String id,distance;
     private User mUser;
 
@@ -45,10 +45,7 @@ public class UserLocationDialog implements Comparable<UserLocationDialog>,Compar
         mUser = user;
     }
 
-    @Override
-    public int compare(UserLocationDialog userLocationDialog, UserLocationDialog t1) {
-        return Double.valueOf(t1.getDistance()).compareTo(Double.valueOf(userLocationDialog.getDistance()));
-    }
+
 
     @Override
     public boolean equals(Object o) {

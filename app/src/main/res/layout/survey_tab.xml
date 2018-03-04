@@ -3,51 +3,62 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 xmlns:app="http://schemas.android.com/apk/res-auto"
-                xmlns:fancy="http://schemas.android.com/tools"
                 android:background="@color/white">
-
-
-
-
-
-
+    <ScrollView
+        android:layout_centerInParent="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
 
     <android.support.v7.widget.CardView
+
         android:id="@+id/cardView"
         android:layout_width="match_parent"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:alpha="0.9"
+        android:elevation="6dp"
         android:background="@color/creamYellow"
         android:visibility="visible"
         app:cardCornerRadius="5dp">
-        <ScrollView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+
         <RelativeLayout
             android:id="@+id/cardView_RLayout"
+            android:padding="10dp"
+
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@color/creamYellow"
             android:visibility="visible">
 
-            <ProgressBar
-                android:id="@+id/survey_progressBar"
-                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
+            <ImageView
+                android:id="@+id/backarrow_survey"
+                android:layout_width="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_action_backarrow"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/progress_text"
+                android:layout_width="wrap_content"
+                android:gravity="center"
+                android:textSize="16sp"
+                android:layout_centerHorizontal="true"
                 android:layout_alignParentTop="true"
-                android:layout_marginTop="3dp"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:progress="0"/>
+                android:layout_marginTop="5dp"
+                android:textColor="@color/colorPrimaryDark"
+                android:visibility="visible"
+                android:text="1/8"
+                android:layout_height="wrap_content"/>
+
 
             <ProgressBar
-                android:id="@+id/progressBar2"
+                android:id="@+id/loading_progressbar"
                 style="@style/Widget.AppCompat.ProgressBar"
                 android:layout_width="35dp"
                 android:layout_height="wrap_content"
@@ -55,9 +66,17 @@
                 android:layout_centerVertical="true"
                 android:visibility="visible"/>
 
-
+            <LinearLayout
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="15dp"
+                android:layout_below="@id/progress_text"
+                android:id="@+id/question_layout"
+                android:layout_width="match_parent"
+                android:orientation="vertical"
+                android:layout_height="wrap_content">
             <me.grantland.widget.AutofitTextView
                 android:id="@+id/question_id"
+                android:text="What is your name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/favorite_btn"
@@ -65,8 +84,8 @@
                 android:paddingStart="9dp"
                 android:gravity="left"
                 android:textColor="@color/black"
-                android:textStyle="bold"
-                android:textSize="23sp"
+                android:textStyle="normal"
+                android:textSize="20sp"
                 android:maxLines="3"
                 app:minTextSize="16sp"/>
 
@@ -79,16 +98,17 @@
                 android:shadowColor="@android:color/darker_gray"
                 android:text="1:Hate it  10:Love it"
                 android:textSize="14sp"
-                android:visibility="invisible"/>
+                android:visibility="visible"/>
 
             <RadioGroup
                 android:id="@+id/radioGroup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/question_id"
-                android:layout_marginBottom="30dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginTop="20dp"
+                android:paddingStart="9dp"
+                android:layout_below="@id/sub_question_id"
+                android:layout_alignWithParentIfMissing="true"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
                 android:orientation="vertical"
                 android:visibility="invisible">
 
@@ -98,11 +118,11 @@
                 android:id="@+id/spinner_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/question_id"
+                android:layout_below="@id/sub_question_id"
                 android:layout_marginBottom="30dp"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="15dp"
                 android:popupBackground="@color/colorAccent"
                 android:visibility="invisible"></Spinner>
 
@@ -115,11 +135,8 @@
                 android:id="@+id/seekBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/question_id"
-                android:layout_marginBottom="30dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginTop="40dp"
+                android:layout_below="@id/sub_question_id"
+                android:layout_margin="13dp"
                 app:bsb_max="10"
                 app:bsb_min="1"
                app:bsb_seek_by_section="true"
@@ -134,23 +151,24 @@
                 app:bsb_section_text_position="below_section_mark"
                 android:visibility="gone"
                 />
+            </LinearLayout>
 
             <com.beardedhen.androidbootstrap.BootstrapButton
 
                 android:id="@+id/submitBtn"
+                android:layout_below="@id/question_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_above="@id/skip_btn"
 
-
+                android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:textSize="14sp"
-                app:bootstrapBrand="success"
-                app:roundedCorners="true"
-                app:buttonMode="regular"
                 android:gravity="center"
                 android:text="Confirm"
-                android:visibility="gone">
+                android:textSize="14sp"
+                android:visibility="gone"
+                app:bootstrapBrand="success"
+                app:buttonMode="regular"
+                app:roundedCorners="true">
 
 
             </com.beardedhen.androidbootstrap.BootstrapButton>
@@ -159,9 +177,8 @@
                 android:id="@+id/skip_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignEnd="@+id/question_id"
-                android:layout_alignRight="@+id/question_id"
-                android:layout_below="@+id/spinner_id"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:text="Skip"
@@ -171,38 +188,37 @@
 
             <ImageView
                 android:id="@+id/favorite_btn"
-                android:layout_below="@id/survey_progressBar"
                 android:layout_alignParentEnd="true"
                 android:visibility="visible"
-                android:src="@drawable/ic_action_star_selected"
+                android:src="@drawable/ic_action_start_selector"
                 android:layout_width="30dp"
                 android:layout_height="30dp"/>
 
 
         </RelativeLayout>
-        </ScrollView>
+
 
 
     </android.support.v7.widget.CardView>
 
 
     <android.support.design.widget.FloatingActionButton
+        android:layout_marginBottom="5dp"
         android:id="@+id/floatingActionButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/cardView"
-        android:layout_alignRight="@+id/cardView"
+        android:layout_alignParentEnd="true"
         android:layout_below="@+id/cardView"
         android:layout_marginEnd="35dp"
-        app:pressedTranslationZ="12dp"
-        android:layout_marginRight="35dp"
         android:layout_marginTop="23dp"
         android:clickable="true"
         android:src="@drawable/ic_action_refresh"
-        app:backgroundTint="@color/colorPrimaryDark"/>
+        app:backgroundTint="@color/colorAccent"/>
 
 
 
 
 
+</RelativeLayout>
+    </ScrollView>
 </RelativeLayout>

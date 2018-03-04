@@ -1,19 +1,15 @@
-package app.jayang.icebr8k;
+package app.jayang.icebr8k.Utility;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.job.JobParameters;
-import android.app.job.JobService;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -21,7 +17,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
@@ -30,9 +25,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
@@ -46,7 +39,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Date;
-import java.util.concurrent.Executor;
+
+import app.jayang.icebr8k.R;
 
 /**
  * Created by yjj781265 on 2/5/2018.
@@ -61,7 +55,7 @@ public class MyJobService extends com.firebase.jobdispatcher.JobService implemen
 
     @Override
     public boolean onStartJob(final com.firebase.jobdispatcher.JobParameters job) {
-        Toast.makeText(getApplicationContext(), "IceBr8k Background Job Service Activated", Toast.LENGTH_LONG).show();
+        //Toast.makeText(getApplicationContext(), "IceBr8k Background Job Service Activated", Toast.LENGTH_LONG).show();
         setUpLocationClientIfNeeded();
         return false;
 
@@ -125,7 +119,7 @@ public class MyJobService extends com.firebase.jobdispatcher.JobService implemen
                 new GeoLocation(lat, lng), new GeoFire.CompletionListener() {
             @Override
             public void onComplete(String key, DatabaseError error) {
-                Toast.makeText(getApplicationContext(),"last location is updated to firebase",Toast.LENGTH_LONG).show();
+               // Toast.makeText(getApplicationContext(),"last location is updated to firebase",Toast.LENGTH_LONG).show();
             }
         });
         ref.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("timestamp").setValue(new Date().getTime());
@@ -284,7 +278,7 @@ public class MyJobService extends com.firebase.jobdispatcher.JobService implemen
     }
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        Toast.makeText(getApplicationContext(), "Google Service Connected", Toast.LENGTH_LONG).show();
+       // Toast.makeText(getApplicationContext(), "Google Service Connected", Toast.LENGTH_LONG).show();
         initGoogleMapLocation();
 
     }
