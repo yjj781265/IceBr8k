@@ -977,8 +977,6 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
             }
         });
-
-
     }
 
     private void loadMoreHistory() {

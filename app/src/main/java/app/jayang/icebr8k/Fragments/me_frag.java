@@ -101,6 +101,7 @@ public class me_frag extends Fragment {
     private ActivityCommunicator activityCommunicator;
     private User user;
     private long lastClickTime = 0;
+    private String DEFAULT_URL  = "https://i.imgur.com/zI4v7oF.png";
 
 
     @Override
@@ -557,7 +558,11 @@ public class me_frag extends Fragment {
                 // taskSnapshot.getMetadata() contains file metadata such as size, content-type,
                 // and download URL.
                 Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                updateDatabaseAndCurrentUser(downloadUrl.toString());
+                if(downloadUrl!=null) {
+                    updateDatabaseAndCurrentUser(downloadUrl.toString());
+                }else{
+                    showDismissDialog("Avatar update failed");
+                }
             }
         });
 
@@ -570,19 +575,18 @@ public class me_frag extends Fragment {
         UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                 .setPhotoUri(Uri.parse(photoUrl))
                 .build();
-
+        mProgressDialog.dismiss();
         currentuser.updateProfile(profileUpdates)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            mProgressDialog.dismiss();
+
                             Glide.with(fragView).load(photoUrl).
                                     apply(RequestOptions.circleCropTransform()).into(avatar);
                             showToast("Avatar Updated ");
 
                         }else{
-                            mProgressDialog.dismiss();
                             showDismissDialog(task.getException().getMessage());
                         }
                     }
@@ -590,21 +594,28 @@ public class me_frag extends Fragment {
 
     }
 
-    private void deleteOldAvatarFile(String photoUrl){
-        StorageReference photoRef = FirebaseStorage.getInstance().getReferenceFromUrl(photoUrl);
-        photoRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                // File deleted successfully
-              // showToast("File deleted");
+    private void deleteOldAvatarFile(String photoUrl) {
+        if (!DEFAULT_URL.equals(photoUrl)) {
+            try {
+
+                StorageReference photoRef = FirebaseStorage.getInstance().getReferenceFromUrl(photoUrl);
+                photoRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        // File deleted successfully
+                        // showToast("File deleted");
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Uh-oh, an error occurred!
+                        //showToast("File deleted failed");
+                    }
+                });
+            } catch (Exception e) {
+
             }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Uh-oh, an error occurred!
-                //showToast("File deleted failed");
-            }
-        });
+        }
     }
 
 
