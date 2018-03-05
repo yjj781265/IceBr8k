@@ -30,6 +30,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -428,7 +429,27 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onToggleSwitchChangeListener(int position, boolean isChecked) {
      if(isChecked){
-       setUI(position);
+         switch (position){
+             case 1:
+                 mFrameLayout.setVisibility(View.VISIBLE);
+                 mRecyclerView.setVisibility(View.GONE);
+
+                 break;
+             case 0:
+                 mFrameLayout.setVisibility(View.GONE);
+                 mRecyclerView.setVisibility(View.VISIBLE);
+                 if(mLocationDialogs.isEmpty()){
+                     noUser.setVisibility(View.VISIBLE);
+                 }else{
+                     noUser.setVisibility(View.GONE);
+                 }
+
+                 break;
+             default:
+                 mFrameLayout.setVisibility(View.GONE);
+                 mRecyclerView.setVisibility(View.VISIBLE);
+                 break;
+         }
      }
     }
 
@@ -437,16 +458,12 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
             case 1:
                 mFrameLayout.setVisibility(View.VISIBLE);
                 mRecyclerView.setVisibility(View.GONE);
-                noUser.setVisibility(View.GONE);
+
                 break;
             case 0:
                 mFrameLayout.setVisibility(View.GONE);
                 mRecyclerView.setVisibility(View.VISIBLE);
-                if(mLocationDialogAdapter.getItemCount()>0){
-                    noUser.setVisibility(View.GONE);
-                }else{
-                    noUser.setVisibility(View.VISIBLE);
-                }
+
                 break;
             default:
                 mFrameLayout.setVisibility(View.GONE);
@@ -797,7 +814,6 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         Collections.sort(mLocationDialogs);
         mLocationDialogAdapter.notifyDataSetChanged();
         noUser.setVisibility(View.GONE);
-        mProgressDialog.dismiss();
         Log.d(TAG,"new item added");
 
         }
@@ -876,6 +892,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
             marker.setTitle(yourAddress);
 
 
+
             //MyMarker offsetItem = new MyMarker(latLng.latitude, latLng.longitude,yourAddress,yourCity);
            // mClusterManager.addItem(offsetItem);
 
@@ -919,6 +936,9 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                 mLocationDialogs.remove(temp);
                 mLocationDialogAdapter.notifyDataSetChanged();
             }
+            if(mLocationDialogs.isEmpty() && mRecyclerView.getVisibility() == View.VISIBLE){
+                noUser.setVisibility(View.VISIBLE);
+            }
 
 
 
@@ -957,19 +977,21 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onDataChanged(DataSnapshot dataSnapshot, GeoLocation location) {
+        Log.d(TAG,dataSnapshot.toString());
 
     }
 
     @Override
     public void onGeoQueryReady() {
         if(mLocationDialogAdapter.getItemCount()>0 && !mLocationDialogs.isEmpty()){
-            mProgressDialog.dismiss();
+
             noUser.setVisibility(View.GONE);
         }else if(mLocationDialogs.isEmpty() && mRecyclerView.getVisibility() == View.VISIBLE){
             noUser.setVisibility(View.VISIBLE);
         }else{
             noUser.setVisibility(View.GONE);
         }
+        mProgressDialog.dismiss();
 
 
 
