@@ -154,7 +154,7 @@ public class FriendRequestPage extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
                 UserDialog dialog  =new UserDialog(user.getDisplayname(),user.getUsername()
-                ,user.getPhotourl(), null,null,user.getEmail(),user2Uid,null);
+                ,user.getPhotourl(), null,null,user.getEmail(),user2Uid,null,null);
                 mUserDialogs.add(dialog);
                 noFrt.setVisibility(View.GONE);
                  mAdapter.notifyDataSetChanged();

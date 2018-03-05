@@ -104,6 +104,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_chat);
+        OneSignal.clearOneSignalNotifications();
         editText = (MyEditText) findViewById(R.id.userChat_input);
         send = (ImageView) findViewById(R.id.userChat_send);
         attachment = (ImageView) findViewById(R.id.userChat_attachment);
@@ -1099,7 +1100,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         super.onStart();
         inChat(true);
         clearUnread();
-        OneSignal.clearOneSignalNotifications();
+
 
     }
 

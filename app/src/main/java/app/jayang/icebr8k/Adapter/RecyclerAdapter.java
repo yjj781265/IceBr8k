@@ -33,7 +33,7 @@ import app.jayang.icebr8k.UserProfilePage;
  */
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDialogViewHolder>
-        implements Filterable {
+        {
     private Context context;
     private ArrayList<UserDialog>mUserDialogs;
     private ArrayList<UserDialog> mFilteredList;
@@ -42,7 +42,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
     public class UserDialogViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
          private ImageView image,onlineStats;
          private TextView displayname,username,score,lastSeen;
-         private RelativeLayout mRelativeLayout;
          private long lastClickTime =0;
 
         public UserDialogViewHolder(View itemView) {
@@ -52,7 +51,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
             username=itemView.findViewById(R.id.username_textview);
             score = itemView.findViewById(R.id.score);
             onlineStats =itemView.findViewById(R.id.onlineStats);
-            lastSeen = itemView.findViewById(R.id.lastseen);
+            lastSeen =itemView.findViewById(R.id.lastseen);
             itemView.setOnClickListener(this);
 
         }
@@ -196,33 +195,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
     }
 
 
-    @Override
-    public Filter getFilter() {
-        return new Filter() {
-            @Override
-            protected FilterResults performFiltering(CharSequence charSequence) {
-                String chatString = charSequence.toString();
-                    ArrayList<UserDialog> filteredList = new ArrayList<>();
-                    for(UserDialog dialog : mUserDialogs){
-                        if(dialog.getName().toLowerCase().contains(chatString)){
-                            filteredList.add(dialog);
-                        }
-                    }
-                    mFilteredList =filteredList;
-
-                FilterResults filterResults = new FilterResults();
-                filterResults.values = mFilteredList;
-                return filterResults;
-
-            }
-
-            @Override
-            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-                mFilteredList = (ArrayList<UserDialog>) filterResults.values;
-                notifyDataSetChanged();
-            }
-        };
-    }
 
 
 

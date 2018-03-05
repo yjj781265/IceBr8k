@@ -37,9 +37,11 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 
 import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.Modle.UserDialog;
+import app.jayang.icebr8k.Modle.UserMessage;
 import app.jayang.icebr8k.Modle.UserQA;
 import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.Adapter.RecyclerAdapter;
@@ -133,7 +135,6 @@ public class Userstab_Fragment extends Fragment  {
             sortByScore =true;
         }
 
-
     }
 
 
@@ -159,7 +160,9 @@ public class Userstab_Fragment extends Fragment  {
         filter_btn =view.findViewById(R.id.filter_btn);
 
 
+
         populateUserDialogList();
+        setTimeChsngeListener();
 
 
 
@@ -372,26 +375,20 @@ public class Userstab_Fragment extends Fragment  {
 
     }
 
-    private void setTimeChsngeListener(final UserDialog dialog, final Long lastSeen) {
-        tickReceiver = new BroadcastReceiver() {
+    private void setTimeChsngeListener() {
+
+      tickReceiver = new BroadcastReceiver() {
+
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().compareTo(Intent.ACTION_TIME_TICK) == 0) {
-                   dialog.setLastseen(MyDateFormatter.lastSeenConverterShort(lastSeen));
-                   if(mUserDialogArrayList.contains(dialog)){
-                       int index = mUserDialogArrayList.indexOf(dialog);
-                       mUserDialogArrayList.set(index,dialog);
-                   }
-                    if(!sortByScore){
-                      Collections.sort(mUserDialogArrayList,ONLINESTATS);
-                   }else{
-                        Collections.sort(mUserDialogArrayList,SCORE);
+                for(UserDialog dialog : mUserDialogArrayList){
+                    if(dialog.getLastseen()!=null){
+                        dialog.setLastseen(MyDateFormatter.lastSeenConverterShort(dialog.getTimestamp()));
                     }
-                    mAdapter.notifyDataSetChanged();
                 }
+                mAdapter.notifyDataSetChanged();
             }
         };
-
      getActivity().registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK)); // register the broadcast receiver to receive TIME_TICK
 
     }
@@ -406,8 +403,8 @@ public class Userstab_Fragment extends Fragment  {
              User user = dataSnapshot.getValue(User.class);
              if(dataSnapshot.hasChild("lastseen") && "0".equals(user.getOnlinestats())){
                  Long timestamp = dataSnapshot.child("lastseen").getValue(Long.class);
+                 dialog.setTimestamp(timestamp);
                  dialog.setLastseen(MyDateFormatter.lastSeenConverterShort(timestamp));
-                 setTimeChsngeListener(dialog,timestamp);
              }else{
                  dialog.setLastseen(null);
              }

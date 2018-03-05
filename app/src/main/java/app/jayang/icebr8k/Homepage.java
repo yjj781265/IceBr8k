@@ -118,6 +118,7 @@ public class Homepage extends AppCompatActivity  implements
         presenceRef = FirebaseDatabase.getInstance().getReference().child("Users").
                 child(currentUser.getUid()).child("onlinestats");
 
+
         lastSeenRef = FirebaseDatabase.getInstance().getReference().child("Users").
                 child(currentUser.getUid()).child("lastseen");
         lastSeenRef.keepSynced(true);
@@ -473,7 +474,7 @@ public class Homepage extends AppCompatActivity  implements
                 Log.d("haha", "DataSnapshot:" + dataSnapshot);
                 if (dataSnapshot.hasChildren()) {
                     presenceRef.onDisconnect().setValue("0");
-
+                    lastSeenRef.onDisconnect().setValue(ServerValue.TIMESTAMP);
                 }
             }
 

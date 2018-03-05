@@ -15,12 +15,20 @@ import com.github.wrdlbrnft.sortedlistadapter.SortedListAdapter;
 
 public class UserDialog implements Parcelable{
     private String name, username,photoUrl,score,onlinestats,email,id,lastseen;
+    private Long timestamp;
 
 
     public UserDialog() {
     }
 
-    public UserDialog(String name, String username, String photoUrl, String score, String onlinestats, String email, String id, String lastseen) {
+
+
+
+    public String getOnlinestats() {
+        return onlinestats;
+    }
+
+    public UserDialog(String name, String username, String photoUrl, String score, String onlinestats, String email, String id, String lastseen, Long timestamp) {
         this.name = name;
         this.username = username;
         this.photoUrl = photoUrl;
@@ -29,11 +37,15 @@ public class UserDialog implements Parcelable{
         this.email = email;
         this.id = id;
         this.lastseen = lastseen;
+        this.timestamp = timestamp;
     }
 
+    public Long getTimestamp() {
+        return timestamp;
+    }
 
-    public String getOnlinestats() {
-        return onlinestats;
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
     }
 
     public void setOnlinestats(String onlinestats) {
