@@ -195,6 +195,11 @@ public class Userstab_Fragment extends Fragment  {
                                     Collections.sort(mUserDialogArrayList,ONLINESTATS);
                                     mAdapter.notifyDataSetChanged();
                                 }
+
+                                if (id == R.id.order_by){
+
+                                  return false;
+                                }
                                 return true;
 
                             }

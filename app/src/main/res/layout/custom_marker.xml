@@ -19,7 +19,7 @@
         android:src="@drawable/map_marker"/>
 
     <ImageView
-        android:src="@drawable/default_avatar"
+        android:src="@drawable/default_avatar3"
         android:id="@+id/marker_image"
         android:layout_width="26dp"
         android:layout_height="26dp"

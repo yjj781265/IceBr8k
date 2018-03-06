@@ -6,7 +6,9 @@
     <item
         android:title ="Order By..."
         android:orderInCategory="100"
-        android:id="@+id/title"
+        android:id="@+id/order_by"
+        android:enabled="false"
+        android:checkable="false"
         app:showAsAction="ifRoom|withText"
         />
 

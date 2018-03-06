@@ -5,11 +5,10 @@
               android:orientation="horizontal"
               android:layout_width="match_parent"
               android:animateLayoutChanges="true"
-    android:layout_height="wrap_content"
+    android:layout_height="72dp"
     android:theme="@style/AppTheme"
     android:gravity="start"
-    android:padding="9dp"
-    android:layout_marginTop="5dp"
+    android:padding="16dp"
     android:background="?attr/selectableItemBackground"
     android:clickable="true"
     >
@@ -17,10 +16,9 @@
 
 
         <ImageView
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:id="@+id/imageview_id"
-            android:layout_marginLeft="6dp"
             android:src="@drawable/default_avatar3"
             android:layout_centerVertical="true"
 
@@ -39,9 +37,8 @@
 
 
     <LinearLayout
-        android:layout_weight="4"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="5dp"
+        android:layout_weight="12"
+        android:layout_marginStart="16dp"
         android:orientation="vertical"
         android:layout_gravity="center_vertical"
         android:layout_width="0dp"
@@ -74,19 +71,17 @@
     </LinearLayout>
          <LinearLayout
 
-             android:padding="3dp"
-
-             android:layout_marginRight="15dp"
-             android:gravity="center_vertical|end"
+             android:layout_marginStart="16dp"
+             android:gravity="end|center"
              android:orientation="vertical"
-             android:layout_weight="1"
+             android:layout_gravity="end"
+             android:layout_weight="2"
              android:layout_width="0dp"
              android:layout_height="match_parent">
         <TextView
-            android:layout_weight="1"
             android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:gravity="center_vertical|end"
+            android:layout_height="wrap_content"
+            android:gravity="bottom|end"
             android:id="@+id/score"
             android:textColor="@android:color/tab_indicator_text"
             android:text="30%"
@@ -95,17 +90,15 @@
           />
 
              <TextView
-                 android:layout_weight="1"
                  android:layout_width="wrap_content"
-                 android:layout_marginTop="5dp"
-                 android:layout_height="0dp"
+                 android:layout_height="wrap_content"
                  android:id="@+id/lastseen"
                  android:textColor="@android:color/tab_indicator_text"
                  android:layout_gravity="center_vertical|end"
                  android:visibility="gone"
                  android:text="2 min"
-                 android:gravity="center_vertical|end"
-                 android:textSize="14sp"
+                 android:gravity="bottom|end"
+                 android:textSize="13sp"
                  />
 
 

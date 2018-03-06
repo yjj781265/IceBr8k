@@ -65,7 +65,6 @@ public class UserMessageDialog_Frag extends Fragment {
         loadingGif = fragView.findViewById(R.id.messageDialog_loading);
 
         mRecyclerView =fragView.findViewById(R.id.messageDialog_list);
-        OneSignal.clearOneSignalNotifications();
         mComparator = new Comparator<UserMessageDialog>() {
             @Override
             public int compare(UserMessageDialog dialog, UserMessageDialog t1) {
@@ -104,6 +103,8 @@ public class UserMessageDialog_Frag extends Fragment {
         loadDialogs();
         return fragView;
     }
+
+
 
     public void showLog(String str){
         Log.d(TAG,str);

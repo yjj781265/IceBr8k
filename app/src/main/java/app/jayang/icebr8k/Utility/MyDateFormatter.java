@@ -139,7 +139,7 @@ public class MyDateFormatter {
                 }
                 string = "Last seen "+hours+" hr ago";
             }else if(minutes >=1440 && minutes <525600) {
-                days = TimeUnit.MINUTES.toHours(minutes);
+                days = TimeUnit.MINUTES.toDays(minutes);
                 if (days == 0) {
                     days = 1;
                 }
@@ -179,7 +179,7 @@ public class MyDateFormatter {
                 }
                 string = hours+" hr";
             }else if(minutes >=1440 && minutes <525600) {
-                days = TimeUnit.MINUTES.toHours(minutes);
+                days = TimeUnit.MINUTES.toDays(minutes);
                 if (days == 0) {
                     days = 1;
                 }
