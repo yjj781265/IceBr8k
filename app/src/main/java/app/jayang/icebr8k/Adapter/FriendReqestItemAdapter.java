@@ -75,7 +75,7 @@ public class FriendReqestItemAdapter extends RecyclerView.Adapter<FriendReqestIt
          final UserDialog dialog = requestList.get(position);
         holder.name.setText(dialog.getName());
         holder.username.setText(dialog.getUsername());
-        Glide.with(mContext).load(dialog.getPhotoUrl()).apply(RequestOptions.circleCropTransform())
+        Glide.with(mContext).load(dialog.getPhotoUrl()).apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3))
                 .into(holder.avatar);
         holder.delete.setOnClickListener(new View.OnClickListener() {
             @Override

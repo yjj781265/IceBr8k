@@ -279,15 +279,19 @@ public class login_page extends AppCompatActivity implements
         // Firebase sign out
         mAuth.signOut();
         // Google sign out
-        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                new ResultCallback<Status>() {
+        try {
+            Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                    new ResultCallback<Status>() {
 
-                    @Override
-                    public void onResult(@NonNull Status status) {
+                        @Override
+                        public void onResult(@NonNull Status status) {
 
 
-                    }
-                });
+                        }
+                    });
+        }catch (Exception e){
+
+        }
 
     }
 
@@ -464,9 +468,9 @@ public class login_page extends AppCompatActivity implements
         userNameDialog.show();
     }
     //check user has username or not
-public void usernameCreateCheck(final GoogleSignInAccount account){
+public void usernameCreateCheck(final GoogleSignInAccount account) {
     final DatabaseReference mRef = mdatabase.
-            getReference("Users/"+mAuth.getCurrentUser().getUid());
+            getReference("Users/" + mAuth.getCurrentUser().getUid());
 
     mRef.addValueEventListener(new ValueEventListener() {
         @Override
@@ -483,6 +487,7 @@ public void usernameCreateCheck(final GoogleSignInAccount account){
             }
             mRef.removeEventListener(this);
         }
+
         @Override
         public void onCancelled(DatabaseError databaseError) {
 
@@ -490,22 +495,141 @@ public void usernameCreateCheck(final GoogleSignInAccount account){
     });
 }
 
+    //check user from Firebase Sign in has username or not
+    public void usernameCreateCheck(){
+        final DatabaseReference mRef = mdatabase.
+                getReference("Users/"+mAuth.getCurrentUser().getUid());
+
+        mRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.hasChild("username")) {
+                    //user doesn't have username
+                    User user = dataSnapshot.getValue(User.class);
+                    user.setDisplayname(currentUser.getDisplayName());
+                    user.setEmail(currentUser.getEmail());
+                    user.setPhotourl(currentUser.getPhotoUrl().toString());
+                    createFirebaesUsernameDialog(user);
+                } else {
+                    startActivity(intent);
+                    finish();
+                    overridePendingTransition(android.R.anim.fade_in,android.
+                            R.anim.fade_out);
+                }
+                mRef.removeEventListener(this);
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+            public void createFirebaesUsernameDialog(final User user){
+                loadingdialog.dismiss();
+                MaterialDialog.Builder userNameDialogBuilder = new MaterialDialog.Builder(this)
+                        .title("Username").maxIconSize(60)
+                        .content("Create a username for " + mAuth.getCurrentUser().getEmail() + " \n(" +
+                                "at least 3 characters)")
+                        .inputType(InputType.TYPE_CLASS_TEXT).inputRange(3, 20,
+                                getResources().
+                                        getColor(R.color.red_error)).positiveText("Confirm").positiveColor
+                                (getResources().getColor(R.color.colorAccent)).negativeText("Discard").
+                                negativeColor(getResources().getColor(R.color.red_error)).
+                                icon(getDrawable(R.mipmap.ic_launcher));
+
+                userNameDialogBuilder.input("Username", null,
+                        false, new MaterialDialog.InputCallback() {
+                            @Override
+                            public void onInput(@NonNull final MaterialDialog dialog, CharSequence input) {
+                                final String username = input.toString();
+
+                                DatabaseReference mRef = mdatabase.getReference().child("Usernames");
+                                mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        boolean flag = false;
+                                        for(DataSnapshot usernameSnap:dataSnapshot.getChildren()){
+                                            if(usernameSnap.getKey().equals(username)){
+                                                flag=true; // Username is not unique in database
+                                                break;
+                                            }
+                                        }
+                                        if(flag){
+                                            showToast(getString(R.string.usernameError));
+                                            usernameCreateCheck();
+                                        }else if(username.length()>20 ||username.length()<3){
+                                            showToast(getString(R.string.usernameError2));
+                                            usernameCreateCheck();
+                                        }else if(username.isEmpty()) {
+                                            showToast(getString(R.string.emptyfieldError));
+                                            usernameCreateCheck();
+                                        }else if(username.contains(" ")) {
+                                            showToast(getString(R.string.usernameError3));
+                                            usernameCreateCheck();
+                                        }else if(checkFirebasePathError(username)) {
+                                            showToast(getString(R.string.firebase_path_error));
+                                            usernameCreateCheck();
+                                        }else if(username.trim().matches("")){
+                                            showToast(getString(R.string.emptyfieldError));
+                                            usernameCreateCheck();
+                                        }else{
+                                            User user2 = new User();
+                                            user2.setDisplayname(user.getDisplayname());
+                                            user2.setEmail(user.getEmail());
+                                            user2.setUsername(username);
+                                            user2.setPhotourl(DEFAULT_PHOTO_URL);
+                                            user2.setPrivacy("private");
+                                            updateCurrentUser(user2, mAuth.getCurrentUser());
+                                            dialog.dismiss();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+                            }
+                        }).onNegative(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        dialog.cancel();
+                    }
+                }).cancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        if (mAuth.getCurrentUser() != null) {
+                            mAuth.getCurrentUser().delete()
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                Log.d(TAG, "User account deleted.");
+                                            }
+                                        }
+                                    });
+                            signOut();
+                        }
+                    }
+                });
+
+                userNameDialog = userNameDialogBuilder.build();
+                userNameDialog.show();
+            }
+
+
 
 
         public void login(String email, String password){
             loadingdialog.show();
+
             mAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
                                 currentUser = mAuth.getCurrentUser();
-                                loadingdialog.dismiss();
-                                startActivity(intent);
-                                finish();
-                                overridePendingTransition(android.R.anim.fade_in,android.
-                                        R.anim.fade_out);
-
+                                usernameCreateCheck();
                             } else {
                              showDismissDialog(task.getException().getMessage()).show();
                                 loadingdialog.dismiss();

@@ -100,7 +100,6 @@
                     android:maxLines="1"
                     android:ellipsize="end"
                     android:layout_weight="16"
-                    android:layout_marginTop="6dp"
                     android:textSize="14sp"
                     android:text="HOw is the project going , and the fu1231231321nd best d d d? d" />
                 <ImageView

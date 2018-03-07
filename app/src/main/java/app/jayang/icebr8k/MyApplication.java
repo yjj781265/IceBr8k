@@ -10,7 +10,6 @@ import com.onesignal.OSNotificationOpenResult;
 import com.onesignal.OneSignal;
 import com.zplesac.connectionbuddy.ConnectionBuddy;
 import com.zplesac.connectionbuddy.ConnectionBuddyConfiguration;
-import com.zplesac.connectionbuddy.cache.ConnectionBuddyCache;
 import com.zplesac.connectionbuddy.models.ConnectivityStrength;
 
 import cat.ereza.customactivityoncrash.config.CaocConfig;
@@ -57,7 +56,7 @@ public class MyApplication extends Application {
 
         ConnectionBuddyConfiguration networkInspectorConfiguration =
                 new ConnectionBuddyConfiguration.Builder(this).
-                        notifyOnlyReliableEvents(false).setMinimumSignalStrength(ConnectivityStrength.POOR)
+                        notifyOnlyReliableEvents(true)
                         .build();
         ConnectionBuddy.getInstance().init(networkInspectorConfiguration);
 

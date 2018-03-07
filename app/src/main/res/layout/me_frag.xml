@@ -6,6 +6,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
    <ScrollView
+       android:id="@+id/me_scrollview"
        android:layout_width="wrap_content"
        android:layout_height="match_parent">
    <LinearLayout
@@ -49,7 +50,6 @@
 
                 android:maxLength="18"
                 android:maxLines="2"
-                android:text="123456789111315172"
                 android:layout_toRightOf="@id/avatar_frag"
 
                 android:textColor="@android:color/black"
@@ -106,7 +106,6 @@
             android:layout_centerVertical="true"
             android:layout_alignParentStart="true"
             android:layout_marginStart="96dp"
-            android:text="yjj@gmail.com"
             android:textSize="16sp"
             android:autoLink="email"
             android:textColorLink="@color/dark_gray"
@@ -141,8 +140,8 @@
                 android:id="@+id/badge_frag"
                 android:textColor="@color/white"
                 android:textStyle="bold"
+                android:visibility="gone"
                 android:textSize="12sp"
-                android:text="1"
                 android:gravity="center"
                 android:background="@drawable/badge_circle"
 
@@ -194,7 +193,36 @@
            app:pb_colorPressed="@color/darkRed"/>
 
    </LinearLayout>
+
    </ScrollView>
+
+    <RelativeLayout
+    android:id="@+id/loadingImg_meTab"
+   android:layout_centerInParent="true"
+    android:visibility="visible"
+    android:paddingBottom="50dp"
+    android:layout_width="wrap_content"
+    android:layout_height="150dp">
+    <pl.droidsonroids.gif.GifImageView
+        android:id="@+id/loadingImg"
+        android:layout_centerHorizontal="true"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:src="@drawable/icebr8k_load"
+        android:paddingTop="10dp"
+        android:paddingLeft="6dp"
+        />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:textSize="14sp"
+        android:paddingLeft="15dp"
+        android:text="Loading..."/>
+
+</RelativeLayout>
 
 
 </RelativeLayout>

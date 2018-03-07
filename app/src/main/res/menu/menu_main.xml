@@ -32,6 +32,13 @@
         android:id="@+id/people_nearby"
         android:icon="@drawable/map_icon"
         app:showAsAction="never"/>
+    <item
+        android:title ="@string/feedback"
+        android:orderInCategory="100"
+        android:id="@+id/feedback"
+        android:icon="@drawable/ic_action_feedback"
+        app:showAsAction="never"/>
+
 
     <item
     android:title ="@string/log_out"

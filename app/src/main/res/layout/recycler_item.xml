@@ -74,8 +74,8 @@
              android:layout_marginStart="16dp"
              android:gravity="end|center"
              android:orientation="vertical"
-             android:layout_gravity="end"
-             android:layout_weight="2"
+             android:layout_gravity="end|center_vertical"
+             android:layout_weight="3"
              android:layout_width="0dp"
              android:layout_height="match_parent">
         <TextView
@@ -95,9 +95,9 @@
                  android:id="@+id/lastseen"
                  android:textColor="@android:color/tab_indicator_text"
                  android:layout_gravity="center_vertical|end"
-                 android:visibility="gone"
-                 android:text="2 min"
-                 android:gravity="bottom|end"
+                 android:visibility="visible"
+                 android:text="60 min"
+                 android:gravity="end|bottom"
                  android:textSize="13sp"
                  />
 

@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.transition.Fade;
 import android.widget.ImageView;
 import android.widget.Toolbar;
 
@@ -44,6 +45,8 @@ public class ImageViewer extends AppCompatActivity {
                 .content("Loading..").canceledOnTouchOutside(false)
                 .progress(true, 0)
                 .build();
+
+
 
         if(photourl!=null){
             mDialog.show();

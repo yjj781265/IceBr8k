@@ -25,6 +25,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.beardedhen.androidbootstrap.BootstrapButton;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -355,6 +357,7 @@ public class Userstab_Fragment extends Fragment  {
                     mAppBarLayout.setVisibility(View.VISIBLE);
 
                     addFriend.setVisibility(View.GONE);
+                    YoYo.with(Techniques.FadeIn).duration(500).playOn(mRecyclerView);
                     for(UserDialog dialog :mUserDialogArrayList){
                         getUserinfo(dialog);
                     }
@@ -366,6 +369,7 @@ public class Userstab_Fragment extends Fragment  {
                 }
                 done =true;
                 loadingGif.setVisibility(View.GONE);
+
 
             }
 

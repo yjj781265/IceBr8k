@@ -23,6 +23,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
+import android.transition.Fade;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -60,7 +61,7 @@ import com.onesignal.OSSubscriptionObserver;
 import com.onesignal.OSSubscriptionStateChanges;
 import com.onesignal.OneSignal;
 import com.zplesac.connectionbuddy.ConnectionBuddy;
-import com.zplesac.connectionbuddy.cache.ConnectionBuddyCache;
+import com.zplesac.connectionbuddy.ConnectionBuddyCache;
 import com.zplesac.connectionbuddy.interfaces.ConnectivityChangeListener;
 import com.zplesac.connectionbuddy.models.ConnectivityEvent;
 import com.zplesac.connectionbuddy.models.ConnectivityState;
@@ -127,6 +128,8 @@ public class Homepage extends AppCompatActivity  implements
 
 
 
+
+
         showLog("onCreate");
         showLog(currentUser.getPhotoUrl().toString());
 
@@ -142,10 +145,8 @@ public class Homepage extends AppCompatActivity  implements
 
 
         /**************************************************************//////
-        if (savedInstanceState != null) {
-            ConnectionBuddyCache.clearLastNetworkState(this);
-        }
-        ConnectionBuddy.getInstance().registerForConnectivityEvents(this, this);
+
+
 
 
 
@@ -223,6 +224,17 @@ public class Homepage extends AppCompatActivity  implements
                 overridePendingTransition(R.anim.slide_from_right,0);
             }
     }
+        if(checkInternet()){
+            // device has active internet connection
+            noConnection_tv.setVisibility(View.GONE);
+            setOnline();
+
+        }
+        else{
+            // there is no active internet connection on this device
+            noConnection_tv.setVisibility(View.VISIBLE);
+        }
+
 
     }
 
@@ -323,6 +335,8 @@ public class Homepage extends AppCompatActivity  implements
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         sharedPref.registerOnSharedPreferenceChangeListener(this);
 
+        ConnectionBuddy.getInstance().registerForConnectivityEvents(this, this);
+
     }
 
     @Override
@@ -358,7 +372,13 @@ public class Homepage extends AppCompatActivity  implements
 
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         sharedPref.unregisterOnSharedPreferenceChangeListener(this);
+        try {
+            if (ConnectionBuddy.getInstance() != null) {
+                ConnectionBuddy.getInstance().unregisterFromConnectivityEvents(this);
+            }
+        }catch (Exception e){
 
+        }
 
 
 
@@ -367,13 +387,7 @@ public class Homepage extends AppCompatActivity  implements
 
     @Override
     protected void onDestroy() {
-        try {
-            if (ConnectionBuddy.getInstance() != null) {
-                ConnectionBuddy.getInstance().unregisterFromConnectivityEvents(this);
-            }
-        }catch (Exception e){
 
-        }
         super.onDestroy();
 
 
@@ -668,7 +682,7 @@ public class Homepage extends AppCompatActivity  implements
     // check internet connections
     @Override
     public void onConnectionChange(ConnectivityEvent event) {
-        if(event.getState() == ConnectivityState.CONNECTED){
+        if(event.getState().getValue() == ConnectivityState.CONNECTED){
             // device has active internet connection
             noConnection_tv.setVisibility(View.GONE);
             setOnline();

@@ -68,7 +68,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     private final String VIEWTYPE_LOAD_STR = "load";
     private final String VIEWTYPE_HEADER_STR = "header";
-    private final String Default_Url = "https://firebasestorage.googleapis.com/v0/b/icebr8k-98675.appspot.com/o/UserAvatars%2Fdefault_avatar.png?alt=media&token=ccbf30ce-5cfb-493a-8c28-8bf7ee18cc9a";
+    private final String Default_Url = "https://i.imgur.com/zI4v7oF.png";
 
     private boolean loading;
     private long lastClickTime =0;
@@ -173,11 +173,11 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             String url =userPhotoUrlMap.get(message.getSenderid());
             if(url!=null && !url.isEmpty()) {
                 Glide.with(getContext()).load(url)
-                        .apply(RequestOptions.circleCropTransform())
+                        .apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3))
                         .into(((IncomingTextMessageViewHolder) holder).avatar_in);
             }else{
                 Glide.with(getContext()).load(Default_Url)
-                        .apply(RequestOptions.circleCropTransform())
+                        .apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3))
                         .into(((IncomingTextMessageViewHolder) holder).avatar_in);
             }
         }else if(holder instanceof OutcomingTextMessageViewHolder) {
@@ -199,11 +199,11 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             String url =FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString();
             if(url!=null && !url.isEmpty()) {
                 Glide.with(getContext()).load(url)
-                        .apply(RequestOptions.circleCropTransform())
+                        .apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3))
                         .into(((OutcomingTextMessageViewHolder) holder).avatar_out);
             }else{
                 Glide.with(getContext()).load(Default_Url)
-                        .apply(RequestOptions.circleCropTransform())
+                        .apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3))
                         .into(((OutcomingTextMessageViewHolder) holder).avatar_out);
             }
         }else if(holder instanceof TypingViewHolder){
@@ -211,11 +211,11 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             String url =userPhotoUrlMap.get(message.getSenderid());
             if(url!=null && !url.isEmpty()) {
                 Glide.with(getContext()).load(url)
-                        .apply(RequestOptions.circleCropTransform())
+                        .apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3))
                         .into(((TypingViewHolder) holder).avatar);
             }else{
                 Glide.with(getContext()).load(Default_Url)
-                        .apply(RequestOptions.circleCropTransform())
+                        .apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3))
                         .into(((TypingViewHolder) holder).avatar);
             }
         }else if(holder instanceof DateHeaderViewHolder){

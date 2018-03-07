@@ -4,6 +4,7 @@
 <string name="error_field_nospace">No space in username</string>
 <string name="error_invalid_username">Username needs at least 5 characters</string>
 <string name="log_out">Log Out</string>
+    <string name="feedback">Support &amp; Feedback</string>
 <string name="check_back_later">No more questions</string>
 <string name="question_skip">skipped</string>
 <string name="date_header_yesterday">Yesterday</string>

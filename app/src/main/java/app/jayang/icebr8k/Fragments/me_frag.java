@@ -25,6 +25,8 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +35,8 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.dd.processbutton.FlatButton;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -96,7 +100,9 @@ public class me_frag extends Fragment {
     private FirebaseUser currentuser;
     private DatabaseReference mRef;
     private LinearLayout mLinearLayout;
+    private RelativeLayout loadingGif;
     private MaterialDialog mProgressDialog;
+    private ScrollView scrollView;
     private SwitchCompat mSwitchCompat;
     private ActivityCommunicator activityCommunicator;
     private User user;
@@ -135,24 +141,51 @@ public class me_frag extends Fragment {
         mProgressDialog = new MaterialDialog.Builder(getActivity())
                 .content("Updating Avatar...")
                 .progress(true, 0).build();
+        scrollView = fragView.findViewById(R.id.me_scrollview);
+        loadingGif = fragView.findViewById(R.id.loadingImg_meTab);
 
         //update ui
         badge.setVisibility(View.INVISIBLE);
-        displayname.setText(currentuser.getDisplayName());
-        email.setText(currentuser.getEmail());
+        loadingGif.setVisibility(View.VISIBLE);
+        scrollView.setVisibility(View.GONE);
+
 
         DatabaseReference photoUrlref = FirebaseDatabase.getInstance().getReference().child("Users")
-                .child(currentuser.getUid()).child("photourl");
-        photoUrlref.addValueEventListener(new ValueEventListener() {
+                .child(currentuser.getUid());
+        photoUrlref.addListenerForSingleValueEvent(     new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                String photourl = dataSnapshot.getValue(String.class);
-                if(photourl!=null){
-                    Glide.with(fragView).load(photourl).
+                User user = dataSnapshot.getValue(User.class);
+                if (user.getPhotourl() != null) {
+                    Glide.with(getContext()).load(user.getPhotourl()).
                             apply(RequestOptions.circleCropTransform()).into(avatar);
                 }
+                displayname.setText(user.getDisplayname());
+                email.setText(user.getEmail());
+                if (user.getDisplayname() != null && user.getPhotourl() != null) {
+                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                            .setDisplayName(user.getDisplayname())
+                            .setPhotoUri(Uri.parse(user.getPhotourl()))
+                            .build();
 
+                    currentuser.updateProfile(profileUpdates)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        loadingGif.setVisibility(View.GONE);
+                                        YoYo.with(Techniques.FadeIn).duration(500).playOn(scrollView);
+                                        scrollView.setVisibility(View.VISIBLE);
+
+
+
+                                    }
+                                }
+                            });
+                }
             }
+
+
 
             @Override
             public void onCancelled(DatabaseError databaseError) {

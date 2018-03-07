@@ -122,8 +122,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
 
 
         if(dialog.getPhotoUrl()!=null){
-            Glide.with(holder.image.getContext()).load(dialog.getPhotoUrl()).
-                    apply(RequestOptions.circleCropTransform()).into(holder.image);
+            Glide.with(holder.image.getContext()). load(dialog.getPhotoUrl()).
+                    apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3)). into(holder.image);
         }
 
 

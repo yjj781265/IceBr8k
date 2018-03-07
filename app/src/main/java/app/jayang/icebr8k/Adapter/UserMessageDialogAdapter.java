@@ -68,7 +68,7 @@ public class UserMessageDialogAdapter extends RecyclerView.Adapter<RecyclerView.
             if(messageDialog.getPhotoUrl()!=null){
               ImageView avatsr=((UserMessageDialogViewHolder) holder).avatar;
                 Glide.with(mContext).load(messageDialog.getPhotoUrl())
-                        .apply(RequestOptions.circleCropTransform())
+                        .apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3))
                         .into(avatsr);
             }
 

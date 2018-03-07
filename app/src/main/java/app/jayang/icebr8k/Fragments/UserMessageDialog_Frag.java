@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.transition.Fade;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,8 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.google.android.gms.common.data.DataBufferObserverSet;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -214,6 +217,7 @@ public class UserMessageDialog_Frag extends Fragment {
                    noChat.setVisibility(View.VISIBLE);
                }else{
                    noChat.setVisibility(View.GONE);
+                   YoYo.with(Techniques.FadeIn).duration(500).playOn(mRecyclerView);
                }
 
             }
