@@ -34,6 +34,7 @@ import com.xw.repo.BubbleSeekBar;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 
 import app.jayang.icebr8k.Modle.SurveyQ;
 import app.jayang.icebr8k.Modle.UserQA;
@@ -66,7 +67,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
     private  ArrayList<SurveyQ> surveyList; // for unpdating UI
     private ArrayList<String> userQlist;
 
-    private ArrayList<String> surveyQlist; // for comparing with userQArraylist
+    private HashMap<SurveyQ, UserQA> userQAHashMap; // for comparing with userQArraylist
 
     private ProgressBar mProgressBar;
     private  Spinner mSpinner;
@@ -81,7 +82,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         userQlist = new ArrayList<>();
-        surveyQlist = new ArrayList<>();
+        userQAHashMap = new HashMap<>();
         surveyList =  new ArrayList<>();
 
         userQARef = FirebaseDatabase.getInstance().getReference().child("UserQA").child(currentUser.getUid());
@@ -153,7 +154,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
             @Override
             public void onClick(View view) {
                 if(index>1 && !surveyList.isEmpty()){
-                    updateUI(surveyList.get(index-2));
+                    updateUI_QA(surveyList.get(index-2));
 
                 }
             }
@@ -365,7 +366,321 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
 
     }
 
-    private void isMultipleChoic(SurveyQ surveyQ) {
+    private void updateUI_QA(SurveyQ surveyQ) {
+        if(surveyList.indexOf(surveyQ) ==0){
+            backArrow.setVisibility(View.GONE);
+        }else{
+            backArrow.setVisibility(View.VISIBLE);
+        }
+        mTextView.setTypeface(Typeface.DEFAULT_BOLD);
+        String type = surveyQ.getType();
+        switch(type){
+            case  MC_TYPE:
+                isMultipleChoicQA(surveyQ);
+                break;
+            case  SC_TYPE:
+                isScaleQuestionQA(surveyQ);
+                break;
+            case  SP_TYPE:
+                isSpinnerQuestionQA(surveyQ);
+                break;
+            default: isMultipleChoic(surveyQ);
+                break;
+        }
+
+
+    }
+
+
+
+
+
+
+    private void isSpinnerQuestionQA(final SurveyQ surveyQ) {
+        if(surveyQ.getType().equals(SP_TYPE) && surveyList.contains(surveyQ)){
+            index = surveyList.indexOf(surveyQ)+1;
+            mTextView.setVisibility(View.VISIBLE);
+            mTextView.setText(surveyQ.getQuestion());
+            progressText .setVisibility(View.VISIBLE);
+            progressText.setText(index +"/"+surveyList.size());
+            skip.setVisibility(View.VISIBLE);
+
+            mSeekBar.setVisibility(View.GONE);
+            mSpinner.setVisibility(View.VISIBLE);
+            mRadioGroup.setVisibility(View.GONE);
+
+            favorite_btn.setVisibility(View.VISIBLE);
+            mSubmit.setVisibility(View.VISIBLE);
+            msubTextview.setVisibility(View.GONE);
+        }
+        String answer = userQAHashMap.get(surveyQ).getAnswer();
+
+        if(!surveyQ.getAnswer().isEmpty()) {
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_dropdown_item, surveyQ.getAnswer());
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            mSpinner.setAdapter(adapter);
+          if(answer!=null&&!"skipped".equals(answer)){
+              for(int i =0 ; i<surveyQ.getAnswer().size();i++){
+                  if(surveyQ.getAnswer().get(i).equals(answer)){
+                      mSpinner.setSelection(i);
+                  }
+              }
+
+          }
+
+            if(userQAHashMap.get(surveyQ).getFavorite()!=null){
+                favorite_btn.setSelected(userQAHashMap.get(surveyQ).getFavorite());
+
+            }
+
+
+            final UserQA userQA = new UserQA();
+            userQA.setQuestion(surveyQ.getQuestion());
+            userQA.setQuestionId(surveyQ.getQuestionId());
+            //default is false;
+            userQA.setFavorite(userQAHashMap.get(surveyQ).getFavorite());
+
+
+            //update Database
+            favorite_btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(favorite_btn.isSelected()){
+                        favorite_btn.setSelected(false);
+                        userQA.setFavorite(false);
+                    }else{
+                        favorite_btn.setSelected(true);
+                        userQA.setFavorite(true);
+                    }
+                }
+            });
+            skip.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    userQA.setAnswer("skipped");
+                    userQA.setFavorite(false);
+                    userQARef.child(userQA.getQuestionId()).setValue(userQA).addOnSuccessListener(SurveyTab_Fragment.this);
+                    if(index<surveyList.size() && index!=0){
+                        updateUI(surveyList.get(index));
+                        userQAHashMap.put(surveyQ,userQA);
+                    }else if(index == surveyList.size()){
+                        hideCardViewComponent();
+                    }
+                }
+            });
+
+            mSubmit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    String text =  mSpinner.getSelectedItem().toString();
+                    userQA.setAnswer(text);
+                    userQARef.child(userQA.getQuestionId()).setValue(userQA).addOnSuccessListener(SurveyTab_Fragment.this);
+
+                    if(index<surveyList.size()&& index!=0){
+                        updateUI(surveyList.get(index));
+                        userQAHashMap.put(surveyQ,userQA);
+                    }else if(index ==surveyList.size()){
+                        hideCardViewComponent();
+                    }
+                }
+            });
+        }
+
+    }
+
+    private void isScaleQuestionQA(final SurveyQ surveyQ) {
+
+        if(surveyQ.getType().equals(SC_TYPE) && surveyList.contains(surveyQ)){
+            index = surveyList.indexOf(surveyQ)+1;
+            mTextView.setVisibility(View.VISIBLE);
+            mTextView.setText(surveyQ.getQuestion());
+            progressText .setVisibility(View.VISIBLE);
+            progressText.setText(index +"/"+surveyList.size());
+            skip.setVisibility(View.VISIBLE);
+
+            mSeekBar.setVisibility(View.VISIBLE);
+            mSpinner.setVisibility(View.GONE);
+            mRadioGroup.setVisibility(View.GONE);
+
+            favorite_btn.setVisibility(View.VISIBLE);
+            mSubmit.setVisibility(View.VISIBLE);
+            msubTextview.setVisibility(View.VISIBLE);
+            String str = userQAHashMap.get(surveyQ).getAnswer();
+            if(str!=null && !"skipped".equals(str)) {
+                Float answer = Float.valueOf(userQAHashMap.get(surveyQ).getAnswer());
+                mSeekBar.setProgress(answer);
+            }else{
+                mSeekBar.setProgress(5f);
+
+            }
+            if(userQAHashMap.get(surveyQ).getFavorite()!=null){
+                favorite_btn.setSelected(userQAHashMap.get(surveyQ).getFavorite());
+            }
+
+
+
+
+
+
+            final UserQA userQA = new UserQA();
+            userQA.setQuestion(surveyQ.getQuestion());
+            userQA.setQuestionId(surveyQ.getQuestionId());
+            //default is false;
+            userQA.setFavorite(userQAHashMap.get(surveyQ).getFavorite());
+
+            //update Database
+            favorite_btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(favorite_btn.isSelected()){
+                        favorite_btn.setSelected(false);
+                        userQA.setFavorite(false);
+                    }else{
+                        favorite_btn.setSelected(true);
+                        userQA.setFavorite(true);
+                    }
+                }
+            });
+            skip.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    userQA.setFavorite(false);
+                    userQA.setAnswer("skipped");
+                    userQARef.child(userQA.getQuestionId()).setValue(userQA).addOnSuccessListener(SurveyTab_Fragment.this);
+                    if(index<surveyList.size()&& index!=0){
+                        updateUI(surveyList.get(index));
+                        userQAHashMap.put(surveyQ,userQA);
+                    }else if(index == surveyList.size()){
+                        hideCardViewComponent();
+                    }
+                }
+            });
+
+            mSubmit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    String answer = String.valueOf( mSeekBar.getProgress());
+                    userQA.setAnswer(answer);
+                    userQARef.child(userQA.getQuestionId()).setValue(userQA).addOnSuccessListener(SurveyTab_Fragment.this);
+                    if(index<surveyList.size() && index!=0){
+                        updateUI(surveyList.get(index));
+                        userQAHashMap.put(surveyQ,userQA);
+                    }else if(index ==surveyList.size()){
+                        hideCardViewComponent();
+                    }
+                }
+            });
+
+
+
+        }
+    }
+
+    private void isMultipleChoicQA(final SurveyQ surveyQ) {
+        if(surveyQ.getType().equals(MC_TYPE) && surveyList.contains(surveyQ)) {
+            index = surveyList.indexOf(surveyQ)+1;
+            mTextView.setVisibility(View.VISIBLE);
+            mTextView.setText(surveyQ.getQuestion());
+            progressText .setVisibility(View.VISIBLE);
+            progressText.setText(index +"/"+surveyList.size());
+            skip.setVisibility(View.VISIBLE);
+            favorite_btn.setVisibility(View.VISIBLE);
+            mSubmit.setVisibility(View.VISIBLE);
+            mSeekBar.setVisibility(View.GONE);
+            mSpinner.setVisibility(View.GONE);
+
+            msubTextview.setVisibility(View.GONE);
+
+            mRadioGroup.removeAllViews();
+            mRadioGroup.clearCheck();
+            mRadioGroup.setVisibility(View.VISIBLE);
+
+            String answer =null;
+            if(userQAHashMap.get(surveyQ)!=null) {
+                answer =userQAHashMap.get(surveyQ).getAnswer();
+                if(userQAHashMap.get(surveyQ).getFavorite()!=null){
+                    favorite_btn.setSelected(userQAHashMap.get(surveyQ).getFavorite());
+                }
+
+            }
+
+            //Ui Stuff
+            for (int i = 0; i < surveyQ.getAnswer().size(); i++) {
+                RadioButton button = new RadioButton(mview.getContext());
+                button.setText(surveyQ.getAnswer().get(i).toString());
+                mRadioGroup.addView(button);
+                if(answer!=null&&!"skipped".equals(answer)  && surveyQ.getAnswer().get(i).toString().equals(answer)) {
+                    ((RadioButton)mRadioGroup.getChildAt(i)).setChecked(true);
+                }
+            }
+
+
+            final UserQA userQA = new UserQA();
+            userQA.setQuestion(surveyQ.getQuestion());
+            userQA.setQuestionId(surveyQ.getQuestionId());
+            //default is false;
+            userQA.setFavorite(userQAHashMap.get(surveyQ).getFavorite());
+            //update Database
+            favorite_btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(favorite_btn.isSelected()){
+                        favorite_btn.setSelected(false);
+                        userQA.setFavorite(false);
+                    }else{
+                        favorite_btn.setSelected(true);
+                        userQA.setFavorite(true);
+                    }
+                }
+            });
+
+            skip.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    userQA.setFavorite(false);
+                    userQA.setAnswer("skipped");
+                    userQARef.child(userQA.getQuestionId()).setValue(userQA).addOnSuccessListener(SurveyTab_Fragment.this);
+                    if(index<surveyList.size() && index!=0){
+                        updateUI(surveyList.get(index));
+                        userQAHashMap.put(surveyQ,userQA);
+                    }else if(index == surveyList.size()){
+                        hideCardViewComponent();
+                    }
+                }
+            });
+
+            mSubmit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(mRadioGroup.getCheckedRadioButtonId()==-1&& mRadioGroup.getVisibility()==View.VISIBLE){
+                        Toast.makeText(getContext(),"Make a selection",Toast.LENGTH_SHORT).show();
+
+                    }else if(mRadioGroup.getCheckedRadioButtonId()!=-1&& mRadioGroup.getVisibility()==View.VISIBLE){
+                        int id= mRadioGroup.getCheckedRadioButtonId();
+                        View radioButton = mRadioGroup.findViewById(id);
+                        int radioId = mRadioGroup.indexOfChild(radioButton);
+                        RadioButton btn = (RadioButton) mRadioGroup.getChildAt(radioId);
+                        String selection = (String) btn.getText();
+                        userQA.setAnswer(selection);
+                        userQARef.child(userQA.getQuestionId()).setValue(userQA).addOnSuccessListener(SurveyTab_Fragment.this);
+                        if(index<surveyList.size() && index!=0){
+                            updateUI(surveyList.get(index));
+                            userQAHashMap.put(surveyQ,userQA);
+                        }else if(index == surveyList.size()){
+                            hideCardViewComponent();
+                        }
+
+                    }
+                }
+            });
+
+
+        }
+
+    }
+
+
+    private void isMultipleChoic(final SurveyQ surveyQ) {
         if(surveyQ.getType().equals(MC_TYPE) && surveyList.contains(surveyQ)) {
             index = surveyList.indexOf(surveyQ)+1;
             mTextView.setVisibility(View.VISIBLE);
@@ -386,7 +701,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
             mRadioGroup.setVisibility(View.VISIBLE);
 
 
-          ;
+
           //Ui Stuff
             for (int i = 0; i < surveyQ.getAnswer().size(); i++) {
                 RadioButton button = new RadioButton(mview.getContext());
@@ -420,6 +735,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
                     userQARef.child(userQA.getQuestionId()).setValue(userQA).addOnSuccessListener(SurveyTab_Fragment.this);
                     if(index<surveyList.size() && index!=0){
                         updateUI(surveyList.get(index));
+                        userQAHashMap.put(surveyQ,userQA);
                     }else if(index == surveyList.size()){
                         hideCardViewComponent();
                     }
@@ -442,6 +758,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
                         userQARef.child(userQA.getQuestionId()).setValue(userQA).addOnSuccessListener(SurveyTab_Fragment.this);
                         if(index<surveyList.size() && index!=0){
                             updateUI(surveyList.get(index));
+                            userQAHashMap.put(surveyQ,userQA);
                         }else if(index == surveyList.size()){
                             hideCardViewComponent();
                         }
@@ -455,7 +772,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
 
 
     }
-    private  void isScaleQuestion(SurveyQ surveyQ){
+    private  void isScaleQuestion(final SurveyQ surveyQ){
         if(surveyQ.getType().equals(SC_TYPE) && surveyList.contains(surveyQ)){
             index = surveyList.indexOf(surveyQ)+1;
             mTextView.setVisibility(View.VISIBLE);
@@ -504,6 +821,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
                     userQARef.child(userQA.getQuestionId()).setValue(userQA).addOnSuccessListener(SurveyTab_Fragment.this);
                     if(index<surveyList.size()&& index!=0){
                         updateUI(surveyList.get(index));
+                        userQAHashMap.put(surveyQ,userQA);
                     }else if(index == surveyList.size()){
                         hideCardViewComponent();
                     }
@@ -518,6 +836,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
                     userQARef.child(userQA.getQuestionId()).setValue(userQA).addOnSuccessListener(SurveyTab_Fragment.this);
                     if(index<surveyList.size() && index!=0){
                         updateUI(surveyList.get(index));
+                        userQAHashMap.put(surveyQ,userQA);
                     }else if(index ==surveyList.size()){
                         hideCardViewComponent();
                     }
@@ -529,7 +848,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
         }
 
     }
-    private  void isSpinnerQuestion(SurveyQ surveyQ){
+    private  void isSpinnerQuestion(final SurveyQ surveyQ){
         if(surveyQ.getType().equals(SP_TYPE) && surveyList.contains(surveyQ)){
             index = surveyList.indexOf(surveyQ)+1;
             mTextView.setVisibility(View.VISIBLE);
@@ -559,8 +878,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
             userQA.setQuestionId(surveyQ.getQuestionId());
             //default is false;
             userQA.setFavorite(false);
-            String text = mSpinner.getSelectedItem().toString();
-            userQA.setAnswer(text);
+
 
             //update Database
             favorite_btn.setOnClickListener(new View.OnClickListener() {
@@ -583,6 +901,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
                     userQARef.child(userQA.getQuestionId()).setValue(userQA).addOnSuccessListener(SurveyTab_Fragment.this);
                     if(index<surveyList.size() && index!=0){
                         updateUI(surveyList.get(index));
+                        userQAHashMap.put(surveyQ,userQA);
                     }else if(index == surveyList.size()){
                         hideCardViewComponent();
                     }
@@ -592,10 +911,13 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
             mSubmit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    String text =  mSpinner.getSelectedItem().toString();
+                    userQA.setAnswer(text);
                     userQARef.child(userQA.getQuestionId()).setValue(userQA).addOnSuccessListener(SurveyTab_Fragment.this);
 
                     if(index<surveyList.size()&& index!=0){
                         updateUI(surveyList.get(index));
+                        userQAHashMap.put(surveyQ,userQA);
                     }else if(index ==surveyList.size()){
                         hideCardViewComponent();
                     }

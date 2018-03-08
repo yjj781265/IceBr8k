@@ -3,9 +3,10 @@
     android:id="@+id/messageDialog"
     android:background="?attr/selectableItemBackground"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="72dp">
 
     <LinearLayout
+    android:padding="16dp"
         android:id="@+id/messageDialog_container"
         android:gravity="center_vertical"
         android:layout_width="match_parent"
@@ -13,7 +14,9 @@
         android:layout_height="wrap_content">
         <LinearLayout
             android:id="@+id/messageDialog_avatar_container"
-            android:layout_margin="16dp"
+
+
+
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
             <ImageView
@@ -23,30 +26,30 @@
                 android:layout_height="40dp"
                 android:scaleType="centerCrop" />
 
+            <TextView
+                android:id="@+id/messageDialog_unread"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:layout_marginLeft="-10dp"
+                android:layout_marginRight="13dp"
+                android:background="@drawable/badge_circle"
+                android:gravity="center"
+                android:padding="2dp"
+                android:text="99"
+                android:textColor="#FFF"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
 
         </LinearLayout>
-        <TextView
-            android:id="@+id/messageDialog_unread"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:layout_marginLeft="-25dp"
-            android:layout_marginTop="13dp"
-            android:background="@drawable/badge_circle"
-            android:gravity="center"
-            android:padding="2dp"
-            android:text="99"
-            android:textColor="#FFF"
-            android:textSize="12dp"
-            android:textStyle="bold"/>
+
 
 
 
 
         <LinearLayout
             android:layout_gravity="center_vertical"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
             android:layout_width="match_parent"
             android:orientation="vertical"
             android:layout_height="wrap_content">
@@ -124,7 +127,7 @@
     <View
 
         android:id="@+id/dialogDivider"
-        android:layout_below="@id/messageDialog_container"
+       android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/dialog_divider"/>

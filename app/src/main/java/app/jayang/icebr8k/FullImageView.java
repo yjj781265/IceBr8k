@@ -278,6 +278,7 @@ public class FullImageView extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        show();
         supportFinishAfterTransition();
 
     }

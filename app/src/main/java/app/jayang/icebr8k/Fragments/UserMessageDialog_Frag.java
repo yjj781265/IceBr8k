@@ -208,7 +208,7 @@ public class UserMessageDialog_Frag extends Fragment {
             }
         });
 
-        msgRef.addValueEventListener(new ValueEventListener() {
+        msgRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 showLog(mDialogs.size() + " Done");
