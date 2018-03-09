@@ -53,7 +53,6 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
     private RadioGroup mRadioGroup;
     private BootstrapButton mSubmit;
     private ImageView backArrow;
-    private CardView mCardView;
     private TextView skip;
     private int index =0;
     private FloatingActionButton mActionButton;
@@ -114,7 +113,6 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
         msubTextview.setVisibility(View.GONE);
         progressText = mview.findViewById(R.id.progress_text);
         progressText.setVisibility(View.INVISIBLE);
-        mCardView =mview.findViewById(R.id.cardView);
         favorite_btn = mview.findViewById(R.id.favorite_btn);
         favorite_btn.setVisibility(View.GONE);
         mActionButton= mview.findViewById(R.id.floatingActionButton);
@@ -142,9 +140,8 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
 
 
         mActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
             public void onClick(View view) {
-                mActionButton.setClickable(false);;// prevent user spam click the button ,may crash the program
+                mActionButton.setClickable(false);// prevent user spam click the button ,may crash the program
                 mTextView.setVisibility(View.INVISIBLE);
                 initQuestions();
             }
@@ -202,12 +199,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
 
 
 
-    // this method is triggered once the survey fragment is appeared to the user
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
 
-    }
 
 
 
@@ -287,7 +279,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
                     if(dataSnapshot.hasChild("answer") ) {
                         GenericTypeIndicator<ArrayList<String>> t = new GenericTypeIndicator<ArrayList<String>>(){};
                         answer = dataSnapshot.child("answer").getValue(t);
-                        showLog(answer.toString());
+
                     }
 
                     SurveyQ surveyQ = new SurveyQ(type, question, question_id, answer);
@@ -416,7 +408,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
         String answer = userQAHashMap.get(surveyQ).getAnswer();
 
         if(!surveyQ.getAnswer().isEmpty()) {
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_dropdown_item, surveyQ.getAnswer());
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_dropdown_item, surveyQ.getAnswer());
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             mSpinner.setAdapter(adapter);
           if(answer!=null&&!"skipped".equals(answer)){
@@ -680,6 +672,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
     }
 
 
+
     private void isMultipleChoic(final SurveyQ surveyQ) {
         if(surveyQ.getType().equals(MC_TYPE) && surveyList.contains(surveyQ)) {
             index = surveyList.indexOf(surveyQ)+1;
@@ -705,7 +698,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
           //Ui Stuff
             for (int i = 0; i < surveyQ.getAnswer().size(); i++) {
                 RadioButton button = new RadioButton(mview.getContext());
-                button.setText(surveyQ.getAnswer().get(i).toString());
+                button.setText(surveyQ.getAnswer().get(i));
                 mRadioGroup.addView(button);
             }
             final UserQA userQA = new UserQA();

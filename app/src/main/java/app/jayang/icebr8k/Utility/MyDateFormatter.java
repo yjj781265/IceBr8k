@@ -171,25 +171,25 @@ public class MyDateFormatter {
             long minutes = TimeUnit.MILLISECONDS.toMinutes(milliseconds);
 
             if(minutes<60 && minutes>0){
-                string = minutes+" min";
+                string = minutes+"min";
             }else if(minutes>=60 && minutes<1440){
                 long hours = TimeUnit.MINUTES.toHours(minutes);
                 if(hours==0){
                     hours =1;
                 }
-                string = hours+" hr";
+                string = hours+"hr";
             }else if(minutes >=1440 && minutes <525600) {
                 days = TimeUnit.MINUTES.toDays(minutes);
                 if (days == 0) {
                     days = 1;
                 }
-                string = days + " d";
+                string = days + "d";
             }else if(days>=30){
                 months = days/30;
-                string =  months + " mo";
+                string =  months + "mo";
             }else if(months>=12){
                 long years = months / 12;
-                string = +years+" yr";
+                string = +years+"yr";
             }else{
                 string = "offline";
             }

@@ -96,8 +96,8 @@
                  android:textColor="@android:color/tab_indicator_text"
                  android:layout_gravity="center_vertical|end"
                  android:visibility="visible"
-                 android:text="60 min"
-                 android:gravity="end|bottom"
+                 android:text="1hrfdsfsf"
+                 android:gravity="center"
                  android:textSize="13sp"
                  />
 

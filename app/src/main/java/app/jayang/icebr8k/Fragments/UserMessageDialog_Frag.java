@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import app.jayang.icebr8k.Adapter.UserMessageDialogAdapter;
+import app.jayang.icebr8k.Homepage;
 import app.jayang.icebr8k.Modle.UserMessage;
 import app.jayang.icebr8k.Modle.UserMessageDialog;
 import app.jayang.icebr8k.R;
@@ -44,6 +45,7 @@ import app.jayang.icebr8k.R;
 
 public class UserMessageDialog_Frag extends Fragment {
     private View fragView;
+    private Homepage mHomepage;
     private TextView noChat;
     private ArrayList<UserMessageDialog> mDialogs;
     private UserMessageDialogAdapter mAdapter;
@@ -101,10 +103,21 @@ public class UserMessageDialog_Frag extends Fragment {
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         userInfoRef = FirebaseDatabase.getInstance().getReference().child("Users");
         msgRef = FirebaseDatabase.getInstance().getReference().child("UserMessages").child(currentUser.getUid());
-
+        mHomepage = (Homepage)getActivity();
+        if(mHomepage!=null) {
+            mHomepage.getViewPager().setSwipeable(true);
+        }
 
         loadDialogs();
         return fragView;
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if(!isVisibleToUser && getView()!=null && mAdapter!=null){
+            mAdapter.dismissActionMode();
+        }
     }
 
 
@@ -141,6 +154,7 @@ public class UserMessageDialog_Frag extends Fragment {
 
                      // is one to one chat
                     if(!mDialogs.contains(messageDialog)&& !groupchat) {
+                        noChat.setVisibility(View.GONE);
                        mDialogs.add(messageDialog);
                         addlastMessageListener(messageDialog);
                         addMuteListener(messageDialog);
@@ -181,6 +195,7 @@ public class UserMessageDialog_Frag extends Fragment {
 
                     // is one to one chat
                     if(!mDialogs.contains(messageDialog)&& !groupchat) {
+                        noChat.setVisibility(View.GONE);
                         mDialogs.add(messageDialog);
                         addlastMessageListener(messageDialog);
                         addMuteListener(messageDialog);
@@ -194,6 +209,15 @@ public class UserMessageDialog_Frag extends Fragment {
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChild("lastmessage")){
+                    UserMessageDialog messageDialog = new UserMessageDialog();
+                    messageDialog.setId(dataSnapshot.getKey());
+                    mDialogs.remove(messageDialog);
+                }
+                if(mDialogs.isEmpty()){
+                    noChat.setVisibility(View.VISIBLE);
+                }
+
 
             }
 
