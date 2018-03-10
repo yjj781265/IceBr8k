@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -23,6 +24,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 
 import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.Modle.UserDialog;
 import app.jayang.icebr8k.Modle.UserLocationDialog;
 
 /**
@@ -47,91 +49,100 @@ public class UserLocationDialogAdapter extends RecyclerView.Adapter<UserLocation
 
     @Override
     public void onBindViewHolder(final UserLocationDialogVH holder, int position) {
-        Log.d("PeopleNearby_IceBr8k","binding");
-         User user = mLocationDialogs.get(position).getUser();
-        holder.username.setText(user.getUsername());
-        holder.displayname.setText(user.getDisplayname());
-        holder.score.setText(user.getScore());
-        String uid =  mLocationDialogs.get(position).getId();
+        if(!mLocationDialogs.get(position).getId().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())){
+            Log.d("PeopleNearby_IceBr8k","binding");
+            User user = mLocationDialogs.get(position).getUser();
+            UserLocationDialog dialog = mLocationDialogs.get(position);
+            if(user!=null &&  user.getDisplayname()!=null && user.getPhotourl()!=null &&
+                    user.getOnlinestats()!=null &&user.getUsername()!=null ){
+                holder.username.setText(user.getUsername());
+                holder.displayname.setText(user.getDisplayname());
+                holder.score.setText(user.getScore());
+                Glide.with(holder.image.getContext()).load(user.getPhotourl()).
+                        apply(RequestOptions.circleCropTransform()).into(holder.image);
 
-        double miles = Double.valueOf(mLocationDialogs.get(position).getDistance());
-        int intMiles;
-        String distance;
-        String unit;
-        intMiles = (int)Math.round(miles*5280);
-        if(intMiles<=1000){
-            unit="ft";
-            distance = String.valueOf(intMiles);
-        }else{
-            int scale = (int) Math.pow(10, 1);
-            miles =(double) Math.round(miles * scale) / scale;
-            distance = String.valueOf(miles);
-            unit ="mi";
-        }
+                holder.score.setText( dialog.getScore()+"%");
+            }
 
-
-        holder.distanance.setText(distance+" "+unit);
-
-        Glide.with(holder.image.getContext()).load(user.getPhotourl()).
-                apply(RequestOptions.circleCropTransform()).into(holder.image);
-
-        if ( user.getScore()!=null && user.getScore().equals("")) {
-            holder.score.setVisibility(View.INVISIBLE);
-        } else {
-            holder.score.setText(user.getScore() + "%");
-
-        }
-
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("Users").child(uid);
-        userRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                User user2 =dataSnapshot.getValue(User.class);
-
-                if(user2!=null){
+            String uid =  mLocationDialogs.get(position).getId();
+            if(mLocationDialogs.get(position).getDistance()!=null){
+                double miles = Double.valueOf(mLocationDialogs.get(position).getDistance());
+                int intMiles;
+                String distance;
+                String unit;
+                intMiles = (int)Math.round(miles*5280);
+                if(intMiles<=1000){
+                    unit="ft";
+                    distance = String.valueOf(intMiles);
+                }else{
+                    int scale = (int) Math.pow(10, 1);
+                    miles =(double) Math.round(miles * scale) / scale;
+                    distance = String.valueOf(miles);
+                    unit ="mi";
+                }
 
 
-                    String online =user2.getOnlinestats();
-                    if(online!=null){
-                        if(holder.image.getAlpha()!=1.0f) {
-                            holder.image.setAlpha(1.0f);
-                        }
-                        if (online.equals("2")) {
-                            holder.onlineStats.setImageResource(R.drawable.green_dot);
-                            holder.onlineStats.setVisibility(View.VISIBLE);
-                            if(holder.mRelativeLayout.getAlpha()!=1.0f) {
-                                holder.mRelativeLayout.setAlpha(1.0f);
+                holder.distanance.setText(distance+" "+unit);
+
+            }
+
+
+
+
+
+
+            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("Users").child(uid);
+            userRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    User user2 =dataSnapshot.getValue(User.class);
+
+                    if(user2!=null){
+
+
+                        String online =user2.getOnlinestats();
+                        if(online!=null){
+                            if(holder.image.getAlpha()!=1.0f) {
+                                holder.image.setAlpha(1.0f);
                             }
-                        } else if (online.equals("1")) {
-                            holder.onlineStats.setImageResource(R.drawable.circle_shape_busy);
-                            holder.onlineStats.setVisibility(View.VISIBLE);
-                            if(holder.mRelativeLayout.getAlpha()!=1.0f) {
-                                holder.mRelativeLayout.setAlpha(1.0f);
+                            if (online.equals("2")) {
+                                holder.onlineStats.setImageResource(R.drawable.green_dot);
+                                holder.onlineStats.setVisibility(View.VISIBLE);
+                                if(holder.mRelativeLayout.getAlpha()!=1.0f) {
+                                    holder.mRelativeLayout.setAlpha(1.0f);
+                                }
+                            } else if (online.equals("1")) {
+                                holder.onlineStats.setImageResource(R.drawable.circle_shape_busy);
+                                holder.onlineStats.setVisibility(View.VISIBLE);
+                                if(holder.mRelativeLayout.getAlpha()!=1.0f) {
+                                    holder.mRelativeLayout.setAlpha(1.0f);
+                                }
+                            } else {
+                                holder.onlineStats.setVisibility(View.INVISIBLE);
+                                holder.image.setAlpha(0.5f);
+                                holder.mRelativeLayout.setAlpha(0.5f);
+
                             }
+
                         } else {
+                            // null
                             holder.onlineStats.setVisibility(View.INVISIBLE);
                             holder.image.setAlpha(0.5f);
                             holder.mRelativeLayout.setAlpha(0.5f);
-
                         }
 
-                    } else {
-                        // null
-                        holder.onlineStats.setVisibility(View.INVISIBLE);
-                        holder.image.setAlpha(0.5f);
-                        holder.mRelativeLayout.setAlpha(0.5f);
                     }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
                 }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+            });
 
 
+
+        }
 
 
     }

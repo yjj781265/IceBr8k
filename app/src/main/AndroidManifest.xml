@@ -32,7 +32,7 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeMain"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustResize"></activity>
+            android:windowSoftInputMode="stateAlwaysHidden|adjustResize" />
         <activity
             android:name=".ResultActivity"
             android:screenOrientation="portrait" />
@@ -93,9 +93,8 @@
         <activity
             android:name=".SearchName"
             android:noHistory="true"
-            android:theme="@style/Theme.AppCompat.Translucent"
-
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Translucent">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -108,7 +107,7 @@
         <activity
             android:name=".FullImageView"
             android:label="@string/title_activity_full_image_view"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".Utility.MyJobService"
@@ -118,9 +117,11 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".UserChatActvity"
-                  android:launchMode="singleTask"></activity>
-
+        <activity
+            android:name=".UserChatActvity"
+            android:launchMode="singleTask" />
+        <activity android:name=".Feedback"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustResize"></activity>
     </application>
 
 </manifest>

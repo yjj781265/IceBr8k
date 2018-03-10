@@ -320,7 +320,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         @Override
         public void onClick(View view) {
             if(view.getId() == text_container_in.getId()){
-                Toast.makeText(view.getContext(), "clicked", Toast.LENGTH_SHORT).show();
+               // Toast.makeText(view.getContext(), "clicked", Toast.LENGTH_SHORT).show();
             }else if(view.getId() == avatar_in.getId()){
                int postion = getAdapterPosition();
                if(postion != RecyclerView.NO_POSITION){
@@ -380,7 +380,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         @Override
         public void onClick(View view) {
             if(view.getId() == text_container_out.getId()){
-                Toast.makeText(view.getContext(), "clicked", Toast.LENGTH_SHORT).show();
+               // Toast.makeText(view.getContext(), "clicked", Toast.LENGTH_SHORT).show();
             }else if(view.getId() == avatar_out.getId()){
                 int postion = getAdapterPosition();
                 if(postion != RecyclerView.NO_POSITION){
@@ -411,7 +411,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         @Override
         public void onClick(View view) {
             if(view.getId() == text_container_out.getId()){
-                Toast.makeText(view.getContext(), "clicked", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(view.getContext(), "clicked", Toast.LENGTH_SHORT).show();
             }
 
         }

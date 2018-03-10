@@ -308,6 +308,14 @@ public class Homepage extends AppCompatActivity  implements
 
 
                 return true;
+            case R.id.feedback:
+                        if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                            return false;
+                        }
+                        Intent intent = new Intent(this,Feedback.class);
+                        startActivity(intent);
+                return true;
+
 
             default:
                 return super.onOptionsItemSelected(item);

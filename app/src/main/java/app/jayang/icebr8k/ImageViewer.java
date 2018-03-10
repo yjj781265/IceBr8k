@@ -3,6 +3,7 @@ package app.jayang.icebr8k;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.transition.Fade;
@@ -28,6 +29,7 @@ public class ImageViewer extends AppCompatActivity {
     private ImageView photoView;
     private android.support.v7.widget.Toolbar  mToolbar;
     private String photourl;
+    private Handler handler;
     private MaterialDialog mDialog;
     private FirebaseUser currentUser;
 
@@ -41,8 +43,9 @@ public class ImageViewer extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         photourl  =currentUser.getPhotoUrl().toString();
+        handler = new Handler();
         mDialog = new MaterialDialog.Builder(this)
-                .content("Loading..").canceledOnTouchOutside(false)
+                .content("Loading...").canceledOnTouchOutside(false)
                 .progress(true, 0)
                 .build();
 
@@ -50,32 +53,39 @@ public class ImageViewer extends AppCompatActivity {
 
         if(photourl!=null){
             mDialog.show();
-            Glide.with(getApplicationContext()).asBitmap().load(photourl).into(new SimpleTarget<Bitmap>() {
+            handler.postDelayed(new Runnable() {
                 @Override
-                public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
-                    new AwesomeQRCode.Renderer()
-                            .contents(currentUser.getUid()).logo(resource)
-                            .size(800).margin(20)
-                            .renderAsync(new AwesomeQRCode.Callback() {
-                                @Override
-                                public void onRendered(final AwesomeQRCode.Renderer renderer, final Bitmap bitmap) {
-                                    runOnUiThread(new Runnable() {
+                public void run() {
+                    Glide.with(getApplicationContext()).asBitmap().load(photourl).into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                            new AwesomeQRCode.Renderer()
+                                    .contents(currentUser.getUid()).logo(resource)
+                                    .size(800).margin(20)
+                                    .renderAsync(new AwesomeQRCode.Callback() {
                                         @Override
-                                        public void run() {
-                                            // Tip: here we use runOnUiThread(...) to avoid the problems caused by operating UI elements from a non-UI thread.
-                                            photoView.setImageBitmap(bitmap);
-                                            mDialog.dismiss();
+                                        public void onRendered(final AwesomeQRCode.Renderer renderer, final Bitmap bitmap) {
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    // Tip: here we use runOnUiThread(...) to avoid the problems caused by operating UI elements from a non-UI thread.
+                                                    photoView.setImageBitmap(bitmap);
+                                                    mDialog.dismiss();
+                                                }
+                                            });
+                                        }
+
+                                        @Override
+                                        public void onError(AwesomeQRCode.Renderer renderer, Exception e) {
+                                            e.printStackTrace();
                                         }
                                     });
-                                }
+                        }
+                    });
 
-                                @Override
-                                public void onError(AwesomeQRCode.Renderer renderer, Exception e) {
-                                    e.printStackTrace();
-                                }
-                            });
                 }
-            });
+            },666);
+
 
         }
 

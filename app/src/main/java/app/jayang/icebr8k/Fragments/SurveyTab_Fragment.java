@@ -15,11 +15,14 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.beardedhen.androidbootstrap.BootstrapButton;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -51,12 +54,14 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
     private TextView mTextView, msubTextview, progressText;
     private ImageView favorite_btn;
     private RadioGroup mRadioGroup;
+    private RelativeLayout loadingGif;
     private BootstrapButton mSubmit;
     private ImageView backArrow;
     private TextView skip;
     private int index =0;
     private FloatingActionButton mActionButton;
     private String TAG = "surveyFrag";
+    private CardView cardView;
     private DatabaseReference userQARef;
     private final String MC_TYPE = "mc";
     private final String SC_TYPE = "sc";
@@ -119,24 +124,13 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
         mActionButton.setVisibility(View.GONE);
         skip = mview.findViewById(R.id.skip_btn);
         skip.setVisibility(View.GONE);
+        cardView = mview.findViewById(R.id.cardView);
+        cardView.setVisibility(View.GONE);
+        loadingGif = mview.findViewById(R.id.survey_loading);
+        loadingGif.setVisibility(View.VISIBLE);
 
-        mSeekBar.setOnProgressChangedListener(new BubbleSeekBar.OnProgressChangedListener() {
-            @Override
-            public void onProgressChanged(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
-               // Toast.makeText(getContext(), "changed "+progress + progressFloat, Toast.LENGTH_SHORT).show();
-            }
 
-            @Override
-            public void getProgressOnActionUp(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
-               showLog(String.valueOf(progressFloat));
-               mSeekBar.setProgress(progressFloat);
-            }
 
-            @Override
-            public void getProgressOnFinally(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
-                //Toast.makeText(getContext(), "finally "+progress + progressFloat, Toast.LENGTH_SHORT).show();
-            }
-        });
 
 
         mActionButton.setOnClickListener(new View.OnClickListener() {
@@ -156,6 +150,26 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
                 }
             }
         });
+
+
+        mSeekBar.setOnProgressChangedListener(new BubbleSeekBar.OnProgressChangedListener() {
+              @Override
+            public void onProgressChanged(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
+                // Toast.makeText(getContext(), "changed "+progress + progressFloat, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void getProgressOnActionUp(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
+                showLog(String.valueOf(progressFloat));
+                mSeekBar.setProgress(progressFloat);
+            }
+
+            @Override
+            public void getProgressOnFinally(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
+                //Toast.makeText(getContext(), "finally "+progress + progressFloat, Toast.LENGTH_SHORT).show();
+            }
+        });
+
 
         initQuestions();
 
@@ -322,7 +336,11 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
 
                 }
                 mProgressBar.setVisibility(View.GONE);
-
+                loadingGif.setVisibility(View.GONE);
+                if(cardView.getVisibility() == View.GONE) {
+                    YoYo.with(Techniques.FadeIn).duration(500).playOn(cardView);
+                }
+                cardView.setVisibility(View.VISIBLE);
 
             }
 
@@ -339,7 +357,11 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
         }else{
             backArrow.setVisibility(View.VISIBLE);
         }
-        mTextView.setTypeface(Typeface.DEFAULT_BOLD);
+
+        if(userQAHashMap.get(surveyQ)!=null){
+            updateUI_QA(surveyQ);
+        }else{
+            mTextView.setTypeface(Typeface.DEFAULT_BOLD);
             String type = surveyQ.getType();
             switch(type){
                 case  MC_TYPE:
@@ -352,8 +374,10 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
                     isSpinnerQuestion(surveyQ);
                     break;
                 default: isMultipleChoic(surveyQ);
-                break;
+                    break;
             }
+        }
+
 
 
     }

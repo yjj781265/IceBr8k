@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/lightBlue"
+    tools:context="app.jayang.icebr8k.Feedback">
+    <android.support.v7.widget.Toolbar
+        android:elevation="3dp"
+        android:id="@+id/feedback_toolbar"
+        android:theme="@style/MyActionBarTheme"
+        android:layout_width="match_parent"
+        app:title="@string/feedback"
+        android:background="@color/colorPrimary"
+        android:layout_height="56dp"></android.support.v7.widget.Toolbar>
+    <ScrollView
+        android:layout_below="@id/feedback_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+
+        android:layout_height="match_parent">
+
+
+
+        <EditText
+            android:id="@+id/feedback_email"
+            android:layout_margin="16dp"
+            android:visibility="gone"
+        android:layout_width="match_parent"
+        android:inputType="textEmailAddress"
+        android:text="icebr8kdev@gmail.com"
+            android:clickable="false"
+            android:enabled="false"
+        android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/feedback_subject"
+            android:layout_width="match_parent"
+            android:inputType="text"
+            android:maxLines="1"
+            android:layout_margin="16dp"
+            android:hint="Subject"
+            android:layout_height="wrap_content" />
+        <FrameLayout
+            android:padding="2dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="16dp"
+           android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:background="@color/colorPrimaryDark"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        <EditText
+            android:id="@+id/feedback_message"
+            android:background="@color/creamYellow"
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Message here"
+            android:scrollbars="vertical"
+            android:minLines="8"
+            android:gravity="top|left"
+            android:maxLines="8" />
+        </FrameLayout>
+
+        <com.beardedhen.androidbootstrap.BootstrapButton
+            android:text="Send"
+            android:layout_marginBottom="10dp"
+            android:id="@+id/feedback_button"
+            android:textAllCaps="false"
+            app:bootstrapSize="lg"
+            app:roundedCorners="true"
+            app:buttonMode="regular"
+            app:bootstrapBrand="success"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+
+
+    </LinearLayout>
+    </ScrollView>
+
+</RelativeLayout>

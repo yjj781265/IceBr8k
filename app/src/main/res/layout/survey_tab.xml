@@ -221,4 +221,31 @@
 
 </RelativeLayout>
     </ScrollView>
+    <RelativeLayout
+        android:id="@+id/survey_loading"
+        android:layout_centerInParent="true"
+        android:paddingBottom="50dp"
+        android:layout_width="wrap_content"
+        android:layout_height="150dp">
+        <pl.droidsonroids.gif.GifImageView
+            android:id="@+id/loadingImg"
+            android:layout_centerHorizontal="true"
+            android:layout_width="75dp"
+            android:layout_height="75dp"
+            android:src="@drawable/icebr8k_load"
+            android:paddingTop="10dp"
+            android:paddingLeft="6dp"
+            />
+
+        <TextView
+            android:id="@+id/chatFregLoading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:textSize="14dp"
+            android:paddingLeft="15dp"
+            android:text="Loading..."/>
+
+    </RelativeLayout>
 </RelativeLayout>

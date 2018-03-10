@@ -3,14 +3,7 @@
       xmlns:app="http://schemas.android.com/apk/res-auto"
     >
 
-    <item
-        android:title ="Order By..."
-        android:orderInCategory="100"
-        android:id="@+id/order_by"
-        android:enabled="false"
-        android:checkable="false"
-        app:showAsAction="ifRoom|withText"
-        />
+
 
            <item
                 android:title ="Online Status"

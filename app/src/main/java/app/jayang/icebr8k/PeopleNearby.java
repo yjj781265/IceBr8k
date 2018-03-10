@@ -2,6 +2,7 @@ package app.jayang.icebr8k;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -15,10 +16,12 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -26,6 +29,9 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -94,6 +100,7 @@ import app.jayang.icebr8k.Modle.UserDialog;
 import app.jayang.icebr8k.Modle.UserLocationDialog;
 
 import app.jayang.icebr8k.Modle.UserQA;
+import app.jayang.icebr8k.Utility.MyDateFormatter;
 import belka.us.androidtoggleswitch.widgets.BaseToggleSwitch;
 import belka.us.androidtoggleswitch.widgets.ToggleSwitch;
 
@@ -105,6 +112,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     private final int FASTEST_INTERVAL = 3000;
     private final int DISPLACEMENT = 3;
     private final int   REQUEST_CHECK_SETTINGS =9000;
+    private final int  MY_PERMISSIONS_REQUEST_FINE_LOCATION=8000;
     private FirebaseUser curretUser;
     private GoogleMap map;
     private  ToggleSwitch mToggleSwitch;
@@ -116,7 +124,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     private LocationCallback mLocationCallback;
     private Location mCurrentLocation;
     private FusedLocationProviderClient mFusedLocationClient;
-    private Boolean center = true;
+    private Boolean center = true, flag = false;
     private Double radius =1.6;
     private float ZoomLevel =17f;
     private MaterialDialog mProgressDialog;
@@ -124,6 +132,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     private Toolbar mToolbar;
     private TextView noUser;
     private int index =0;
+    private Handler handler;
 
     private SupportMapFragment mapFragment;
     private LocationRequest mLocationRequest;
@@ -211,7 +220,6 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
               ZoomLevel =9f;
           }
           mProgressDialog =ProgressDialog(radiusString);
-            mProgressDialog.show();
 
         }
         mfilter.setOnClickListener(new View.OnClickListener() {
@@ -221,9 +229,27 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.peoplenearby_menu, menu);
+        return true;
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.peoplenearby_maptype:
+                if(map!=null){
+                    showMapTypeSelectorDialog();
+                }
 
-
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -245,6 +271,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     protected void onStop() {
         super.onStop();
 
+
     }
 
     @Override
@@ -262,6 +289,55 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    private static final String[] MAP_TYPE_ITEMS =
+            {"Road Map", "Satellite", "Terrain","Hybrid"};
+
+    private void showMapTypeSelectorDialog() {
+        // Prepare the dialog by setting up a Builder.
+        final String fDialogTitle = "Select Map Type";
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(fDialogTitle);
+
+        // Find the current map type to pre-check the item representing the current state.
+        int checkItem = map.getMapType()-1;
+
+        // Add an OnClickListener to the dialog, so that the selection will be handled.
+        builder.setSingleChoiceItems(
+                MAP_TYPE_ITEMS,
+                checkItem,
+                new DialogInterface.OnClickListener() {
+
+                    public void onClick(DialogInterface dialog, int item) {
+                        // Locally create a finalised object.
+
+                        // Perform an action depending on which item was selected.
+                        switch (item) {
+                            case 0:
+                                map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                                break;
+                            case 1:
+                                map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                                break;
+                            case 2:
+                                map.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                                break;
+                            case 3:
+                                map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                                break;
+                            default:
+                                map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                        }
+                        dialog.dismiss();
+                    }
+                }
+        );
+
+        // Build the dialog and show it.
+        AlertDialog fMapTypeDialog = builder.create();
+        fMapTypeDialog.setCanceledOnTouchOutside(true);
+        fMapTypeDialog.show();
+    }
+
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -271,54 +347,32 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         mGoogleApiClient.connect();
     }
 
-    private void initGoogleMapLocation() {
+    private void startLocationMonitoring(){
+        mProgressDialog.show();
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        mFusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                mCurrentLocation =location;
-                if(mCurrentLocation!=null) {
-                    findPeopleNearby(location.getLatitude(), location.getLongitude(), radius);
-                }
-
-            }
-        });
-
         mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult result) {
                 super.onLocationResult(result);
-               // mCurrentLocation = result.getLastLocation();
+
                 mCurrentLocation = result.getLocations().get(0);
                 if(mCurrentLocation!=null) {
                     updateLocationtoDatabase(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), radius);
+                    if(flag==false){
+                        findPeopleNearby(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), radius);
+                        flag=true;
+                    }
+
                 }
 
-
-
-              Log.d(TAG,"Current location:\n" + mCurrentLocation) ;
+                Log.d(TAG,"Current location:\n" + mCurrentLocation) ;
 
             }
         };
-
-        startLocationMonitoring();
-    }
-
-    private void startLocationMonitoring(){
         Log.d(TAG,"startLocation called");
         mLocationRequest = new LocationRequest();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).
-              setInterval(UPDATE_INTERVAL).setFastestInterval(FASTEST_INTERVAL).setSmallestDisplacement(DISPLACEMENT);
+                setInterval(UPDATE_INTERVAL).setFastestInterval(FASTEST_INTERVAL).setSmallestDisplacement(DISPLACEMENT);
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
         builder.addLocationRequest(mLocationRequest);
         SettingsClient mSettingsClient = LocationServices.getSettingsClient(this);
@@ -332,9 +386,18 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                 //
                 if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                         != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(PeopleNearby.this,
+                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                            MY_PERMISSIONS_REQUEST_FINE_LOCATION);
+
+                    mProgressDialog.dismiss();
                     return;
                 }
                 mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
+
+
+
+
 
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -346,22 +409,53 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                     // and check the result in onActivityResult().
                     ResolvableApiException resolvable = (ResolvableApiException) e;
                     resolvable.startResolutionForResult(PeopleNearby.this,
-                           REQUEST_CHECK_SETTINGS);
-                } catch (IntentSender.SendIntentException sendEx) {
-                    // Ignore the error.
+                            REQUEST_CHECK_SETTINGS);
+
+                } catch (Exception excpetion) {
+                    // Toast.makeText(PeopleNearby.this, excpetion.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                 startLocationMonitoring();
+
+                } else {
+                    Toast.makeText(this, "Location Permission Denied", Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request.
+        }
+    }
+
+
 
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode==REQUEST_CHECK_SETTINGS && resultCode == RESULT_OK){
-            Toast.makeText(this, "It's okay", Toast.LENGTH_SHORT).show();
             if(checkGooglePlayService()){
-                buildGoogleApiClient();
+              //  Toast.makeText(this, "okay", Toast.LENGTH_SHORT).show();
+                //reset
+                mHashMap.clear();
+                map.clear();
+                mLocationDialogs.clear();
+                mLocationDialogAdapter.notifyDataSetChanged();
+
+               startLocationMonitoring();
             }
         }
     }
@@ -421,8 +515,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onMyLocationClick(@NonNull Location location) {
-       // Toast.makeText(this, "Current location:\n" + location, Toast.LENGTH_LONG).show();
-        updateUserLocation(location.getLatitude(),location.getLatitude(),radius);
+
 
     }
 
@@ -433,16 +526,20 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
              case 1:
                  mFrameLayout.setVisibility(View.VISIBLE);
                  mRecyclerView.setVisibility(View.GONE);
+                 noUser.setVisibility(View.GONE);
 
                  break;
              case 0:
                  mFrameLayout.setVisibility(View.GONE);
                  mRecyclerView.setVisibility(View.VISIBLE);
-                 if(mLocationDialogs.isEmpty()){
+                 if(mLocationDialogs.isEmpty() || (mLocationDialogs.size()==1
+                 && mLocationDialogs.get(0).getId().equals(curretUser.getUid()))){
                      noUser.setVisibility(View.VISIBLE);
-                 }else{
+                 }else {
                      noUser.setVisibility(View.GONE);
                  }
+
+
 
                  break;
              default:
@@ -491,103 +588,10 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         return returnedBitmap;
 
     }
-    private void addCustomMarkerFromURL(final LatLng mDummyLatLng,final String userUid) {
-
-        if (map == null) {
-            return;
-        }
-        Log.d(TAG,"reach adding photo progress") ;
-
-        DatabaseReference urlRef = FirebaseDatabase.getInstance().getReference().child("Users")
-                .child(userUid);
-        urlRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                 String photoUrl =null;
-                  User user =null;
-                if(dataSnapshot.exists()){
-                   user = dataSnapshot.getValue(User.class);
-                   photoUrl = user.getPhotourl();
-                }
-                if("public".equals(user.getPrivacy())&&photoUrl!=null ){
-                    if(mHashMap.containsKey(userUid)){
-                        Log.d(TAG,userUid+ " old marker before "+  mHashMap.get(userUid).getPosition()) ;
-                        mHashMap.get(userUid).hideInfoWindow();
-                        mHashMap.get(userUid).setSnippet(user.getDisplayname());
-                        addmarkerWithTitle(mDummyLatLng,mHashMap.get(userUid));
-                        mHashMap.get(userUid).setPosition(mDummyLatLng);
-
-
-                        Log.d(TAG,userUid+ " old marker updated "+  mHashMap.get(userUid).getPosition()) ;
-
-                    }else{
-                        final User finalUser = user;
-                        Glide.with(getApplicationContext()).asBitmap().load(photoUrl).
-                                apply(RequestOptions.circleCropTransform()).into(new SimpleTarget<Bitmap>() {
-                            @Override
-                            public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
-
-                                Marker marker;
-                                marker = map.addMarker(new MarkerOptions().position(mDummyLatLng)
-                                            .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(mCustomerMarkerView, resource))));
-                                marker.setSnippet(finalUser.getDisplayname());
-                                    addmarkerWithTitle(mDummyLatLng,marker);
-                                    mHashMap.put(userUid, marker);
-                                UserLocationDialog temp = new UserLocationDialog();
-                                temp.setId(userUid);
-                                if(!mLocationDialogs.contains(temp)) {
-                                    updateList(userUid, mDummyLatLng, finalUser);
-                                    Log.d(TAG, userUid + " marker and list item added");
-                                }
-
-                            }
-
-
-                        });
-                    }
-                    if(userUid.equals(curretUser.getUid()) && center){
-                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(mDummyLatLng, ZoomLevel));
-
-                    }
-
-
-                }else if("private".equals(user.getPrivacy())&&photoUrl!=null){
-                    if(mHashMap.containsKey(userUid)) {
-                        Marker oldMarker = mHashMap.get(userUid);
-                        if (oldMarker != null) {
-                            oldMarker.remove();
-                            mHashMap.remove(userUid);
-
-
-                         UserLocationDialog temp =new UserLocationDialog();
-                         temp.setId(userUid);
-                         if(mLocationDialogs.contains(temp)) {
-                             mLocationDialogs.remove(temp);
-                             mLocationDialogAdapter.notifyDataSetChanged();
-                             Log.d(TAG, "old marker and list item removed privacy changed" );
-                         }
-
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        // adding a marker with image from URL using glide image loading library
-
-
-      // map.addMarker(new MarkerOptions().position())
 
 
 
 
-
-    }
 
 
     private boolean checkGooglePlayService(){
@@ -600,27 +604,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    private void updateUserLocation(double lat, double lng,double radius)  {
-        Geocoder gcd = new Geocoder(this, Locale.getDefault());
-        List<Address> addresses = null;
-        try {
-            addresses = gcd.getFromLocation(lat, lng, 3);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if(addresses!=null){
-            Address address = addresses.get(0);
-            if(address.getCountryName()!=null && address.getAdminArea() !=null &&address.getLocality()!=null){
-               // Toast.makeText(this,address.getCountryName()+" "+address.getAdminArea() + " "+address.getLocality(),Toast.LENGTH_LONG).show();
-               // updateLocationtoDatabase(address.getCountryName(),address.getAdminArea(),address.getLocality(),lat,lng,radius);
-            }
-
-        }
-
-
-
-    }
 
     private void updateLocationtoDatabase(final double lat,final double lng,double radius){
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("GeoFireLocations");
@@ -638,17 +622,19 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
 
     }
-    private void updateTimeStamp(DatabaseReference ref){
-        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        ref.child("timestamp").setValue(timestamp);
 
-    }
-    private void findPeopleNearby(final double lat, final double lng, double radius){
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("GeoFireLocations");
+    private void findPeopleNearby(final double lat, final double lng, final double radius){
+        handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("GeoFireLocations");
+                geofire = new GeoFire(ref);
+                geoQuery = geofire.queryAtLocation(new GeoLocation(lat,lng), radius);
+                geoQuery.addGeoQueryDataEventListener(PeopleNearby.this);
+            }
+        },666);
 
-        geofire = new GeoFire(ref);
-        geoQuery = geofire.queryAtLocation(new GeoLocation(lat,lng), radius);
-        geoQuery.addGeoQueryDataEventListener(this);
     }
 
     private Double convertMileStringtoKm(String string){
@@ -663,7 +649,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onConnected(@Nullable Bundle bundle) {
       if(mGoogleApiClient!=null){
-         initGoogleMapLocation();
+         startLocationMonitoring();
       }
     }
 
@@ -677,35 +663,8 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-   private void updateList(String userUid,LatLng latLng,User user){
-           if(!userUid.equals(curretUser.getUid())) {
-               Log.d(TAG, "reach adding item progress");
-               Location destLocaiton = new Location("");
-               destLocaiton.setLatitude(latLng.latitude);
-               destLocaiton.setLongitude(latLng.longitude);
-               float meter = mCurrentLocation.distanceTo(destLocaiton);
-               double miles = (double) meter * 0.000621371192;
 
-
-
-               String distance = String.valueOf(miles);
-               UserLocationDialog dialog = new UserLocationDialog(userUid, distance, user);
-               if (!mLocationDialogs.contains(dialog)) {
-                   Log.d(TAG, "item  need update");
-                   compareWithUser2(dialog);
-               }else{
-                   int index = mLocationDialogs.indexOf(dialog);
-                   if(index!=-1) {
-                       mLocationDialogs.remove(dialog);
-                       compareWithUser2(dialog);
-                   }
-
-               }
-
-           }
-
-   }
-
+/***************************get score*****************************************/
     public void compareWithUser2(UserLocationDialog dialog) {
         pullUser1QA(dialog);
 
@@ -806,18 +765,18 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         } else {
             score = "0";
         }
-
-        dialog.getUser().setScore(score);
-        if(!mLocationDialogs.contains(dialog)) {
-            mLocationDialogs.add(dialog);
+        Log.d("PeopleNearby",score);
+        dialog.setScore(score);
+            mLocationDialogAdapter.notifyDataSetChanged();
+        if(mProgressDialog.isShowing()){
+            mProgressDialog.dismiss();
         }
-        Collections.sort(mLocationDialogs);
-        mLocationDialogAdapter.notifyDataSetChanged();
-        noUser.setVisibility(View.GONE);
+
         Log.d(TAG,"new item added");
 
         }
 
+    /***************************get score*****************************************/
 
     @Override
     public boolean onMarkerClick(Marker marker) {
@@ -847,13 +806,10 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                         index =which;
                         radius = convertMileStringtoKm(String.valueOf(text));;
                         if(radius<2){
-
                             ZoomLevel =13f;
                         }else if(radius>15 && radius<32){
-
                             ZoomLevel =11f;
                         }else{
-
                             ZoomLevel =9f;
                         }
                         map.clear();
@@ -862,8 +818,8 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
 
                         mLocationDialogs.clear();
-                        mLocationDialogAdapter.notifyDataSetChanged();
                         mHashMap.clear();
+                       // mLocationDialogAdapter.notifyDataSetChanged();
                         mProgressDialog = ProgressDialog(text);
                         mProgressDialog.show();
                         if(mCurrentLocation!=null) {
@@ -877,7 +833,6 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
     public void addmarkerWithTitle(LatLng latLng,Marker marker){
         Geocoder geocoder;
-
         List<Address> yourAddresses = new ArrayList<>();
         geocoder = new Geocoder(this, Locale.getDefault());
         try {
@@ -892,13 +847,154 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
             marker.setTitle(yourAddress);
 
 
-
-            //MyMarker offsetItem = new MyMarker(latLng.latitude, latLng.longitude,yourAddress,yourCity);
-           // mClusterManager.addItem(offsetItem);
-
         }
 
     }
+
+    private void addMapMarker(final UserLocationDialog dialog){
+
+        String snippet ;
+
+        if(mHashMap.get(dialog.getId())!=null){
+            mHashMap.get(dialog.getId()).setPosition(dialog.getLatLng());
+            if(dialog.getTimestamp()!=null){
+                snippet = dialog.getUser().getDisplayname() + " (Updated at "+
+                        MyDateFormatter.timeStampToDateConverter(dialog.getTimestamp(),false) +")";
+            }else {
+                snippet = dialog.getUser().getDisplayname();
+            }
+            mHashMap.get(dialog.getId()).hideInfoWindow();
+            mHashMap.get(dialog.getId()).setSnippet(snippet);
+            addmarkerWithTitle(dialog.getLatLng(),mHashMap.get(dialog.getId()));
+
+            if (dialog.getId().equals(curretUser.getUid()) && center) {
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(dialog.getLatLng(), ZoomLevel));
+            }
+        }else{
+            String photoUrl = dialog.getUser().getPhotourl();
+            Glide.with(getApplicationContext()).asBitmap().load(photoUrl).
+                    apply(RequestOptions.circleCropTransform()).into(new SimpleTarget<Bitmap>() {
+                @Override
+                public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                    String snippet;
+                    Marker marker;
+                    marker = map.addMarker(new MarkerOptions().position(dialog.getLatLng())
+                            .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(mCustomerMarkerView, resource))));
+                    mHashMap.put(dialog.getId(),marker);
+
+                    if(dialog.getTimestamp()!=null){
+                        snippet = dialog.getUser().getDisplayname() + " (Updated at "+
+                                MyDateFormatter.timeStampToDateConverter(dialog.getTimestamp(),false) +")";
+                    }else{
+                        snippet = dialog.getUser().getDisplayname();
+                    }
+                    mHashMap.get(dialog.getId()).hideInfoWindow();
+                    marker.setSnippet(snippet);
+                    addmarkerWithTitle(dialog.getLatLng(),marker);
+                    if(dialog.getId().equals(curretUser.getUid()) && center){
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(dialog.getLatLng(), ZoomLevel));
+
+                    }
+                }
+
+
+            });
+
+        }
+
+
+
+
+
+
+
+    }
+
+    private  void setListView(final UserLocationDialog dialog){
+
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference()
+                .child("Users")
+                .child(dialog.getId());
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User user = dataSnapshot.getValue(User.class);
+                if(user.getDisplayname()!=null && user.getPhotourl()!=null &&
+                        user.getOnlinestats()!=null &&user.getUsername()!=null && "public".equals(user.getPrivacy())){
+                    dialog.setUser(user);
+                    if(!dialog.getId().equals(curretUser.getUid())){
+                        Location destLocaiton = new Location("");
+                        destLocaiton.setLatitude(dialog.getLatLng().latitude);
+                        destLocaiton.setLongitude(dialog.getLatLng().longitude);
+                        float meter = mCurrentLocation.distanceTo(destLocaiton);
+                        double miles = (double) meter * 0.000621371192;
+                        String distance = String.valueOf(miles);
+                        dialog.setDistance(distance);
+
+                        compareWithUser2(dialog);
+                    }
+                    addMapMarker(dialog);
+
+                }
+                mProgressDialog.dismiss();
+                if( mLocationDialogs.isEmpty() && mRecyclerView.getVisibility()==View.VISIBLE){
+                    noUser.setVisibility(View.VISIBLE);
+                }else{
+                    noUser.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+    }
+
+    public void addPrivacyListener (final UserLocationDialog dialog){
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+                .child("Users")
+                .child(dialog.getId())
+                .child("privacy");
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+            //    Toast.makeText(PeopleNearby.this, "changed", Toast.LENGTH_SHORT).show();
+                String privacy = dataSnapshot.getValue(String.class);
+                if("private".equals(privacy)){
+                    if(mHashMap.get(dialog.getId())!=null){
+                        mHashMap.get(dialog.getId()).remove();
+                    }
+                    if(mLocationDialogs.contains(dialog)){
+                        mLocationDialogs.remove(dialog);
+                        mLocationDialogAdapter.notifyDataSetChanged();
+                        if(mLocationDialogs.isEmpty() && mRecyclerView.getVisibility() ==View.VISIBLE){
+                            noUser.setVisibility(View.VISIBLE);
+                        }
+                    }
+                }else{
+
+                    if(mLocationDialogs.contains(dialog)){
+                       setListView(dialog);
+                    }else{
+                        mLocationDialogs.add(dialog);
+                        setListView(dialog);
+                        noUser.setVisibility(View.GONE);
+                    }
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
 
     @Override
     public boolean onSupportNavigateUp() {
@@ -908,16 +1004,36 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onBackPressed() {
+
         finish();
     }
 
     @Override
     public void onDataEntered(DataSnapshot dataSnapshot, GeoLocation location) {
-        Log.d(TAG,"new key entered "+ dataSnapshot.getKey()) ;
-        if(dataSnapshot.getKey()!=null){
+        Log.d(TAG,"new key entered " + radius+ " "+ dataSnapshot.getKey()) ;
+        if(dataSnapshot.getKey()!=null ){
             String userUid =dataSnapshot.getKey();
+            UserLocationDialog dialog = new UserLocationDialog();
+            dialog.setId(userUid);
             LatLng latLng = new LatLng(location.latitude,location.longitude);
-            addCustomMarkerFromURL(latLng,userUid);
+            dialog.setLatlng(latLng);
+            if(!mLocationDialogs.contains(dialog )&& !userUid.equals(curretUser.getUid())){
+                if(dataSnapshot.hasChild("timestamp")){
+                        dialog.setTimestamp(dataSnapshot.child("timestamp").getValue(Long.class));
+                }
+
+                addPrivacyListener(dialog);
+            }
+            //dont add self in the list view
+            if(userUid.equals(curretUser.getUid())){
+                if(dataSnapshot.hasChild("timestamp")){
+                    dialog.setTimestamp(dataSnapshot.child("timestamp").getValue(Long.class));
+                }
+              setListView(dialog);
+            }
+
+
+
 
         }
     }
@@ -925,22 +1041,22 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onDataExited(DataSnapshot dataSnapshot) {
         if(dataSnapshot.getKey()!=null){
-            String userUid =dataSnapshot.getKey();
-            if(mHashMap.containsKey(userUid)){
-                mHashMap.get(userUid).remove();
-                mHashMap.remove(userUid);
+           String uid = dataSnapshot.getKey();
+           if(uid.equals(curretUser.getUid())){
+               map.clear();
+               mLocationDialogs.clear();
+               mHashMap.clear();
+               findPeopleNearby(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude(),radius);
+           }else{
+               UserLocationDialog dialog = new UserLocationDialog();
+               dialog.setId(uid);
+               mLocationDialogs.remove(dialog);
+               mLocationDialogAdapter.notifyDataSetChanged();
+               if(mHashMap.get(uid)!=null){
+                   mHashMap.get(uid).remove();
+                   mHashMap.remove(uid);
+               }
             }
-            UserLocationDialog temp =new UserLocationDialog();
-            temp.setId(userUid);
-            if(mLocationDialogs.contains(temp)) {
-                mLocationDialogs.remove(temp);
-                mLocationDialogAdapter.notifyDataSetChanged();
-            }
-            if(mLocationDialogs.isEmpty() && mRecyclerView.getVisibility() == View.VISIBLE){
-                noUser.setVisibility(View.VISIBLE);
-            }
-
-
 
         }
     }
@@ -948,50 +1064,35 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onDataMoved(DataSnapshot dataSnapshot, GeoLocation location) {
         if(dataSnapshot.getKey()!=null){
-            Log.d(TAG,"user moved "+ dataSnapshot.getKey()) ;
-            // .makeText(getApplicationContext(),"user moved "+ dataSnapshot.getKey(),Toast.LENGTH_LONG).show();
-            String userUid =dataSnapshot.getKey();
+            String uid = dataSnapshot.getKey();
+            UserLocationDialog dialog = new UserLocationDialog();
             LatLng latLng = new LatLng(location.latitude,location.longitude);
-            if(mHashMap.containsKey(userUid) && mHashMap.get(userUid)!=null){
-                Log.d(TAG,userUid+ " old marker moved before "+  mHashMap.get(userUid).getPosition()) ;
-                mHashMap.get(userUid).hideInfoWindow();
-                mHashMap.get(userUid).setPosition(latLng);
-                addmarkerWithTitle(latLng, mHashMap.get(userUid));
-
-
-                Log.d(TAG,userUid+ " old marker moved updated "+  mHashMap.get(userUid).getPosition()) ;
-                UserLocationDialog temp =new UserLocationDialog();
-                temp.setId(userUid);
-                if(mLocationDialogs.contains(temp)) {
-                    int index = mLocationDialogs.indexOf(temp);
-                    if(index!=-1) {
-                        User user = mLocationDialogs.get(index).getUser();
-                        updateList(userUid, new LatLng(location.latitude,location.longitude),user);
-                    }
-                }
-
-
+            dialog.setLatlng(latLng);
+            dialog.setId(uid);
+            if(dataSnapshot.hasChild("timestamp")){
+                dialog.setTimestamp(dataSnapshot.child("timestamp").getValue(Long.class));
             }
+            if(mLocationDialogs.contains(dialog) && !dialog.getId().equals(curretUser.getUid())){
+                setListView(dialog);
+            }
+
+
+
+
         }
     }
 
     @Override
     public void onDataChanged(DataSnapshot dataSnapshot, GeoLocation location) {
-        Log.d(TAG,dataSnapshot.toString());
+
 
     }
 
     @Override
     public void onGeoQueryReady() {
-        if(mLocationDialogAdapter.getItemCount()>0 && !mLocationDialogs.isEmpty()){
 
-            noUser.setVisibility(View.GONE);
-        }else if(mLocationDialogs.isEmpty() && mRecyclerView.getVisibility() == View.VISIBLE){
-            noUser.setVisibility(View.VISIBLE);
-        }else{
-            noUser.setVisibility(View.GONE);
-        }
-        mProgressDialog.dismiss();
+
+
 
 
 
