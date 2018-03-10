@@ -966,6 +966,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                 if("private".equals(privacy)){
                     if(mHashMap.get(dialog.getId())!=null){
                         mHashMap.get(dialog.getId()).remove();
+                        mHashMap.remove(dialog.getId());
                     }
                     if(mLocationDialogs.contains(dialog)){
                         mLocationDialogs.remove(dialog);
@@ -1074,6 +1075,10 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
             }
             if(mLocationDialogs.contains(dialog) && !dialog.getId().equals(curretUser.getUid())){
                 setListView(dialog);
+            }
+
+            if(mLocationDialogs.contains(dialog) && dialog.getId().equals(curretUser.getUid())){
+                addMapMarker(dialog);
             }
 
 

@@ -171,7 +171,7 @@ public class MyDateFormatter {
             long minutes = TimeUnit.MILLISECONDS.toMinutes(milliseconds);
 
             if(minutes<60 && minutes>0){
-                string = minutes+"min";
+                string = minutes+"m";
             }else if(minutes>=60 && minutes<1440){
                 long hours = TimeUnit.MINUTES.toHours(minutes);
                 if(hours==0){

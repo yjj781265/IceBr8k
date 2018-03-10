@@ -3,7 +3,7 @@
     android:id="@+id/messageDialog"
     android:foreground="?attr/selectableItemBackground"
     android:layout_width="match_parent"
-    android:layout_height="72dp">
+    android:layout_height="wrap_content">
 
     <LinearLayout
     android:padding="16dp"

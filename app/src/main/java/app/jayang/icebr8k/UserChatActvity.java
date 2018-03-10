@@ -94,7 +94,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
     protected Handler handler;
     private UserMessage isTypingMessage, loadingMessage;
     private Long lastSeen;
-    private Integer firstVisablePos =0 , lastVisablePos =0,toastThreshhold =3;
+    private Integer firstVisablePos =0 , lastVisablePos =0,toastThreshhold =2;
     private String  name;
     private DatabaseReference senderMessageRef, receiverMessageRef, isTypingRef, inChatRef, muteRef
             , subTitleRef,titleRef,user2InchatRef;
