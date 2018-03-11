@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,7 +45,7 @@ public class FriendReqestItemAdapter extends RecyclerView.Adapter<FriendReqestIt
     public  Context mContext;
     public class FriendRequestItemViewHolder extends RecyclerView.ViewHolder{
         public TextView name,username;
-        public BootstrapButton  delete,accept;
+        public Button delete,accept;
         public ImageView avatar;
 
         public FriendRequestItemViewHolder(View itemView) {

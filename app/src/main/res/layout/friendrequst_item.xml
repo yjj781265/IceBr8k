@@ -2,18 +2,20 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="16dp"
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="3dp"
+    android:gravity="center_vertical"
     android:background="@color/lightBlue"
     >
     <ImageView
+        android:layout_gravity="center_vertical"
         android:layout_width="40dp"
         android:id="@+id/avatar_frt"
         android:layout_height="40dp"
         android:clickable="true"
-        android:layout_margin="9dp"/>
+        android:layout_marginRight="16dp"/>
 
 
 
@@ -21,13 +23,12 @@
             android:layout_gravity="center_vertical"
             android:layout_weight="4"
             android:id="@+id/name_frt"
-            android:textSize="14sp"
+            android:textSize="16dp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text=""
             android:maxLines="1"
             android:ellipsize="end"
-            android:layout_marginRight="5dp"
+            android:layout_marginRight="6dp"
 
             android:textColor="@color/black"/>
 
@@ -49,31 +50,33 @@
         android:orientation="horizontal"
         android:layout_width="0dp"
         android:layout_height="wrap_content">
-   <com.beardedhen.androidbootstrap.BootstrapButton
+   <Button
        android:elevation="6dp"
+       android:textSize="14dp"
        android:layout_weight="1"
+       android:textAllCaps="false"
        android:id="@+id/accept_frt"
        android:layout_width="0dp"
-       android:layout_height="wrap_content"
+       android:layout_height="30dp"
        android:layout_gravity="center_vertical"
-       app:bootstrapBrand="success"
-       app:roundedCorners="true"
-       android:layout_marginRight="9sp"
+       android:layout_marginRight="9dp"
        android:background="@color/colorAccent"
-       android:textColor="@color/black"
+       android:textColor="@color/white"
        android:text="Accept"/>
 
-        <com.beardedhen.androidbootstrap.BootstrapButton
+        <Button
             android:layout_weight="1"
+            android:textAllCaps="false"
+            android:textSize="14dp"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="30dp"
+            android:layout_gravity="center_vertical"
+            android:background="@color/holo_red_light"
+            android:textColor="@color/white"
             android:id="@+id/delete_frt"
             android:text="Delete"
-            android:layout_marginEnd="5dp"
-            app:bootstrapBrand="danger"
-            app:buttonMode="regular"
-            app:showOutline="false"
-            app:roundedCorners="true"
+
+
             />
 
     </LinearLayout>

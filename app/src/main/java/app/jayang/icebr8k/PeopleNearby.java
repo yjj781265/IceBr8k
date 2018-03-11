@@ -767,6 +767,11 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         }
         Log.d("PeopleNearby",score);
         dialog.setScore(score);
+
+        if(mLocationDialogs.contains(dialog)){
+            int i = mLocationDialogs.indexOf(dialog);
+            mLocationDialogs.set(i,dialog);
+        }
             mLocationDialogAdapter.notifyDataSetChanged();
         if(mProgressDialog.isShowing()){
             mProgressDialog.dismiss();
@@ -1073,14 +1078,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
             if(dataSnapshot.hasChild("timestamp")){
                 dialog.setTimestamp(dataSnapshot.child("timestamp").getValue(Long.class));
             }
-            if(mLocationDialogs.contains(dialog) && !dialog.getId().equals(curretUser.getUid())){
-                setListView(dialog);
-            }
-
-            if(mLocationDialogs.contains(dialog) && dialog.getId().equals(curretUser.getUid())){
-                addMapMarker(dialog);
-            }
-
+           setListView(dialog);
 
 
 
