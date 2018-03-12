@@ -1069,25 +1069,30 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onDataMoved(DataSnapshot dataSnapshot, GeoLocation location) {
+
+    }
+
+    @Override
+    public void onDataChanged(DataSnapshot dataSnapshot, GeoLocation location) {
         if(dataSnapshot.getKey()!=null){
             String uid = dataSnapshot.getKey();
             UserLocationDialog dialog = new UserLocationDialog();
             LatLng latLng = new LatLng(location.latitude,location.longitude);
             dialog.setLatlng(latLng);
             dialog.setId(uid);
+            if(uid.equals(curretUser.getUid())){
+                mCurrentLocation.setLongitude(location.longitude);
+                mCurrentLocation.setLatitude(location.latitude);
+            }
             if(dataSnapshot.hasChild("timestamp")){
                 dialog.setTimestamp(dataSnapshot.child("timestamp").getValue(Long.class));
             }
-           setListView(dialog);
+            setListView(dialog);
+
 
 
 
         }
-    }
-
-    @Override
-    public void onDataChanged(DataSnapshot dataSnapshot, GeoLocation location) {
-
 
     }
 

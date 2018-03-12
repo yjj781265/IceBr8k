@@ -30,8 +30,8 @@
 
             <ImageView
                 android:id="@+id/onlineStats"
-                android:layout_width="16dp"
-                android:layout_height="13dp"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
                 android:layout_gravity="bottom"
                 android:layout_marginBottom="2dp"
                 android:layout_marginLeft="-10dp"
