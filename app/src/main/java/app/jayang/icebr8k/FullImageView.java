@@ -86,7 +86,7 @@ public class FullImageView extends AppCompatActivity {
 
                                 }
                                 @Override public void onPermissionDenied(PermissionDeniedResponse response) {
-                                    showSnackbarWithSetting("Camera Permission needed for Scanning QR Code",getCurrentFocus());
+                                    showSnackbarWithSetting("Storage Permission needed for saveing images",mContentView);
                                 }
                                 @Override public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
                                     token.continuePermissionRequest();
