@@ -2,6 +2,7 @@ package app.jayang.icebr8k;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.DialogFragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -60,6 +61,7 @@ import com.karumi.dexter.listener.single.PermissionListener;
 import com.onesignal.OSSubscriptionObserver;
 import com.onesignal.OSSubscriptionStateChanges;
 import com.onesignal.OneSignal;
+
 import com.zplesac.connectionbuddy.ConnectionBuddy;
 import com.zplesac.connectionbuddy.ConnectionBuddyCache;
 import com.zplesac.connectionbuddy.interfaces.ConnectivityChangeListener;
@@ -72,6 +74,7 @@ import app.jayang.icebr8k.Fragments.UserMessageDialog_Frag;
 import app.jayang.icebr8k.Fragments.Userstab_Fragment;
 import app.jayang.icebr8k.Fragments.me_frag;
 import app.jayang.icebr8k.Modle.ActivityCommunicator;
+import app.jayang.icebr8k.Modle.DatePickerFragment;
 import app.jayang.icebr8k.Modle.myViewPager;
 import app.jayang.icebr8k.Utility.MyJobService;
 
@@ -217,7 +220,6 @@ public class Homepage extends AppCompatActivity  implements
                 String chatId = intent.getExtras().getString("chatId");
                 String name = intent.getExtras().getString("chatName");
                 Intent mIntent = new Intent(this, UserChatActvity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 mIntent.putExtra("chatId", chatId);
                 mIntent.putExtra("chatName", name);
                 startActivity(mIntent);
@@ -412,6 +414,8 @@ public class Homepage extends AppCompatActivity  implements
     }
 
 
+
+
     public void checkCameraPermission(){
         Dexter.withActivity(this)
                 .withPermission(Manifest.permission.CAMERA)
@@ -524,7 +528,7 @@ public class Homepage extends AppCompatActivity  implements
 
         homepageTab.setTitleState(AHBottomNavigation.TitleState.ALWAYS_SHOW);
         homepageTab.setAccentColor(getResources().getColor(R.color.colorPrimary));
-        AHBottomNavigationItem item1 = new AHBottomNavigationItem("Survey",
+        AHBottomNavigationItem item1 = new AHBottomNavigationItem("Questions",
                 R.drawable.survey_selector);
         AHBottomNavigationItem item2 = new AHBottomNavigationItem("Friends",
                 R.drawable.user_selector);

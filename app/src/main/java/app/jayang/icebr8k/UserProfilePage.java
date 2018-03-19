@@ -14,6 +14,7 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Log;
@@ -460,25 +461,31 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                 compare_btn.setProgress(0);
             }
         });
+        if(User2QA.isEmpty() && User1QA.isEmpty()){
+            details.setClickable(false);
+            details.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.ripple));
+            details.setEnabled(false);
+        }else{
+            details.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // send user QA data to the result details activity
+                    Intent i = new Intent(getApplicationContext(), ResultActivity.class);
+                    i.putExtra("sameAnswer", User1QA);
+                    i.putExtra("user2", mUser);
+                    i.putExtra("user2Id" ,uid);
+                    i.putExtra("diffAnswer1", temp1QA);
+                    i.putExtra("diffAnswer2", temp2QA);
+                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
+                            FLAG_ACTIVITY_BROUGHT_TO_FRONT);
 
-        details.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // send user QA data to the result details activity
-                Intent i = new Intent(getApplicationContext(), ResultActivity.class);
-                i.putExtra("sameAnswer", User1QA);
-                i.putExtra("user2", mUser);
-                i.putExtra("user2Id" ,uid);
-                i.putExtra("diffAnswer1", temp1QA);
-                i.putExtra("diffAnswer2", temp2QA);
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
-                        FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+                    startActivity(i);
+                    overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
+                    dialog.dismiss();
+                }
+            });
+        }
 
-                startActivity(i);
-                overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
-                dialog.dismiss();
-            }
-        });
     }
 
 

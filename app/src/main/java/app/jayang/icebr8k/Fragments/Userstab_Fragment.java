@@ -402,6 +402,7 @@ public class Userstab_Fragment extends Fragment  {
 
     private void getUserinfo(final UserDialog dialog){
      DatabaseReference userinfoRef = mDatabase.getReference().child("Users").child(dialog.getId());
+     userinfoRef.keepSynced(true);
      userinfoRef.addValueEventListener(new ValueEventListener() {
          @Override
          public void onDataChange(DataSnapshot dataSnapshot) {
@@ -413,12 +414,14 @@ public class Userstab_Fragment extends Fragment  {
              }else{
                  dialog.setLastseen(null);
              }
-             dialog.setName(user.getDisplayname());
-             dialog.setOnlinestats(user.getOnlinestats());
-             dialog.setUsername(user.getUsername());
-             dialog.setPhotoUrl(user.getPhotourl());
-             dialog.setEmail(user.getEmail());;
-             addScoreListener(dialog);
+             if(user!=null) {
+                 dialog.setName(user.getDisplayname());
+                 dialog.setOnlinestats(user.getOnlinestats());
+                 dialog.setUsername(user.getUsername());
+                 dialog.setPhotoUrl(user.getPhotourl());
+                 dialog.setEmail(user.getEmail());
+                 addScoreListener(dialog);
+             }
 
 
 

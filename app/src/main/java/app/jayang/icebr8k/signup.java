@@ -3,6 +3,7 @@ package app.jayang.icebr8k;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -64,9 +65,12 @@ import com.theartofdev.edmodo.cropper.CropImageView;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
+import app.jayang.icebr8k.Modle.Birthdate;
+import app.jayang.icebr8k.Modle.DatePickerFragment;
 import app.jayang.icebr8k.Modle.User;
 import dmax.dialog.SpotsDialog;
 import id.zelory.compressor.Compressor;
@@ -75,15 +79,17 @@ import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 import pl.aprilapps.easyphotopicker.DefaultCallback;
 import pl.aprilapps.easyphotopicker.EasyImage;
 
+import static android.preference.PreferenceManager.getDefaultSharedPreferences;
+
 
 public class signup extends SwipeBackActivity {
     private final String DEFAULT_PHOTO_URL = "https://i.imgur.com/zI4v7oF.png";
     private ImageView avatar;
     private ScrollView sv;
     private Boolean flag,defaultPhotoFlag;
-    private TextInputEditText email,password,username,password2,displayname;
+    private TextInputEditText email,password,username,password2,displayname,birthdate;
     private TextInputLayout email_layout,username_layout,password_layout,displayname_layout,
-            password2_layout;
+            password2_layout,birthdate_layout;
     private Toolbar mToolbar;
     private SpotsDialog loadingdialog;
     private MaterialDialog reminderDialog;
@@ -92,6 +98,8 @@ public class signup extends SwipeBackActivity {
     private SwipeBackLayout mSwipeBackLayout;
     private  MultiplePermissionsListener snackbarMultiplePermissionsListener;
     private DatabaseReference mRef;
+    private DatePickerFragment datePickerFragment;
+
 
 
     @Override
@@ -119,13 +127,17 @@ public class signup extends SwipeBackActivity {
         password2 = (TextInputEditText) findViewById(R.id.confirmpwd_signup);
         username = (TextInputEditText) findViewById(R.id.username_signup);
         displayname = (TextInputEditText) findViewById(R.id.fullname_signup);
-
+        birthdate = (TextInputEditText) findViewById(R.id.birthdate_signup);
         //textinputlayout
         email_layout = (TextInputLayout) findViewById(R.id.email_layout_signup);
         password_layout = (TextInputLayout)findViewById(R.id.password_layout_signup);
         password2_layout = (TextInputLayout)findViewById(R.id.confirmpwd_layout_signup);
         username_layout =(TextInputLayout) findViewById(R.id.username_layout_signup);
         displayname_layout = (TextInputLayout)findViewById(R.id.fullname_layout_signup);
+        birthdate_layout = (TextInputLayout) findViewById(R.id.birthdate_layout_signup);
+
+        datePickerFragment = new DatePickerFragment();
+        datePickerFragment.setSignUp(true);
 
         password.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -150,6 +162,17 @@ public class signup extends SwipeBackActivity {
                 clearFocusAndError();
                 CheckUserInput();
                 return true;
+            }
+        });
+
+        birthdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                datePickerFragment.setEditText(birthdate);
+                datePickerFragment.show(getFragmentManager(),"datePicker");
+
+
             }
         });
        Glide.with(this).load(DEFAULT_PHOTO_URL).apply(RequestOptions.circleCropTransform()).into(avatar);
@@ -280,7 +303,9 @@ public class signup extends SwipeBackActivity {
 
     public void onClickSignUp(View view) {
         clearFocusAndError();
+        //Toast.makeText(this, datePickerFragment.getBirthdate().toString(), Toast.LENGTH_SHORT).show();
         CheckUserInput();
+
     }
 
     public void CheckUserInput(){
@@ -291,6 +316,10 @@ public class signup extends SwipeBackActivity {
             String passwordStr = password.getText().toString();
             String passwordStr2 = password2.getText().toString();
             String fullname = displayname.getText().toString();
+            String birthdateStr = birthdate.getText().toString();
+            Birthdate mBirthdate = datePickerFragment.getBirthdate();
+
+
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -350,10 +379,19 @@ public class signup extends SwipeBackActivity {
                     password_layout.setErrorEnabled(true);
                     password_layout.setError(getString(R.string.pwdError2));
                     password.requestFocus();
+                }else if (birthdateStr.isEmpty()) {
+                    birthdate_layout.setErrorEnabled(true);
+                    birthdate_layout.setError(getString(R.string.emptyfieldError));
+                    birthdate_layout.requestFocus();
+                }else if (!checkAge(mBirthdate)) {
+                    birthdate_layout.setErrorEnabled(true);
+                    birthdate_layout.setError(getString(R.string.ageError));
+                    birthdate_layout.requestFocus();
+
                 } else if (defaultPhotoFlag) {
-                    showReminderDialog();
+                    showReminderDialog(mBirthdate);
                 } else {
-                    SignUp(emailstr,passwordStr,fullname,usernameStr);
+                    showPrivacyPolicy(mBirthdate);
                 }
 
             }
@@ -367,7 +405,13 @@ public class signup extends SwipeBackActivity {
 
     }
 
-    public void showReminderDialog(){
+    public Boolean checkAge(Birthdate birthdate){
+        int currentYear =  Calendar.getInstance().get(Calendar.YEAR);
+
+        return currentYear -birthdate.getYear()>=13;
+    }
+
+    public void showReminderDialog(final Birthdate birthdate){
 
         reminderDialog = new MaterialDialog.Builder(this)
                 .content("Because you didn't choose your own avatar photo, " +
@@ -378,8 +422,9 @@ public class signup extends SwipeBackActivity {
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                         dialog.dismiss();
-                        SignUp(email.getText().toString(),password.getText().toString(),
-                                displayname.getText().toString(),username.getText().toString());
+                       showPrivacyPolicy(birthdate);
+
+
                     }
                 }).onNegative(new MaterialDialog.SingleButtonCallback() {
                     @Override
@@ -462,7 +507,7 @@ public class signup extends SwipeBackActivity {
     }
 
     public void SignUp(final String email, String password, final String displayname,
-                       final String username){
+                       final String username,final Birthdate birthdate){
         loadingdialog.show();
 
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
@@ -475,6 +520,8 @@ public class signup extends SwipeBackActivity {
                             user.setDisplayname(displayname);
                             user.setUsername(username);
                             user.setEmail(email);
+                            user.setBirthdate(birthdate);
+                            user.setPrivacy("private");
                             if(defaultPhotoFlag) {
                                 updateDatabaseAndCurrentUser(user,currentUser,DEFAULT_PHOTO_URL);
                             }else{
@@ -489,10 +536,9 @@ public class signup extends SwipeBackActivity {
                 });
     }
 
-    public void updateDatabaseAndCurrentUser(User user, FirebaseUser currentUser,String photoUrl){
+    public void updateDatabaseAndCurrentUser(User user, final FirebaseUser currentUser,String photoUrl){
 
         user.setPhotourl(photoUrl);
-
         mRef.child("Users").child(currentUser.getUid()).setValue(user);
         mRef.child("Usernames").child(user.getUsername()).setValue(currentUser.getUid());
 
@@ -509,9 +555,31 @@ public class signup extends SwipeBackActivity {
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             loadingdialog.dismiss();
-                          showToast("Sign Up Success");
-                          startActivity(mIntent);
-                          finish();
+                            currentUser.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+
+                                    if(task.isSuccessful()){
+
+                                        new MaterialDialog.Builder(signup.this)
+                                                .content("Sign up successful, a verification email sent to " + currentUser.getEmail()
+                                                        + ", check inbox to verify your account")
+                                                .positiveText("okay").onPositive(new MaterialDialog.SingleButtonCallback() {
+                                            @Override
+                                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                                finish();
+                                                FirebaseAuth.getInstance().signOut();
+                                            }
+                                        }).show();
+
+                                    }else{
+                                        Toast.makeText(signup.this,
+                                                "Failed to send verification email.",
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+
+                                }
+                            });
 
                         }else{
                             loadingdialog.dismiss();
@@ -520,7 +588,54 @@ public class signup extends SwipeBackActivity {
                     }
                 });
 
+
     }
+
+    public void showPrivacyPolicy(final Birthdate birthdate){
+
+        if(agreedPolicySharedPreference()){
+            if(birthdate!=null){
+                SignUp(email.getText().toString(),password.getText().toString(),
+                        displayname.getText().toString(),username.getText().toString(),birthdate);
+            }
+        }else{
+            new MaterialDialog.Builder(this)
+                    .iconRes(R.mipmap.ic_launcher)
+                    .limitIconToDefaultSize()
+                    .content(R.string.privacy_policy)
+                    .title("Privacy Policy")
+                    .positiveText("Agree")
+                    .negativeText("Disagree").onPositive(new MaterialDialog.SingleButtonCallback() {
+                @Override
+                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                    if(birthdate!=null){
+                        SignUp(email.getText().toString(),password.getText().toString(),
+                                displayname.getText().toString(),username.getText().toString(),birthdate);
+                    }
+
+                    addPolicySharedPreference();
+
+                }
+            }).show();
+        }
+
+    }
+
+    public void addPolicySharedPreference(){
+
+        SharedPreferences prefs = getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean("policy", true);
+        editor.commit();
+
+    }
+    private  boolean agreedPolicySharedPreference() {
+        SharedPreferences prefs = getDefaultSharedPreferences(getApplicationContext());
+        boolean defaultValue = false;
+        boolean agreedPolicy = prefs.getBoolean("policy", defaultValue);
+        return agreedPolicy;
+    }
+
 
     @Override
     public void onBackPressed() {

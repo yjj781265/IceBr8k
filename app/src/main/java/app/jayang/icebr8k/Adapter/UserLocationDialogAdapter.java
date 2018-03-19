@@ -1,4 +1,4 @@
-package app.jayang.icebr8k;
+package app.jayang.icebr8k.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -24,8 +24,9 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 
 import app.jayang.icebr8k.Modle.User;
-import app.jayang.icebr8k.Modle.UserDialog;
 import app.jayang.icebr8k.Modle.UserLocationDialog;
+import app.jayang.icebr8k.R;
+import app.jayang.icebr8k.UserProfilePage;
 
 /**
  * Created by yjj781265 on 1/25/2018.

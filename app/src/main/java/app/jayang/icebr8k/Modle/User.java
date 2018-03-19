@@ -12,6 +12,7 @@ import java.io.Serializable;
 public class User implements Serializable,Comparable<User> {
     private String displayname,username,photourl,email,score,privacy;
     private String onlinestats;
+    private Birthdate mBirthdate;
 
     public User() {
     }
@@ -21,6 +22,16 @@ public class User implements Serializable,Comparable<User> {
         this.username = username;
         this.photourl = photourl;
         this.email = email;
+    }
+
+    public User(String displayname, String username, String photourl, String email, String privacy, String onlinestats, Birthdate birthdate) {
+        this.displayname = displayname;
+        this.username = username;
+        this.photourl = photourl;
+        this.email = email;
+        this.privacy = privacy;
+        this.onlinestats = onlinestats;
+        mBirthdate = birthdate;
     }
 
     public String getPrivacy() {
@@ -73,6 +84,14 @@ public class User implements Serializable,Comparable<User> {
 
     public String getOnlinestats() {
         return onlinestats;
+    }
+
+    public Birthdate getBirthdate() {
+        return mBirthdate;
+    }
+
+    public void setBirthdate(Birthdate birthdate) {
+        mBirthdate = birthdate;
     }
 
     public void setOnlinestats(String onlinestats) {

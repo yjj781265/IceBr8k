@@ -1,9 +1,11 @@
 package app.jayang.icebr8k;
 
 
+import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
@@ -57,8 +59,13 @@ import com.google.firebase.database.ValueEventListener;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import app.jayang.icebr8k.Modle.Birthdate;
+import app.jayang.icebr8k.Modle.DatePickerFragment;
+import app.jayang.icebr8k.Modle.OnDoneListener;
 import app.jayang.icebr8k.Modle.User;
 import dmax.dialog.SpotsDialog;
+
+import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
 
 public class login_page extends AppCompatActivity implements
@@ -71,6 +78,7 @@ public class login_page extends AppCompatActivity implements
     private long lastClickTime =0;
     // [START declare_auth]
     private FirebaseAuth mAuth;
+    private GoogleSignInAccount acct;
     // [END declare_auth]
     private RelativeLayout loginPage_Rlayout;
     private FirebaseDatabase mdatabase;
@@ -78,6 +86,7 @@ public class login_page extends AppCompatActivity implements
     private DatabaseReference myRef;
     private GoogleApiClient mGoogleApiClient;
     private Intent intent;
+    private  DatePickerFragment datePickerFragment;
     private  SpotsDialog loadingdialog;
     private  ScrollView sv;
     private TextInputLayout email_layout,password_layout;
@@ -100,6 +109,7 @@ public class login_page extends AppCompatActivity implements
         email_layout = findViewById(R.id.email_layout_login);
         password_layout = findViewById(R.id.password_layout_login);
         intent = new Intent(this,Homepage.class);
+        datePickerFragment = new DatePickerFragment();
 
         sv =findViewById(R.id.mScroll);
         loginPage_Rlayout = findViewById(R.id.login_page);
@@ -151,6 +161,10 @@ public class login_page extends AppCompatActivity implements
 
 
 
+
+
+
+
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -174,6 +188,20 @@ public class login_page extends AppCompatActivity implements
             public void onCancel(DialogInterface dialogInterface) {
                 signOut();
             }
+        });
+        datePickerFragment.setOnDoneListener(new OnDoneListener() {
+            @Override
+            public void isDone() {
+                if(acct!=null){
+                    usernameCreateCheck(acct);
+                }else{
+                    usernameCreateCheck();
+                }
+                loadingdialog.show();
+
+            }
+
+
         });
 
 
@@ -244,7 +272,8 @@ public class login_page extends AppCompatActivity implements
                             Log.d("haha",mAuth.getCurrentUser().getPhotoUrl().
                                     toString()+" from currentUserBeforeUpdate");
                             currentUser = mAuth.getCurrentUser();
-                            usernameCreateCheck(acct);
+                            login_page.this.acct = acct;
+                            ageCreateCheck(acct,true);
 
                         } else {
                             // If sign in fails, display a message to the user.
@@ -495,6 +524,46 @@ public void usernameCreateCheck(final GoogleSignInAccount account) {
     });
 }
 
+            public void ageCreateCheck(final GoogleSignInAccount account, final Boolean isGoogle) {
+                final DatabaseReference mRef = mdatabase.
+                        getReference("Users/" + mAuth.getCurrentUser().getUid());
+
+                mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (!dataSnapshot.hasChild("birthdate")) {
+                            loadingdialog.dismiss();
+                            showDatePickerDialog();
+
+                        } else {
+                            if (isGoogle) {
+                                usernameCreateCheck(account);
+                            } else {
+                                usernameCreateCheck();
+                            }
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+
+
+            public void showDatePickerDialog() {
+
+                if (datePickerFragment != null) {
+                    datePickerFragment.show(getFragmentManager(), "datePicker");
+                    Toast.makeText(this, "Please Choose Your Birthdate", Toast.LENGTH_LONG).show();
+
+
+                }
+            }
+
+
     //check user from Firebase Sign in has username or not
     public void usernameCreateCheck(){
         final DatabaseReference mRef = mdatabase.
@@ -619,24 +688,47 @@ public void usernameCreateCheck(final GoogleSignInAccount account) {
 
 
 
+            public void login(String email, String password){
+                loadingdialog.show();
 
-        public void login(String email, String password){
-            loadingdialog.show();
+                mAuth.signInWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                if (task.isSuccessful()) {
+                                    currentUser = mAuth.getCurrentUser();
+                                    if(currentUser.isEmailVerified()){
+                                      ageCreateCheck(null,false);
+                                    }else{
+                                        loadingdialog.dismiss();
+                                        new MaterialDialog.Builder(login_page.this)
+                                                .content(currentUser.getEmail()+ "\n Email is not verified by user ")
+                                                .negativeColor(getResources().getColor(R.color.colorPrimary))
+                                                .positiveText("Okay")
+                                                .negativeText("Resend Email").onNegative(new MaterialDialog.SingleButtonCallback() {
+                                            @Override
+                                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                                currentUser.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if(task.isSuccessful()) {
+                                                            showToast("Verification email sent to  "+currentUser.getEmail());
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        }).show();
 
-            mAuth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()) {
-                                currentUser = mAuth.getCurrentUser();
-                                usernameCreateCheck();
-                            } else {
-                             showDismissDialog(task.getException().getMessage()).show();
-                                loadingdialog.dismiss();
+
+                                    }
+
+                                } else {
+                                    showDismissDialog(task.getException().getMessage()).show();
+                                    loadingdialog.dismiss();
+                                }
                             }
-                        }
-                    });
-        }
+                        });
+            }
 
     public void CheckUserInput(){
         String emailstr = email.getText().toString();
@@ -675,6 +767,54 @@ public void usernameCreateCheck(final GoogleSignInAccount account) {
 
     }
 
+    public void showPrivacyPolicy(final Boolean isGoogle) {
+        new MaterialDialog.Builder(this)
+                .iconRes(R.mipmap.ic_launcher)
+                .limitIconToDefaultSize()
+                .content(R.string.privacy_policy)
+                .title("Privacy Policy")
+                .positiveText("Agree")
+                .negativeText("Disagree").onPositive(new MaterialDialog.SingleButtonCallback() {
+            @Override
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                 addPolicySharedPreference();
+                if (isGoogle) {
+                    signIn();
+                } else {
+                    email.clearFocus();
+                    password.clearFocus();
+                    password_layout.setError(null);
+                    email_layout.setError(null);
+                    CheckUserInput();
+                }
+
+            }
+        }).show();
+    }
+
+
+    private  boolean agreedPolicySharedPreference() {
+        SharedPreferences prefs = getDefaultSharedPreferences(getApplicationContext());
+        boolean defaultValue = false;
+        boolean agreedPolicy = prefs.getBoolean("policy", defaultValue);
+        return agreedPolicy;
+    }
+
+    public void addPolicySharedPreference() {
+
+        SharedPreferences prefs = getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean("policy", true);
+        editor.commit();
+
+    }
+
+
+
+
+
+
+
 
 
 
@@ -685,8 +825,14 @@ public void usernameCreateCheck(final GoogleSignInAccount account) {
         }
         lastClickTime = SystemClock.elapsedRealtime();
         if (view.getId() == R.id.sign_in_button && mAuth.getCurrentUser()==null) {
-            if(checkInternet()) {
-                signIn();
+            if(checkInternet() ) {
+
+                if(agreedPolicySharedPreference()){
+                    signIn();
+                }else{
+                    showPrivacyPolicy(true);
+                }
+
             }else{
                 Snackbar snackbar = Snackbar
                         .make(loginPage_Rlayout, "No Internet Connection", Snackbar.LENGTH_LONG)
@@ -710,11 +856,17 @@ public void usernameCreateCheck(final GoogleSignInAccount account) {
             overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
 
         }else if(view.getId() == R.id.login_btn){
-            email.clearFocus();
-            password.clearFocus();
-            password_layout.setError(null);
-            email_layout.setError(null);
-             CheckUserInput();
+
+            if(agreedPolicySharedPreference()){
+                email.clearFocus();
+                password.clearFocus();
+                password_layout.setError(null);
+                email_layout.setError(null);
+                CheckUserInput();
+            }else{
+                showPrivacyPolicy(false);
+            }
+
         }
 
     }

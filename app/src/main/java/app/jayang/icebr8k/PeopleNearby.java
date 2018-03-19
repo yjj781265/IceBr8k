@@ -4,10 +4,8 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -36,7 +34,6 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,7 +51,6 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
@@ -84,8 +80,6 @@ import com.google.maps.android.clustering.ClusterManager;
 
 import java.io.IOException;
 
-import java.sql.Timestamp;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -94,9 +88,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import app.jayang.icebr8k.Adapter.UserLocationDialogAdapter;
 import app.jayang.icebr8k.Modle.User;
 
-import app.jayang.icebr8k.Modle.UserDialog;
 import app.jayang.icebr8k.Modle.UserLocationDialog;
 
 import app.jayang.icebr8k.Modle.UserQA;
@@ -772,6 +766,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
             int i = mLocationDialogs.indexOf(dialog);
             mLocationDialogs.set(i,dialog);
         }
+            Collections.sort(mLocationDialogs);
             mLocationDialogAdapter.notifyDataSetChanged();
         if(mProgressDialog.isShowing()){
             mProgressDialog.dismiss();

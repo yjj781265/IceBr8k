@@ -7,6 +7,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.EditText;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.BootstrapButton;
 
 public class Feedback extends AppCompatActivity {
@@ -52,5 +53,15 @@ public class Feedback extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         finish();
         return  true;
+    }
+
+    public void onPrivacyClick(View view) {
+        new MaterialDialog.Builder(this)
+                .iconRes(R.mipmap.ic_launcher)
+                .limitIconToDefaultSize()
+                .content(R.string.privacy_policy)
+                .title("Privacy Policy")
+                .positiveText("Ok").show();
+
     }
 }

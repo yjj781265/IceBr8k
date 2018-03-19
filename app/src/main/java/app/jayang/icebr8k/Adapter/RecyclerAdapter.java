@@ -13,6 +13,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -42,6 +43,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
     public class UserDialogViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
          private ImageView image,onlineStats;
          private TextView displayname,username,score,lastSeen;
+         private LinearLayout container;
          private long lastClickTime =0;
 
         public UserDialogViewHolder(View itemView) {
@@ -52,6 +54,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
             score = itemView.findViewById(R.id.score);
             onlineStats =itemView.findViewById(R.id.onlineStats);
             lastSeen =itemView.findViewById(R.id.lastseen);
+            container = itemView.findViewById(R.id.userTab_item_container);
+
             itemView.setOnClickListener(this);
 
         }
@@ -148,7 +152,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
                     if (online.equals("2")) {
                         holder.onlineStats.setImageResource(R.drawable.green_dot);
                         holder.onlineStats.setVisibility(View.VISIBLE);
-                        holder.itemView.setAlpha(1.0f);
+                        holder.container.setAlpha(1.0f);
 
 
 
@@ -156,20 +160,19 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
                     } else if (online.equals("1")) {
                         holder.onlineStats.setImageResource(R.drawable.circle_shape_busy);
                         holder.onlineStats.setVisibility(View.VISIBLE);
-                        holder.itemView.setAlpha(1.0f);
+                        holder.container.setAlpha(1.0f);
 
 
-
-
-
-
-
-                    } else {
+                    } else if("0".equals(online)) {
                         holder.onlineStats.setVisibility(View.INVISIBLE);
-                        holder.itemView.setAlpha(0.5f);
+                        holder.container.setAlpha(0.5f);
 
 
-                    }
+                    }else{
+                        holder.onlineStats.setVisibility(View.INVISIBLE);
+                        holder.container.setAlpha(0.5f);
+
+               }
 
                 } else {
                     // null
