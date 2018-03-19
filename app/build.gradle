@@ -22,8 +22,8 @@ android {
         applicationId "app.jayang.icebr8k"
         minSdkVersion 22
         targetSdkVersion 26
-        versionCode 3
-        versionName "1.1"
+        versionCode 4
+        versionName "1.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [onesignal_app_id               : "c1189c2a-37e1-4db8-8f8e-c236f552131a",
                                 // Project number pulled from dashboard, local value is ignored.

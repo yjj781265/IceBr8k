@@ -2,6 +2,7 @@ package app.jayang.icebr8k.Fragments;
 
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -20,9 +21,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
+import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
+import com.github.javiersantos.materialstyleddialogs.enums.Style;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -261,6 +266,15 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
     mref.addListenerForSingleValueEvent(new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
+            if(userQlist.isEmpty()){
+                new MaterialStyledDialog.Builder(getContext())
+                        .setIcon(R.mipmap.ic_launcher)
+                        .withDialogAnimation(true)
+                        .setDescription("Welcome to the IceBr8k, please answer some simple fun questions to get this wonderful journey started")
+                        .setStyle(Style.HEADER_WITH_ICON)
+                        .setPositiveText("Okay")
+                        .show();
+            }
 
             pullDatabaseQuesteions();
 
