@@ -15,6 +15,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "773225047243-shcbg0timl4uhrab688d7f6okg184bcm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.jayang.icebr8k",
+            "certificate_hash": "ca42b7f70af6df9c3ad2d25a6ae0afc2e3001485"
+          }
+        },
+        {
+          "client_id": "773225047243-44jcnofpfdn352iqjnf0oq3monivbmro.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.jayang.icebr8k",
+            "certificate_hash": "9332188b1342dfbf544ea0209caf5962f61a5bb3"
+          }
+        },
+        {
           "client_id": "773225047243-0id6h6ug2kau9padgfpc2q4k0rks10md.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -72,15 +88,15 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "773225047243-a6cnkkd01vh4ddkd7msvf3npin3286au.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
               "client_id": "773225047243-sla0md2q5rut2ejikgk1f38cr0anh50t.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "com.KingdomDigitalMedia.IceBr8k"
               }
+            },
+            {
+              "client_id": "773225047243-a6cnkkd01vh4ddkd7msvf3npin3286au.apps.googleusercontent.com",
+              "client_type": 3
             }
           ]
         },

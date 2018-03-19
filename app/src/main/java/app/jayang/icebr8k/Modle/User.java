@@ -24,15 +24,7 @@ public class User implements Serializable,Comparable<User> {
         this.email = email;
     }
 
-    public User(String displayname, String username, String photourl, String email, String privacy, String onlinestats, Birthdate birthdate) {
-        this.displayname = displayname;
-        this.username = username;
-        this.photourl = photourl;
-        this.email = email;
-        this.privacy = privacy;
-        this.onlinestats = onlinestats;
-        mBirthdate = birthdate;
-    }
+
 
     public String getPrivacy() {
         return privacy;
@@ -124,15 +116,11 @@ public class User implements Serializable,Comparable<User> {
 
         User user = (User) o;
 
-        if (displayname != null ? !displayname.equals(user.displayname) : user.displayname != null)
-            return false;
-        return photourl != null ? photourl.equals(user.photourl) : user.photourl == null;
+        return username != null ? username.equals(user.username) : user.username == null;
     }
 
     @Override
     public int hashCode() {
-        int result = displayname != null ? displayname.hashCode() : 0;
-        result = 31 * result + (photourl != null ? photourl.hashCode() : 0);
-        return result;
+        return username != null ? username.hashCode() : 0;
     }
 }

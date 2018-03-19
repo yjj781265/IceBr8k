@@ -1,10 +1,12 @@
 package app.jayang.icebr8k.Modle;
 
+import java.io.Serializable;
+
 /**
  * Created by yjj781265 on 3/18/2018.
  */
 
-public class Birthdate {
+public class Birthdate implements Serializable {
     private int year = 2018 , month,day;
 
     public Birthdate() {
