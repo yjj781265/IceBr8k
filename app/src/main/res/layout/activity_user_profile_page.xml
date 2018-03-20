@@ -25,12 +25,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-    <RelativeLayout
+    <LinearLayout
 
         android:background="@color/creamYellow"
-        android:layout_marginTop="10dp"
-        android:gravity="fill_horizontal"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="20dp"
+        android:layout_gravity="start|center_vertical"
+        android:gravity="center_vertical"
         android:transitionName="profile"
+        android:orientation="horizontal"
         android:id="@+id/R1"
         android:elevation="3dp"
         android:layout_width="match_parent"
@@ -39,56 +44,55 @@
     <ImageView
 
         android:id="@+id/profileButton"
-        android:layout_width="66dp"
-        android:layout_height="66dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_margin="10dp"
+        android:layout_weight="1"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginRight="16dp"
+        android:layout_gravity="center"
         android:clickable="true"
         app:srcCompat="@drawable/common_google_signin_btn_icon_dark"/>
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_toRightOf="@id/profileButton"
-        android:layout_marginStart="9dp"
-        android:layout_centerVertical="true"
+        android:layout_width="0dp"
+        android:layout_weight="12"
+        android:layout_marginRight="16dp"
+        android:layout_gravity="center_vertical"
         android:orientation="vertical"
         android:layout_height="wrap_content">
     <TextView
         android:id="@+id/displayname_profile"
-
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
-        android:maxLength="18"
-        android:maxLines="2"
-        android:text="123456789111315172"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="123456789111315172dsasdsfsdfs"
         android:layout_toRightOf="@id/profileButton"
 
         android:textColor="@android:color/black"
-        android:textSize="20sp"/>
+        android:textSize="18sp"/>
 
         <TextView
             android:id="@+id/username_profile"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:ellipsize="end"
             android:textStyle="normal"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:text="Username" />
     </LinearLayout>
 
 
         <ImageView
             android:id="@+id/profile_QR"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
             android:transitionName="qr_transition"
-            android:layout_width="30dp"
-            android:layout_centerVertical="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="30dp"
+            android:layout_width="0dp"
             android:clickable="true"
             android:onClick="qrOnClick"
             android:src="@drawable/qr_code_selector"
             android:layout_height="30dp"/>
-    </RelativeLayout>
+    </LinearLayout>
 
     <RelativeLayout
         android:elevation="3dp"
