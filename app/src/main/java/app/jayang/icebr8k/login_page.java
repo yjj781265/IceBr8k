@@ -1,6 +1,7 @@
 package app.jayang.icebr8k;
 
 
+import android.annotation.SuppressLint;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -701,8 +702,9 @@ public void usernameCreateCheck(final GoogleSignInAccount account) {
                                       ageCreateCheck(null,false);
                                     }else{
                                         loadingdialog.dismiss();
-                                        new MaterialDialog.Builder(login_page.this)
-                                                .content(currentUser.getEmail()+ "\n Email is not verified by user ")
+
+                             MaterialDialog materialDialog =new MaterialDialog.Builder(login_page.this)
+                                                .content(currentUser.getEmail()+ "\nEmail is not verified by user ")
                                                 .negativeColor(getResources().getColor(R.color.colorPrimary))
                                                 .positiveText("Okay")
                                                 .negativeText("Resend Email").onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -714,11 +716,23 @@ public void usernameCreateCheck(final GoogleSignInAccount account) {
                                                         if(task.isSuccessful()) {
                                                             showToast("Verification email sent to  "+currentUser.getEmail());
                                                         }
+                                                        mAuth.signOut();
                                                     }
                                                 });
                                             }
-                                        }).show();
+                                        }).onPositive(new MaterialDialog.SingleButtonCallback() {
+                                         @Override
+                                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                             mAuth.signOut();
+                                         }
+                                     }) .show();
 
+                                   materialDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                                       @Override
+                                       public void onCancel(DialogInterface dialog) {
+                                           mAuth.signOut();
+                                       }
+                                   });
 
                                     }
 
@@ -818,6 +832,7 @@ public void usernameCreateCheck(final GoogleSignInAccount account) {
 
 
 
+    @SuppressLint("RestrictedApi")
     @Override
     public void onClick(View view) {
         if (SystemClock.elapsedRealtime() - lastClickTime < 1000){

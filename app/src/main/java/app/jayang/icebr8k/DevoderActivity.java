@@ -112,6 +112,11 @@ public class DevoderActivity extends AppCompatActivity  implements ZXingScannerV
     }
 
     @Override
+    public void onBackPressed() {
+        finish();
+    }
+
+    @Override
     public void handleResult(Result result) {
          searchUser(result.getText());
 

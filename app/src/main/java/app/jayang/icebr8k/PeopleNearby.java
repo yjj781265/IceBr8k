@@ -1,6 +1,7 @@
 package app.jayang.icebr8k;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -214,6 +215,12 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
               ZoomLevel =9f;
           }
           mProgressDialog =ProgressDialog(radiusString);
+            mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    finish();
+                }
+            });
 
         }
         mfilter.setOnClickListener(new View.OnClickListener() {
@@ -267,6 +274,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
 
     }
+
 
     @Override
     protected void onDestroy() {
@@ -341,6 +349,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         mGoogleApiClient.connect();
     }
 
+    @SuppressLint("RestrictedApi")
     private void startLocationMonitoring(){
         mProgressDialog.show();
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -1005,7 +1014,6 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onBackPressed() {
-
         finish();
     }
 

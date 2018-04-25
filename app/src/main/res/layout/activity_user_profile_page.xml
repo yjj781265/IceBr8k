@@ -28,6 +28,7 @@
     <LinearLayout
 
         android:background="@color/creamYellow"
+        android:layout_marginTop="8dp"
         android:paddingTop="20dp"
         android:paddingBottom="20dp"
         android:paddingLeft="5dp"
@@ -87,7 +88,7 @@
             android:layout_weight="1"
             android:layout_gravity="center_vertical"
             android:transitionName="qr_transition"
-            android:layout_width="0dp"
+            android:layout_width="30dp"
             android:clickable="true"
             android:onClick="qrOnClick"
             android:src="@drawable/qr_code_selector"
@@ -174,7 +175,7 @@
         style="?android:attr/borderlessButtonStyle"
         android:textColor="@android:color/white"
         android:id="@+id/message_btn"
-        android:visibility="gone"
+        android:visibility="visible"
         android:layout_gravity="center_horizontal"
         android:text="Message"
         android:textAllCaps="false"

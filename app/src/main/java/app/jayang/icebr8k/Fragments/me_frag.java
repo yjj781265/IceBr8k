@@ -16,9 +16,11 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -152,6 +154,7 @@ public class me_frag extends Fragment {
 
         DatabaseReference photoUrlref = FirebaseDatabase.getInstance().getReference().child("Users")
                 .child(currentuser.getUid());
+        photoUrlref.keepSynced(true);
         photoUrlref.addListenerForSingleValueEvent(     new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -162,6 +165,10 @@ public class me_frag extends Fragment {
                 }
                 displayname.setText(user.getDisplayname());
                 email.setText(user.getEmail());
+
+                scrollView.setVisibility(View.VISIBLE);
+                YoYo.with(Techniques.FadeIn).duration(500).playOn(scrollView);
+                loadingGif.setVisibility(View.GONE);
                 if (user.getDisplayname() != null && user.getPhotourl() != null) {
                     UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                             .setDisplayName(user.getDisplayname())
@@ -174,11 +181,7 @@ public class me_frag extends Fragment {
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
                                         loadingGif.setVisibility(View.GONE);
-                                        YoYo.with(Techniques.FadeIn).duration(500).playOn(scrollView);
                                         scrollView.setVisibility(View.VISIBLE);
-
-
-
                                     }
                                 }
                             });
@@ -193,7 +196,7 @@ public class me_frag extends Fragment {
             }
         });
 
-
+     // check user has new friend request
         setBadge();
         //set switchcompat state base on user's choice history
         if("public".equals(getPrivacySharedPreference())){
@@ -457,24 +460,29 @@ public class me_frag extends Fragment {
                 .show();
     }
     public void showSignleChoiceDialog(){
-        new MaterialDialog.Builder(getActivity())
-                .items(R.array.avatar_choice)
-                .itemsCallbackSingleChoice(0, new MaterialDialog.ListCallbackSingleChoice() {
-                    @Override
-                    public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
-                        if(which==0){
-                            changeAvatar();
-                        }else{
-                        Intent i = new Intent(getActivity(), FullImageView.class);
-                        i.putExtra("photoUrl",currentuser.getPhotoUrl().toString());
-                            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity(),avatar,"profile");
-                            startActivity(i, options.toBundle());
-                        }
-                        return true;
-                    }
-                })
-                .positiveText(R.string.ok)
-                .show();
+
+        PopupMenu popup = new PopupMenu(getActivity(),avatar);
+        //Inflating the Popup using xml file
+        popup.getMenuInflater()
+                .inflate(R.menu.photo_menu, popup.getMenu());
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if(item.getItemId() == R.id.photo_menu_change){
+                    changeAvatar();
+                    return true;
+                }else{
+                    // view photo
+                    Intent i = new Intent(getActivity(), FullImageView.class);
+                    i.putExtra("photoUrl",currentuser.getPhotoUrl().toString());
+                    ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity(),avatar,"profile");
+                    startActivity(i, options.toBundle());
+                    return  true;
+                }
+
+            }
+        });
+        popup.show();
     }
 
 

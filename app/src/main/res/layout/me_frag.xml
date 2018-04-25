@@ -18,6 +18,7 @@
         android:background="@color/creamYellow"
         android:gravity="center_vertical"
         android:id="@+id/R1"
+        android:layout_marginTop="8dp"
         android:paddingTop="20dp"
         android:paddingBottom="20dp"
         android:paddingLeft="10dp"

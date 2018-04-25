@@ -1,5 +1,6 @@
 package app.jayang.icebr8k;
 
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -48,6 +49,12 @@ public class ImageViewer extends AppCompatActivity {
                 .content("Loading...").canceledOnTouchOutside(false)
                 .progress(true, 0)
                 .build();
+        mDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                finish();
+            }
+        });
 
 
 

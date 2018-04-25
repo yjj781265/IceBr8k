@@ -347,6 +347,22 @@ public class Homepage extends AppCompatActivity  implements
 
         ConnectionBuddy.getInstance().registerForConnectivityEvents(this, this);
 
+        //check total num quesitons
+       /* DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+                .child("Questions_8");
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Toast.makeText(Homepage.this, "Question count " +dataSnapshot.getChildrenCount(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });*/
+
+
     }
 
     @Override

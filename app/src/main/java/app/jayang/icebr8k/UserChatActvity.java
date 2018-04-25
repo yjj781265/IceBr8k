@@ -75,7 +75,6 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
     private MyEditText editText;
     private TextView toast;
-    private ValueEventListener mListener;
     private Long lastTimeStamp;
     private FirebaseUser currentUser;
     private RecyclerView mRecyclerView;
@@ -114,18 +113,9 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         if(getIntent()!=null) {
             user2Uid = getIntent().getExtras().getString("chatId");
             name = getIntent().getExtras().getString("chatName");
+
         }
-        mListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
 
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        };
 
 
         voice = (ImageView) findViewById(R.id.userChat_voicemessage);
@@ -191,7 +181,6 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.addOnChildAttachStateChangeListener(this);
 
-        //  mAdapter.notifyDataSetChanged();
 
 
         if (!mMessages.isEmpty()) {
@@ -210,11 +199,18 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
          user2InchatRef = receiverMessageRef.child("inchat");
 
 ////////////////////////////////////////////////Custom Methods/////////////////////////////////////
+
         if(name!=null && user2Uid!=null) {
-            setIstypingListener();
-            loadMessages();
+            getSupportActionBar().setTitle(name);
             setTitle();
             setSubTitle();
+            loadMessages();
+            setIstypingListener();
+
+
+        }else{
+            finish();
+            Toast.makeText(this, "Unable to connect to the server", Toast.LENGTH_SHORT).show();
         }
 
 
@@ -628,8 +624,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
                }
                if(user2Inchat){
                    inChatItem.setVisible(true);
-                   if(name!=null) {
-                   }
+
 
                }else{
                    inChatItem.setVisible(false);
@@ -921,6 +916,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         tempMessages.clear();
         DatabaseReference loadMsgRef =
                 senderMessageRef.child("chathistory");
+        loadMsgRef.keepSynced(true);
 
         loadMsgRef.orderByChild("timestamp").limitToLast(MAX_COUNT).addChildEventListener(new ChildEventListener() {
             @Override

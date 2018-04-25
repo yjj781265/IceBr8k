@@ -499,6 +499,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                 String stats = dataSnapshot.getValue(String.class);
                 if(stats ==null){
                     addFriend_btn.setVisibility(View.VISIBLE);
+                    addFriend_btn.setAlpha(1f);
                     addFriend_btn.setClickable(true);
                     addFriend_btn.setText("Send Friend Request");
                     addFriend_btn.setBackgroundColor(getResources().getColor(R.color.colorAccent));
@@ -546,6 +547,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                              addFriend_btn.setText("Friend Request Pending");
                              addFriend_btn.setBackgroundColor(getResources().getColor(R.color.darkOrange));
                              addFriend_btn.setClickable(false);
+                             addFriend_btn.setAlpha(0.6f);
                          }
             }
 
@@ -765,7 +767,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         new MaterialDialog.Builder(this)
                 .title("Greeting Message")
                 .inputType(InputType.TYPE_CLASS_TEXT ).inputRange(0,30)
-                .input(null, null, new MaterialDialog.InputCallback() {
+                .input("(Optional)", null, new MaterialDialog.InputCallback() {
                     @Override
                     public void onInput(MaterialDialog dialog, CharSequence input) {
                         if(!input.toString().trim().isEmpty()){

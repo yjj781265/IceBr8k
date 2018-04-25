@@ -79,7 +79,7 @@ public class FriendRequestPage extends AppCompatActivity {
                     if("pending".equals(dataSnapshot.child("stats").getValue(String.class))){
                     addToDialog( dataSnapshot.getKey());
                 }
-                noFrt.setVisibility(View.GONE);
+
 
             }
 

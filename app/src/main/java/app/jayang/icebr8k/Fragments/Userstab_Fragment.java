@@ -157,7 +157,7 @@ public class Userstab_Fragment extends Fragment  {
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mAdapter = new RecyclerAdapter(getContext(),mUserDialogArrayList);
-        mAdapter.setHasStableIds(true);
+        mAdapter.setHasStableIds(false);
         mRecyclerView.setAdapter(mAdapter);
         filter_btn =view.findViewById(R.id.filter_btn);
 

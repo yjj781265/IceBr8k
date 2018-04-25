@@ -84,28 +84,28 @@ public class MyDateFormatter {
 
     public static String timeStampToDateConverter(long timestamp, boolean isDialogDate) {
         Date date = new Date(timestamp);
+        String pattern = "h:mm a";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+        String time =simpleDateFormat.format(date);
+
+        String pattern2 = "MM/dd/yyyy";
+        SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat(pattern2);
+        String dateStr = simpleDateFormat2.format(date);
+
+        String pattern3 = "MM/dd";
+        SimpleDateFormat simpleDateFormat3 = new SimpleDateFormat(pattern3);
+        String dateStrSameYear = simpleDateFormat3.format(date);
         if (isDialogDate) {
             if (isToday(date)) {
-                return "Today";
+
+                return time;
             } else if (isYesterday(date)) {
                 return "Yesterday";
             } else {
-                String pattern = "MM/dd/yyyy";
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-                return simpleDateFormat.format(date);
+                return dateStr;
             }
         } else {
-            String pattern = "h:mm a";
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-            String time =simpleDateFormat.format(date);
 
-            String pattern2 = "MM/dd/yyyy";
-            SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat(pattern2);
-            String dateStr = simpleDateFormat2.format(date);
-
-            String pattern3 = "MM/dd";
-            SimpleDateFormat simpleDateFormat3 = new SimpleDateFormat(pattern3);
-            String dateStrSameYear = simpleDateFormat3.format(date);
 
             if(isYesterday(date)) {
                 return "Yesterday" + bullet + time;
@@ -138,18 +138,20 @@ public class MyDateFormatter {
                     hours =1;
                 }
                 string = "Last seen "+hours+" hr ago";
-            }else if(minutes >=1440 && minutes <525600) {
+            }else if(minutes >=1440 && minutes <43800) {
                 days = TimeUnit.MINUTES.toDays(minutes);
                 if (days == 0) {
                     days = 1;
                 }
                 string = "Last seen " + days + " d ago";
-            }else if(days>=30){
+            }else if(minutes>=43800){
+                days = TimeUnit.MINUTES.toDays(minutes);
                 months = days/30;
-                string = "Last seen " + months + " mo ago";
-            }else if(months>=12){
-                long years = months / 12;
-                string = "Last seen "+years+" yr ago";
+                string = "Last seen "+months + " mo ago";
+                if(months>=12){
+                    long years = months / 12;
+                    string ="Last seen " +years+" yr ago";
+                }
             }else{
                 string = "offline";
             }
@@ -178,19 +180,21 @@ public class MyDateFormatter {
                     hours =1;
                 }
                 string = hours+"hr";
-            }else if(minutes >=1440 && minutes <525600) {
+            }else if(minutes >=1440 && minutes <43800) {
                 days = TimeUnit.MINUTES.toDays(minutes);
                 if (days == 0) {
                     days = 1;
                 }
                 string = days + "d";
-            }else if(days>=30){
+            }else if(minutes>= 43800){
+                days = TimeUnit.MINUTES.toDays(minutes);
                 months = days/30;
                 string =  months + "mo";
-            }else if(months>=12){
-                long years = months / 12;
-                string = +years+"yr";
-            }else{
+                if(months>=12){
+                    long years = months / 12;
+                    string = +years+"yr";
+                }
+            } else{
                 string = "offline";
             }
 
