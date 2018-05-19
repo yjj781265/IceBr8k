@@ -837,6 +837,7 @@ public class Homepage extends AppCompatActivity  implements
                         Intent intent = new Intent(getApplicationContext(),PeopleNearby.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         intent.putExtra("radius",radius);
+                        intent.putExtra("index",index);
                          startActivity(intent);
                         return true;
                     }

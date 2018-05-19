@@ -204,15 +204,15 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         if(getIntent().getExtras()!=null) {
         String radiusString=getIntent().getExtras().getString("radius");
           radius = convertMileStringtoKm(radiusString);
-          if(radius<2){
+          index = getIntent().getExtras().getInt("index");
+          if(index ==0){
               ZoomLevel =13f;
-              index =0;
-          }else if(radius>15 && radius<32){
-              index =1;
+          }else if(index == 1){
               ZoomLevel =11f;
-          }else{
-              index=2;
+          }else if(index ==2){
               ZoomLevel =9f;
+          }else{
+              ZoomLevel =7f;
           }
           mProgressDialog =ProgressDialog(radiusString);
             mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -814,12 +814,14 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                     public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
                         index =which;
                         radius = convertMileStringtoKm(String.valueOf(text));;
-                        if(radius<2){
+                        if(index ==0){
                             ZoomLevel =13f;
-                        }else if(radius>15 && radius<32){
+                        }else if(index == 1){
                             ZoomLevel =11f;
-                        }else{
+                        }else if(index ==2){
                             ZoomLevel =9f;
+                        }else{
+                            ZoomLevel =7f;
                         }
                         map.clear();
                         center =true;
@@ -945,7 +947,6 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                     addMapMarker(dialog);
 
                 }
-                mProgressDialog.dismiss();
                 if( mLocationDialogs.isEmpty() && mRecyclerView.getVisibility()==View.VISIBLE){
                     noUser.setVisibility(View.VISIBLE);
                 }else{
