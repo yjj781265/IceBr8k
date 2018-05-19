@@ -2,6 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <!--
+    <item android:id="@+id/leaderboard"
+          android:title="Leaderboard"
+          android:icon="@drawable/ic_action_leaderboard"
+          app:showAsAction="always"
+          ></item>
+          -->
 
 
      <item android:title="Main Menu"
@@ -52,6 +59,8 @@
 
 </menu>
 </item>
+
+
 
 
 

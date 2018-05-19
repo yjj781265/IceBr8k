@@ -57,6 +57,7 @@
     <string name="image">Image</string>
     <string name="enter_message">Enter a message...</string>
     <string name="dont_ask_again">Don\'t ask again </string>
+    <string name="first_login_message">Welcome to Icebr8k. Icebr8k is here to help make connecting easier. We only make Icebr8k better with your help. We would appreciate your feedback. You can do so by clicking the top right + button.</string>
 
 
     <string name="privacy_policy">
@@ -68,7 +69,7 @@ IceBr8k built the IceBr8k app as a Free app. This SERVICE is provided by IceBr8k
 \nFor a better experience, while using our Service, we may require you to provide us with certain personally identifiable information, including but not limited to Consumer Data. The information that we request is will be retained by us and used as described in this privacy policy.
 The app does use third party services that may collect information used to identify you.
 Link to privacy policy of third party service providers used by the app
- \n<a href="http://stackoverflow.com/questions/9204303/android-is-it-possible-to-add-a-clickable-link-into-a-string-resource">
+ \n<a href="https://policies.google.com/privacy">
        Google Privacy Policy
     </a>
         \n<b>Log Data</b>

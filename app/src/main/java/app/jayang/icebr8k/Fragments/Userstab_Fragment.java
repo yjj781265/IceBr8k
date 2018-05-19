@@ -67,7 +67,7 @@ public class Userstab_Fragment extends Fragment  {
     RecyclerView mRecyclerView;
     FirebaseUser currentUser;
     RecyclerAdapter mAdapter;
-    Integer friendCount,counter;
+    Integer friendCount;
     TextView mSearchView;
     Button filter_btn;
     BootstrapButton addFriend;
@@ -123,7 +123,6 @@ public class Userstab_Fragment extends Fragment  {
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         done =false;
         friendCount=0;
-        counter=0;
         sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
         sortByScoreStr= sharedPref.getString("sort",null);
         if(sortByScoreStr==null){
@@ -658,4 +657,7 @@ public class Userstab_Fragment extends Fragment  {
         }
         super.onDestroy();
     }
+
+
+
 }

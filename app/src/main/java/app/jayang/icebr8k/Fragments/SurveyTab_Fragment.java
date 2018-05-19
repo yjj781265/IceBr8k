@@ -1,6 +1,7 @@
 package app.jayang.icebr8k.Fragments;
 
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -269,10 +270,11 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
             if(userQlist.isEmpty()){
                 new MaterialStyledDialog.Builder(getContext())
                         .setIcon(R.mipmap.ic_launcher)
+                        .setHeaderColor(R.color.lightBlue)
                         .withDialogAnimation(true)
-                        .setDescription("Welcome to the IceBr8k, please answer some simple fun questions to get this wonderful journey started")
+                        .setDescription(getString(R.string.first_login_message))
                         .setStyle(Style.HEADER_WITH_ICON)
-                        .setPositiveText("Okay")
+                        .setPositiveText(getString(R.string.ok))
                         .show();
             }
 
@@ -1130,6 +1132,16 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
 
     @Override
     public void onSuccess(Object o) {
-        compareWithFriends();
+        new UpdateCompatibility().execute();
     }
+
+    // run in the background thread
+    private class UpdateCompatibility extends AsyncTask<Void,Void,Void>{
+        @Override
+        protected Void doInBackground(Void... voids) {
+            compareWithFriends();
+            return null;
+        }
+    }
+
 }

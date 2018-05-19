@@ -16,14 +16,14 @@ apply plugin: 'com.android.application'
 
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion '26.0.2'
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "app.jayang.icebr8k"
         minSdkVersion 22
         targetSdkVersion 26
-        versionCode 7
-        versionName "0.3"
+        versionCode 8
+        versionName "0.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [onesignal_app_id               : "c1189c2a-37e1-4db8-8f8e-c236f552131a",
                                 // Project number pulled from dashboard, local value is ignored.
@@ -43,10 +43,10 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.github.d-max:spots-dialog:0.7@aar'
-    compile 'com.android.support:support-v4:26.1.0'
-    compile 'com.android.support:appcompat-v7:26.1.0'
-    compile 'com.android.support:support-v13:26.1.0'
-    compile 'com.android.support:design:26.1.0'
+    implementation 'com.android.support:support-v4:27.1.1'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support:support-v13:27.1.1'
+    implementation 'com.android.support:design:27.1.1'
     compile 'com.android.support:support-annotations:27.0.2'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.google.firebase:firebase-auth:11.8.0'
@@ -58,15 +58,15 @@ dependencies {
     compile 'com.github.bumptech.glide:glide:4.6.1'
     compile 'com.github.lzyzsd:circleprogress:1.2.1'
     compile 'com.github.javiersantos:MaterialStyledDialogs:2.1'
-    compile 'com.android.support:recyclerview-v7:26.1.0'
-    compile 'com.android.support:gridlayout-v7:26.1.0'
-    compile 'com.android.support:cardview-v7:26.1.0'
+    implementation 'com.android.support:recyclerview-v7:27.1.1'
+    implementation 'com.android.support:gridlayout-v7:27.1.1'
+    implementation 'com.android.support:cardview-v7:27.1.1'
     compile 'com.simplecityapps:recyclerview-fastscroll:1.0.16'
-    compile 'com.android.support:support-compat:26.1.0'
+    implementation 'com.android.support:support-compat:27.1.1'
     compile 'com.daimajia.easing:library:2.0@aar'
     compile 'com.daimajia.androidanimations:library:2.3@aar'
     compile 'me.grantland:autofittextview:0.2.+'
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.2.0'
     compile 'com.loopj.android:android-async-http:1.4.9'
     compile 'cat.ereza:customactivityoncrash:2.1.0'
@@ -95,10 +95,10 @@ dependencies {
     compile 'com.github.silvestrpredko:dot-progress-bar:1.1'
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
 
-    androidTestCompile 'com.android.support.test.espresso:espresso-core:3.0.1'
-    androidTestCompile 'com.android.support.test.espresso:espresso-intents:3.0.1'
-    androidTestCompile 'com.android.support.test:rules:1.0.1'
-    androidTestCompile 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-intents:3.0.1'
+    androidTestImplementation 'com.android.support.test:rules:1.0.1'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
 
 
 }

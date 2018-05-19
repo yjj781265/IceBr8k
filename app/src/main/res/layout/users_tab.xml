@@ -44,7 +44,7 @@
              android:layout_marginLeft="10dp"
              android:layout_centerInParent="true"
              android:textSize="16sp"
-             android:background="?attr/selectableItemBackgroundBorderless"
+             android:background="?android:attr/selectableItemBackgroundBorderless"
              android:layout_toRightOf="@id/searchIcon_id"
              android:layout_weight="6"
              android:layout_width="0dp"

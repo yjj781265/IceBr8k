@@ -432,7 +432,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
     }
 
 
-    //Todo below method
+
 
     private void updateIsTyping(boolean istyping) {
         senderMessageRef.child("istyping").setValue(istyping);

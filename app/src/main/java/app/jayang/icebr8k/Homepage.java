@@ -290,7 +290,6 @@ public class Homepage extends AppCompatActivity  implements
                 if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
                     return false;
                 }
-
                 lastClickTime = SystemClock.elapsedRealtime();
 
                     // if share my postion is on
@@ -307,16 +306,24 @@ public class Homepage extends AppCompatActivity  implements
                         })
                                 .show();
                     }
-
-
-                return true;
+                    return true;
             case R.id.feedback:
                         if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
                             return false;
                         }
+                lastClickTime = SystemClock.elapsedRealtime();
                         Intent intent = new Intent(this,Feedback.class);
                         startActivity(intent);
                 return true;
+
+           /* case R.id.leaderboard:
+                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                    return false;
+                }
+                lastClickTime = SystemClock.elapsedRealtime();
+                Intent mIntent = new Intent(this,Leaderboard.class);
+                startActivity(mIntent);
+                return true;*/
 
 
             default:

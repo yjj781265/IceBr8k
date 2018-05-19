@@ -161,7 +161,7 @@ public class me_frag extends Fragment {
                 User user = dataSnapshot.getValue(User.class);
                 if (user.getPhotourl() != null) {
                     Glide.with(getContext()).load(user.getPhotourl()).
-                            apply(RequestOptions.circleCropTransform()).into(avatar);
+                            apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3)).into(avatar);
                 }
                 displayname.setText(user.getDisplayname());
                 email.setText(user.getEmail());
@@ -624,7 +624,7 @@ public class me_frag extends Fragment {
                         if (task.isSuccessful()) {
 
                             Glide.with(fragView).load(photoUrl).
-                                    apply(RequestOptions.circleCropTransform()).into(avatar);
+                                    apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3)).into(avatar);
                             showToast("Avatar Updated ");
 
                         }else{

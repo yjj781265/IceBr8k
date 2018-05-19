@@ -8,7 +8,7 @@
 
         <bitmap
             android:gravity="center"
-            android:src="@drawable/icebr8k_logo_beta"/>
+            android:src="@drawable/icebr8k_logo"/>
     </item>
 
 

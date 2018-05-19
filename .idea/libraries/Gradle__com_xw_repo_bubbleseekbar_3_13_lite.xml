@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: com.xw.repo:bubbleseekbar-3.13-lite">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/bubbleseekbar-3.13-lite.aar/3a7355663d91848a34ab73f19aa4b6ce/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/bubbleseekbar-3.13-lite.aar/3a7355663d91848a34ab73f19aa4b6ce/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.xw.repo/bubbleseekbar/3.13-lite/9e0581ff3725a1f7d712f148795fcce8e7b3e6b2/bubbleseekbar-3.13-lite-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

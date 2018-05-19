@@ -1,5 +1,6 @@
 package app.jayang.icebr8k;
 
+import android.app.ActionBar;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -49,8 +51,9 @@ public class SearchUser extends SwipeBackActivity implements SearchView.OnQueryT
         setContentView(R.layout.activity_search_user);
         searchToolbar = (Toolbar) findViewById(R.id.search_toolbar);
         setSupportActionBar(searchToolbar);
+        getSupportActionBar().setTitle(null);
+        getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("");
         mSwipeBackLayout = getSwipeBackLayout();
         mSwipeBackLayout.setEdgeTrackingEnabled(SwipeBackLayout.EDGE_LEFT);
         username = (TextView) findViewById(R.id.search_username);
@@ -93,9 +96,8 @@ public class SearchUser extends SwipeBackActivity implements SearchView.OnQueryT
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.search_context_menu,menu);
-        final MenuItem searchItem = menu.findItem(R.id.pdf_menu_search_item);
-        searchView =(SearchView) MenuItemCompat.getActionView(searchItem);
-        searchView.setIconified(false);
+
+        searchView = (SearchView) menu.findItem(R.id.pdf_menu_search_item).getActionView();
         searchView.setIconifiedByDefault(false);
         searchView.setQueryHint("Search Username");
         searchView.setOnQueryTextListener(this);
