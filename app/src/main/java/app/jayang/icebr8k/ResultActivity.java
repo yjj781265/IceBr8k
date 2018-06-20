@@ -74,6 +74,7 @@ public class ResultActivity extends AppCompatActivity {
 
         mViewPager.setAdapter(viewPagerAdapter);
         mLayout.setupWithViewPager(mViewPager);
+
         mLayout.getTabAt(0).setIcon(R.drawable.check_mark);
         mLayout.getTabAt(1).setIcon(R.drawable.axe_mark);
 

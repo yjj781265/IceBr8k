@@ -5,30 +5,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
-import android.graphics.RectF;
-import android.graphics.drawable.BitmapDrawable;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
-import android.provider.MediaStore;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -61,6 +48,9 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
+import com.tsongkha.spinnerdatepicker.DatePicker;
+import com.tsongkha.spinnerdatepicker.DatePickerDialog;
+import com.tsongkha.spinnerdatepicker.SpinnerDatePickerDialogBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -70,7 +60,6 @@ import java.util.List;
 import java.util.UUID;
 
 import app.jayang.icebr8k.Modle.Birthdate;
-import app.jayang.icebr8k.Modle.DatePickerFragment;
 import app.jayang.icebr8k.Modle.User;
 import dmax.dialog.SpotsDialog;
 import id.zelory.compressor.Compressor;
@@ -82,7 +71,7 @@ import pl.aprilapps.easyphotopicker.EasyImage;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
 
-public class signup extends SwipeBackActivity {
+public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDateSetListener{
     private final String DEFAULT_PHOTO_URL = "https://i.imgur.com/zI4v7oF.png";
     private ImageView avatar;
     private ScrollView sv;
@@ -93,12 +82,12 @@ public class signup extends SwipeBackActivity {
     private Toolbar mToolbar;
     private SpotsDialog loadingdialog;
     private MaterialDialog reminderDialog;
+    private DatePickerDialog mDatePickerDialog;
     private Intent mIntent;
     private Bitmap avatarBitmap;
     private SwipeBackLayout mSwipeBackLayout;
-    private  MultiplePermissionsListener snackbarMultiplePermissionsListener;
     private DatabaseReference mRef;
-    private DatePickerFragment datePickerFragment;
+    private  Birthdate mBirthdate ;
 
 
 
@@ -136,8 +125,31 @@ public class signup extends SwipeBackActivity {
         displayname_layout = (TextInputLayout)findViewById(R.id.fullname_layout_signup);
         birthdate_layout = (TextInputLayout) findViewById(R.id.birthdate_layout_signup);
 
-        datePickerFragment = new DatePickerFragment();
-        datePickerFragment.setSignUp(true);
+
+
+        Calendar now = Calendar.getInstance();   // Gets the current date and time
+        int year = now.get(Calendar.YEAR);       // The current year
+        int month = now.get(Calendar.MONTH); // The current month
+        int day = now.get(Calendar.DAY_OF_MONTH); // The current day
+
+        mDatePickerDialog = new SpinnerDatePickerDialogBuilder()
+                .context(signup.this)
+                .showTitle(true)
+                .spinnerTheme(R.style.NumberPickerStyle)
+                .callback(signup.this)
+                .defaultDate(1985, 0, 1)
+                .maxDate(year, month, day)
+                .minDate(1900, 0, 1)
+                .build();
+        mDatePickerDialog.setCanceledOnTouchOutside(false);
+
+        /*mDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                if (which == DialogInterface.BUTTON_NEGATIVE) {
+                    Toast.makeText(signup.this, "haha", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });*/
 
         password.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -168,15 +180,25 @@ public class signup extends SwipeBackActivity {
         birthdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                datePickerFragment.setEditText(birthdate);
-                datePickerFragment.show(getFragmentManager(),"datePicker");
-
+                mDatePickerDialog.show();
 
             }
         });
        Glide.with(this).load(DEFAULT_PHOTO_URL).apply(RequestOptions.circleCropTransform()).into(avatar);
+       avatar.setOnTouchListener(new View.OnTouchListener() {
+           @Override
+           public boolean onTouch(View v, MotionEvent event) {
+               if(event.getAction() == MotionEvent.ACTION_DOWN)
+               {
+                   v.setAlpha(0.6f);
+               } else {
+                   v.setAlpha(1f);
+               }
 
+               return false;
+
+           }
+       });
 
 
 
@@ -317,7 +339,7 @@ public class signup extends SwipeBackActivity {
             String passwordStr2 = password2.getText().toString();
             String fullname = displayname.getText().toString();
             String birthdateStr = birthdate.getText().toString();
-            Birthdate mBirthdate = datePickerFragment.getBirthdate();
+
 
 
 
@@ -389,9 +411,9 @@ public class signup extends SwipeBackActivity {
                     birthdate_layout.requestFocus();
 
                 } else if (defaultPhotoFlag) {
-                    showReminderDialog(mBirthdate);
+                    showReminderDialog();
                 } else {
-                    showPrivacyPolicy(mBirthdate);
+                    showPrivacyPolicy();
                 }
 
             }
@@ -411,7 +433,7 @@ public class signup extends SwipeBackActivity {
         return currentYear -birthdate.getYear()>=13;
     }
 
-    public void showReminderDialog(final Birthdate birthdate){
+    public void showReminderDialog(){
 
         reminderDialog = new MaterialDialog.Builder(this)
                 .content("Because you didn't choose your own avatar photo, " +
@@ -422,7 +444,8 @@ public class signup extends SwipeBackActivity {
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                         dialog.dismiss();
-                       showPrivacyPolicy(birthdate);
+                       showPrivacyPolicy(
+                       );
 
 
                     }
@@ -591,12 +614,13 @@ public class signup extends SwipeBackActivity {
 
     }
 
-    public void showPrivacyPolicy(final Birthdate birthdate){
+    public void showPrivacyPolicy(){
 
+        // if user agreed with the privacy already
         if(agreedPolicySharedPreference()){
             if(birthdate!=null){
                 SignUp(email.getText().toString(),password.getText().toString(),
-                        displayname.getText().toString(),username.getText().toString(),birthdate);
+                        displayname.getText().toString(),username.getText().toString(),mBirthdate);
             }
         }else{
             new MaterialDialog.Builder(this)
@@ -608,9 +632,9 @@ public class signup extends SwipeBackActivity {
                     .negativeText("Disagree").onPositive(new MaterialDialog.SingleButtonCallback() {
                 @Override
                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                    if(birthdate!=null){
+                    if(mBirthdate!=null){
                         SignUp(email.getText().toString(),password.getText().toString(),
-                                displayname.getText().toString(),username.getText().toString(),birthdate);
+                                displayname.getText().toString(),username.getText().toString(),mBirthdate);
                     }
 
                     addPolicySharedPreference();
@@ -621,6 +645,8 @@ public class signup extends SwipeBackActivity {
 
     }
 
+
+// policy pop up
     public void addPolicySharedPreference(){
 
         SharedPreferences prefs = getDefaultSharedPreferences(getApplicationContext());
@@ -648,5 +674,15 @@ public class signup extends SwipeBackActivity {
         finish();
         overridePendingTransition(R.anim.slide_from_left,R.anim.slide_to_right);
         return true;
+    }
+
+   //callback for the datepicker
+    @Override
+    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+
+        birthdate.setText((++monthOfYear)+"/"+dayOfMonth+"/"+year);
+        // monthofyear has already incremented
+        mBirthdate = new Birthdate(year,monthOfYear,dayOfMonth);
+        //Toast.makeText(this, ""+ mBirthdate.getYear() + " "+ mBirthdate.getMonth() + " " + mBirthdate.getDay(), Toast.LENGTH_SHORT).show();
     }
 }

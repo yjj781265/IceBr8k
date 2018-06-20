@@ -49,6 +49,7 @@ import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.Adapter.RecyclerAdapter;
 import app.jayang.icebr8k.SearchName;
 import app.jayang.icebr8k.SearchUser;
+import app.jayang.icebr8k.Utility.Compatability;
 import app.jayang.icebr8k.Utility.MyDateFormatter;
 
 
@@ -88,7 +89,10 @@ public class Userstab_Fragment extends Fragment  {
                         compareTo(Integer.valueOf(dialog.getOnlinestats()));
             }
             if(result==0){
-                result =dialog.getName().compareTo(t1.getName());
+                if(t1.getName()!=null && dialog.getName()!=null) {
+                    result =dialog.getName().compareTo(t1.getName());
+                }
+
             }
             return  result;
         }
@@ -99,17 +103,17 @@ public class Userstab_Fragment extends Fragment  {
         public int compare(UserDialog dialog, UserDialog t1) {
             int result =0;
             if(t1.getScore()!=null &&dialog.getScore()!=null){
-            result= Integer.valueOf(t1.getScore()).
+                result= Integer.valueOf(t1.getScore()).
                         compareTo( Integer.valueOf(dialog.getScore()));
             }
 
-          if(result==0){
-              if(t1.getName()!=null &&dialog.getName()!=null){
-                  result =dialog.getName() .compareTo(t1.getName());
-              }
+            if(result==0){
+                if(t1.getName()!=null &&dialog.getName()!=null){
+                    result =dialog.getName() .compareTo(t1.getName());
+                }
 
-          }
-          return result;
+            }
+            return result;
         };
     };
     public Userstab_Fragment() {
@@ -154,9 +158,9 @@ public class Userstab_Fragment extends Fragment  {
         final LinearLayoutManager manager = new LinearLayoutManager(view.getContext());
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mAdapter = new RecyclerAdapter(getContext(),mUserDialogArrayList);
-        mAdapter.setHasStableIds(false);
+        mRecyclerView.setItemAnimator(null);
+        mAdapter.setHasStableIds(true);
         mRecyclerView.setAdapter(mAdapter);
         filter_btn =view.findViewById(R.id.filter_btn);
 
@@ -168,44 +172,48 @@ public class Userstab_Fragment extends Fragment  {
 
 
         filter_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //Toast.makeText(getContext(),"Clicked",Toast.LENGTH_SHORT).show();
+                PopupMenu popup = new PopupMenu(view.getContext(),filter_btn, Gravity.RIGHT);
+                popup.getMenuInflater().inflate(R.menu.sort_menu,popup.getMenu());
+                popup.show();
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
-                    public void onClick(View view) {
-                        //Toast.makeText(getContext(),"Clicked",Toast.LENGTH_SHORT).show();
-                        PopupMenu popup = new PopupMenu(view.getContext(),filter_btn, Gravity.RIGHT);
-                        popup.getMenuInflater().inflate(R.menu.sort_menu,popup.getMenu());
-                        popup.show();
-                        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                            @Override
-                            public boolean onMenuItemClick(MenuItem item) {
-                              int id = item.getItemId();
-                              if(id==R.id.score) {
-                                  //save user setting locally
-                                  SharedPreferences.Editor editor = sharedPref.edit();
-                                  editor.putString("sort", "yes");
-                                  editor.commit();
-                                  sortByScore=true;
-                                  Collections.sort(mUserDialogArrayList,SCORE);
-                                  mAdapter.notifyDataSetChanged();
-                              }
-                                if (id == R.id.online_stats){
-                                    //save user setting locally
-                                    SharedPreferences.Editor editor = sharedPref.edit();
-                                    editor.putString("sort", "no");
-                                    editor.commit();
-                                    sortByScore=false;
-                                    Collections.sort(mUserDialogArrayList,ONLINESTATS);
-                                    mAdapter.notifyDataSetChanged();
-                                }
+                    public boolean onMenuItemClick(MenuItem item) {
+                        int id = item.getItemId();
+                        if(id==R.id.score) {
+                            //save user setting locally
+                            SharedPreferences.Editor editor = sharedPref.edit();
+                            editor.putString("sort", "yes");
+                            editor.commit();
+                            sortByScore=true;
+                            Collections.sort(mUserDialogArrayList,SCORE);
+                            ArrayList<UserDialog> newList = new ArrayList<>();
+                            newList.addAll(mUserDialogArrayList);
+                            mAdapter.submitList(newList);
+                        }
+                        if (id == R.id.online_stats){
+                            //save user setting locally
+                            SharedPreferences.Editor editor = sharedPref.edit();
+                            editor.putString("sort", "no");
+                            editor.commit();
+                            sortByScore=false;
+                            Collections.sort(mUserDialogArrayList,ONLINESTATS);
+                             ArrayList<UserDialog> newList = new ArrayList<>();
+                            newList.addAll(mUserDialogArrayList);
+                            mAdapter.submitList(newList);
+                        }
 
-                                return true;
-
-                            }
-                        });
-
-
+                        return true;
 
                     }
                 });
+
+
+
+            }
+        });
 
 
 
@@ -279,16 +287,16 @@ public class Userstab_Fragment extends Fragment  {
                 if(dataSnapshot.hasChild("stats")){
                     showLog(dataSnapshot.getKey() +" added");
                     if(dataSnapshot.child("stats").getValue(String.class).equals("accepted")){
-                     UserDialog dialog = new UserDialog();
-                     dialog.setId(dataSnapshot.getKey());
-                      if(!mUserDialogArrayList.contains(dialog)){
-                          mUserDialogArrayList.add(dialog);
-                          addFriend.setVisibility(View.GONE);
-                          mAppBarLayout.setExpanded(false);
-                          mAppBarLayout.setVisibility(View.VISIBLE);
-                          getUserinfo(dialog);
+                        UserDialog dialog = new UserDialog();
+                        dialog.setId(dataSnapshot.getKey());
+                        if(!mUserDialogArrayList.contains(dialog)){
+                            mUserDialogArrayList.add(dialog);
+                            addFriend.setVisibility(View.GONE);
+                            mAppBarLayout.setExpanded(false);
+                            mAppBarLayout.setVisibility(View.VISIBLE);
+                            getUserinfo(dialog);
 
-                      }
+                        }
                     }
                 }
 
@@ -318,20 +326,22 @@ public class Userstab_Fragment extends Fragment  {
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-               UserDialog dialog = new UserDialog();
-               dialog.setId(dataSnapshot.getKey());
-               if(mUserDialogArrayList.contains(dialog)) {
-                   mUserDialogArrayList.remove(dialog);
-               }
-               mAdapter.notifyDataSetChanged();
-               if(mUserDialogArrayList.isEmpty()){
-                   addFriend.setVisibility(View.VISIBLE);
-                   mAppBarLayout.setExpanded(false);
-                   mAppBarLayout.setVisibility(View.GONE);
+                UserDialog dialog = new UserDialog();
+                dialog.setId(dataSnapshot.getKey());
+                if(mUserDialogArrayList.contains(dialog)) {
+                    mUserDialogArrayList.remove(dialog);
+                }
+                ArrayList<UserDialog> newList = new ArrayList<>();
+                newList.addAll(mUserDialogArrayList);
+                mAdapter.submitList(newList);
+                if(mUserDialogArrayList.isEmpty()){
+                    addFriend.setVisibility(View.VISIBLE);
+                    mAppBarLayout.setExpanded(false);
+                    mAppBarLayout.setVisibility(View.GONE);
 
-               }
+                }
 
-               showLog("Child Removed"+dataSnapshot.getKey());
+                showLog("Child Removed"+dataSnapshot.getKey());
             }
 
             @Override
@@ -381,7 +391,7 @@ public class Userstab_Fragment extends Fragment  {
 
     private void setTimeChsngeListener() {
 
-      tickReceiver = new BroadcastReceiver() {
+        tickReceiver = new BroadcastReceiver() {
 
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -390,49 +400,72 @@ public class Userstab_Fragment extends Fragment  {
                         dialog.setLastseen(MyDateFormatter.lastSeenConverterShort(dialog.getTimestamp()));
                     }
                 }
-                mAdapter.notifyDataSetChanged();
+                ArrayList<UserDialog> newList = new ArrayList<>();
+                newList.addAll(mUserDialogArrayList);
+                mAdapter.submitList(newList);
             }
         };
-     getActivity().registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK)); // register the broadcast receiver to receive TIME_TICK
+        getActivity().registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK)); // register the broadcast receiver to receive TIME_TICK
 
     }
 
 
 
     private void getUserinfo(final UserDialog dialog){
-     DatabaseReference userinfoRef = mDatabase.getReference().child("Users").child(dialog.getId());
-     userinfoRef.keepSynced(true);
-     userinfoRef.addValueEventListener(new ValueEventListener() {
-         @Override
-         public void onDataChange(DataSnapshot dataSnapshot) {
-             User user = dataSnapshot.getValue(User.class);
-             if(dataSnapshot.hasChild("lastseen") && "0".equals(user.getOnlinestats())){
-                 Long timestamp = dataSnapshot.child("lastseen").getValue(Long.class);
-                 dialog.setTimestamp(timestamp);
-                 dialog.setLastseen(MyDateFormatter.lastSeenConverterShort(timestamp));
-             }else{
-                 dialog.setLastseen(null);
-             }
-             if(user!=null) {
-                 dialog.setName(user.getDisplayname());
-                 dialog.setOnlinestats(user.getOnlinestats());
-                 dialog.setUsername(user.getUsername());
-                 dialog.setPhotoUrl(user.getPhotourl());
-                 dialog.setEmail(user.getEmail());
-                 addScoreListener(dialog);
-             }
+        DatabaseReference userinfoRef = mDatabase.getReference().child("Users").child(dialog.getId());
+        userinfoRef.keepSynced(true);
+        userinfoRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User user = dataSnapshot.getValue(User.class);
+                if(dataSnapshot.hasChild("lastseen") && "0".equals(user.getOnlinestats())){
+                    Long timestamp = dataSnapshot.child("lastseen").getValue(Long.class);
+                    dialog.setTimestamp(timestamp);
+                    dialog.setLastseen(MyDateFormatter.lastSeenConverterShort(timestamp));
+                }else{
+                    dialog.setLastseen(null);
+                }
+                if(user!=null) {
+                    dialog.setName(user.getDisplayname());
+                    dialog.setOnlinestats(user.getOnlinestats());
+                    dialog.setUsername(user.getUsername());
+                    dialog.setPhotoUrl(user.getPhotourl());
+                    dialog.setEmail(user.getEmail());
+
+                    if(!dialog.getHasScoreListener()){
+                        addScoreListener(dialog);
+                        dialog.setHasScoreListener(true);
+                    }
+
+                    if(mUserDialogArrayList.contains(dialog)){
+                        int index = mUserDialogArrayList.indexOf(dialog);
+                        if(!sortByScore){
+                            Collections.sort(mUserDialogArrayList,ONLINESTATS);
+                            ArrayList<UserDialog> newList = new ArrayList<>();
+                            newList.addAll(mUserDialogArrayList);
+                            mAdapter.submitList(newList);
+                        }else{
+                            mAdapter.notifyItemChanged(index);
+
+                        }
+
+                    }
 
 
 
-         }
+                }
 
 
 
-         @Override
-         public void onCancelled(DatabaseError databaseError) {
+            }
 
-         }
-     });
+
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
     }
 
@@ -449,13 +482,16 @@ public class Userstab_Fragment extends Fragment  {
                     dialog.setScore(score);
                     if(mUserDialogArrayList.contains(dialog)){
                         int index = mUserDialogArrayList.indexOf(dialog);
-                        mUserDialogArrayList.set(index,dialog);
                         if(sortByScore){
                             Collections.sort(mUserDialogArrayList,SCORE);
+                            ArrayList<UserDialog> newList = new ArrayList<>();
+                            newList.addAll(mUserDialogArrayList);
+                           mAdapter.submitList(newList);
                         }else{
-                            Collections.sort(mUserDialogArrayList,ONLINESTATS);
+                            mAdapter.notifyItemChanged(index);
+
                         }
-                        mAdapter.notifyDataSetChanged();
+
                     }
                 }else if(dataSnapshot!=null && dataSnapshot.hasChild("stats")){
                     compareWithUser2(dialog);
@@ -469,32 +505,57 @@ public class Userstab_Fragment extends Fragment  {
         });
     }
 
-    public void compareWithUser2(UserDialog dialog) {
-        pullUser1QA(dialog);
+    public void compareWithUser2(final UserDialog dialog) {
+        final ArrayList<UserQA> userQA1 = new ArrayList<>();
+        final ArrayList<UserQA> userQA2 = new ArrayList<>();
+        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + currentUser.getUid());
+        final DatabaseReference mRef2 = FirebaseDatabase.getInstance().getReference("UserQA/" + dialog.getId());
 
-    }
-
-    public void pullUser1QA(final UserDialog dialog) {
-        currentUser = FirebaseAuth.getInstance().getCurrentUser();
-
-        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("" +
-                "UserQA/" + currentUser.getUid());
-        mRef.keepSynced(true);
         mRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            ArrayList<UserQA> User1QA = new ArrayList<>();
-
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                    UserQA userQA = childSnapshot.getValue(UserQA.class);
-                    User1QA.add(userQA);
+                for(DataSnapshot child : dataSnapshot.getChildren()){
+                    if( !"skipped".equals(child.getValue(UserQA.class).getAnswer())){
+                        userQA1.add(child.getValue(UserQA.class));
+                    }
 
                 }
 
-                if (dataSnapshot.getChildrenCount() == User1QA.size()) {
-                    pullUser2QA( User1QA, dialog);
-                }
+
+                mRef2.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for(DataSnapshot child : dataSnapshot.getChildren()){
+                            if(!"skipped".equals(child.getValue(UserQA.class).getAnswer())){
+                                userQA2.add(child.getValue(UserQA.class));
+                            }
+
+
+                        }
+
+                        Compatability mCompatability = new Compatability(userQA1,userQA2);
+                        dialog.setScore(mCompatability.getScore().toString());
+                        setScoreNode(dialog.getId(),mCompatability.getScore().toString());
+                        if(sortByScore){
+                            Collections.sort(mUserDialogArrayList,SCORE);
+                            ArrayList<UserDialog> newList = new ArrayList<>();
+                            newList.addAll(mUserDialogArrayList);
+                            mAdapter.submitList(newList);
+                        }else{
+                            ArrayList<UserDialog> newList = new ArrayList<>();
+                            newList.addAll(mUserDialogArrayList);
+                            mAdapter.submitList(newList);
+                        }
+
+
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
             }
 
             @Override
@@ -503,115 +564,7 @@ public class Userstab_Fragment extends Fragment  {
             }
         });
 
-    }
 
-    private void pullUser2QA(final ArrayList<UserQA> user1QA, final UserDialog dialog) {
-
-        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + dialog.getId());
-        mRef.keepSynced(true);
-        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            ArrayList<UserQA> User2QA = new ArrayList<>();
-
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                    UserQA userQA = childSnapshot.getValue(UserQA.class);
-                    User2QA.add(userQA);
-                }
-                SetScore(user1QA,User2QA, dialog);
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-
-    public void SetScore(ArrayList<UserQA> user1Arr, ArrayList<UserQA> user2Arr,
-                         UserDialog dialog) {
-        int size = user1Arr.size();
-        int commonQuestionSize = 0;
-        String score;
-
-        ArrayList<String> user1StrArr = new ArrayList<>();
-        ArrayList<String> user2StrArr = new ArrayList<>();
-
-        for (UserQA userQA : user1Arr) {
-            if (!userQA.getAnswer().equals("skipped")) {
-                user1StrArr.add(userQA.getQuestionId());
-            }
-
-        }
-        for (UserQA userQA : user2Arr) {
-            if (!userQA.getAnswer().equals("skipped")) {
-                user2StrArr.add(userQA.getQuestionId());
-            }
-        }
-
-        user1StrArr.retainAll(user2StrArr);
-
-        commonQuestionSize = user1StrArr.size();
-
-        Log.d("Score", "Common Question " + commonQuestionSize);
-        user1Arr.retainAll(user2Arr);
-        Log.d("Score", String.valueOf(user1Arr.size()));
-        Log.d("Score", "Size " + size);
-        if (commonQuestionSize != 0) {
-            score = String.valueOf((int) (((double) user1Arr.size() / (double) commonQuestionSize) * 100));
-            Log.d("Score", "Score is " + score);
-
-        }else if(user1Arr.isEmpty() || user2Arr.isEmpty()){
-            score ="0";
-
-        } else {
-            score = "0";
-        }
-        if(dialog.getOnlinestats()==null){
-            dialog.setOnlinestats("0");
-        }
-        dialog.setScore(score);
-        if(dialog.getId()!=null) {
-            setScoreNode(dialog.getId(), score);
-        }
-         if(mUserDialogArrayList.contains(dialog)){
-            int index = mUserDialogArrayList.indexOf(dialog);
-            mUserDialogArrayList.set(index,dialog);
-         }
-
-         if(sortByScore){
-             Collections.sort(mUserDialogArrayList,SCORE);
-         }else {
-             Collections.sort(mUserDialogArrayList,ONLINESTATS);
-        }
-        mAdapter.notifyDataSetChanged();
-
-
-
-
-
-
-
-
-        if(mUserDialogArrayList.size()==friendCount && !done){
-            done =true;
-            showLog("DONE" + "LIST SIZE " + mUserDialogArrayList.size());
-
-
-         if(sortByScore){
-             Collections.sort(mUserDialogArrayList,SCORE);
-             mAdapter.notifyDataSetChanged();
-             loadingGif.setVisibility(View.GONE);
-
-         }else {
-             Collections.sort(mUserDialogArrayList,ONLINESTATS);
-             mAdapter.notifyDataSetChanged();
-             loadingGif.setVisibility(View.GONE);
-         }
-
-        }
 
     }
 
@@ -650,7 +603,7 @@ public class Userstab_Fragment extends Fragment  {
     public void onDestroy() {
         try {
             if (tickReceiver != null) {
-              getActivity().unregisterReceiver(tickReceiver);
+                getActivity().unregisterReceiver(tickReceiver);
             }
         } catch (IllegalArgumentException e) {
             tickReceiver = null;

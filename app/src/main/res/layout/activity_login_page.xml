@@ -50,7 +50,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:id="@+id/email_layout_login"
-        app:errorEnabled="true"
+        app:errorEnabled="false"
         android:gravity="center"
         android:layout_below="@id/imageView3"
         android:hint="@string/email"
@@ -72,7 +72,7 @@
             android:layout_height="wrap_content"
             app:passwordToggleEnabled="true"
             android:id="@+id/password_layout_login"
-            app:errorEnabled="true"
+            app:errorEnabled="false"
 
             android:gravity="center"
             android:layout_below="@id/email_login"
@@ -89,14 +89,22 @@
 
         </android.support.design.widget.TextInputLayout>
 
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/remember_me_login"
+            android:text="Remember me"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"/>
+
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/login_btn"
             android:layout_width="280dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="5dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="8dp"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
             android:background="@color/colorAccent"
+            android:textAllCaps="false"
             android:text="@string/login"/>
     </LinearLayout>
     </ScrollView>
@@ -148,16 +156,20 @@
           android:id="@+id/sign_in_methods"
           android:gravity="center_horizontal">
 
-        <com.shaishavgandhi.loginbuttons.GooglePlusButton
+        <com.shaishavgandhi.loginbuttons.GoogleButton
             android:id="@+id/sign_in_button"
-            android:layout_gravity="center_horizontal"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:layout_centerHorizontal="true"
-            app:iconSize="30dp"
+            android:layout_width="wrap_content"
+            android:textAlignment="center"
             app:roundedCorner="true"
-            app:roundedCornerRadius="80dp"
-            app:transparentBackground="false"/>
+            app:roundedCornerRadius="3dp"
+            app:iconCenterAligned="true"
+            android:textAllCaps="false"
+
+            app:iconSize="30dp"
+            android:textColor="@color/dark_gray"
+            android:text="Sign in with Google"
+            android:layout_height="36dp"
+            />
 
     </RelativeLayout>
 

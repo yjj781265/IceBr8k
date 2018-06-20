@@ -63,6 +63,7 @@
        android:layout_gravity="center_vertical"
        android:layout_marginRight="9dp"
        android:background="@color/colorAccent"
+       android:foreground="?attr/selectableItemBackground"
        android:textColor="@color/white"
        android:text="Accept"/>
 
@@ -74,6 +75,7 @@
             android:layout_height="30dp"
             android:layout_gravity="center_vertical"
             android:background="@color/holo_red_light"
+            android:foreground="?attr/selectableItemBackground"
             android:textColor="@color/white"
             android:id="@+id/delete_frt"
             android:text="Delete"

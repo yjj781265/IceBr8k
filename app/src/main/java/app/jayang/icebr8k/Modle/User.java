@@ -11,6 +11,7 @@ import java.io.Serializable;
 
 public class User implements Serializable,Comparable<User> {
     private String displayname,username,photourl,email,score,privacy;
+    private Long lastseen;
     private String onlinestats;
     private Birthdate mBirthdate;
 
@@ -88,6 +89,14 @@ public class User implements Serializable,Comparable<User> {
 
     public void setOnlinestats(String onlinestats) {
         this.onlinestats = onlinestats;
+    }
+
+    public Long getLastseen() {
+        return lastseen;
+    }
+
+    public void setLastseen(Long lastseen) {
+        this.lastseen = lastseen;
     }
 
     @Override

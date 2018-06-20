@@ -1,8 +1,10 @@
 package app.jayang.icebr8k.Modle;
 
+import android.support.annotation.NonNull;
+
 import java.util.Objects;
 
-public class LeaderboardDialog {
+public class LeaderboardDialog implements Comparable<LeaderboardDialog>{
     private User user;
     private Long questionSum;
     private String id,rank;
@@ -71,5 +73,16 @@ public class LeaderboardDialog {
                 ", id='" + id + '\'' +
                 ", rank='" + rank + '\'' +
                 '}';
+    }
+
+    @Override
+    public int compareTo(@NonNull LeaderboardDialog o) {
+        if(o.getQuestionSum().compareTo(this.getQuestionSum()) ==0){
+            this.setRank(o.getRank());
+            return  this.getUser().getDisplayname().compareTo(o.getUser().getDisplayname());
+        }else{
+            return o.getQuestionSum().compareTo(this.getQuestionSum());
+        }
+
     }
 }

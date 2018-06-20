@@ -122,6 +122,13 @@
         <item name="android:windowIsTranslucent">false</item>
     </style>
 
+    <!-- Change DatePicker theme colorControlNormal is the color of the horizontal bars (dividers) in the -->
+    <style name="NumberPickerStyle">
+        <item name="android:textSize">18dp</item>
+        <item name="android:textColorPrimary">@color/dark_gray</item>
+        <item name="android:colorControlNormal" tools:targetApi="lollipop">@color/colorPrimary</item>
+    </style>
+
 
 
 

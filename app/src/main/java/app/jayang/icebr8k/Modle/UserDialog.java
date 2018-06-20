@@ -16,6 +16,7 @@ import com.github.wrdlbrnft.sortedlistadapter.SortedListAdapter;
 public class UserDialog implements Parcelable{
     private String name, username,photoUrl,score,onlinestats,email,id,lastseen;
     private Long timestamp;
+    private Boolean hasScoreListener =false;
 
 
     public UserDialog() {
@@ -26,6 +27,14 @@ public class UserDialog implements Parcelable{
 
     public String getOnlinestats() {
         return onlinestats;
+    }
+
+    public Boolean getHasScoreListener() {
+        return hasScoreListener;
+    }
+
+    public void setHasScoreListener(Boolean hasScoreListener) {
+        this.hasScoreListener = hasScoreListener;
     }
 
     public UserDialog(String name, String username, String photoUrl, String score, String onlinestats, String email, String id, String lastseen, Long timestamp) {
@@ -168,7 +177,7 @@ public class UserDialog implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-       parcel.writeString(this.id);
+        parcel.writeString(this.id);
         parcel.writeString(this.name);
         parcel.writeString(this.username);
         parcel.writeString(this.photoUrl);

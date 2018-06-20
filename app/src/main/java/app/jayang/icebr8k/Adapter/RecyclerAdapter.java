@@ -4,6 +4,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.SystemClock;
 
+import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.recyclerview.extensions.AsyncListDiffer;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -34,17 +39,17 @@ import app.jayang.icebr8k.UserProfilePage;
  */
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDialogViewHolder>
-        {
+{
     private Context context;
     private ArrayList<UserDialog>mUserDialogs;
     private ArrayList<UserDialog> mFilteredList;
 
 
     public class UserDialogViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
-         private ImageView image,onlineStats;
-         private TextView displayname,username,score,lastSeen;
-         private LinearLayout container;
-         private long lastClickTime =0;
+        private ImageView image,onlineStats;
+        private TextView displayname,username,score,lastSeen;
+        private ConstraintLayout container;
+        private long lastClickTime =0;
 
         public UserDialogViewHolder(View itemView) {
             super(itemView);
@@ -55,6 +60,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
             onlineStats =itemView.findViewById(R.id.onlineStats);
             lastSeen =itemView.findViewById(R.id.lastseen);
             container = itemView.findViewById(R.id.userTab_item_container);
+
 
             itemView.setOnClickListener(this);
 
@@ -115,6 +121,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
     @Override
     public void onBindViewHolder(final UserDialogViewHolder holder, int position) {
         final UserDialog dialog = mUserDialogs.get(position);
+
         Log.d("UserFrag","onBind "+ dialog.getId());
         if(dialog.getUsername()!=null) {
             holder.username.setText(dialog.getUsername());
@@ -148,44 +155,54 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
 
 
         String online =dialog.getOnlinestats();
-           if(online!=null){
-                    if (online.equals("2")) {
-                        holder.onlineStats.setImageResource(R.drawable.green_dot);
-                        holder.onlineStats.setVisibility(View.VISIBLE);
-                        holder.container.setAlpha(1.0f);
+        if(online!=null){
+            if (online.equals("2")) {
+                holder.onlineStats.setImageResource(R.drawable.green_dot);
+                holder.onlineStats.setVisibility(View.VISIBLE);
+                holder.score.setAlpha(1.0f);
+                holder.image.setAlpha(1.0f);
+                holder.displayname.setAlpha(1.0f);
 
 
 
 
-                    } else if (online.equals("1")) {
-                        holder.onlineStats.setImageResource(R.drawable.circle_shape_busy);
-                        holder.onlineStats.setVisibility(View.VISIBLE);
-                        holder.container.setAlpha(1.0f);
+            } else if (online.equals("1")) {
+                holder.onlineStats.setImageResource(R.drawable.circle_shape_busy);
+                holder.onlineStats.setVisibility(View.VISIBLE);
+                holder.score.setAlpha(1.0f);
+                holder.image.setAlpha(1.0f);
+                holder.displayname.setAlpha(1.0f);
+            } else if("0".equals(online)) {
+                holder.onlineStats.setVisibility(View.INVISIBLE);
+                holder.score.setAlpha(0.5f);
+                holder.image.setAlpha(0.5f);
+                holder.displayname.setAlpha(0.5f);
+                holder.lastSeen.setAlpha(0.5f);
 
-
-                    } else if("0".equals(online)) {
-                        holder.onlineStats.setVisibility(View.INVISIBLE);
-                        holder.container.setAlpha(0.5f);
-
-
-                    }else{
-                        holder.onlineStats.setVisibility(View.INVISIBLE);
-                        holder.container.setAlpha(0.5f);
-
-               }
-
-                } else {
-                    // null
-                    holder.onlineStats.setVisibility(View.INVISIBLE);
-                    holder.itemView.setAlpha(0.5f);
-
-                }
-
-
-
-
+            }else{
+                holder.onlineStats.setVisibility(View.INVISIBLE);
+                holder.score.setAlpha(0.5f);
+                holder.image.setAlpha(0.5f);
+                holder.displayname.setAlpha(0.5f);
+                holder.lastSeen.setAlpha(0.5f);
 
             }
+
+        } else {
+            // null
+            holder.onlineStats.setVisibility(View.INVISIBLE);
+            holder.score.setAlpha(0.5f);
+            holder.image.setAlpha(0.5f);
+            holder.displayname.setAlpha(0.5f);
+            holder.lastSeen.setAlpha(0.5f);
+
+        }
+
+
+
+
+
+    }
 
     @Override
     public int getItemCount() {
@@ -197,20 +214,33 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
         return  (mUserDialogs.get(position).getId()).hashCode() ;
     }
 
+    public void submitList(ArrayList<UserDialog> list) {
+        mDiffer.submitList(list);
+    }
 
 
+    private final AsyncListDiffer<UserDialog> mDiffer = new AsyncListDiffer(this, DIFF_CALLBACK);
+     public static final  DiffUtil.ItemCallback<UserDialog> DIFF_CALLBACK
+             = new DiffUtil.ItemCallback<UserDialog>() {
+         @Override
+         public boolean areItemsTheSame(UserDialog oldItem, UserDialog newItem) {
+             return oldItem.getId().equals(newItem);
+         }
 
-
+         @Override
+         public boolean areContentsTheSame(UserDialog oldItem, UserDialog newItem) {
+              return oldItem.getScore().
+                     equals(newItem.getScore())
+                     ||oldItem.getOnlinestats().
+                     equals(newItem.getOnlinestats())
+                     ||oldItem.getPhotoUrl().
+                     equals(newItem.getPhotoUrl())
+                     ||oldItem.getName().
+                     equals(newItem.getName())
+                     ||oldItem.getLastseen().
+                     equals(newItem.getLastseen());
+         }
+     };
 
 
 }
-
-
-
-
-
-
-
-
-
-

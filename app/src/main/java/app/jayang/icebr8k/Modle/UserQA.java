@@ -10,16 +10,25 @@ import android.support.annotation.NonNull;
 
 public class UserQA implements Parcelable,Comparable<UserQA> {
     private String questionId,answer,question;
-    private Boolean favorite;
+    private Boolean like,favorite;
+
 
     public UserQA(){}
 
 
-    public UserQA(String questionId, String answer, String question, Boolean favorite) {
+    public UserQA(String questionId, String answer, String question, Boolean like) {
         this.questionId = questionId;
         this.answer = answer;
         this.question = question;
-        this.favorite = favorite;
+        this.like = like;
+    }
+
+    public Boolean getLike() {
+        return like;
+    }
+
+    public void setLike(Boolean like) {
+        this.like = like;
     }
 
     public Boolean getFavorite() {
@@ -61,9 +70,12 @@ public class UserQA implements Parcelable,Comparable<UserQA> {
 
         UserQA userQA = (UserQA) o;
 
-        if (!questionId.equals(userQA.questionId)) return false;
-        return (answer.equals(userQA.answer) && !answer.equals("skipped")
-                && !userQA.answer.equals("skipped")) ;
+        if(questionId.equals(userQA.questionId) && isInteger(answer) && isInteger(userQA.answer) ){
+            return Math.abs((Integer.valueOf(answer) -  Integer.valueOf(userQA.getAnswer()))) <=1;
+        }else{
+            return questionId.equals(userQA.getQuestionId()) && questionId!=null && userQA!=null
+                    && answer.equals(userQA.answer);
+        }
     }
 
     @Override
@@ -117,5 +129,22 @@ public class UserQA implements Parcelable,Comparable<UserQA> {
     @Override
     public int compareTo(@NonNull UserQA userQA) {
         return question.compareTo(userQA.getQuestion());
+    }
+
+
+    public static boolean isInteger(String s) {
+        return isInteger(s,10);
+    }
+
+    public static boolean isInteger(String s, int radix) {
+        if(s.isEmpty()) return false;
+        for(int i = 0; i < s.length(); i++) {
+            if(i == 0 && s.charAt(i) == '-') {
+                if(s.length() == 1) return false;
+                else continue;
+            }
+            if(Character.digit(s.charAt(i),radix) < 0) return false;
+        }
+        return true;
     }
 }

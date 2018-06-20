@@ -73,7 +73,7 @@ public class FriendReqestItemAdapter extends RecyclerView.Adapter<FriendReqestIt
 
     @Override
     public void onBindViewHolder(FriendRequestItemViewHolder holder, final int position) {
-         final UserDialog dialog = requestList.get(position);
+        final UserDialog dialog = requestList.get(position);
         holder.name.setText(dialog.getName());
         holder.username.setText(dialog.getUsername());
         Glide.with(mContext).load(dialog.getPhotoUrl()).apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3))
@@ -101,7 +101,7 @@ public class FriendReqestItemAdapter extends RecyclerView.Adapter<FriendReqestIt
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_DOWN){
-                 view.setAlpha(0.5f);
+                    view.setAlpha(0.5f);
                 }else{
                     view.setAlpha(1.0f);
                 }

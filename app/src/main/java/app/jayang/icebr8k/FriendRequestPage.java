@@ -58,8 +58,8 @@ public class FriendRequestPage extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-       finish();
-       return true;
+        finish();
+        return true;
     }
 
     @Override
@@ -76,7 +76,7 @@ public class FriendRequestPage extends AppCompatActivity {
         requestRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    if("pending".equals(dataSnapshot.child("stats").getValue(String.class))){
+                if("pending".equals(dataSnapshot.child("stats").getValue(String.class))){
                     addToDialog( dataSnapshot.getKey());
                 }
 
@@ -124,11 +124,11 @@ public class FriendRequestPage extends AppCompatActivity {
         requestRef.equalTo("pending").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-               if(dataSnapshot.hasChildren()){
-                   noFrt.setVisibility(View.GONE);
-               }else{
-                   noFrt.setVisibility(View.VISIBLE);
-               }
+                if(dataSnapshot.hasChildren()){
+                    noFrt.setVisibility(View.GONE);
+                }else{
+                    noFrt.setVisibility(View.VISIBLE);
+                }
 
             }
 
@@ -154,10 +154,10 @@ public class FriendRequestPage extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
                 UserDialog dialog  =new UserDialog(user.getDisplayname(),user.getUsername()
-                ,user.getPhotourl(), null,null,user.getEmail(),user2Uid,null,null);
+                        ,user.getPhotourl(), null,null,user.getEmail(),user2Uid,null,null);
                 mUserDialogs.add(dialog);
                 noFrt.setVisibility(View.GONE);
-                 mAdapter.notifyDataSetChanged();
+                mAdapter.notifyDataSetChanged();
 
             }
 

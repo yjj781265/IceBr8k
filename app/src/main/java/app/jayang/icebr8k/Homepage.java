@@ -2,7 +2,6 @@ package app.jayang.icebr8k;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.DialogFragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -24,7 +23,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
-import android.transition.Fade;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -63,7 +61,6 @@ import com.onesignal.OSSubscriptionStateChanges;
 import com.onesignal.OneSignal;
 
 import com.zplesac.connectionbuddy.ConnectionBuddy;
-import com.zplesac.connectionbuddy.ConnectionBuddyCache;
 import com.zplesac.connectionbuddy.interfaces.ConnectivityChangeListener;
 import com.zplesac.connectionbuddy.models.ConnectivityEvent;
 import com.zplesac.connectionbuddy.models.ConnectivityState;
@@ -73,8 +70,7 @@ import app.jayang.icebr8k.Fragments.SurveyTab_Fragment;
 import app.jayang.icebr8k.Fragments.UserMessageDialog_Frag;
 import app.jayang.icebr8k.Fragments.Userstab_Fragment;
 import app.jayang.icebr8k.Fragments.me_frag;
-import app.jayang.icebr8k.Modle.ActivityCommunicator;
-import app.jayang.icebr8k.Modle.DatePickerFragment;
+import app.jayang.icebr8k.Utility.ActivityCommunicator;
 import app.jayang.icebr8k.Modle.myViewPager;
 import app.jayang.icebr8k.Utility.MyJobService;
 
@@ -103,6 +99,7 @@ public class Homepage extends AppCompatActivity  implements
     //job scheduler variables
     private static final String Job_TaG ="MY_JOB_TAG";
     private FirebaseJobDispatcher mDispatcher;
+    private int mCurrentPosition =-1;
 
 
     @Override
@@ -281,7 +278,7 @@ public class Homepage extends AppCompatActivity  implements
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     checkCameraPermission();
                 } else {
-                    Intent intent = new Intent(getApplicationContext(),DevoderActivity.class);
+                    Intent intent = new Intent(getApplicationContext(),ScannerActivity.class);
                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     startActivity(intent);
                 }
@@ -316,15 +313,15 @@ public class Homepage extends AppCompatActivity  implements
                         startActivity(intent);
                 return true;
 
-           /* case R.id.leaderboard:
+          /*  case R.id.leaderboard:
                 if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
                     return false;
                 }
                 lastClickTime = SystemClock.elapsedRealtime();
                 Intent mIntent = new Intent(this,Leaderboard.class);
                 startActivity(mIntent);
-                return true;*/
-
+                return true;
+*/
 
             default:
                 return super.onOptionsItemSelected(item);
@@ -444,7 +441,7 @@ public class Homepage extends AppCompatActivity  implements
                 .withPermission(Manifest.permission.CAMERA)
                 .withListener(new PermissionListener() {
                     @Override public void onPermissionGranted(PermissionGrantedResponse response) {
-                        Intent intent = new Intent(getApplicationContext(),DevoderActivity.class);
+                        Intent intent = new Intent(getApplicationContext(),ScannerActivity.class);
                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(intent);
 
@@ -541,16 +538,24 @@ public class Homepage extends AppCompatActivity  implements
     private void showLog(String str){ Log.d(TAG,str);}
 
     public void setHomepageTab(){ mViewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+        mViewPagerAdapter.addFragment(new me_frag());
+
         mViewPagerAdapter.addFragment(new SurveyTab_Fragment());
-      mViewPagerAdapter.addFragment(new Userstab_Fragment());mViewPagerAdapter.addFragment(new UserMessageDialog_Frag());
+      mViewPagerAdapter.addFragment(new Userstab_Fragment());
+      mViewPagerAdapter.addFragment(new UserMessageDialog_Frag());
       mViewPagerAdapter.addFragment(new me_frag());
+        mViewPagerAdapter.addFragment(new SurveyTab_Fragment());
+
 
 
 
       viewPager.setAdapter(mViewPagerAdapter);
+      viewPager.setCurrentItem(1);
 
         homepageTab.setTitleState(AHBottomNavigation.TitleState.ALWAYS_SHOW);
         homepageTab.setAccentColor(getResources().getColor(R.color.colorPrimary));
+
+
         AHBottomNavigationItem item1 = new AHBottomNavigationItem("Questions",
                 R.drawable.survey_selector);
         AHBottomNavigationItem item2 = new AHBottomNavigationItem("Friends",
@@ -562,7 +567,9 @@ public class Homepage extends AppCompatActivity  implements
 
 
 
+
         // Add items
+
         homepageTab.addItem(item1);
         homepageTab.addItem(item2);
         homepageTab.addItem(item3);
@@ -570,22 +577,48 @@ public class Homepage extends AppCompatActivity  implements
 
 
 
+
         // for smooth swipe
-        viewPager.setOffscreenPageLimit(3);
+        viewPager.setOffscreenPageLimit(5);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                showLog(""+ positionOffset);
 
             }
 
             @Override
             public void onPageSelected(int position) {
-                homepageTab.setCurrentItem(position);
+                if(position ==0){
+                    mCurrentPosition = homepageTab.getItemsCount()-1;
+                }else if(position == mViewPagerAdapter.getCount()-1){
+                    mCurrentPosition = 0;
+                }else{
+                    mCurrentPosition = position-1;
+                }
+                homepageTab.setCurrentItem(mCurrentPosition);
+
 
             }
 
             @Override
             public void onPageScrollStateChanged(int state) {
+                if(state == ViewPager.SCROLL_STATE_IDLE){
+                    int pageCount = mViewPagerAdapter.getCount();
+                    int currentItem = viewPager.getCurrentItem();
+                    if(currentItem ==0){
+                        viewPager.setCurrentItem(pageCount-2,true);
+
+
+
+
+                    }else if(currentItem == pageCount-1){
+                        viewPager.setCurrentItem(1,true);
+
+
+                    }
+
+                }
 
             }
         });
@@ -593,7 +626,7 @@ public class Homepage extends AppCompatActivity  implements
         homepageTab.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
-                viewPager.setCurrentItem(position,false);
+                viewPager.setCurrentItem(position+1,false);
                 return true;
             }
         });
@@ -774,9 +807,11 @@ public class Homepage extends AppCompatActivity  implements
     }
 
     @Override
-    public void passDataToActivity(View view) {
+    public void passDataToActivity(Object view,String tag) {
         mSwitchCompat= (SwitchCompat) view;
     }
+
+
 
     public class ScreenStateReceiver extends BroadcastReceiver {
         @Override
@@ -862,6 +897,8 @@ public class Homepage extends AppCompatActivity  implements
             }
         }
     }
+
+
 
     public myViewPager getViewPager() {
         return viewPager;

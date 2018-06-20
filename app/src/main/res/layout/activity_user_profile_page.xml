@@ -95,45 +95,7 @@
             android:layout_height="30dp"/>
     </LinearLayout>
 
-    <RelativeLayout
-        android:elevation="3dp"
-        android:background="@color/creamYellow"
-        android:layout_marginTop="10dp"
-        android:id="@+id/R2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/R1">
-        <TextView
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Email"
-            android:id="@+id/email_tv"
-            android:layout_marginLeft="20dp"
-            android:layout_centerVertical="true"
-            android:textSize="16sp"
-
-            android:textColor="@android:color/black"/>
-        <TextView
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:id="@+id/email_profile"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginStart="96dp"
-            android:text="yjj@gmail.com"
-            android:textSize="16sp"
-            android:autoLink="email"
-            android:textColorLink="@color/dark_gray"
-            />
-
-
-    </RelativeLayout>
-
-    <LinearLayout
+        <LinearLayout
         android:elevation="1dp"
         android:background="@color/creamYellow"
         android:layout_width="match_parent"

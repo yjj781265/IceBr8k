@@ -95,23 +95,25 @@ import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.Modle.UserLocationDialog;
 
 import app.jayang.icebr8k.Modle.UserQA;
+import app.jayang.icebr8k.Utility.Compatability;
 import app.jayang.icebr8k.Utility.MyDateFormatter;
 import belka.us.androidtoggleswitch.widgets.BaseToggleSwitch;
 import belka.us.androidtoggleswitch.widgets.ToggleSwitch;
 
-public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallback,GoogleMap.OnMyLocationButtonClickListener,
-        GoogleMap.OnMyLocationClickListener,BaseToggleSwitch.OnToggleSwitchChangeListener,GoogleMap.OnMarkerClickListener,
-        GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener,GeoQueryDataEventListener {
+public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
+        GoogleMap.OnMyLocationClickListener, BaseToggleSwitch.OnToggleSwitchChangeListener, GoogleMap.OnMarkerClickListener,
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, GeoQueryDataEventListener,
+        GoogleMap.OnInfoWindowClickListener {
 
     private final int UPDATE_INTERVAL = 5000; //5sec
     private final int FASTEST_INTERVAL = 3000;
     private final int DISPLACEMENT = 3;
-    private final int   REQUEST_CHECK_SETTINGS =9000;
-    private final int  MY_PERMISSIONS_REQUEST_FINE_LOCATION=8000;
+    private final int REQUEST_CHECK_SETTINGS = 9000;
+    private final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 8000;
     private FirebaseUser curretUser;
     private GoogleMap map;
-    private  ToggleSwitch mToggleSwitch;
-    private  FrameLayout mFrameLayout;
+    private ToggleSwitch mToggleSwitch;
+    private FrameLayout mFrameLayout;
     private RecyclerView mRecyclerView;
     private View mCustomerMarkerView;
     private ImageView mMarkerImageView;
@@ -120,19 +122,19 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     private Location mCurrentLocation;
     private FusedLocationProviderClient mFusedLocationClient;
     private Boolean center = true, flag = false;
-    private Double radius =1.6;
-    private float ZoomLevel =17f;
+    private Double radius = 1.6;
+    private float ZoomLevel = 17f;
     private MaterialDialog mProgressDialog;
     private GeoFire geofire;
     private Toolbar mToolbar;
     private TextView noUser;
-    private int index =0;
+    private int index = 0;
     private Handler handler;
 
     private SupportMapFragment mapFragment;
     private LocationRequest mLocationRequest;
     private GoogleApiClient mGoogleApiClient;
-    private HashMap<String,Marker> mHashMap;
+    private HashMap<String, Marker> mHashMap;
     private UserLocationDialogAdapter mLocationDialogAdapter;
     private ArrayList<UserLocationDialog> mLocationDialogs;
     private ImageButton mfilter;
@@ -143,7 +145,6 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     private final String TAG = "PeopleNearby_IceBr8k";
 
 
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -151,19 +152,19 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         mCustomerMarkerView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).
                 inflate(R.layout.custom_marker, null);
         mMarkerImageView = mCustomerMarkerView.findViewById(R.id.marker_image);
-        mFrameLayout =findViewById(R.id.people_mapFrame);
-        mRecyclerView =findViewById(R.id.people_recyclerView);
-        mfilter =findViewById(R.id.people_filter);
-        mToolbar =findViewById(R.id.people_toolbar);
-        noUser =findViewById(R.id.people_noUsers);
+        mFrameLayout = findViewById(R.id.people_mapFrame);
+        mRecyclerView = findViewById(R.id.people_recyclerView);
+        mfilter = findViewById(R.id.people_filter);
+        mToolbar = findViewById(R.id.people_toolbar);
+        noUser = findViewById(R.id.people_noUsers);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
-        mLocationButton =findViewById(R.id.people_myLocation);
-        curretUser =FirebaseAuth.getInstance().getCurrentUser();
-        mHashMap =new HashMap<>();
-        mLocationDialogs =new ArrayList<>();
+        mLocationButton = findViewById(R.id.people_myLocation);
+        curretUser = FirebaseAuth.getInstance().getCurrentUser();
+        mHashMap = new HashMap<>();
+        mLocationDialogs = new ArrayList<>();
         mLocationDialogAdapter = new UserLocationDialogAdapter(mLocationDialogs);
         mLocationDialogAdapter.setHasStableIds(true);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -171,7 +172,6 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.setAdapter(mLocationDialogAdapter);
         mRecyclerView.setHasFixedSize(true);
-
 
 
         // Get the SupportMapFragment and request notification
@@ -184,37 +184,35 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         //map or list
         int position = mToggleSwitch.getCheckedTogglePosition();
         setUI(position);
-        if(checkGooglePlayService() ){
-             buildGoogleApiClient();
+        if (checkGooglePlayService()) {
+            buildGoogleApiClient();
             mLocationButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if(mCurrentLocation!=null && map!=null){
+                    if (mCurrentLocation != null && map != null) {
                         float zoom = map.getCameraPosition().zoom;
-                        Log.d(TAG, "ZOOM LEVEL "+zoom);
+                        Log.d(TAG, "ZOOM LEVEL " + zoom);
                         Log.d(TAG, "center true");
-                        center =true;
+                        center = true;
                         LatLng latLng = new LatLng(mCurrentLocation.getLatitude(),
                                 mCurrentLocation.getLongitude());
-                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,18f));
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18f));
                     }
                 }
             });
         }
-        if(getIntent().getExtras()!=null) {
-        String radiusString=getIntent().getExtras().getString("radius");
-          radius = convertMileStringtoKm(radiusString);
-          index = getIntent().getExtras().getInt("index");
-          if(index ==0){
-              ZoomLevel =13f;
-          }else if(index == 1){
-              ZoomLevel =11f;
-          }else if(index ==2){
-              ZoomLevel =9f;
-          }else{
-              ZoomLevel =7f;
-          }
-          mProgressDialog =ProgressDialog(radiusString);
+        if (getIntent().getExtras() != null) {
+            String radiusString = getIntent().getExtras().getString("radius");
+            radius = convertMileStringtoKm(radiusString);
+            index = getIntent().getExtras().getInt("index");
+            if (index == 0) {
+                ZoomLevel = 9f;
+            } else if (index == 1) {
+                ZoomLevel = 7f;
+            }  else {
+                ZoomLevel = 5f;
+            }
+            mProgressDialog = ProgressDialog(radiusString);
             mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
                 @Override
                 public void onCancel(DialogInterface dialog) {
@@ -231,6 +229,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         });
 
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -243,7 +242,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.peoplenearby_maptype:
-                if(map!=null){
+                if (map != null) {
                     showMapTypeSelectorDialog();
                 }
 
@@ -256,7 +255,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onStart() {
         super.onStart();
-        if(mGoogleApiClient!=null && !mGoogleApiClient.isConnected()) {
+        if (mGoogleApiClient != null && !mGoogleApiClient.isConnected()) {
             mGoogleApiClient.reconnect();
         }
 
@@ -279,20 +278,20 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mGoogleApiClient!=null) {
+        if (mGoogleApiClient != null) {
             mGoogleApiClient.disconnect();
         }
         if (mFusedLocationClient != null) {
             mFusedLocationClient.removeLocationUpdates(mLocationCallback);
         }
-        if(geoQuery!=null){
-           geoQuery.removeGeoQueryEventListener(this);
+        if (geoQuery != null) {
+            geoQuery.removeGeoQueryEventListener(this);
 
         }
     }
 
     private static final String[] MAP_TYPE_ITEMS =
-            {"Road Map", "Satellite", "Terrain","Hybrid"};
+            {"Road Map", "Satellite", "Terrain", "Hybrid"};
 
     private void showMapTypeSelectorDialog() {
         // Prepare the dialog by setting up a Builder.
@@ -301,7 +300,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         builder.setTitle(fDialogTitle);
 
         // Find the current map type to pre-check the item representing the current state.
-        int checkItem = map.getMapType()-1;
+        int checkItem = map.getMapType() - 1;
 
         // Add an OnClickListener to the dialog, so that the selection will be handled.
         builder.setSingleChoiceItems(
@@ -350,7 +349,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @SuppressLint("RestrictedApi")
-    private void startLocationMonitoring(){
+    private void startLocationMonitoring() {
         mProgressDialog.show();
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         mLocationCallback = new LocationCallback() {
@@ -359,22 +358,26 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                 super.onLocationResult(result);
 
                 mCurrentLocation = result.getLocations().get(0);
-                if(mCurrentLocation!=null) {
+                if (mCurrentLocation != null) {
                     updateLocationtoDatabase(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), radius);
-                    if(flag==false){
+                    // flag first time open the map
+                    if (flag == false) {
                         findPeopleNearby(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), radius);
-                        flag=true;
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mCurrentLocation.getLatitude()
+                                    ,mCurrentLocation.getLongitude()), ZoomLevel));
+
+                        flag = true;
                     }
 
                 }
 
-                Log.d(TAG,"Current location:\n" + mCurrentLocation) ;
+                Log.d(TAG, "Current location:\n" + mCurrentLocation);
 
             }
         };
-        Log.d(TAG,"startLocation called");
+        Log.d(TAG, "startLocation called");
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY).
                 setInterval(UPDATE_INTERVAL).setFastestInterval(FASTEST_INTERVAL).setSmallestDisplacement(DISPLACEMENT);
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
         builder.addLocationRequest(mLocationRequest);
@@ -397,9 +400,6 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                     return;
                 }
                 mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
-
-
-
 
 
             }
@@ -430,7 +430,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                 startLocationMonitoring();
+                    startLocationMonitoring();
 
                 } else {
                     Toast.makeText(this, "Location Permission Denied", Toast.LENGTH_SHORT).show();
@@ -444,21 +444,19 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode==REQUEST_CHECK_SETTINGS && resultCode == RESULT_OK){
-            if(checkGooglePlayService()){
-              //  Toast.makeText(this, "okay", Toast.LENGTH_SHORT).show();
+        if (requestCode == REQUEST_CHECK_SETTINGS && resultCode == RESULT_OK) {
+            if (checkGooglePlayService()) {
+                //  Toast.makeText(this, "okay", Toast.LENGTH_SHORT).show();
                 //reset
                 mHashMap.clear();
                 map.clear();
                 mLocationDialogs.clear();
                 mLocationDialogAdapter.notifyDataSetChanged();
 
-               startLocationMonitoring();
+                startLocationMonitoring();
             }
         }
     }
@@ -469,30 +467,33 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         map.setTrafficEnabled(true);
         map.setIndoorEnabled(true);
+
         map.setBuildingsEnabled(true);
         map.getUiSettings().setZoomControlsEnabled(true);
-        map.setOnMarkerClickListener(this);
-       map.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
-       @Override
-       public void onCameraMove() {
-           ZoomLevel= map.getCameraPosition().zoom;
-           //Log.d(TAG, "ZOOM LEVEL "+ZoomLevel);
-       }
-   });
-       map.setOnCameraMoveStartedListener(new GoogleMap.OnCameraMoveStartedListener() {
-           @Override
-           public void onCameraMoveStarted(int i) {
-               Log.d(TAG, "center off " + i);
-               if(i==REASON_GESTURE) {
-                   center = false;
-               }
-           }
-       });
+        map.getUiSettings().setMapToolbarEnabled(false);
 
-        mClusterManager = new ClusterManager<>(this,map);
-        mClusterManager.setAnimation(true);
-       map.setOnCameraIdleListener(mClusterManager);
-       map.setOnMarkerClickListener(mClusterManager);
+
+        map.setOnMarkerClickListener(this);
+        map.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+            @Override
+            public void onCameraMove() {
+                ZoomLevel = map.getCameraPosition().zoom;
+                //Log.d(TAG, "ZOOM LEVEL "+ZoomLevel);
+            }
+        });
+        map.setOnInfoWindowClickListener(this);
+        map.setOnCameraMoveStartedListener(new GoogleMap.OnCameraMoveStartedListener() {
+            @Override
+            public void onCameraMoveStarted(int i) {
+                Log.d(TAG, "center off " + i);
+                if (i == REASON_GESTURE) {
+                    center = false;
+                }
+            }
+        });
+
+
+
 
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -500,7 +501,9 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                         != PackageManager.PERMISSION_GRANTED) {
             return;
+
         }
+        map.setMyLocationEnabled(true);
 
 
 
@@ -668,124 +671,75 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
 
 /***************************get score*****************************************/
-    public void compareWithUser2(UserLocationDialog dialog) {
-        pullUser1QA(dialog);
 
-    }
+public void compareWithUser2(final UserLocationDialog dialog) {
+    final ArrayList<UserQA> userQA1 = new ArrayList<>();
+    final ArrayList<UserQA> userQA2 = new ArrayList<>();
+    DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
+    final DatabaseReference mRef2 = FirebaseDatabase.getInstance().getReference("UserQA/" + dialog.getId());
 
-    public void pullUser1QA(final UserLocationDialog dialog) {
+    mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            for(DataSnapshot child : dataSnapshot.getChildren()){
+                if( !"skipped".equals(child.getValue(UserQA.class).getAnswer())){
+                    userQA1.add(child.getValue(UserQA.class));
+                }
+
+            }
 
 
-        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("" +
-                "UserQA/" + curretUser.getUid());
-        mRef.keepSynced(true);
-        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            ArrayList<UserQA> User1QA = new ArrayList<>();
+            mRef2.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for(DataSnapshot child : dataSnapshot.getChildren()){
+                        if(!"skipped".equals(child.getValue(UserQA.class).getAnswer())){
+                            userQA2.add(child.getValue(UserQA.class));
+                        }
 
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
 
-                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                    UserQA userQA = childSnapshot.getValue(UserQA.class);
-                    User1QA.add(userQA);
+                    }
+
+                    Compatability mCompatability = new Compatability(userQA1,userQA2);
+                    dialog.setScore(mCompatability.getScore().toString());
+                    addMapMarker(dialog);
+
+                    if(mLocationDialogs.contains(dialog)){
+                        int i = mLocationDialogs.indexOf(dialog);
+                        mLocationDialogs.set(i,dialog);
+                    }
+                    Collections.sort(mLocationDialogs);
+                    mLocationDialogAdapter.notifyDataSetChanged();
+                    if(mProgressDialog.isShowing()){
+                        mProgressDialog.dismiss();
+                    }
+
+
 
                 }
 
-                if (dataSnapshot.getChildrenCount() == User1QA.size()) {
-                    pullUser2QA( User1QA, dialog);
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
                 }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-    }
-
-    private void pullUser2QA(final ArrayList<UserQA> user1QA, final UserLocationDialog dialog) {
-
-        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + dialog.getId());
-        mRef.keepSynced(true);
-        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            ArrayList<UserQA> User2QA = new ArrayList<>();
-
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                    UserQA userQA = childSnapshot.getValue(UserQA.class);
-                    User2QA.add(userQA);
-                }
-                SetScore(user1QA,User2QA, dialog);
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-
-    public void SetScore(ArrayList<UserQA> user1Arr, ArrayList<UserQA> user2Arr,
-                         UserLocationDialog dialog) {
-        int size = user1Arr.size();
-        int commonQuestionSize = 0;
-        String score;
-
-        ArrayList<String> user1StrArr = new ArrayList<>();
-        ArrayList<String> user2StrArr = new ArrayList<>();
-
-        for (UserQA userQA : user1Arr) {
-            if (!userQA.getAnswer().equals("skipped")) {
-                user1StrArr.add(userQA.getQuestionId());
-            }
-
-        }
-        for (UserQA userQA : user2Arr) {
-            if (!userQA.getAnswer().equals("skipped")) {
-                user2StrArr.add(userQA.getQuestionId());
-            }
+            });
         }
 
-        user1StrArr.retainAll(user2StrArr);
-
-        commonQuestionSize = user1StrArr.size();
-
-        Log.d("Score", "Common Question " + commonQuestionSize);
-        user1Arr.retainAll(user2Arr);
-        Log.d("Score", String.valueOf(user1Arr.size()));
-        Log.d("Score", "Size " + size);
-        if (commonQuestionSize != 0) {
-            score = String.valueOf((int) (((double) user1Arr.size() / (double) commonQuestionSize) * 100));
-            Log.d("Score", "Score is " + score);
-
-        }else if(user1Arr.isEmpty() || user2Arr.isEmpty()){
-            score ="0";
-
-        } else {
-            score = "0";
-        }
-        Log.d("PeopleNearby",score);
-        dialog.setScore(score);
-
-        if(mLocationDialogs.contains(dialog)){
-            int i = mLocationDialogs.indexOf(dialog);
-            mLocationDialogs.set(i,dialog);
-        }
-            Collections.sort(mLocationDialogs);
-            mLocationDialogAdapter.notifyDataSetChanged();
-        if(mProgressDialog.isShowing()){
-            mProgressDialog.dismiss();
-        }
-
-        Log.d(TAG,"new item added");
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
 
         }
+    });
 
-    /***************************get score*****************************************/
+
+
+}
+
+
+
+
+
+    /*************************** end get score*****************************************/
 
     @Override
     public boolean onMarkerClick(Marker marker) {
@@ -815,13 +769,11 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                         index =which;
                         radius = convertMileStringtoKm(String.valueOf(text));;
                         if(index ==0){
-                            ZoomLevel =13f;
-                        }else if(index == 1){
-                            ZoomLevel =11f;
-                        }else if(index ==2){
                             ZoomLevel =9f;
-                        }else{
+                        }else if(index == 1){
                             ZoomLevel =7f;
+                        }else{
+                            ZoomLevel =5f;
                         }
                         map.clear();
                         center =true;
@@ -830,11 +782,12 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
                         mLocationDialogs.clear();
                         mHashMap.clear();
-                       // mLocationDialogAdapter.notifyDataSetChanged();
                         mProgressDialog = ProgressDialog(text);
                         mProgressDialog.show();
                         if(mCurrentLocation!=null) {
                             findPeopleNearby(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), radius);
+                            map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mCurrentLocation.getLatitude()
+                                    ,mCurrentLocation.getLongitude()), ZoomLevel));
                         }
                         return true;
                     }
@@ -842,41 +795,41 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                 .positiveText(R.string.ok).show();
     }
 
-    public void addmarkerWithTitle(LatLng latLng,Marker marker){
-        Geocoder geocoder;
-        List<Address> yourAddresses = new ArrayList<>();
-        geocoder = new Geocoder(this, Locale.getDefault());
-        try {
-            yourAddresses= geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
-        } catch (IOException e) {
-            e.printStackTrace();
+
+    private String distanceConverter(String dist){
+        double miles = Double.valueOf(dist);
+        int intMiles;
+        String distance;
+        String unit;
+        String str;
+        intMiles = (int)Math.round(miles*5280);
+        if(intMiles<=1000){
+            unit="ft";
+            distance = String.valueOf(intMiles);
+        }else{
+            int scale = (int) Math.pow(10, 1);
+            miles =(double) Math.round(miles * scale) / scale;
+            distance = String.valueOf(miles);
+            unit ="mi";
         }
-
-        if (yourAddresses.size() > 0)
-        {
-            String yourAddress = yourAddresses.get(0).getAddressLine(0);
-            marker.setTitle(yourAddress);
-
-
-        }
-
+        return  distance+unit + " away";
     }
+
 
     private void addMapMarker(final UserLocationDialog dialog){
 
-        String snippet ;
+
 
         if(mHashMap.get(dialog.getId())!=null){
             mHashMap.get(dialog.getId()).setPosition(dialog.getLatLng());
-            if(dialog.getTimestamp()!=null){
-                snippet = dialog.getUser().getDisplayname() + " (Updated at "+
-                        MyDateFormatter.timeStampToDateConverter(dialog.getTimestamp(),false) +")";
-            }else {
-                snippet = dialog.getUser().getDisplayname();
-            }
+
+                String title = dialog.getUser().getDisplayname()+"("+distanceConverter(dialog.getDistance())+")";
+                String snippet = "Compatibility: " + dialog.getScore()+"%";
+
+
             mHashMap.get(dialog.getId()).hideInfoWindow();
+            mHashMap.get(dialog.getId()).setTitle(title);
             mHashMap.get(dialog.getId()).setSnippet(snippet);
-            addmarkerWithTitle(dialog.getLatLng(),mHashMap.get(dialog.getId()));
 
             if (dialog.getId().equals(curretUser.getUid()) && center) {
                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(dialog.getLatLng(), ZoomLevel));
@@ -887,25 +840,22 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
                     apply(RequestOptions.circleCropTransform()).into(new SimpleTarget<Bitmap>() {
                 @Override
                 public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
-                    String snippet;
+
+                    String title = dialog.getUser().getDisplayname() +"("+distanceConverter(dialog.getDistance())+")";
+                    String snippet = "Compatibility: " + dialog.getScore()+"%";
+
                     Marker marker;
                     marker = map.addMarker(new MarkerOptions().position(dialog.getLatLng())
                             .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(mCustomerMarkerView, resource))));
                     mHashMap.put(dialog.getId(),marker);
 
-                    if(dialog.getTimestamp()!=null){
-                        snippet = dialog.getUser().getDisplayname() + " (Updated at "+
-                                MyDateFormatter.timeStampToDateConverter(dialog.getTimestamp(),false) +")";
-                    }else{
-                        snippet = dialog.getUser().getDisplayname();
-                    }
                     mHashMap.get(dialog.getId()).hideInfoWindow();
+                    marker.setTitle(title);
                     marker.setSnippet(snippet);
-                    addmarkerWithTitle(dialog.getLatLng(),marker);
-                    if(dialog.getId().equals(curretUser.getUid()) && center){
-                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(dialog.getLatLng(), ZoomLevel));
 
-                    }
+
+
+
                 }
 
 
@@ -944,7 +894,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
                         compareWithUser2(dialog);
                     }
-                    addMapMarker(dialog);
+
 
                 }
                 if( mLocationDialogs.isEmpty() && mRecyclerView.getVisibility()==View.VISIBLE){
@@ -1021,7 +971,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onDataEntered(DataSnapshot dataSnapshot, GeoLocation location) {
         Log.d(TAG,"new key entered " + radius+ " "+ dataSnapshot.getKey()) ;
-        if(dataSnapshot.getKey()!=null ){
+        if(dataSnapshot.getKey()!=null && !curretUser.getUid().equals(dataSnapshot.getKey()) ){
             String userUid =dataSnapshot.getKey();
             UserLocationDialog dialog = new UserLocationDialog();
             dialog.setId(userUid);
@@ -1050,7 +1000,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onDataExited(DataSnapshot dataSnapshot) {
-        if(dataSnapshot.getKey()!=null){
+        if(dataSnapshot.getKey()!=null && !curretUser.getUid().equals(dataSnapshot.getKey())){
            String uid = dataSnapshot.getKey();
            if(uid.equals(curretUser.getUid())){
                map.clear();
@@ -1078,7 +1028,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onDataChanged(DataSnapshot dataSnapshot, GeoLocation location) {
-        if(dataSnapshot.getKey()!=null){
+        if(dataSnapshot.getKey()!=null && !curretUser.getUid().equals(dataSnapshot.getKey())){
             String uid = dataSnapshot.getKey();
             UserLocationDialog dialog = new UserLocationDialog();
             LatLng latLng = new LatLng(location.latitude,location.longitude);
@@ -1102,7 +1052,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onGeoQueryReady() {
-
+        mProgressDialog.dismiss();
 
 
 
@@ -1115,6 +1065,19 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         mProgressDialog.dismiss();
         Toast.makeText(getApplicationContext(), error.getMessage(),Toast.LENGTH_LONG).show();
 
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+       for(UserLocationDialog dialog : mLocationDialogs){
+           if(dialog.getLatLng().equals(marker.getPosition())){
+               Intent i =  new Intent(this, UserProfilePage.class);
+               i.putExtra("userInfo",dialog.getUser());
+               i.putExtra("userUid",dialog.getId());
+               startActivity(i);
+               break;
+           }
+       }
     }
 }
 

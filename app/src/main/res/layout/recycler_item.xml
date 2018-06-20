@@ -1,117 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:orientation="horizontal"
-              android:layout_width="match_parent"
-              android:animateLayoutChanges="true"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="HardcodedText"
     android:id="@+id/userTab_item_container"
-    android:layout_height="wrap_content"
-    android:theme="@style/AppTheme"
-    android:gravity="start"
-    android:alpha="0.5"
-    android:padding="16dp"
-    android:background="?attr/selectableItemBackground"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
     android:clickable="true"
+    android:background="@color/white"
+    android:foreground="?attr/selectableItemBackgroundBorderless"
+    android:gravity="start"
+    android:theme="@style/AppTheme"
     >
 
 
-        <LinearLayout
-            android:layout_gravity="center_vertical"
-            android:layout_width="wrap_content"
-            android:orientation="horizontal"
-            android:layout_height="wrap_content">
-        <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:id="@+id/imageview_id"
-            android:src="@drawable/default_avatar3"
+    <ImageView
+        android:id="@+id/imageview_id"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:alpha="0.5"
 
 
-            android:scaleType="centerCrop"/>
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/default_avatar3"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
-            <ImageView
-                android:id="@+id/onlineStats"
-                android:layout_width="10dp"
-                android:layout_height="10dp"
-                android:layout_gravity="bottom"
-                android:layout_marginBottom="2dp"
-                android:layout_marginLeft="-10dp"
-                android:elevation="10dp"
-                android:visibility="visible" />
-        </LinearLayout>
+    <ImageView
+        android:id="@+id/onlineStats"
+
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:layout_marginBottom="6dp"
+        android:layout_marginStart="46dp"
+        android:elevation="10dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/circle_shape_busy"/>
+
+
+    <TextView
+        android:id="@+id/displayname_textview"
+        android:alpha="0.5"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:ellipsize="end"
+        android:gravity="start|bottom"
+        android:maxLines="1"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/linearLayout"
+        app:layout_constraintStart_toEndOf="@+id/imageview_id"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:fontFamily="sans-serif"/>
+
+    <TextView
+        android:alpha="0.5"
+        android:id="@+id/username_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="255dp"
+        android:layout_marginRight="255dp"
+        android:ellipsize="end"
+        android:gravity="start|bottom"
+        android:maxLines="1"
+
+        android:textColor="@android:color/tab_indicator_text"
+        android:textSize="14sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/displayname_textview"
+        app:layout_constraintEnd_toStartOf="@+id/linearLayout"
+        app:layout_constraintStart_toEndOf="@+id/displayname_textview"
+        app:layout_constraintTop_toTopOf="@+id/displayname_textview"/>
+
 
     <LinearLayout
-        android:layout_weight="10"
+        android:id="@+id/linearLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="end|center_vertical"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
         android:orientation="vertical"
-        android:layout_gravity="center_vertical"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content">
-        <TextView
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:id="@+id/displayname_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="start|bottom"
-            android:textSize="16sp"
-            android:textColor="@color/black"
-            tools:fontFamily="sans-serif"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/displayname_textview"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:textColor="@android:color/tab_indicator_text"
-            android:id="@+id/username_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="start|bottom"
-            android:layout_below="@id/displayname_textview"
-
-            android:textSize="14sp"
-            />
-
-    </LinearLayout>
-         <LinearLayout
-
-             android:layout_marginStart="16dp"
-             android:gravity="end|center"
-             android:orientation="vertical"
-             android:layout_gravity="end|center_vertical"
-             android:layout_weight="3"
-             android:layout_width="0dp"
-             android:layout_height="match_parent">
-        <TextView
-            android:maxLines="1"
+            android:id="@+id/score"
+            android:alpha="0.5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="bottom|end"
-            android:id="@+id/score"
+            android:maxLines="1"
             android:textColor="@android:color/tab_indicator_text"
-            android:text="30%"
-            android:textSize="18sp"
+            android:textSize="16sp"
 
-          />
+            />
 
-             <TextView
-                 android:maxLines="1"
-                 android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:id="@+id/lastseen"
-                 android:textColor="@android:color/tab_indicator_text"
-                 android:layout_gravity="center_vertical|end"
-                 android:visibility="visible"
-                 android:text="1hrfdsfsf"
-                 android:gravity="center"
-                 android:textSize="13sp"
-                 />
+        <TextView
+            android:id="@+id/lastseen"
+            android:alpha="0.5"
+            android:textSize="12sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
 
 
+           />
+    </LinearLayout>
 
 
-         </LinearLayout>
-
-
-
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>

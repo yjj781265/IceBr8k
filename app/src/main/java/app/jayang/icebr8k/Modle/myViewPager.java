@@ -9,7 +9,7 @@ import android.view.MotionEvent;
  * Created by yjj781265 on 1/3/2018.
  */
 
-public class myViewPager extends ViewPager {
+public class myViewPager extends ViewPager  {
     private boolean swipeable;
     public myViewPager(Context context) {
         super(context);
@@ -35,6 +35,11 @@ public class myViewPager extends ViewPager {
             return super.onInterceptTouchEvent(event);
         }
         return false;
+    }
+
+    @Override
+    public int getCurrentItem() {
+        return super.getCurrentItem();
     }
 
     public void setSwipeable(boolean swipeable) {

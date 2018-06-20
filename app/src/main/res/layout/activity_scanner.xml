@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="app.jayang.icebr8k.ScannerActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/AppTheme"
+        android:id="@+id/scan_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/colorPrimary"
+        app:title="Scan QR code"
+        app:titleTextColor="@color/white">
+
+
+    </android.support.v7.widget.Toolbar>
+
+    <cn.bingoogolapple.qrcode.zxing.ZXingView
+        android:id="@+id/zxingview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/scan_toolbar"
+        android:layout_marginTop="0dp"
+
+        app:qrcv_animTime="1000"
+        app:qrcv_borderColor="@color/colorPrimaryDark"
+        app:qrcv_borderSize="3dp"
+        app:qrcv_cornerColor="@color/colorAccent"
+        app:qrcv_cornerLength="20dp"
+        app:qrcv_cornerSize="3dp"
+        app:qrcv_isTipTextBelowRect="false"
+        app:qrcv_maskColor="#33FFFFFF"
+        app:qrcv_qrCodeTipText="Scan QR code to add new friend"
+
+        app:qrcv_rectWidth="200dp"
+        app:qrcv_scanLineColor="@color/colorAccent"
+        app:qrcv_scanLineSize="1dp"
+        app:qrcv_tipTextColor="@color/creamYellow"
+        app:qrcv_topOffset="90dp"/>
+
+
+</RelativeLayout>

@@ -14,7 +14,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -30,10 +29,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import app.jayang.icebr8k.Modle.User;
-import app.jayang.icebr8k.Modle.UserDialog;
 import app.jayang.icebr8k.UserProfilePage;
 import app.jayang.icebr8k.Utility.MyDateFormatter;
-import app.jayang.icebr8k.Modle.OnLoadMoreListener;
+import app.jayang.icebr8k.Utility.OnLoadMoreListener;
 import app.jayang.icebr8k.Modle.UserMessage;
 import app.jayang.icebr8k.R;
 

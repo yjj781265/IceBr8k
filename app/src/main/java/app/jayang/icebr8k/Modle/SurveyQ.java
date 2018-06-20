@@ -9,6 +9,7 @@ import java.util.ArrayList;
 public class SurveyQ {
     private String type, question,questionId;
     private ArrayList<String> answer;
+    private  Integer likes , dislikes;
 
     public SurveyQ() {
 
@@ -20,6 +21,23 @@ public class SurveyQ {
         this.questionId = questionId;
         this.answer = answer;
     }
+
+    public Integer getLikes() {
+        return likes;
+    }
+
+    public void setLikes(Integer likes) {
+        this.likes = likes;
+    }
+
+    public Integer getDislikes() {
+        return dislikes;
+    }
+
+    public void setDislikes(Integer dislikes) {
+        this.dislikes = dislikes;
+    }
+
 
     public String getType() {
         return type;
@@ -49,7 +67,8 @@ public class SurveyQ {
         return answer;
     }
 
-    public void setAnswer(ArrayList answer) {
+
+    public void setAnswer(ArrayList<String> answer) {
         this.answer = answer;
     }
 

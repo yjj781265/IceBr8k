@@ -40,17 +40,18 @@
             android:name=".SplashScreen"
             android:noHistory="true"
             android:screenOrientation="portrait"
+
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
         </activity>
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat"/>
-
 
         <meta-data
             android:name="com.onesignal.NotificationOpened.DEFAULT"
@@ -82,10 +83,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ImageViewer"
+            android:name=".MyQR_Code"
             android:screenOrientation="portrait"/>
         <activity
-            android:name=".DevoderActivity"
+            android:name=".ScannerActivity"
             android:noHistory="true"
             android:screenOrientation="portrait"/>
         <activity
@@ -96,7 +97,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH"/>
             </intent-filter>
-
         </activity>
         <activity android:name=".PeopleNearby"/>
         <activity
@@ -118,6 +118,9 @@
         <activity
             android:name=".Feedback"
             android:windowSoftInputMode="stateAlwaysHidden|adjustResize"/>
+        <activity android:name=".Leaderboard">
+
+        </activity>
     </application>
 
 </manifest>

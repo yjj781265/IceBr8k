@@ -20,14 +20,14 @@ import me.imid.swipebacklayout.lib.SwipeBackLayout;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 
 public class SearchName extends SwipeBackActivity implements SearchView.OnQueryTextListener {
-  android.support.v7.widget.Toolbar mToolbar;
+    android.support.v7.widget.Toolbar mToolbar;
 
-  private ArrayList<UserDialog> friendList;
-  private ArrayList<UserDialog> filterdList;
-  private RecyclerAdapter mAdapter;
-  private SwipeBackLayout mSwipeBackLayout;
-  private RecyclerView mRecyclerView;
-  private  SearchView searchView;
+    private ArrayList<UserDialog> friendList;
+    private ArrayList<UserDialog> filterdList;
+    private RecyclerAdapter mAdapter;
+    private SwipeBackLayout mSwipeBackLayout;
+    private RecyclerView mRecyclerView;
+    private  SearchView searchView;
 
 
     @Override
@@ -110,7 +110,7 @@ public class SearchName extends SwipeBackActivity implements SearchView.OnQueryT
     public boolean onSupportNavigateUp() {
         //hide keyboard
         if(searchView.hasFocus()) {
-         hideKeyboard();
+            hideKeyboard();
 
         }
 

@@ -48,7 +48,7 @@ import java.util.UUID;
 import app.jayang.icebr8k.Adapter.UserMessageAdapter;
 import app.jayang.icebr8k.Utility.MyDateFormatter;
 import app.jayang.icebr8k.Modle.MyEditText;
-import app.jayang.icebr8k.Modle.OnLoadMoreListener;
+import app.jayang.icebr8k.Utility.OnLoadMoreListener;
 import app.jayang.icebr8k.Modle.UserMessage;
 import app.jayang.icebr8k.Utility.SendNotification;
 import me.imid.swipebacklayout.lib.SwipeBackLayout;

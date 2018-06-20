@@ -265,7 +265,7 @@ public class MyJobService extends com.firebase.jobdispatcher.JobService implemen
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(10000);
         mLocationRequest.setFastestInterval(5000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     }
 
     protected synchronized void buildGoogleApiClient() {

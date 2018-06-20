@@ -8,17 +8,14 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.SwitchCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -34,7 +31,6 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.daimajia.androidanimations.library.Techniques;
@@ -66,8 +62,6 @@ import com.karumi.dexter.listener.single.PermissionListener;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
-import org.w3c.dom.Text;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -77,13 +71,10 @@ import java.util.UUID;
 import app.jayang.icebr8k.FriendRequestPage;
 import app.jayang.icebr8k.FullImageView;
 import app.jayang.icebr8k.Homepage;
-import app.jayang.icebr8k.ImageViewer;
-import app.jayang.icebr8k.Modle.ActivityCommunicator;
+import app.jayang.icebr8k.MyQR_Code;
+import app.jayang.icebr8k.Utility.ActivityCommunicator;
 import app.jayang.icebr8k.Modle.User;
-import app.jayang.icebr8k.PeopleNearby;
 import app.jayang.icebr8k.R;
-import app.jayang.icebr8k.UserChatActvity;
-import app.jayang.icebr8k.UserProfilePage;
 import id.zelory.compressor.Compressor;
 import pl.aprilapps.easyphotopicker.DefaultCallback;
 import pl.aprilapps.easyphotopicker.EasyImage;
@@ -139,7 +130,7 @@ public class me_frag extends Fragment {
         mLinearLayout = fragView.findViewById(R.id.frt_frag);
         mRef =FirebaseDatabase.getInstance().getReference();
         mSwitchCompat =fragView.findViewById(R.id.switch_frag);
-        activityCommunicator.passDataToActivity(mSwitchCompat);
+        activityCommunicator.passDataToActivity(mSwitchCompat,null);
         mProgressDialog = new MaterialDialog.Builder(getActivity())
                 .content("Updating Avatar...")
                 .progress(true, 0).build();
@@ -235,7 +226,7 @@ public class me_frag extends Fragment {
                     return;
                 }
                 lastClickTime = SystemClock.elapsedRealtime();
-                Intent intent = new Intent( fragView.getContext(), ImageViewer.class);
+                Intent intent = new Intent( fragView.getContext(), MyQR_Code.class);
                 ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity(),qrCode,"qr_transition");
                 startActivity(intent, options.toBundle());
 

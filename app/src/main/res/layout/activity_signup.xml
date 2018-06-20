@@ -154,6 +154,7 @@
 
         <android.support.v7.widget.AppCompatButton
             android:layout_width="280dp"
+            android:textAllCaps="false"
             android:layout_height="wrap_content"
             android:id="@+id/signupbtn_signup"
             android:background="@color/colorPrimary"

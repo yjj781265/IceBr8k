@@ -17,7 +17,6 @@ import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
@@ -61,6 +60,7 @@ import java.util.UUID;
 import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.Modle.UserMessage;
 import app.jayang.icebr8k.Modle.UserQA;
+import app.jayang.icebr8k.Utility.Compatability;
 import app.jayang.icebr8k.Utility.SendNotification;
 import id.zelory.compressor.Compressor;
 import me.imid.swipebacklayout.lib.SwipeBackLayout;
@@ -74,7 +74,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
     ImageView mImageView,qrImage;
     ActionProcessButton  compare_btn;
     FlatButton message_btn,addFriend_btn,deleteFriend_btn,reset_btn;
-    TextView displayname_profile, email_profile, username_profile;
+    TextView displayname_profile, username_profile;
     MaterialDialog mProgressDialog;
     SwipeBackLayout mSwipeBackLayout;
     private long lastClickTime = 0;
@@ -91,6 +91,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
     ArrayList<String> User1QArr, User2QArr;
     ArrayList<UserQA> User1QA, User2QA;
     ArrayList<UserQA> temp1QA, temp2QA;
+    private Compatability mCompatability;
     int score;
 
 
@@ -118,7 +119,6 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         deleteFriend_btn = (FlatButton) findViewById(R.id.deleteFriend_btn);
         reset_btn = (FlatButton) findViewById(R.id.reset_btn);
         displayname_profile = (TextView) findViewById(R.id.displayname_profile);
-        email_profile = (TextView) findViewById(R.id.email_profile);
         username_profile = (TextView) findViewById(R.id.username_profile);
         database = FirebaseDatabase.getInstance();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -191,7 +191,6 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         Glide.with(getBaseContext()).load(user.getPhotourl()).
                 apply(RequestOptions.circleCropTransform()).into(mImageView);
         displayname_profile.setText(user.getDisplayname());
-        email_profile.setText(user.getEmail());
         username_profile.setText(user.getUsername());
 
     }
@@ -208,204 +207,46 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
     }
 
 
-    public int compareWithUser2(User user2) {
-        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("Usernames/" + user2.getUsername());
-        mRef.keepSynced(true);
+    public void compareWithUser2() {
+        compare_btn.setProgress(0);
+        final ArrayList<UserQA> userQA1 = new ArrayList<>();
+        final ArrayList<UserQA> userQA2 = new ArrayList<>();
+        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + currentUser.getUid());
+        final DatabaseReference mRef2 = FirebaseDatabase.getInstance().getReference("UserQA/" + uid);
+
         mRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                User2Uid = dataSnapshot.getValue(String.class);
-                compare_btn.setProgress(20);
-                Log.d("user2", User2Uid);
-                pullUser2Q(User2Uid);
-
-            }
-
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-        return score;
-
-    }
-
-    public void pullUser1Q(String Uid, final ArrayList arrayList) {
-        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + Uid);
-        mRef.keepSynced(true);
-        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                User1QArr = new ArrayList<String>();
-                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                    String key = childSnapshot.getKey();
-                    User1QArr.add(key);
-                    Log.d("key", key);
-                }
-                User1QArr.retainAll(arrayList);
-                compare_btn.setProgress(60);
-                Log.d("arr", User1QArr.toString());
-                getUser1QA(FirebaseAuth.getInstance().getCurrentUser().getUid());
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-    }
-
-    public void pullUser2Q(String Uid) {
-        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + Uid);
-        mRef.keepSynced(true);
-        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                User2QArr = new ArrayList<String>();
-                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                    String key = childSnapshot.getKey();
-                    User2QArr.add(key);
-                    Log.d("key2", key);
-                }
-                compare_btn.setProgress(40);
-                pullUser1Q(FirebaseAuth.getInstance().getCurrentUser().getUid(), User2QArr);
-
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-    }
-
-    public void getUser1QA(final String User1ID) {
-        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + User1ID);
-        mRef.keepSynced(true);
-
-
-        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            ArrayList<String>user1QuestionArr = new ArrayList<>();
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-
-                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                    if (User1QArr.contains(childSnapshot.getKey())) {
-                        UserQA user1QA = childSnapshot.getValue(UserQA.class);
-                        if (!user1QA.getAnswer().equals("skipped")) {
-                            user1QuestionArr.add(user1QA.getQuestionId());
-                        }
-
-                    }
-
-
-                }
-                compare_btn.setProgress(99);
-                getUser2QA(User2Uid, user1QuestionArr);
-
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-    }
-
-    public void getUser2QA(final String User2ID, final ArrayList arr) {
-        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + User2ID);
-        mRef.keepSynced(true);
-
-
-        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            ArrayList<String>user2QuestionArr = new ArrayList<>();
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                    if (arr.contains(childSnapshot.getKey())) {
-
-                        UserQA user2QA = childSnapshot.getValue(UserQA.class);
-                        if (!user2QA.getAnswer().equals("skipped")) {
-                            user2QuestionArr.add(user2QA.getQuestionId());
-                        }
-
+                for(DataSnapshot child : dataSnapshot.getChildren()){
+                    if( !"skipped".equals(child.getValue(UserQA.class).getAnswer())){
+                        userQA1.add(child.getValue(UserQA.class));
                     }
 
                 }
-                //all the non-skipped questions id both users answered
-                arr.retainAll(user2QuestionArr);
+                compare_btn.setProgress(33);
 
-                User2QA = new ArrayList<>();
-                temp2QA = new ArrayList<>();
-                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                    if (arr.contains(childSnapshot.getKey())) {
-
-                        UserQA user2QA = childSnapshot.getValue(UserQA.class);
-                        if (!user2QA.getAnswer().equals("skipped")) {
-                            User2QA.add(user2QA);
-                            temp2QA.add(user2QA);
-                        }
-
-                    }
-
-                }
-                DatabaseReference mRef2 = FirebaseDatabase.getInstance().getReference("UserQA/" + currentUser.getUid());
-                mRef2.addListenerForSingleValueEvent(new ValueEventListener() {
-
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        User1QA = new ArrayList<>();
-                        temp1QA = new ArrayList<>();
-                        for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                            if (arr.contains(childSnapshot.getKey())) {
-
-                                UserQA user1QA = childSnapshot.getValue(UserQA.class);
-                                if (!user1QA.getAnswer().equals("skipped")) {
-                                    User1QA.add(user1QA);
-                                    temp1QA.add(user1QA);
-                                }
-                            }
-                        }
-
-                        //find questions with the same answer
-                        User1QA.retainAll(User2QA);
-                        //find questions with different answer for user1,user2
-                        temp1QA.removeAll(User1QA);
-                        temp2QA.removeAll(User1QA);
-                        Log.d("afterQA", User1QA.toString());
-                        Log.d("afterQA", String.valueOf(temp1QA.size()));
-                        Log.d("afterQA", String.valueOf(temp2QA.size()));
-
-                        score = (int) (((double) User1QA.size() / (double) arr.size()) * 100);
-
-                        compare_btn.setClickable(true);
-                        if (User2QArr.isEmpty()) {
-                            Toast.makeText(getBaseContext(), mUser.getDisplayname() + " hasn't answered any questions yet", Toast.LENGTH_LONG).show();
-                            compare_btn.setProgress(0);
-                        } else {
-                            setProgressDialog(score);
-
-                            compare_btn.setProgress(0);
-                        }
-
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
+               mRef2.addListenerForSingleValueEvent(new ValueEventListener() {
+                   @Override
+                   public void onDataChange(DataSnapshot dataSnapshot) {
+                       for(DataSnapshot child : dataSnapshot.getChildren()){
+                           if(!"skipped".equals(child.getValue(UserQA.class).getAnswer())){
+                               userQA2.add(child.getValue(UserQA.class));
+                           }
 
 
+                       }
+
+                       mCompatability = new Compatability(userQA1,userQA2);
+                       compare_btn.setProgress(99);
+                       setProgressDialog(mCompatability.getScore());
+
+                   }
+
+                   @Override
+                   public void onCancelled(DatabaseError databaseError) {
+
+                   }
+               });
             }
 
             @Override
@@ -415,21 +256,25 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         });
 
 
+
     }
+
+
 
     private void setProgressDialog(int Score){
+
         Handler mHandler = new Handler();
 
         dialog = new Dialog(UserProfilePage.this);
         dialog.setCanceledOnTouchOutside(true);
         dialog.setContentView(R.layout.score_dialog);
         TextView textview = dialog.findViewById(R.id.compareText);
-        textview.setText("Compare with " + mUser.getUsername()+"\n\t\t"+User1QA.size()+"/"+User2QA.size());
+        textview.setText("Compare with " + mUser.getUsername()+"\n\t\t"+mCompatability.getCommonList().size()+"/"+mCompatability.getCommonQ());
         TextView cancel = dialog.findViewById(R.id.cancel_btn);
         TextView details = dialog.findViewById(R.id.details_btn);
         arcProgress = dialog.findViewById(R.id.arc_progress);
         dialog.show();
-
+        compare_btn.setProgress(0);
         arcProgress.setProgress(0);
 
         for(int i =0 ; i<Score+1;i++){
@@ -443,25 +288,14 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         }
 
 
-
-
-
-
-
-
-
-
-
-
-
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 dialog.dismiss();
-                compare_btn.setProgress(0);
+
             }
         });
-        if(User2QA.isEmpty() && User1QA.isEmpty()){
+        if(mCompatability.getCommonQ()==0){
             details.setClickable(false);
             details.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.ripple));
             details.setEnabled(false);
@@ -471,11 +305,11 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                 public void onClick(View view) {
                     // send user QA data to the result details activity
                     Intent i = new Intent(getApplicationContext(), ResultActivity.class);
-                    i.putExtra("sameAnswer", User1QA);
+                    i.putExtra("sameAnswer", mCompatability.getCommonList());
                     i.putExtra("user2", mUser);
                     i.putExtra("user2Id" ,uid);
-                    i.putExtra("diffAnswer1", temp1QA);
-                    i.putExtra("diffAnswer2", temp2QA);
+                    i.putExtra("diffAnswer1", mCompatability.getDiffList());
+                    i.putExtra("diffAnswer2", mCompatability.getDiffList2());
                     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
                             FLAG_ACTIVITY_BROUGHT_TO_FRONT);
 
@@ -620,7 +454,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
 
     public void qrOnClick(View view) {
-     Intent intent = new Intent(getApplicationContext(),ImageViewer.class);
+     Intent intent = new Intent(getApplicationContext(),MyQR_Code.class);
         ActivityOptionsCompat options = ActivityOptionsCompat.
                 makeSceneTransitionAnimation(this, findViewById(R.id.profile_QR), "qr_transition");
         startActivity(intent,options.toBundle());
@@ -846,8 +680,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
              showBasicDialog("Are you sure to reset all the questions ?");
             } else if (id == R.id.compare_btn) {
                 if (mUser != null) {
-                    compare_btn.setProgress(0);
-                    compareWithUser2(mUser);
+                    compareWithUser2();
                 }
             } else if (id == R.id.message_btn) {
                 if (!uid.equals(currentUser.getUid())) {

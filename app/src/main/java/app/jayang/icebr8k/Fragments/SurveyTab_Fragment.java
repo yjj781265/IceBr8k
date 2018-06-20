@@ -3,9 +3,11 @@ package app.jayang.icebr8k.Fragments;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.util.Log;
@@ -29,7 +31,9 @@ import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.github.javiersantos.materialstyleddialogs.enums.Style;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -45,9 +49,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
+import app.jayang.icebr8k.Modle.CommentBottomSheetFrag;
 import app.jayang.icebr8k.Modle.SurveyQ;
+import app.jayang.icebr8k.Modle.UserDialog;
 import app.jayang.icebr8k.Modle.UserQA;
 import app.jayang.icebr8k.R;
+import app.jayang.icebr8k.Utility.Compatability;
 
 
 /**
@@ -58,14 +65,17 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
     View mview;
     private BubbleSeekBar mSeekBar;
     private TextView mTextView, msubTextview, progressText;
-    private ImageView favorite_btn;
+
     private RadioGroup mRadioGroup;
+    private ImageView  thumbUp, thumbDown;
     private RelativeLayout loadingGif;
     private BootstrapButton mSubmit;
     private ImageView backArrow;
+    private UserQA  currentUserQA;
     private TextView skip;
-    private int index =0;
+    private int index =0, ChilderenCounter =0 , Counter=0;
     private FloatingActionButton mActionButton;
+    private MaterialDialog loadingDialog;
     private String TAG = "surveyFrag";
     private CardView cardView;
     private DatabaseReference userQARef;
@@ -105,12 +115,18 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
     public View onCreateView(LayoutInflater inflater, @Nullable  ViewGroup container, @Nullable final Bundle savedInstanceState) {
 
       mview = inflater.inflate(R.layout.survey_tab,container,false);
+
+
+        thumbUp = mview.findViewById(R.id.survey_thumbup);
+        thumbDown = mview.findViewById(R.id.survey_thumbdown);
+
         mSubmit = mview.findViewById(R.id.submitBtn);
         mSubmit.setVisibility(View.GONE);
         backArrow = mview.findViewById(R.id.backarrow_survey);
         backArrow.setVisibility(View.GONE);
         mProgressBar = mview.findViewById(R.id.loading_progressbar);
         mProgressBar.setVisibility(View.INVISIBLE);
+
 
         mSeekBar = mview.findViewById(R.id.seekBar);
         mSeekBar.setVisibility(View.INVISIBLE);
@@ -124,8 +140,8 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
         msubTextview.setVisibility(View.GONE);
         progressText = mview.findViewById(R.id.progress_text);
         progressText.setVisibility(View.INVISIBLE);
-        favorite_btn = mview.findViewById(R.id.favorite_btn);
-        favorite_btn.setVisibility(View.GONE);
+
+
         mActionButton= mview.findViewById(R.id.floatingActionButton);
         mActionButton.setVisibility(View.GONE);
         skip = mview.findViewById(R.id.skip_btn);
@@ -135,7 +151,57 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
         loadingGif = mview.findViewById(R.id.survey_loading);
         loadingGif.setVisibility(View.VISIBLE);
 
+        loadingDialog = new MaterialDialog.Builder(getContext())
 
+                .content("Updating your compatibility ")
+                .progress(true, 0).build();
+
+
+       thumbUp.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View v) {
+               Toast.makeText(getActivity(), ""+currentUserQA.getQuestion(), Toast.LENGTH_SHORT).show();
+               if(thumbUp.isSelected()){
+                   thumbUp.setSelected(false);
+                   Snackbar.make(mview, "Removed like for this question",
+                           Snackbar.LENGTH_SHORT)
+                           .show();
+
+               }else{
+                   thumbUp.setSelected(true);
+                   thumbDown.setSelected(false);
+                   YoYo.with(Techniques.Tada).playOn(thumbUp);
+
+                   Snackbar.make(mview, "You liked this question",
+                           Snackbar.LENGTH_SHORT)
+                           .show();
+               }
+           }
+       });
+
+        thumbDown.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(thumbDown.isSelected()){
+                    thumbDown.setSelected(false);
+                    Snackbar.make(mview, "Removed dislike for this question",
+                            Snackbar.LENGTH_SHORT)
+                            .show();
+                }else{
+                    thumbDown.setSelected(true);
+                    thumbUp.setSelected(false);
+                    YoYo.with(Techniques.Bounce).playOn(thumbDown);
+                    Snackbar.make(mview, "You disliked this question",
+                            Snackbar.LENGTH_SHORT)
+                            .show();
+                }
+                CommentBottomSheetFrag mCommentBottomSheetFrag = new CommentBottomSheetFrag();
+                mCommentBottomSheetFrag.show(getFragmentManager(),"bottomsheet");
+            }
+
+
+
+        });
 
 
 
@@ -353,9 +419,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
                 }
                 mProgressBar.setVisibility(View.GONE);
                 loadingGif.setVisibility(View.GONE);
-                if(cardView.getVisibility() == View.GONE) {
-                    YoYo.with(Techniques.FadeIn).duration(500).playOn(cardView);
-                }
+
                 cardView.setVisibility(View.VISIBLE);
 
             }
@@ -373,7 +437,6 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
         }else{
             backArrow.setVisibility(View.VISIBLE);
         }
-
         if(userQAHashMap.get(surveyQ)!=null){
             updateUI_QA(surveyQ);
         }else{
@@ -393,7 +456,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
                     break;
             }
         }
-
+        compareWithFriends();
 
 
     }
@@ -441,7 +504,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
             mSpinner.setVisibility(View.VISIBLE);
             mRadioGroup.setVisibility(View.GONE);
 
-            favorite_btn.setVisibility(View.VISIBLE);
+
             mSubmit.setVisibility(View.VISIBLE);
             msubTextview.setVisibility(View.GONE);
         }
@@ -460,32 +523,18 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
 
           }
 
-            if(userQAHashMap.get(surveyQ).getFavorite()!=null){
-                favorite_btn.setSelected(userQAHashMap.get(surveyQ).getFavorite());
 
-            }
 
 
             final UserQA userQA = new UserQA();
             userQA.setQuestion(surveyQ.getQuestion());
             userQA.setQuestionId(surveyQ.getQuestionId());
+            currentUserQA = userQA;
             //default is false;
             userQA.setFavorite(userQAHashMap.get(surveyQ).getFavorite());
 
 
-            //update Database
-            favorite_btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(favorite_btn.isSelected()){
-                        favorite_btn.setSelected(false);
-                        userQA.setFavorite(false);
-                    }else{
-                        favorite_btn.setSelected(true);
-                        userQA.setFavorite(true);
-                    }
-                }
-            });
+
             skip.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -513,6 +562,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
                         userQAHashMap.put(surveyQ,userQA);
                     }else if(index ==surveyList.size()){
                         hideCardViewComponent();
+
                     }
                 }
             });
@@ -534,7 +584,6 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
             mSpinner.setVisibility(View.GONE);
             mRadioGroup.setVisibility(View.GONE);
 
-            favorite_btn.setVisibility(View.VISIBLE);
             mSubmit.setVisibility(View.VISIBLE);
             msubTextview.setVisibility(View.VISIBLE);
             String str = userQAHashMap.get(surveyQ).getAnswer();
@@ -545,9 +594,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
                 mSeekBar.setProgress(5f);
 
             }
-            if(userQAHashMap.get(surveyQ).getFavorite()!=null){
-                favorite_btn.setSelected(userQAHashMap.get(surveyQ).getFavorite());
-            }
+
 
 
 
@@ -557,22 +604,11 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
             final UserQA userQA = new UserQA();
             userQA.setQuestion(surveyQ.getQuestion());
             userQA.setQuestionId(surveyQ.getQuestionId());
+            currentUserQA = userQA;
             //default is false;
             userQA.setFavorite(userQAHashMap.get(surveyQ).getFavorite());
 
-            //update Database
-            favorite_btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(favorite_btn.isSelected()){
-                        favorite_btn.setSelected(false);
-                        userQA.setFavorite(false);
-                    }else{
-                        favorite_btn.setSelected(true);
-                        userQA.setFavorite(true);
-                    }
-                }
-            });
+
             skip.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -616,7 +652,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
             progressText .setVisibility(View.VISIBLE);
             progressText.setText(index +"/"+surveyList.size());
             skip.setVisibility(View.VISIBLE);
-            favorite_btn.setVisibility(View.VISIBLE);
+
             mSubmit.setVisibility(View.VISIBLE);
             mSeekBar.setVisibility(View.GONE);
             mSpinner.setVisibility(View.GONE);
@@ -630,9 +666,6 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
             String answer =null;
             if(userQAHashMap.get(surveyQ)!=null) {
                 answer =userQAHashMap.get(surveyQ).getAnswer();
-                if(userQAHashMap.get(surveyQ).getFavorite()!=null){
-                    favorite_btn.setSelected(userQAHashMap.get(surveyQ).getFavorite());
-                }
 
             }
 
@@ -650,21 +683,10 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
             final UserQA userQA = new UserQA();
             userQA.setQuestion(surveyQ.getQuestion());
             userQA.setQuestionId(surveyQ.getQuestionId());
+            currentUserQA = userQA;
             //default is false;
             userQA.setFavorite(userQAHashMap.get(surveyQ).getFavorite());
-            //update Database
-            favorite_btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(favorite_btn.isSelected()){
-                        favorite_btn.setSelected(false);
-                        userQA.setFavorite(false);
-                    }else{
-                        favorite_btn.setSelected(true);
-                        userQA.setFavorite(true);
-                    }
-                }
-            });
+
 
             skip.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -721,8 +743,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
             progressText .setVisibility(View.VISIBLE);
             progressText.setText(index +"/"+surveyList.size());
             skip.setVisibility(View.VISIBLE);
-            favorite_btn.setVisibility(View.VISIBLE);
-            favorite_btn.setSelected(false);
+
             mSubmit.setVisibility(View.VISIBLE);
             mSeekBar.setVisibility(View.GONE);
             mSpinner.setVisibility(View.GONE);
@@ -744,21 +765,9 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
             final UserQA userQA = new UserQA();
             userQA.setQuestion(surveyQ.getQuestion());
             userQA.setQuestionId(surveyQ.getQuestionId());
+            currentUserQA = userQA;
             //default is false;
             userQA.setFavorite(false);
-            //update Database
-            favorite_btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                 if(favorite_btn.isSelected()){
-                     favorite_btn.setSelected(false);
-                     userQA.setFavorite(false);
-                 }else{
-                     favorite_btn.setSelected(true);
-                     userQA.setFavorite(true);
-                 }
-                }
-            });
 
             skip.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -819,8 +828,8 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
             mSpinner.setVisibility(View.GONE);
             mRadioGroup.setVisibility(View.GONE);
 
-            favorite_btn.setVisibility(View.VISIBLE);
-            favorite_btn.setSelected(false);
+
+
             mSubmit.setVisibility(View.VISIBLE);
             msubTextview.setVisibility(View.VISIBLE);
 
@@ -830,22 +839,11 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
             final UserQA userQA = new UserQA();
             userQA.setQuestion(surveyQ.getQuestion());
             userQA.setQuestionId(surveyQ.getQuestionId());
+            currentUserQA = userQA;
             //default is false;
             userQA.setFavorite(false);
 
-            //update Database
-            favorite_btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(favorite_btn.isSelected()){
-                        favorite_btn.setSelected(false);
-                        userQA.setFavorite(false);
-                    }else{
-                        favorite_btn.setSelected(true);
-                        userQA.setFavorite(true);
-                    }
-                }
-            });
+
             skip.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -894,8 +892,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
             mSpinner.setVisibility(View.VISIBLE);
             mRadioGroup.setVisibility(View.GONE);
 
-            favorite_btn.setVisibility(View.VISIBLE);
-            favorite_btn.setSelected(false);
+
             mSubmit.setVisibility(View.VISIBLE);
             msubTextview.setVisibility(View.GONE);
         }
@@ -909,23 +906,12 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
             final UserQA userQA = new UserQA();
             userQA.setQuestion(surveyQ.getQuestion());
             userQA.setQuestionId(surveyQ.getQuestionId());
+            currentUserQA = userQA;
             //default is false;
             userQA.setFavorite(false);
 
 
-            //update Database
-            favorite_btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(favorite_btn.isSelected()){
-                        favorite_btn.setSelected(false);
-                        userQA.setFavorite(false);
-                    }else{
-                        favorite_btn.setSelected(true);
-                        userQA.setFavorite(true);
-                    }
-                }
-            });
+
             skip.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -980,8 +966,12 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
         mActionButton.setClickable(true);
         skip.setVisibility(View.GONE);
         backArrow.setVisibility(View.GONE);
-        favorite_btn.setVisibility(View.GONE);
         progressText.setVisibility(View.GONE);
+
+
+
+
+
     }
 
     public void showLog(String str){
@@ -995,12 +985,15 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
         mFriendRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+
               for(DataSnapshot childSnapshot : dataSnapshot.getChildren()){
                   if( childSnapshot.hasChild("stats") &&
                           childSnapshot.child("stats").getValue(String.class).equals("accepted")){
-                      pullUser1QA(childSnapshot.getKey());
+                      compareWithUser2(childSnapshot.getKey());
                   }
               }
+
+
             }
 
             @Override
@@ -1012,27 +1005,46 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
 
     }
 
-    public void pullUser1QA(final String user2Uid) {
+    public void compareWithUser2(final String user2Uid) {
+        final ArrayList<UserQA> userQA1 = new ArrayList<>();
+        final ArrayList<UserQA> userQA2 = new ArrayList<>();
+        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + currentUser.getUid());
+        final DatabaseReference mRef2 = FirebaseDatabase.getInstance().getReference("UserQA/" + user2Uid);
 
-
-        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("" +
-                "UserQA/" + currentUser.getUid());
-        mRef.keepSynced(true);
         mRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            ArrayList<UserQA> User1QA = new ArrayList<>();
-
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                    UserQA userQA = childSnapshot.getValue(UserQA.class);
-                    User1QA.add(userQA);
+                for(DataSnapshot child : dataSnapshot.getChildren()){
+                    if( !"skipped".equals(child.getValue(UserQA.class).getAnswer())){
+                        userQA1.add(child.getValue(UserQA.class));
+                    }
 
                 }
 
-                if (dataSnapshot.getChildrenCount() == User1QA.size()) {
-                    pullUser2QA( User1QA, user2Uid);
-                }
+
+                mRef2.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for(DataSnapshot child : dataSnapshot.getChildren()){
+                            if(!"skipped".equals(child.getValue(UserQA.class).getAnswer())){
+                                userQA2.add(child.getValue(UserQA.class));
+                            }
+
+
+                        }
+
+                        Compatability mCompatability = new Compatability(userQA1,userQA2);
+                        setScoreNode(user2Uid,mCompatability.getScore().toString());
+
+
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
             }
 
             @Override
@@ -1040,73 +1052,6 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
 
             }
         });
-
-    }
-
-    private void pullUser2QA(final ArrayList<UserQA> user1QA, final String user2Uid) {
-
-        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + user2Uid);
-        mRef.keepSynced(true);
-        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            ArrayList<UserQA> User2QA = new ArrayList<>();
-
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                    UserQA userQA = childSnapshot.getValue(UserQA.class);
-                    User2QA.add(userQA);
-                }
-                SetScore(user1QA,User2QA,user2Uid);
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-
-    public void SetScore(ArrayList<UserQA> user1Arr, ArrayList<UserQA> user2Arr, String user2Uid) {
-        int size = user1Arr.size();
-        int commonQuestionSize = 0;
-        String score;
-
-        ArrayList<String> user1StrArr = new ArrayList<>();
-        ArrayList<String> user2StrArr = new ArrayList<>();
-
-        for (UserQA userQA : user1Arr) {
-            if (!userQA.getAnswer().equals("skipped")) {
-                user1StrArr.add(userQA.getQuestionId());
-            }
-
-        }
-        for (UserQA userQA : user2Arr) {
-            if (!userQA.getAnswer().equals("skipped")) {
-                user2StrArr.add(userQA.getQuestionId());
-            }
-        }
-
-        user1StrArr.retainAll(user2StrArr);
-
-        commonQuestionSize = user1StrArr.size();
-
-        Log.d("Score", "Common Question " + commonQuestionSize);
-        user1Arr.retainAll(user2Arr);
-        Log.d("Score", String.valueOf(user1Arr.size()));
-        Log.d("Score", "Size " + size);
-        if (commonQuestionSize != 0) {
-            score = String.valueOf((int) (((double) user1Arr.size() / (double) commonQuestionSize) * 100));
-            Log.d("Score", "Score is " + score);
-
-        }else if(user1Arr.isEmpty() || user2Arr.isEmpty()){
-            score ="0";
-
-        } else {
-            score = "0";
-        }
-        setScoreNode(user2Uid,score);
 
 
 
@@ -1126,22 +1071,43 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
                 .child(currentUser.getUid())
                 .child("score");
 
-        scoreRef2.setValue(score);
+        scoreRef2.setValue(score).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+
+                Log.d(TAG,""+ ChilderenCounter + " " + Counter);
+
+            }
+        });
+
+
+
     }
 
 
     @Override
     public void onSuccess(Object o) {
-        new UpdateCompatibility().execute();
+
     }
 
-    // run in the background thread
-    private class UpdateCompatibility extends AsyncTask<Void,Void,Void>{
+    protected  class UpdateCompatability extends  AsyncTask<Void,Void,Void>{
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            loadingDialog.dismiss();
+
+
+        }
+
+
+
         @Override
         protected Void doInBackground(Void... voids) {
             compareWithFriends();
             return null;
         }
     }
+
+
+
 
 }
