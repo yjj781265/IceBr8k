@@ -144,6 +144,7 @@ public class login_page extends AppCompatActivity implements
                 signOut();
             }
         });
+        mDatePickerDialog.setTitle(R.string.pick_birthdate);
 
         sv = findViewById(R.id.mScroll);
         loginPage_Rlayout = findViewById(R.id.login_page);
@@ -586,7 +587,7 @@ public class login_page extends AppCompatActivity implements
 
         if (mDatePickerDialog != null) {
             mDatePickerDialog.show();
-            Toast.makeText(this, "Please Choose Your Birthday", Toast.LENGTH_LONG).show();
+
 
 
         }
@@ -970,7 +971,8 @@ public class login_page extends AppCompatActivity implements
         Birthdate mBirthdate = new Birthdate(year, monthOfYear + 1, dayOfMonth);
         if (!checkAge(mBirthdate)) {
             Toast.makeText(this, getString(R.string.ageError), Toast.LENGTH_LONG).show();
-            showDatePickerDialog();
+            signOut();
+
         } else {
             DatabaseReference mRef = FirebaseDatabase.getInstance().getReference()
                     .child("Users").child(currentUser.getUid()).child("birthdate");

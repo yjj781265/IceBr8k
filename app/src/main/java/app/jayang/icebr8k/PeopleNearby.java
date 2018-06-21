@@ -203,6 +203,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         }
         if (getIntent().getExtras() != null) {
             String radiusString = getIntent().getExtras().getString("radius");
+            mToolbar.setTitle("People Nearby"+'('+radiusString+')');
             radius = convertMileStringtoKm(radiusString);
             index = getIntent().getExtras().getInt("index");
             if (index == 0) {
@@ -224,7 +225,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         mfilter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showSingleChoiceDialog();
+                ;
             }
         });
 
@@ -243,7 +244,7 @@ public class PeopleNearby extends AppCompatActivity implements OnMapReadyCallbac
         switch (item.getItemId()) {
             case R.id.peoplenearby_maptype:
                 if (map != null) {
-                    showMapTypeSelectorDialog();
+                    showSingleChoiceDialog();
                 }
 
                 return true;
@@ -702,7 +703,7 @@ public void compareWithUser2(final UserLocationDialog dialog) {
 
                     Compatability mCompatability = new Compatability(userQA1,userQA2);
                     dialog.setScore(mCompatability.getScore().toString());
-                    addMapMarker(dialog);
+                   // addMapMarker(dialog);
 
                     if(mLocationDialogs.contains(dialog)){
                         int i = mLocationDialogs.indexOf(dialog);
@@ -768,6 +769,7 @@ public void compareWithUser2(final UserLocationDialog dialog) {
                     public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
                         index =which;
                         radius = convertMileStringtoKm(String.valueOf(text));;
+                        mToolbar.setTitle("People Nearby"+'('+text+')');
                         if(index ==0){
                             ZoomLevel =9f;
                         }else if(index == 1){

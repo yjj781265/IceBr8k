@@ -4,7 +4,8 @@
               android:orientation="horizontal"
               android:layout_width="match_parent"
               android:animateLayoutChanges="true"
-              android:layout_height="wrap_content"
+              android:layout_height="72dp"
+              android:padding="16dp"
               android:gravity="center_vertical"
               android:background="?android:attr/selectableItemBackground"
               android:clickable="true"
@@ -14,15 +15,15 @@
         android:id="@+id/avatar_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
+        android:layout_marginRight="16dp"
+
 
         android:layout_gravity="center_vertical">
 
         <ImageView
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:id="@+id/location_avatar"
-            android:layout_marginLeft="10dp"
 
             android:scaleType="centerCrop"/>
 
@@ -40,7 +41,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:id="@+id/location_Rlayout"
 
@@ -50,7 +51,6 @@
             android:id="@+id/location_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="10dp"
             android:textColor="@color/black"
             android:textSize="16sp"
             tools:fontFamily="sans-serif"/>
@@ -59,7 +59,6 @@
             android:id="@+id/location_username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="12dp"
             android:layout_below="@id/location_name"
             android:textSize="14sp"
             />
@@ -68,7 +67,6 @@
             android:orientation="vertical"
             android:layout_alignParentEnd="true"
             android:gravity="end"
-            android:layout_marginEnd="30dp"
             android:layout_height="wrap_content">
 
             <TextView

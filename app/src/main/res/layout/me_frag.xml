@@ -66,6 +66,7 @@
 
         <ImageView
             android:layout_gravity="center_vertical"
+            android:visibility="gone"
             android:layout_weight="1"
             android:transitionName="qr_transition"
             android:id="@+id/QR_frag"

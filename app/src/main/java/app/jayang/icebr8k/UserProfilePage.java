@@ -161,7 +161,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
             // uid is currentuser
         }else if(mUser != null && uid!=null && uid.equals(currentUser.getUid())){
-            qrImage.setVisibility(View.VISIBLE);
+            qrImage.setVisibility(View.GONE);
             compare_btn.setVisibility(View.GONE);
             addFriend_btn.setVisibility(View.GONE);
             message_btn.setVisibility(View.GONE);

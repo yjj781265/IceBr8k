@@ -96,6 +96,7 @@ This Service does not use these “cookies” explicitly. However, the app may u
 \nIf you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us, icebr8kdev@gmail.com </string>
 
     <string name="icebr8k_s_privacy_policy_agreement"><u>IceBr8k\'s Privacy Policy Agreement</u></string>
+    <string name="pick_birthdate">"Choose your birthdate</string>
 
 
 </resources>

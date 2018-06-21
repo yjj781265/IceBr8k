@@ -26,13 +26,14 @@
         app:showAsAction="never"
         />
 
-
+<!--
     <item
     android:title ="Scan QR Code"
     android:orderInCategory="100"
     android:id="@+id/scan_qr"
     android:icon="@drawable/ic_action_scan"
     app:showAsAction="never"/>
+    -->
 
     <item
         android:title ="People Nearby"

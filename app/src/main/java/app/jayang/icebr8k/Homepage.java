@@ -268,7 +268,7 @@ public class Homepage extends AppCompatActivity  implements
              i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
              startActivity(i);
                 return true;
-
+/*
             case R.id.scan_qr:
                 if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
                     return false;
@@ -283,6 +283,7 @@ public class Homepage extends AppCompatActivity  implements
                     startActivity(intent);
                 }
                 return true;
+                */
             case R.id.people_nearby:
                 if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
                     return false;
@@ -294,11 +295,11 @@ public class Homepage extends AppCompatActivity  implements
                         showSingleChoiceDialog();
                     }else {
                         new MaterialDialog.Builder(this)
-                                .content("\"Share My Location\" is disabled, you can go to Me tab to enable.")
+                                .content("\"Share My Location\" is disabled, you can go to Me tab to enable it.")
                                 .positiveText(R.string.ok).onPositive(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                viewPager.setCurrentItem(3,true);
+                                viewPager.setCurrentItem(4,true);
                             }
                         })
                                 .show();

@@ -142,6 +142,7 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
                 .minDate(1900, 0, 1)
                 .build();
         mDatePickerDialog.setCanceledOnTouchOutside(false);
+        mDatePickerDialog.setTitle(R.string.pick_birthdate);
 
         /*mDatePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
