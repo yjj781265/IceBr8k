@@ -74,6 +74,7 @@ dependencies {
     compile 'com.github.lzyzsd:circleprogress:1.2.1'
     compile 'com.github.javiersantos:MaterialStyledDialogs:2.1'
     compile 'com.github.drawers:SpinnerDatePicker:1.0.6'
+    compile 'com.github.deano2390:MaterialShowcaseView:1.2.0'
 
     implementation 'com.android.support:recyclerview-v7:27.1.1'
     implementation 'com.android.support:gridlayout-v7:27.1.1'

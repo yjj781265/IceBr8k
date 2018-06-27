@@ -128,7 +128,14 @@
         <item name="android:textColorPrimary">@color/dark_gray</item>
         <item name="android:colorControlNormal" tools:targetApi="lollipop">@color/colorPrimary</item>
     </style>
-
+   <!-- for showcase text style-->
+    <style name="MyTitleStyle" parent="@android:style/Widget.TextView">
+        <item name="android:textSize">20sp</item>
+        <item name="android:paddingTop">150dp</item>
+        <item name="android:layout_marginTop">150dp</item>
+        <item name="android:textColor">#00ff00</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+    </style>
 
 
 
