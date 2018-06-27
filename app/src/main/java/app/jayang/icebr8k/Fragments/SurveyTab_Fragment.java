@@ -1037,7 +1037,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
         progressText.setVisibility(View.GONE);
 
         //reset tutorial
-        MaterialShowcaseView.resetSingleUse(getActivity(), "survey_tutorial");
+        //MaterialShowcaseView.resetSingleUse(getActivity(), "survey_tutorial");
 
         // sequence example
         ShowcaseConfig config = new ShowcaseConfig();
