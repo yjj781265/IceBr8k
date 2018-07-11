@@ -95,7 +95,7 @@ public class login_page extends AppCompatActivity implements
     private TextInputEditText password, email;
     private MaterialDialog userNameDialog, dismissDialog;
     private AppCompatCheckBox rememberMe;
-    private final String DEFAULT_PHOTO_URL = "https://i.imgur.com/zI4v7oF.png";
+    private final String DEFAULT_PHOTO_URL = "https://i.imgur.com/xUAsoWs.png";
 
 
     @Override

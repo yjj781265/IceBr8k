@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -60,7 +62,7 @@ import app.jayang.icebr8k.Utility.MyDateFormatter;
 public class Userstab_Fragment extends Fragment  {
     View view;
     String TAG ="UserFrag";
-    AppBarLayout mAppBarLayout;
+
     FirebaseDatabase mDatabase;
     DatabaseReference databaseReference;
     ArrayList<UserDialog> mUserDialogArrayList;
@@ -68,10 +70,10 @@ public class Userstab_Fragment extends Fragment  {
     RecyclerView mRecyclerView;
     FirebaseUser currentUser;
     RecyclerAdapter mAdapter;
+    TextView seachView;
     Integer friendCount;
-    TextView mSearchView;
-    Button filter_btn;
     BootstrapButton addFriend;
+    Button filter_btn;
     private BroadcastReceiver tickReceiver;
     private SharedPreferences sharedPref;
     private Boolean sortByScore,done;
@@ -150,19 +152,21 @@ public class Userstab_Fragment extends Fragment  {
         mRecyclerView = view.findViewById(R.id.recyclerView_id);
         loadingGif =view.findViewById(R.id.loadingImg_userTab);
         loadingGif.setVisibility(View.GONE);
-        mSearchView =view.findViewById(R.id.searchview_user);
         addFriend = view.findViewById(R.id.add_friend_frag);
         addFriend.setVisibility(View.GONE);
-        mAppBarLayout = view.findViewById(R.id.appbar);
-        mAppBarLayout.setExpanded(false);
+        filter_btn = view.findViewById(R.id.filter_btn);
+        seachView = view.findViewById(R.id.searchview_user);
+
+
         final LinearLayoutManager manager = new LinearLayoutManager(view.getContext());
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.setHasFixedSize(true);
-        mAdapter = new RecyclerAdapter(getContext(),mUserDialogArrayList);
+        mAdapter = new RecyclerAdapter(getActivity(),mUserDialogArrayList);
         mRecyclerView.setItemAnimator(null);
         mAdapter.setHasStableIds(true);
         mRecyclerView.setAdapter(mAdapter);
-        filter_btn =view.findViewById(R.id.filter_btn);
+
+
 
 
 
@@ -215,11 +219,7 @@ public class Userstab_Fragment extends Fragment  {
             }
         });
 
-
-
-
-
-        mSearchView.setOnClickListener(new View.OnClickListener() {
+        seachView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -232,11 +232,14 @@ public class Userstab_Fragment extends Fragment  {
                 Intent i = new Intent(getContext(), SearchName.class);
                 i.putParcelableArrayListExtra("friendList",mUserDialogArrayList);
                 i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                mAppBarLayout.setExpanded(false,true);
                 startActivity(i);
                 getActivity().overridePendingTransition(0,0);
             }
         });
+
+
+
+
 
         addFriend.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -254,6 +257,9 @@ public class Userstab_Fragment extends Fragment  {
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
+
+
+
 
     }
 
@@ -292,8 +298,6 @@ public class Userstab_Fragment extends Fragment  {
                         if(!mUserDialogArrayList.contains(dialog)){
                             mUserDialogArrayList.add(dialog);
                             addFriend.setVisibility(View.GONE);
-                            mAppBarLayout.setExpanded(false);
-                            mAppBarLayout.setVisibility(View.VISIBLE);
                             getUserinfo(dialog);
 
                         }
@@ -313,8 +317,6 @@ public class Userstab_Fragment extends Fragment  {
                         if(!mUserDialogArrayList.contains(dialog)){
                             mUserDialogArrayList.add(dialog);
                             getUserinfo(dialog);
-                            mAppBarLayout.setExpanded(false);
-                            mAppBarLayout.setVisibility(View.VISIBLE);
                             loadingGif.setVisibility(View.GONE);
                             addFriend.setVisibility(View.GONE);
 
@@ -336,8 +338,6 @@ public class Userstab_Fragment extends Fragment  {
                 mAdapter.submitList(newList);
                 if(mUserDialogArrayList.isEmpty()){
                     addFriend.setVisibility(View.VISIBLE);
-                    mAppBarLayout.setExpanded(false);
-                    mAppBarLayout.setVisibility(View.GONE);
 
                 }
 
@@ -358,8 +358,6 @@ public class Userstab_Fragment extends Fragment  {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(!mUserDialogArrayList.isEmpty()){
-                    mAppBarLayout.setExpanded(false);
-                    mAppBarLayout.setVisibility(View.VISIBLE);
 
                     addFriend.setVisibility(View.GONE);
                     YoYo.with(Techniques.FadeIn).duration(500).playOn(mRecyclerView);
@@ -367,8 +365,7 @@ public class Userstab_Fragment extends Fragment  {
                         getUserinfo(dialog);
                     }
                 }else{
-                    mAppBarLayout.setExpanded(false);
-                    mAppBarLayout.setVisibility(View.GONE);
+
 
                     addFriend.setVisibility(View.VISIBLE);
                 }

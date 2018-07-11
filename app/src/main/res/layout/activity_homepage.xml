@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:animateLayoutChanges="true"
     android:layout_width="match_parent"
@@ -12,36 +11,38 @@
 
 
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/users_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?android:attr/actionBarSize"
-        android:elevation="6dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        app:popupTheme="@style/AppTheme"
-        android:background="@color/colorPrimary">
-        <LinearLayout
+
+        <RelativeLayout
+            android:background="@color/colorPrimary"
+            android:id="@+id/users_toolbar"
             android:layout_width="match_parent"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:layout_height="match_parent">
+            android:elevation="0dp"
+            android:layout_height="56dp">
 
             <ImageView
+                android:id="@+id/users_main_menu"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tooltipText="Main Menu"
+                android:layout_margin="16dp"
+                android:src="@drawable/ic_action_menu"
+                android:layout_centerVertical="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <ImageView
+                android:layout_centerInParent="true"
                 android:layout_width="150dp"
                 android:layout_height="30dp"
-                android:layout_marginLeft="16dp"
                 android:src="@drawable/icebr8k_banner_white"/>
 
 
-        </LinearLayout>
+        </RelativeLayout>
 
 
 
-    </android.support.v7.widget.Toolbar>
+
 
 
 
@@ -61,28 +62,23 @@
         android:textSize="16sp"
         android:visibility="gone"/>
 
-    <android.support.design.widget.CoordinatorLayout
-        android:id="@+id/coordLayout"
-        android:layout_below="@id/noConnection_tv"
-        android:layout_above="@id/bottom_navigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+
 
 
         <app.jayang.icebr8k.Modle.myViewPager
             android:id="@+id/homepage_viewpager"
+            android:layout_below="@id/noConnection_tv"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@+id/bottom_navigation"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:overScrollMode="never"
             android:background="@android:color/white">
 
         </app.jayang.icebr8k.Modle.myViewPager>
 
 
-    </android.support.design.widget.CoordinatorLayout>
+
 
     <com.aurelhubert.ahbottomnavigation.AHBottomNavigation
         android:id="@+id/bottom_navigation"

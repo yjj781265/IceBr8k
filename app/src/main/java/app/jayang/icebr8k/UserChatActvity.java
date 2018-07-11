@@ -69,9 +69,8 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
     private final String LOAD_ID = "loading";
     private final String TYPE_ID = "typing";
 
-    private  String user2Uid = "WDmiRBfGNORfyc5di1YzOMeAeVr2";
-    //EUcJQFrdj5g7MA4Xkyzc57UnjKt1
-    //WDmiRBfGNORfyc5di1YzOMeAeVr2
+    private  String user2Uid = null;
+
 
     private MyEditText editText;
     private TextView toast;

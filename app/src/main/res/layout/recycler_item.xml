@@ -8,7 +8,6 @@
     android:layout_width="match_parent"
     android:layout_height="56dp"
     android:clickable="true"
-    android:background="@color/white"
     android:foreground="?attr/selectableItemBackgroundBorderless"
     android:gravity="start"
     android:theme="@style/AppTheme"
@@ -27,6 +26,7 @@
         android:layout_marginTop="8dp"
         android:scaleType="centerCrop"
         android:src="@drawable/default_avatar3"
+        android:transitionName="user_avatar_transition"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
@@ -58,6 +58,7 @@
         android:maxLines="1"
         android:textColor="@color/black"
         android:textSize="16sp"
+        android:transitionName="user_name_transition"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/linearLayout"
         app:layout_constraintStart_toEndOf="@+id/imageview_id"

@@ -128,7 +128,8 @@ public class UserQA implements Parcelable,Comparable<UserQA> {
 
     @Override
     public int compareTo(@NonNull UserQA userQA) {
-        return question.compareTo(userQA.getQuestion());
+        // remove leading space
+        return question.trim().compareTo(userQA.getQuestion().trim());
     }
 
 

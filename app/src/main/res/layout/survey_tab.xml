@@ -187,22 +187,22 @@
                 android:paddingBottom="3dp">
 
 
-                <com.beardedhen.androidbootstrap.BootstrapButton
+                <TextView
 
                     android:id="@+id/submitBtn"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
+                    android:textColor="@color/colorPrimary"
+                    android:layout_centerInParent="true"
                     android:gravity="center"
                     android:text="Confirm"
-                    android:textSize="14sp"
+                    android:textSize="16dp"
                     android:visibility="gone"
-                    app:bootstrapBrand="success"
-                    app:buttonMode="regular"
-                    app:roundedCorners="true">
+                    >
 
 
-                </com.beardedhen.androidbootstrap.BootstrapButton>
+                </TextView>
 
 
                 <TextView
@@ -211,12 +211,12 @@
 
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    android:layout_margin="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_centerVertical="true"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:clickable="true"
                     android:text="Skip"
-                    android:textColor="@color/colorPrimary"
-                    android:textSize="18sp"
+                    android:textSize="14dp"
                     android:visibility="visible"
                     tools:layout_editor_absoluteX="124dp"/>
 

@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <android.support.v7.widget.CardView
+
+
+        app:cardElevation="0dp"
+
+
+
+        app:cardBackgroundColor="@color/creamYellow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    <android.support.constraint.ConstraintLayout
+
+        android:layout_centerInParent="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <me.grantland.widget.AutofitTextView
+            android:id="@+id/question_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:gravity="left"
+            android:maxLines="3"
+            android:text=""
+            android:textColor="@color/black"
+            android:textSize="20dp"
+            android:textStyle="normal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:minTextSize="16dp"/>
+
+        <TextView
+            android:id="@+id/sub_question_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/question_id"
+            android:layout_marginTop="8dp"
+            android:shadowColor="@android:color/darker_gray"
+            android:text="1:Hate it  10:Love it"
+            android:textSize="14dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="@+id/question_id"
+            app:layout_constraintTop_toBottomOf="@+id/question_id"/>
+
+        <!-- answers portion  -->
+        <LinearLayout
+            android:id="@+id/answer_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toTopOf="@+id/relativeLayout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/sub_question_id">
+
+            <RadioGroup
+                android:id="@+id/radioGroup"
+                android:layout_gravity="center_vertical|start"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+            </RadioGroup>
+
+            <Spinner
+                android:id="@+id/spinner_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/sub_question_id"
+                android:spinnerMode="dropdown"
+                android:visibility="gone"></Spinner>
+
+
+            <com.xw.repo.BubbleSeekBar
+                android:id="@+id/seekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:bsb_hide_bubble="true"
+                app:bsb_max="10"
+                app:bsb_min="1"
+                app:bsb_progress="5"
+                app:bsb_second_track_color="@color/colorAccent"
+                app:bsb_section_count="9"
+                app:bsb_section_text_position="below_section_mark"
+                app:bsb_seek_by_section="true"
+                app:bsb_show_section_mark="true"
+                app:bsb_show_section_text="true"
+                app:bsb_show_thumb_text="false"
+                app:bsb_touch_to_seek="true"
+                />
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/relativeLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.6"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:id="@+id/question_reset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:text="Reset"
+                android:textColor="@color/colorPrimary"
+                android:textSize="16dp"/>
+
+            <TextView
+                android:id="@+id/question_comment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:text="21k Comments"
+                android:textSize="12dp"/>
+
+            <TextView
+                android:id="@+id/question_skip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:text="Skip"
+                android:textSize="14dp"/>
+
+
+        </RelativeLayout>
+
+        <ImageView
+            android:id="@+id/question_skip_stamp"
+            android:layout_width="75dp"
+            android:layout_height="25dp"
+            android:layout_marginBottom="4dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="4dp"
+            android:alpha="0.3"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/answer_layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/question_id"
+            app:srcCompat="@drawable/skipped_stamp"/>
+    </android.support.constraint.ConstraintLayout>
+    </android.support.v7.widget.CardView>
+</RelativeLayout>

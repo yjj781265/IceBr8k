@@ -59,9 +59,7 @@ public class UserMessageDialogAdapter extends RecyclerView.Adapter<RecyclerView.
             inflater.inflate(R.menu.chatdialog_menu, menu);
             mHomepage = (Homepage)mContext;
             tempChatList = new ArrayList<>();
-            if(mHomepage!=null) {
-                mHomepage.getViewPager().setSwipeable(false);
-            }
+
             return true;
         }
 
@@ -88,9 +86,7 @@ public class UserMessageDialogAdapter extends RecyclerView.Adapter<RecyclerView.
         @Override
         public void onDestroyActionMode(ActionMode mode) {
             actionMode = null;
-            if(mHomepage!=null){
-                mHomepage.getViewPager().setSwipeable(true);
-            }
+
           Comparator<UserMessageDialog>  mComparator = new Comparator<UserMessageDialog>() {
                 @Override
                 public int compare(UserMessageDialog dialog, UserMessageDialog t1) {

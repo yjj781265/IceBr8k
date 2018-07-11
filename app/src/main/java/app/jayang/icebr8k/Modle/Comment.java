@@ -1,21 +1,33 @@
 package app.jayang.icebr8k.Modle;
 
-import java.util.ArrayList;
+import android.support.annotation.NonNull;
 
-public class Comment {
+import java.io.Serializable;
+import java.util.Objects;
+
+public class Comment implements Comparable<Comment>, Serializable{
     private String id, senderId, text,type;
-    private Long like, dislike;
     private Long timestamp;
+    private Integer reply;
 
-    public Comment(String id, String senderId, String text, String type, Long timestamp) {
+    public Comment(String id, String senderId, String text, String type, Long timestamp, Integer reply) {
         this.id = id;
         this.senderId = senderId;
         this.text = text;
         this.type = type;
         this.timestamp = timestamp;
+        this.reply = reply;
     }
 
     public Comment() {
+    }
+
+    public Integer getReply() {
+        return reply;
+    }
+
+    public void setReply(Integer reply) {
+        this.reply = reply;
     }
 
     public String getType() {
@@ -26,21 +38,6 @@ public class Comment {
         this.type = type;
     }
 
-    public Long getLike() {
-        return like;
-    }
-
-    public void setLike(Long like) {
-        this.like = like;
-    }
-
-    public Long getDislike() {
-        return dislike;
-    }
-
-    public void setDislike(Long dislike) {
-        this.dislike = dislike;
-    }
 
     public String getId() {
         return id;
@@ -72,6 +69,29 @@ public class Comment {
 
     public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Comment comment = (Comment) o;
+        return Objects.equals(id, comment.id) &&
+                Objects.equals(senderId, comment.senderId);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id, senderId);
+    }
+
+
+
+    @Override
+    public int compareTo(@NonNull Comment o) {
+        return o.getTimestamp().compareTo(this.timestamp);
     }
 }
 

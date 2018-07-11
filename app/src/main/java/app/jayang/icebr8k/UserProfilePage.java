@@ -17,6 +17,7 @@ import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
+import android.transition.Fade;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
@@ -99,6 +100,16 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile_page);
+
+        // prevent flash on status bar
+        Fade fade = new Fade();
+        View decor =  getWindow().getDecorView();
+        fade.excludeTarget(decor.findViewById(R.id.action_bar_container),true);
+        fade.excludeTarget(android.R.id.statusBarBackground,true);
+        fade.excludeTarget(android.R.id.navigationBarBackground,true);
+        getWindow().setEnterTransition(fade);
+        getWindow().setExitTransition(fade);
+
         mRef= FirebaseDatabase.getInstance().getReference();
         mProgressDialog =  new MaterialDialog.Builder(this)
                 .content("Updating Avatar...")
@@ -202,7 +213,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
     @Override
     public boolean onSupportNavigateUp() {
-        finish();
+        supportFinishAfterTransition();
         return true;
     }
 

@@ -12,8 +12,10 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
@@ -26,6 +28,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -68,9 +71,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
 import app.jayang.icebr8k.FriendRequestPage;
 import app.jayang.icebr8k.FullImageView;
 import app.jayang.icebr8k.Homepage;
+import app.jayang.icebr8k.Modle.UserQA;
 import app.jayang.icebr8k.MyQR_Code;
 import app.jayang.icebr8k.Utility.ActivityCommunicator;
 import app.jayang.icebr8k.Modle.User;
@@ -86,67 +91,59 @@ import static android.app.Activity.RESULT_OK;
  */
 
 public class me_frag extends Fragment {
-    private View fragView;
-    private FlatButton reset;
-    private TextView displayname,username,email,badge;
-    private ImageView avatar,qrCode;
-    private FirebaseUser currentuser;
-    private DatabaseReference mRef;
-    private LinearLayout mLinearLayout;
+    private View mView;
+    private ImageView avatar;
+    private TextView username, name;
+    private TabLayout mTabLayout;
+    private ViewPager mViewPager;
+    private ViewPagerAdapter mViewPagerAdapter;
     private RelativeLayout loadingGif;
     private MaterialDialog mProgressDialog;
-    private ScrollView scrollView;
-    private SwitchCompat mSwitchCompat;
-    private ActivityCommunicator activityCommunicator;
-    private User user;
-    private long lastClickTime = 0;
-    private String DEFAULT_URL  = "https://i.imgur.com/zI4v7oF.png";
+    private String DEFAULT_URL  = "https://i.imgur.com/xUAsoWs.png";
 
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        activityCommunicator =(ActivityCommunicator)context;
+
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        currentuser = FirebaseAuth.getInstance().getCurrentUser();
+
 
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        fragView = inflater.inflate(R.layout.me_frag, container, false);
-        displayname =fragView.findViewById(R.id.displayname_frag);
-        username =fragView.findViewById(R.id.username_frag);
-        email =fragView.findViewById(R.id.email_frag);
-        badge =fragView.findViewById(R.id.badge_frag);
-        avatar = fragView.findViewById(R.id.avatar_frag);
-        qrCode = fragView.findViewById(R.id.QR_frag);
-        reset = fragView.findViewById(R.id.reset_frag);
-        mLinearLayout = fragView.findViewById(R.id.frt_frag);
-        mRef =FirebaseDatabase.getInstance().getReference();
-        mSwitchCompat =fragView.findViewById(R.id.switch_frag);
-        activityCommunicator.passDataToActivity(mSwitchCompat,null);
+        mView = inflater.inflate(R.layout.me_frag, container, false);
+        mTabLayout = mView.findViewById(R.id.me_tablayout);
+        mViewPager = mView.findViewById(R.id.me_viewpager);
+        mViewPagerAdapter = new ViewPagerAdapter(getChildFragmentManager());
+        loadingGif = mView.findViewById(R.id.loadingImg_meTab);
+        avatar = mView.findViewById(R.id.me_avatar);
+        username = mView.findViewById(R.id.me_username);
+        name = mView.findViewById(R.id.me_displayname);
         mProgressDialog = new MaterialDialog.Builder(getActivity())
                 .content("Updating Avatar...")
                 .progress(true, 0).build();
-        scrollView = fragView.findViewById(R.id.me_scrollview);
-        loadingGif = fragView.findViewById(R.id.loadingImg_meTab);
 
-        //update ui
-        badge.setVisibility(View.INVISIBLE);
-        loadingGif.setVisibility(View.VISIBLE);
-        scrollView.setVisibility(View.GONE);
+        mViewPagerAdapter.addFragment(new Userstab_Fragment());
+        mViewPagerAdapter.addFragment(new QuestionAnswered_Fragment());
+        mViewPager.setAdapter(mViewPagerAdapter);
+        mTabLayout.setupWithViewPager(mViewPager);
 
+        mTabLayout.getTabAt(0).setText("Friends");
+        mTabLayout.getTabAt(1).setText("Questions\nAnswered");
+        setTabTitle();
 
-        DatabaseReference photoUrlref = FirebaseDatabase.getInstance().getReference().child("Users")
-                .child(currentuser.getUid());
-        photoUrlref.keepSynced(true);
-        photoUrlref.addListenerForSingleValueEvent(     new ValueEventListener() {
+// set my info UI
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference()
+                .child("Users")
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
@@ -154,119 +151,34 @@ public class me_frag extends Fragment {
                     Glide.with(getContext()).load(user.getPhotourl()).
                             apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3)).into(avatar);
                 }
-                displayname.setText(user.getDisplayname());
-                email.setText(user.getEmail());
+                name.setText(user.getDisplayname());
+                username.setText(user.getUsername());
 
-                scrollView.setVisibility(View.VISIBLE);
-                YoYo.with(Techniques.FadeIn).duration(500).playOn(scrollView);
-                loadingGif.setVisibility(View.GONE);
                 if (user.getDisplayname() != null && user.getPhotourl() != null) {
                     UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                             .setDisplayName(user.getDisplayname())
                             .setPhotoUri(Uri.parse(user.getPhotourl()))
                             .build();
 
-                    currentuser.updateProfile(profileUpdates)
+                    FirebaseAuth.getInstance().getCurrentUser().updateProfile(profileUpdates)
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
                                         loadingGif.setVisibility(View.GONE);
-                                        scrollView.setVisibility(View.VISIBLE);
+
                                     }
                                 }
                             });
                 }
             }
 
-
-
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
             }
         });
 
-     // check user has new friend request
-        setBadge();
-        //set switchcompat state base on user's choice history
-        if("public".equals(getPrivacySharedPreference())){
-            mSwitchCompat.setChecked(true);
-            setUserPrivacy(true);
-        }else{
-            mSwitchCompat.setChecked(false);
-            setUserPrivacy(false);
-        }
-
-
-
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("Users").
-                child(currentuser.getUid());
-        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-               user = dataSnapshot.getValue(User.class);
-               if(user!=null){
-                   username.setText(user.getUsername());
-               }
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-
-        qrCode.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
-                    return;
-                }
-                lastClickTime = SystemClock.elapsedRealtime();
-                Intent intent = new Intent( fragView.getContext(), MyQR_Code.class);
-                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity(),qrCode,"qr_transition");
-                startActivity(intent, options.toBundle());
-
-            }
-        });
-
-        //friendrequest button
-        mLinearLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
-                    return;
-                }
-                lastClickTime = SystemClock.elapsedRealtime();
-                Intent i = new Intent(getContext(), FriendRequestPage.class);
-
-                startActivity(i);
-            }
-        });
-
-        reset.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-             showBasicDialog("Are you sure to reset all the questions ?");
-            }
-        });
-
-        mSwitchCompat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                if(isChecked){
-                      showReminderDialog();
-
-                }else{
-                    setSharedPreference(isChecked);
-                    setUserPrivacy(isChecked);
-                    Toast.makeText(getActivity(),"Location Service Off",Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
 
         avatar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -278,12 +190,9 @@ public class me_frag extends Fragment {
         avatar.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN)
-                {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     avatar.setAlpha(.6f);
-                }
-                else
-                {
+                } else {
                     avatar.setAlpha(1f);
                 }
 
@@ -291,192 +200,60 @@ public class me_frag extends Fragment {
             }
         });
 
-        return  fragView;
 
-
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
+        return mView;
 
     }
 
-    private void setBadge(){
-        DatabaseReference badgeRef = FirebaseDatabase.getInstance().getReference().child("UserFriends")
-                .child(currentuser.getUid());
-        badgeRef.keepSynced(true);
+    void setTabTitle(){
+        // retrieve user's question count from Firebase
 
-        badgeRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                int count =0;
-             for(DataSnapshot chidSnapShot : dataSnapshot.getChildren()){
-                 if("pending".equals(chidSnapShot.child("stats").getValue(String.class))){
-                    count++;
-                 }
-             }
-
-             if(count==0){
-                 badge.setVisibility(View.INVISIBLE);
-             }else{
-                 badge.setVisibility(View.VISIBLE);
-                 badge.setText(String.valueOf(count));
-             }
-        }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-
-    private void resetQuestions(){
-        DatabaseReference resetRef = FirebaseDatabase.getInstance().getReference().child("UserQA").child(currentuser.getUid());
-
-            resetRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+            FirebaseUser currentuser = FirebaseAuth.getInstance().getCurrentUser();
+            DatabaseReference questionRef = FirebaseDatabase .getInstance().getReference()
+                    .child("UserQA")
+                    .child(currentuser.getUid());
+            questionRef.addValueEventListener(new ValueEventListener() {
                 @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    Toast.makeText(getActivity(),"Reset Sucess",Toast.LENGTH_SHORT).show();
-                    Homepage homepage= (Homepage)getActivity();
-                    homepage.getViewPager().setCurrentItem(0,false);
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                      String count = "("+dataSnapshot.getChildrenCount()+")";
+                    mTabLayout.getTabAt(1).setText("Questions Answered "+ count);
+                }
+
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
                 }
             });
 
-
-    }
-    //run time permission
-    private void checkLocationPermission() {
-        Dexter.withActivity(getActivity())
-                .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                .withListener(new PermissionListener() {
-                    @Override
-                    public void onPermissionGranted(PermissionGrantedResponse response) {
-                        boolean isChecked =true;
-                        mSwitchCompat.setChecked(isChecked);
-                        setSharedPreference(isChecked);
-                        setUserPrivacy(isChecked);
-
-                    }
-
-                    @Override
-                    public void onPermissionDenied(PermissionDeniedResponse response) {
-                        boolean isChecked =false;
-                        mSwitchCompat.setChecked(isChecked);
-                        mSwitchCompat.setChecked(isChecked);
-                        setSharedPreference(isChecked);
-                        setUserPrivacy(isChecked);
-
-                    }
-
-                    @Override
-                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
-                        token.continuePermissionRequest();
-                    }
-                }).check();
     }
 
 
-    private void showBasicDialog(String str){
-        new MaterialDialog.Builder(getContext())
-                .content(str).positiveColor(getResources().getColor(R.color.colorAccent))
-                .negativeColor(getResources().getColor(R.color.holo_red_light))
-                .positiveText("Yes").onPositive(new MaterialDialog.SingleButtonCallback() {
-            @Override
-            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                resetQuestions();
-            }
-        }).negativeText("No")
-                .show();
-    }
+    public void showSignleChoiceDialog() {
 
-    private void setSharedPreference(boolean isChecked){
-        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        if(isChecked) {
-            editor.putString(currentuser.getUid()+"privacy", "public");
-            editor.commit();
-        }else{
-            editor.putString(currentuser.getUid()+"privacy", "private");
-            editor.commit();
-        }
-    }
-
-    private void setUserPrivacy(boolean isChecked){
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Users").
-                child(currentuser.getUid());
-        if(isChecked) {
-            ref.child("privacy").setValue("public");
-        }else{
-            ref.child("privacy").setValue("private");
-        }
-    }
-
-    private String getPrivacySharedPreference(){
-        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-        String defaultValue = "private";
-        String privacy = sharedPref.getString(currentuser.getUid()+"privacy", defaultValue);
-        return privacy;
-    }
-
-    private void showReminderDialog(){
-        new MaterialDialog.Builder(getActivity())
-                .title("Reminder").canceledOnTouchOutside(false)
-                .content(R.string.location_reminder).
-                negativeColor(getResources().getColor(R.color.bootstrap_gray))
-                .positiveText(R.string.ok).onPositive(new MaterialDialog.SingleButtonCallback() {
-            @Override
-            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                checkLocationPermission();
-            }
-        }).negativeText(R.string.cancel).onNegative(new MaterialDialog.SingleButtonCallback() {
-            @Override
-            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                boolean isChecked =false;
-                mSwitchCompat.setChecked(isChecked);
-                setSharedPreference(isChecked);
-                setUserPrivacy(isChecked);
-            }
-        }).show();
-    }
-
-
-    public void showDismissDialog(String Str){
-        new MaterialDialog.Builder(getActivity())
-                .title("Error").titleColor(getResources().getColor(R.color.red_error))
-                .content(Str)
-                .positiveText("okay")
-                .show();
-    }
-    public void showSignleChoiceDialog(){
-
-        PopupMenu popup = new PopupMenu(getActivity(),avatar);
+        PopupMenu popup = new PopupMenu(getActivity(), avatar);
         //Inflating the Popup using xml file
         popup.getMenuInflater()
                 .inflate(R.menu.photo_menu, popup.getMenu());
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                if(item.getItemId() == R.id.photo_menu_change){
+                if (item.getItemId() == R.id.photo_menu_change) {
                     changeAvatar();
                     return true;
-                }else{
+                } else {
                     // view photo
                     Intent i = new Intent(getActivity(), FullImageView.class);
-                    i.putExtra("photoUrl",currentuser.getPhotoUrl().toString());
-                    ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity(),avatar,"profile");
+                    i.putExtra("photoUrl", FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString());
+                    ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity(), avatar, "profile");
                     startActivity(i, options.toBundle());
-                    return  true;
+                    return true;
                 }
 
             }
         });
         popup.show();
     }
-
-
 
     public void changeAvatar() {
         //request permission
@@ -511,7 +288,7 @@ public class me_frag extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
 
-       super.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
         EasyImage.handleActivityResult(requestCode, resultCode, data,
                 getActivity(), new DefaultCallback() {
                     @Override
@@ -532,10 +309,10 @@ public class me_frag extends Fragment {
 
 
                     File imageFile = new File(result.getUri().getPath());
-                  Bitmap avatarBitmap = new Compressor(getActivity()).compressToBitmap(imageFile);
+                    Bitmap avatarBitmap = new Compressor(getActivity()).compressToBitmap(imageFile);
 
                     mProgressDialog.show();
-                    uploadImage(avatarBitmap,currentuser);
+                    uploadImage(avatarBitmap,FirebaseAuth.getInstance().getCurrentUser());
 
                 } catch (IOException e) {
                     showToast(e.getMessage());
@@ -548,25 +325,6 @@ public class me_frag extends Fragment {
         }
     }
 
-    public void showSnackbarWithSetting(String str, View view){
-        Snackbar snackbar = Snackbar
-                .make(view, str, Snackbar.LENGTH_LONG)
-                .setAction("Setting", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Context context = view.getContext();
-                        Intent myAppSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                                Uri.parse("package:" + context.getPackageName()));
-                        myAppSettings.addCategory(Intent.CATEGORY_DEFAULT);
-                        myAppSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        context.startActivity(myAppSettings);
-                    }
-                });
-        snackbar.show();
-    }
-    public void showToast(String str){
-        Toast.makeText(getActivity(),str,Toast.LENGTH_LONG).show();
-    }
 
     public void uploadImage(Bitmap bitmap, final FirebaseUser currentUser){
         String filename = UUID.randomUUID().toString()+".JPEG";
@@ -601,20 +359,21 @@ public class me_frag extends Fragment {
 
     }
 
+
     public void updateDatabaseAndCurrentUser(final String photoUrl){
 
-        mRef.child("Users").child(currentuser.getUid()).child("photourl").setValue(photoUrl);
+        FirebaseDatabase.getInstance().getReference().child("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("photourl").setValue(photoUrl);
         UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                 .setPhotoUri(Uri.parse(photoUrl))
                 .build();
         mProgressDialog.dismiss();
-        currentuser.updateProfile(profileUpdates)
+        FirebaseAuth.getInstance().getCurrentUser().updateProfile(profileUpdates)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
 
-                            Glide.with(fragView).load(photoUrl).
+                            Glide.with(mView).load(photoUrl).
                                     apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3)).into(avatar);
                             showToast("Avatar Updated ");
 
@@ -650,7 +409,15 @@ public class me_frag extends Fragment {
         }
     }
 
+    public void showDismissDialog(String Str){
+        new MaterialDialog.Builder(getActivity())
+                .title("Error").titleColor(getResources().getColor(R.color.red_error))
+                .content(Str)
+                .positiveText("okay")
+                .show();
+    }
 
-
-
+    public void showToast(String str){
+        Toast.makeText(getActivity(),str,Toast.LENGTH_LONG).show();
+    }
 }

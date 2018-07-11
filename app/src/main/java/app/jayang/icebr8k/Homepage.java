@@ -1,5 +1,6 @@
 package app.jayang.icebr8k;
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
@@ -9,6 +10,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -20,13 +23,20 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.menu.MenuBuilder;
+import android.support.v7.view.menu.MenuPopupHelper;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
+import android.transition.Fade;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,6 +44,8 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.firebase.jobdispatcher.Constraint;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
@@ -65,6 +77,11 @@ import com.zplesac.connectionbuddy.interfaces.ConnectivityChangeListener;
 import com.zplesac.connectionbuddy.models.ConnectivityEvent;
 import com.zplesac.connectionbuddy.models.ConnectivityState;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
 import app.jayang.icebr8k.Fragments.SurveyTab_Fragment;
 import app.jayang.icebr8k.Fragments.UserMessageDialog_Frag;
@@ -83,18 +100,19 @@ public class Homepage extends AppCompatActivity  implements
     private AHBottomNavigation homepageTab;
     private SwitchCompat mSwitchCompat;
     private String radius = "1 mi";
+    private ImageView menu;
     private ViewPagerAdapter mViewPagerAdapter;
     private TextView noConnection_tv;
     protected myViewPager viewPager;
     private FirebaseUser currentUser;
     private long lastClickTime = 0;
-    private Toolbar mToolbar;
     private DatabaseReference mRef;
     private int index =0;
     private DatabaseReference presenceRef,lastSeenRef;
      private ScreenStateReceiver mReceiver;
 
     private String TAG = "homePage";
+    private final String DEFAULTURL = "https://i.imgur.com/xUAsoWs.png";
 
     //job scheduler variables
     private static final String Job_TaG ="MY_JOB_TAG";
@@ -106,12 +124,13 @@ public class Homepage extends AppCompatActivity  implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_homepage);
+        // prevent flash on status bar
+
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-        mToolbar = findViewById(R.id.users_toolbar);
-        setSupportActionBar(mToolbar);
+
+        menu = findViewById(R.id.users_main_menu);
         homepageTab = findViewById(R.id.bottom_navigation);
         viewPager = findViewById(R.id.homepage_viewpager);
-        viewPager.setSwipeable(true);
         noConnection_tv = findViewById(R.id.noConnection_tv);
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         mRef = FirebaseDatabase.getInstance().getReference();
@@ -125,6 +144,16 @@ public class Homepage extends AppCompatActivity  implements
         lastSeenRef.keepSynced(true);
 
         mDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
+
+        menu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPopup(v);
+            }
+        });
+
+
+
 
 
 
@@ -173,7 +202,7 @@ public class Homepage extends AppCompatActivity  implements
         if(getIntent().getExtras()!=null) {
 
             if (getIntent().getExtras().getString("mainchat") != null) {
-                viewPager.setCurrentItem(2);
+                viewPager.setCurrentItem(1);
             }
             if (getIntent().getExtras().getString("chatId") != null &&
                     getIntent().getExtras().getString("chatName") != null){
@@ -206,10 +235,11 @@ public class Homepage extends AppCompatActivity  implements
 
     @Override
     protected void onNewIntent(Intent intent) {
+
       //Toast.makeText(getApplicationContext(),"New Intent",Toast.LENGTH_SHORT).show();
         if (intent.getExtras() != null) {
             if (intent.getExtras().getString("mainchat") != null) {
-                viewPager.setCurrentItem(2,false);
+                viewPager.setCurrentItem(1,false);
             }
             // handle notification clicked
             else if (intent.getExtras().getString("chatId") != null &&
@@ -237,37 +267,35 @@ public class Homepage extends AppCompatActivity  implements
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
 
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+    @SuppressLint("RestrictedApi")
+    public void showPopup(View v){
+        PopupMenu popupMenu = new PopupMenu(this,v);
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.log_out_item:
 
-        return super.onCreateOptionsMenu(menu);
-    }
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.log_out_item:
+                        if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                            return false;
+                        }
 
-                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
-                    return false;
-                }
+                        lastClickTime = SystemClock.elapsedRealtime();
+                        Signout();
+                        finish();
+                        return true;
 
-                lastClickTime = SystemClock.elapsedRealtime();
-                Signout();
-                 finish();
-                return true;
+                    case R.id.add_friend:
+                        if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                            return false;
+                        }
 
-            case R.id.add_friend:
-                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
-                    return false;
-                }
-
-                lastClickTime = SystemClock.elapsedRealtime();
-             Intent i = new Intent(getApplicationContext(),SearchUser.class);
-             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-             startActivity(i);
-                return true;
+                        lastClickTime = SystemClock.elapsedRealtime();
+                        Intent i = new Intent(getApplicationContext(),SearchUser.class);
+                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        startActivity(i);
+                        return true;
 /*
             case R.id.scan_qr:
                 if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
@@ -284,35 +312,35 @@ public class Homepage extends AppCompatActivity  implements
                 }
                 return true;
                 */
-            case R.id.people_nearby:
-                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
-                    return false;
-                }
-                lastClickTime = SystemClock.elapsedRealtime();
-
-                    // if share my postion is on
-                    if("public".equals(getPrivacySharedPreference())){
-                        showSingleChoiceDialog();
-                    }else {
-                        new MaterialDialog.Builder(this)
-                                .content("\"Share My Location\" is disabled, you can go to Me tab to enable it.")
-                                .positiveText(R.string.ok).onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                viewPager.setCurrentItem(4,true);
-                            }
-                        })
-                                .show();
-                    }
-                    return true;
-            case R.id.feedback:
+                    case R.id.people_nearby:
                         if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
                             return false;
                         }
-                lastClickTime = SystemClock.elapsedRealtime();
-                        Intent intent = new Intent(this,Feedback.class);
+                        lastClickTime = SystemClock.elapsedRealtime();
+
+                        // if share my postion is on
+                        if("public".equals(getPrivacySharedPreference())){
+                            showSingleChoiceDialog();
+                        }else {
+                            new MaterialDialog.Builder(getApplicationContext())
+                                    .content("\"Share My Location\" is disabled, you can go to Me tab to enable it.")
+                                    .positiveText(R.string.ok).onPositive(new MaterialDialog.SingleButtonCallback() {
+                                @Override
+                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                    viewPager.setCurrentItem(2,true);
+                                }
+                            })
+                                    .show();
+                        }
+                        return true;
+                    case R.id.feedback:
+                        if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                            return false;
+                        }
+                        lastClickTime = SystemClock.elapsedRealtime();
+                        Intent intent = new Intent(getApplicationContext(),Feedback.class);
                         startActivity(intent);
-                return true;
+                        return true;
 
           /*  case R.id.leaderboard:
                 if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
@@ -324,10 +352,22 @@ public class Homepage extends AppCompatActivity  implements
                 return true;
 */
 
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+                    default:
+                        return false;
+                }
+
+            }
+        });
+
+        popupMenu.inflate(R.menu.menu_main);
+        @SuppressLint("RestrictedApi") MenuPopupHelper menuHelper = new MenuPopupHelper(this,(MenuBuilder) popupMenu.getMenu(),v);
+        menuHelper.setForceShowIcon(true);
+        menuHelper.setGravity(Gravity.START);
+        menuHelper.show();
+
     }
+
+
 
 
 
@@ -339,6 +379,7 @@ public class Homepage extends AppCompatActivity  implements
         super.onStart();
         showLog("onStart");
         setOnline();
+
         Bitmap icon = BitmapFactory.decodeResource(this.getResources(),
                 R.drawable.ic_stat_onesignal_default);
         String label =Html.fromHtml("<font color=\"#fffff4\">" + "IceBr8k"+ "</font>").toString();
@@ -470,11 +511,11 @@ public class Homepage extends AppCompatActivity  implements
                     }
                 }
                 if (count > 0) {
-                    homepageTab.setNotification(String.valueOf(count), 2);
-                    mToolbar.setTitle("IceBr8k"+" ("+count+")");
+                    homepageTab.setNotification(String.valueOf(count), 1);
+
                 } else {
-                    homepageTab.setNotification("", 2);
-                    mToolbar.setTitle("IceBr8k");
+                    homepageTab.setNotification("", 1);
+
                 }
             }
             @Override
@@ -499,9 +540,9 @@ public class Homepage extends AppCompatActivity  implements
                 }
 
                 if(count==0){
-                    homepageTab.setNotification("", 3);
+                    homepageTab.setNotification("", 2);
                 }else{
-                    homepageTab.setNotification(String.valueOf(count), 3);
+                    homepageTab.setNotification(String.valueOf(count), 2);
                 }
             }
 
@@ -538,33 +579,38 @@ public class Homepage extends AppCompatActivity  implements
 
     private void showLog(String str){ Log.d(TAG,str);}
 
-    public void setHomepageTab(){ mViewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
-        mViewPagerAdapter.addFragment(new me_frag());
 
-        mViewPagerAdapter.addFragment(new SurveyTab_Fragment());
-      mViewPagerAdapter.addFragment(new Userstab_Fragment());
-      mViewPagerAdapter.addFragment(new UserMessageDialog_Frag());
+
+    public void setHomepageTab(){ mViewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+
+
+    mViewPagerAdapter.addFragment(new SurveyTab_Fragment());
+
+    mViewPagerAdapter.addFragment(new UserMessageDialog_Frag());
       mViewPagerAdapter.addFragment(new me_frag());
-        mViewPagerAdapter.addFragment(new SurveyTab_Fragment());
+
 
 
 
 
       viewPager.setAdapter(mViewPagerAdapter);
-      viewPager.setCurrentItem(1);
+      viewPager.setCurrentItem(0);
+
 
         homepageTab.setTitleState(AHBottomNavigation.TitleState.ALWAYS_SHOW);
         homepageTab.setAccentColor(getResources().getColor(R.color.colorPrimary));
 
 
         AHBottomNavigationItem item1 = new AHBottomNavigationItem("Questions",
-                R.drawable.survey_selector);
-        AHBottomNavigationItem item2 = new AHBottomNavigationItem("Friends",
-                R.drawable.user_selector);
-        AHBottomNavigationItem item3 = new AHBottomNavigationItem("Chat",
+                R.drawable.survey_tab_icon);
+
+        AHBottomNavigationItem item2 = new AHBottomNavigationItem("Chat",
                 R.drawable.message_selector);
-        AHBottomNavigationItem item4 = new AHBottomNavigationItem("Me",
-                R.drawable.me_selector);
+          AHBottomNavigationItem item3 = new AHBottomNavigationItem("Me", R.drawable.me_selector);
+
+        // set my avatar via firebase changes
+
+
 
 
 
@@ -574,60 +620,19 @@ public class Homepage extends AppCompatActivity  implements
         homepageTab.addItem(item1);
         homepageTab.addItem(item2);
         homepageTab.addItem(item3);
-        homepageTab.addItem(item4);
+
 
 
 
 
         // for smooth swipe
-        viewPager.setOffscreenPageLimit(5);
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                showLog(""+ positionOffset);
+        viewPager.setOffscreenPageLimit(2);
 
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                if(position ==0){
-                    mCurrentPosition = homepageTab.getItemsCount()-1;
-                }else if(position == mViewPagerAdapter.getCount()-1){
-                    mCurrentPosition = 0;
-                }else{
-                    mCurrentPosition = position-1;
-                }
-                homepageTab.setCurrentItem(mCurrentPosition);
-
-
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-                if(state == ViewPager.SCROLL_STATE_IDLE){
-                    int pageCount = mViewPagerAdapter.getCount();
-                    int currentItem = viewPager.getCurrentItem();
-                    if(currentItem ==0){
-                        viewPager.setCurrentItem(pageCount-2,true);
-
-
-
-
-                    }else if(currentItem == pageCount-1){
-                        viewPager.setCurrentItem(1,true);
-
-
-                    }
-
-                }
-
-            }
-        });
         // Set listeners
         homepageTab.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
-                viewPager.setCurrentItem(position+1,false);
+                viewPager.setCurrentItem(position,false);
                 return true;
             }
         });

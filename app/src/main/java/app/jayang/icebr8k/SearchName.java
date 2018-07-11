@@ -49,7 +49,7 @@ public class SearchName extends SwipeBackActivity implements SearchView.OnQueryT
         friendList = getIntent().getExtras().getParcelableArrayList("friendList");
         if(friendList!=null) {
             Log.d("SearchName123",String.valueOf(friendList.size())+ friendList.get(0));
-            mAdapter = new RecyclerAdapter(getApplicationContext(), filterdList);
+            mAdapter = new RecyclerAdapter(this, filterdList);
             mRecyclerView.setAdapter(mAdapter);
         }
         mSwipeBackLayout.addSwipeListener(new SwipeBackLayout.SwipeListener() {

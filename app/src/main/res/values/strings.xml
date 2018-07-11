@@ -98,5 +98,8 @@ This Service does not use these “cookies” explicitly. However, the app may u
     <string name="icebr8k_s_privacy_policy_agreement"><u>IceBr8k\'s Privacy Policy Agreement</u></string>
     <string name="pick_birthdate">"Choose your birthdate</string>
 
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 
 </resources>

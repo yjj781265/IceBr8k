@@ -10,78 +10,66 @@
     android:layout_height="match_parent">
 
 
-
-<android.support.design.widget.AppBarLayout
-    android:background="@color/lightBlue"
+<FrameLayout
     android:layout_width="match_parent"
-    android:elevation="0dp"
-    app:elevation="0dp"
-    android:id="@+id/appbar"
-    app:expanded="false"
+    android:layout_margin="8dp"
+    android:padding="2dp"
+    android:layout_marginBottom="8dp"
+    android:background="@color/ripple"
     android:layout_height="wrap_content">
 
-     <android.support.v7.widget.Toolbar
-         app:layout_scrollFlags="scroll|snap"
-         android:layout_width="match_parent"
-         android:layout_height="56dp">
-         <LinearLayout
-             android:orientation="horizontal"
+    <LinearLayout
+        android:orientation="horizontal"
+        android:id="@+id/linearLayout"
 
-             android:layout_width="match_parent"
+        android:background="@color/white"
 
-             android:layout_height="wrap_content">
-         <ImageView
-             android:layout_weight="1"
-             android:layout_width="0dp"
-             android:id="@+id/searchIcon_id"
-             android:src="@drawable/ic_search"
-             android:layout_marginStart="10dp"
-             android:layout_centerVertical="true"
-             android:layout_height="30dp"/>
+        android:layout_width="match_parent"
 
-         <TextView
-             android:id="@+id/searchview_user"
-             android:layout_marginLeft="10dp"
-             android:layout_centerInParent="true"
-             android:textSize="16sp"
-             android:background="?android:attr/selectableItemBackgroundBorderless"
-             android:layout_toRightOf="@id/searchIcon_id"
-             android:layout_weight="6"
-             android:layout_width="0dp"
-             android:layout_height="wrap_content"
-             android:text="@string/hint1"/>
-         <Button
-             android:id="@+id/filter_btn"
-             android:layout_weight="1"
-             android:layout_width="0dp"
-             android:layout_height="36dp"
-             android:layout_alignParentEnd="true"
-             android:layout_marginEnd="6dp"
-             android:background="@drawable/ic_action_filter"
-             android:foreground="?android:attr/selectableItemBackground"/>
-         </LinearLayout>
+        android:layout_height="wrap_content">
+        <ImageView
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:id="@+id/searchIcon_id"
+            android:src="@drawable/ic_search"
+            android:layout_marginStart="10dp"
+           android:layout_gravity="center_vertical"
+            android:layout_height="30dp"/>
 
-
-
-     </android.support.v7.widget.Toolbar>
-
-
-
-
-</android.support.design.widget.AppBarLayout>
-
-
-
+        <TextView
+            android:id="@+id/searchview_user"
+            android:layout_marginLeft="10dp"
+            android:layout_centerInParent="true"
+            android:textSize="16sp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:layout_toRightOf="@id/searchIcon_id"
+            android:layout_weight="6"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/hint1"/>
+        <Button
+            android:id="@+id/filter_btn"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/ic_action_filter"
+            android:foreground="?android:attr/selectableItemBackground"/>
+    </LinearLayout>
+</FrameLayout>
 
     <android.support.v7.widget.RecyclerView
+
         android:id="@+id/recyclerView_id"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:nestedScrollingEnabled="true"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:layout_gravity="center"
+        android:layout_marginTop="54dp"
         android:scrollbars="none"
 
-      >
+        >
     </android.support.v7.widget.RecyclerView>
 
 
@@ -98,7 +86,7 @@
     <RelativeLayout
         android:id="@+id/loadingImg_userTab"
        android:layout_gravity="center"
-        android:visibility="gone"
+        android:visibility="visible"
         android:paddingBottom="50dp"
         android:layout_width="wrap_content"
         android:layout_height="150dp">

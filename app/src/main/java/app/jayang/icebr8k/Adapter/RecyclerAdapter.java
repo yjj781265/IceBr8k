@@ -1,16 +1,21 @@
 package app.jayang.icebr8k.Adapter;
 
+import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.os.SystemClock;
 
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.recyclerview.extensions.AsyncListDiffer;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,7 +45,7 @@ import app.jayang.icebr8k.UserProfilePage;
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDialogViewHolder>
 {
-    private Context context;
+    private Activity mActivity;
     private ArrayList<UserDialog>mUserDialogs;
     private ArrayList<UserDialog> mFilteredList;
 
@@ -79,6 +84,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
                 User mUser = new User(dialog.getName(), dialog.getUsername(),
                         dialog.getPhotoUrl(), dialog.getEmail());
                 Intent intent = new Intent(view.getContext(), UserProfilePage.class);
+
                 intent.putExtra("userInfo", mUser);
                 intent.putExtra("userUid",dialog.getId());
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -101,8 +107,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
 
 
 
-    public RecyclerAdapter(Context context, ArrayList<UserDialog> dialogs) {
-        this.context = context;
+    public RecyclerAdapter(Activity activity, ArrayList<UserDialog> dialogs) {
+       mActivity = activity;
         mUserDialogs = dialogs;
         mFilteredList =dialogs;
 

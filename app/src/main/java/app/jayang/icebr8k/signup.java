@@ -72,7 +72,7 @@ import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
 
 public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDateSetListener{
-    private final String DEFAULT_PHOTO_URL = "https://i.imgur.com/zI4v7oF.png";
+    private final String DEFAULT_PHOTO_URL = "https://i.imgur.com/xUAsoWs.png";
     private ImageView avatar;
     private ScrollView sv;
     private Boolean flag,defaultPhotoFlag;

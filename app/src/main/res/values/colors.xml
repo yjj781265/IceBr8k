@@ -14,10 +14,11 @@
     <color name="creamYellow">#fffff4</color>
     <color name="ripple">#cecece</color>
     <color name="lightGreen">#e7fce0</color>
-    <color name="lightGray">#dddddd</color>
+    <color name="lightGray">#d3d3d3</color>
     <color name="lightRed">#feb2b2</color>
     <color name="dialog_divider">#ebebeb</color>
     <color name="dark_gray">#3c3e42</color>
+
 
     <color name="black_overlay">#66000000</color>
 

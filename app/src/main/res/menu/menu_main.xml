@@ -12,18 +12,14 @@
 
 
 
-     <item android:title="Main Menu"
-           android:id="@+id/main_menu"
-      android:icon="@drawable/ic_action_add"
-    app:showAsAction="ifRoom">
-<menu>
+
 
     <item
         android:title ="Add Friend"
         android:orderInCategory="100"
         android:id="@+id/add_friend"
         android:icon="@drawable/ic_action_addfriend"
-        app:showAsAction="never"
+
         />
 
 <!--
@@ -57,13 +53,5 @@
     app:showAsAction="never"
 
     />
-
-
-</menu>
-</item>
-
-
-
-
 
 </menu>

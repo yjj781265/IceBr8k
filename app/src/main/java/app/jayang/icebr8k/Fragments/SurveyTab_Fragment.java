@@ -78,7 +78,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
     private Homepage mHomepage;
     private ImageView  thumbUp, thumbDown;
     private RelativeLayout loadingGif;
-    private BootstrapButton mSubmit;
+    private TextView mSubmit;
     private ImageView backArrow;
     private UserQA  currentUserQA;
     private TextView skip;
@@ -1037,7 +1037,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
         progressText.setVisibility(View.GONE);
 
         //reset tutorial
-        //MaterialShowcaseView.resetSingleUse(getActivity(), "survey_tutorial");
+       // MaterialShowcaseView.resetSingleUse(getActivity(), "survey_tutorial");
 
         // sequence example
         ShowcaseConfig config = new ShowcaseConfig();

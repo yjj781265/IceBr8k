@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <android.support.constraint.ConstraintLayout
+        android:padding="16dp"
+        android:id="@+id/item_comment_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/comment_item_avatar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/camera_selector"/>
+
+    <TextView
+        android:id="@+id/comment_item_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:maxLength="20"
+        android:text="TextView"
+        android:textSize="14dp"
+        app:layout_constraintStart_toEndOf="@+id/comment_item_avatar"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:id="@+id/comment_item_timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:textColor="@color/ripple"
+        android:textSize="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:id="@+id/comment_item_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:text="TextView"
+        android:textColor="@color/black"
+        android:textSize="16dp"
+        app:layout_constraintStart_toEndOf="@+id/comment_item_avatar"
+        app:layout_constraintTop_toBottomOf="@+id/comment_item_name"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:gravity="start"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toEndOf="@+id/comment_item_avatar"
+            app:layout_constraintTop_toBottomOf="@+id/comment_item_text">
+
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:layout_gravity="center_vertical"
+                app:srcCompat="@drawable/bubble_icon"/>
+
+            <TextView
+                android:id="@+id/commentNum"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="3dp"
+                android:text="12"
+                android:textSize="12dp"/>
+        </LinearLayout>
+
+    </android.support.constraint.ConstraintLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_below="@id/item_comment_container"
+        android:layout_height="1dp"
+        android:background="@color/dialog_divider"
+        tools:layout_editor_absoluteX="0dp"/>
+</RelativeLayout>
