@@ -8,14 +8,26 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
+import app.jayang.icebr8k.Fragments.CommentBottomSheetFrag;
 import app.jayang.icebr8k.Modle.Comment;
+import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.Utility.MyDateFormatter;
 import app.jayang.icebr8k.Utility.OnLoadMoreListener;
@@ -25,18 +37,27 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private  final int VIEWTYPE_TEXT =0;
     private final String VIEWTYPE_LOAD_STR = "load";
     private  final int VIEWTYPE_LOAD =1;
+    private final String VIEWTYPE_INPUT__STR = "input";
+    private  final int VIEWTYPE_INPUT =2;
 
 
-    private ArrayList<Comment> comments;
+
+    private ArrayList<Comment> mComments;
     private boolean loading;
     private int lastVisibleItem, totalItemCount;
     private Context mContext;
+    private String questionId;
+    private android.support.v4.app.FragmentManager mFragmentManager;
     private int threshHold =1;
+    private final FirebaseUser currentuser = FirebaseAuth.getInstance().getCurrentUser();
     private OnLoadMoreListener onLoadMoreListener;
 
-    public CommentAdapter(final ArrayList<Comment> comments, RecyclerView recyclerView, Context context) {
-        this.comments = comments;
+
+    public CommentAdapter(ArrayList<Comment> comments, String mQuestionId, RecyclerView recyclerView, Context context, android.support.v4.app.FragmentManager fragmentManager) {
+       mComments = comments;
         mContext = context;
+        this.questionId = mQuestionId;
+        mFragmentManager = fragmentManager;
         if(recyclerView.getLayoutManager() instanceof LinearLayoutManager){
             final LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView
                     .getLayoutManager();
@@ -49,7 +70,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     super.onScrolled(recyclerView, dx, dy);
 
 
-                    if(onLoadMoreListener!=null &&!comments.isEmpty() && dy>1) {
+                    if(onLoadMoreListener!=null &&!mComments.isEmpty() && dy>1) {
                         totalItemCount = linearLayoutManager.getItemCount();
                         lastVisibleItem = linearLayoutManager.findLastCompletelyVisibleItemPosition();
                         Log.d("commentAdapter",""+loading);
@@ -89,6 +110,11 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                  v = LayoutInflater.from(parent.getContext()).inflate(
                         R.layout.loadingmore, parent, false);
                 return new LoadMoreViewHolder(v);
+
+            case VIEWTYPE_INPUT :
+                v = LayoutInflater.from(parent.getContext()).inflate(
+                        R.layout.item_comment_input, parent, false);
+                return new CommentInputViewHolder(v);
         }
 
        return  null;
@@ -96,15 +122,52 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, int position) {
         if(holder instanceof CommentViewHolder){
-            Comment comment = comments.get(position);
-            ((CommentViewHolder) holder).name.setText(comment.getSenderId());
-            ((CommentViewHolder) holder).text.setText(comment.getText());
-            ((CommentViewHolder) holder).timestamp.setText(MyDateFormatter.lastSeenConverterShort(comment.getTimestamp()));
+            Comment comment = mComments.get(position);
 
-        }else  if(holder instanceof UserMessageAdapter.LoadMoreViewHolder){
+            ((CommentViewHolder) holder).text.setText(comment.getText());
+            ((CommentViewHolder) holder).reply.setText(comment.getReply()!=null? comment.getReply().toString() :"");
+             ((CommentViewHolder) holder).answer.setVisibility(comment.getAnswer()==null ? View.GONE:View.VISIBLE);
+            ((CommentViewHolder) holder).answer.setText( "A: "+ comment.getAnswer());
+            ((CommentViewHolder) holder).timestamp.setText(MyDateFormatter.commentTImeConverter(comment.getTimestamp()));
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+                    .child("Users")
+                    .child(comment.getSenderId())
+                    ;
+
+            // set avatar and name
+            ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                  User user = dataSnapshot.getValue(User.class);
+                    Glide.with(mContext).load(user.getPhotourl()).apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3))
+                            .into(((CommentViewHolder) holder).avatar);
+                    ((CommentViewHolder) holder).name.setText(user.getDisplayname());
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+
+
+
+    }else  if(holder instanceof CommentAdapter.LoadMoreViewHolder){
             ((LoadMoreViewHolder) holder).mProgressBar.setIndeterminate(true);
+
+        }else  if(holder instanceof CommentInputViewHolder){
+            ((CommentInputViewHolder) holder).itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    CommentBottomSheetFrag commentBottomSheetFrag =  CommentBottomSheetFrag.newInstance(questionId);
+                    commentBottomSheetFrag.show(mFragmentManager,"commentBts");
+
+                }
+            });
 
         }
 
@@ -114,13 +177,13 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public int getItemCount() {
-        return comments.size();
+        return mComments.size();
     }
 
     @Override
     public int getItemViewType(int position) {
 
-        String messageType = comments.get(position).getType();
+        String messageType = mComments.get(position).getType();
         int viewType;
 
         switch (messageType){
@@ -130,6 +193,9 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
             case VIEWTYPE_TEXT_STR: viewType =VIEWTYPE_TEXT;
                 break;
+
+            case VIEWTYPE_INPUT__STR: viewType =VIEWTYPE_INPUT;
+                break;
             default: viewType = VIEWTYPE_TEXT;
                 break;
         }
@@ -138,14 +204,15 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     class CommentViewHolder extends RecyclerView.ViewHolder {
         private ImageView avatar;
-        private TextView name, text,reply,timestamp;
+        private TextView name, text,answer,timestamp,reply;
 
         public CommentViewHolder(View itemView) {
             super(itemView);
             avatar = itemView.findViewById(R.id.comment_item_avatar);
+            reply = itemView.findViewById(R.id.commentNum);
             name = itemView.findViewById(R.id.comment_item_name);
             text = itemView.findViewById(R.id.comment_item_text);
-            reply = itemView.findViewById(R.id.commentNum);
+            answer = itemView.findViewById(R.id.comment_item_answer);
             timestamp = itemView.findViewById(R.id.comment_item_timestamp);
         }
     }
@@ -159,6 +226,40 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             mProgressBar =itemView.findViewById(R.id.loadingmore);
         }
     }
+
+    // input layout
+    public class CommentInputViewHolder extends RecyclerView.ViewHolder  {
+        ImageView avatar;
+
+        public CommentInputViewHolder(View itemView) {
+            super(itemView);
+            avatar =itemView.findViewById(R.id.comment_avatar);
+
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+                    .child("Users")
+                    .child(currentuser.getUid())
+                    .child("photourl");
+
+            // set avatar
+            ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    String url = dataSnapshot.getValue(String.class);
+                    Glide.with(mContext).load(url).apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3))
+                            .into(avatar);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+
+
+    }
+
+
 
     public void setOnLoadMoreListener(OnLoadMoreListener onLoadMoreListener) {
         this.onLoadMoreListener = onLoadMoreListener;

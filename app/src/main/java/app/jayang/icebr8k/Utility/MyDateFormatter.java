@@ -203,5 +203,46 @@ public class MyDateFormatter {
         return  string;
     };
 
+    public static String commentTImeConverter(long timestamp){
+        String  string = "now";
+        long milliseconds = new Date().getTime() - timestamp;
+        long days =0;
+        long months =0;
+
+        Log.d("timestamp","timestamp "+ milliseconds);
+        if(milliseconds>0){
+            long minutes = TimeUnit.MILLISECONDS.toMinutes(milliseconds);
+
+            if(minutes<60 && minutes>0){
+                string = minutes+"m";
+            }else if(minutes>=60 && minutes<1440){
+                long hours = TimeUnit.MINUTES.toHours(minutes);
+                if(hours==0){
+                    hours =1;
+                }
+                string = hours+"hr";
+            }else if(minutes >=1440 && minutes <43800) {
+                days = TimeUnit.MINUTES.toDays(minutes);
+                if (days == 0) {
+                    days = 1;
+                }
+                string = days + "d";
+            }else if(minutes>= 43800){
+                days = TimeUnit.MINUTES.toDays(minutes);
+                months = days/30;
+                string =  months + "mo";
+                if(months>=12){
+                    long years = months / 12;
+                    string = +years+"yr";
+                }
+            } else{
+              return "now";
+            }
+
+        }
+
+        return  string +" ago" ;
+    };
+
 
 }

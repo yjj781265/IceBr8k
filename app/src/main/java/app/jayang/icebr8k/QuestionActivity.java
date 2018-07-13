@@ -9,6 +9,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -45,6 +46,7 @@ public class QuestionActivity extends AppCompatActivity {
     private TextView questionTV, subQuestion,confirmBtn,skipBtn ;
     private TabLayout mLayout;
     private ViewPager mViewPager;
+    private Toolbar mToolbar;
     private ImageView stamp;
     private RadioGroup radioGroup;
     private Spinner spinner;
@@ -71,11 +73,16 @@ public class QuestionActivity extends AppCompatActivity {
         stamp = findViewById(R.id.question_skip_stamp);
         mLayout = findViewById(R.id.question_tablayout);
         mViewPager = findViewById(R.id.question_viewpager);
+        mToolbar = findViewById(R.id.question_toolbar);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        questionId = getIntent().getExtras().getString("questionId",null);
 
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
 
 
-        viewPagerAdapter.addFragment(Comment_Fragment.newInstance("hello there"));
+        viewPagerAdapter.addFragment(Comment_Fragment.newInstance(questionId));
 
 
 
@@ -83,10 +90,11 @@ public class QuestionActivity extends AppCompatActivity {
         mLayout.setupWithViewPager(mViewPager);
 
         mLayout.getTabAt(0).setText("Comments");
+        getCommentCounts();
 
 
 
-        questionId = getIntent().getExtras().getString("questionId",null);
+
         Toast.makeText(this, questionId, Toast.LENGTH_SHORT).show();
 
         //if user has answered question the btn will be reset , else will be confirm
@@ -133,6 +141,32 @@ public class QuestionActivity extends AppCompatActivity {
 
 
 
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
+    }
+
+    void getCommentCounts(){
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+                .child("Comments")
+                .child(questionId);
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                long count = dataSnapshot.getChildrenCount();
+                String str = count>0 ? "("+count+")" :"";
+                mLayout.getTabAt(0).setText("Comments" +str );
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     void setUI(final boolean answered) {

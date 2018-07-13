@@ -138,6 +138,13 @@
         <item name="android:textColor">#00ff00</item>
         <item name="android:fontFamily">sans-serif-condensed</item>
     </style>
+    <!-- prevent keyboard cover the view  (use setstyle in fragment oncreateview)-->
+    <style name="BottomSheetStyle" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+    </style>
 
 
 

@@ -71,13 +71,32 @@ public class QuestionAnsweredAdapter extends RecyclerView.Adapter<RecyclerView.V
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, int position) {
         UserQA userQA = mList.get(position);
         if(holder instanceof QuestionAnsweredAdapter.QuestionAnsweredViewholder){
             ((QuestionAnsweredViewholder) holder).question.setText(userQA.getQuestion().trim());
            ((QuestionAnsweredViewholder) holder).stamp.setVisibility("skipped".equals(userQA.getAnswer()) ? View.VISIBLE:View.GONE);
             ((QuestionAnsweredViewholder) holder).answer.setVisibility("skipped".equals(userQA.getAnswer()) ? View.GONE:View.VISIBLE);
            ((QuestionAnsweredViewholder) holder).answer.setText(userQA.getAnswer());
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+                    .child("Comments")
+                    .child(userQA.getQuestionId());
+            ref.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    long count = dataSnapshot.getChildrenCount();
+                    String str = count>0 ? ""+count :"";
+
+                    ((QuestionAnsweredViewholder) holder).comment.setText(str);
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         }
 
 
@@ -90,7 +109,7 @@ public class QuestionAnsweredAdapter extends RecyclerView.Adapter<RecyclerView.V
     }
 
     class  QuestionAnsweredViewholder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView question,answer;
+        TextView question,answer,comment;
         ImageView stamp;
         CardView mCardView;
 
@@ -99,8 +118,21 @@ public class QuestionAnsweredAdapter extends RecyclerView.Adapter<RecyclerView.V
             question = itemView.findViewById(R.id.question);
             stamp = itemView.findViewById(R.id.question_stamp);
             answer = itemView.findViewById(R.id.answer);
+            comment = itemView.findViewById(R.id.commentNum);
             mCardView = itemView.findViewById(R.id.cardView);
             mCardView.setOnClickListener(this);
+            comment.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(getAdapterPosition()!= RecyclerView.NO_POSITION){
+                        UserQA userQA = mList.get(getAdapterPosition());
+                        Intent intent = new Intent(mContext, QuestionActivity.class);
+                        intent.putExtra("questionId",userQA.getQuestionId());
+                        mContext.startActivity(intent);
+                    }
+
+                }
+            });
             mCardView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
@@ -139,11 +171,41 @@ public class QuestionAnsweredAdapter extends RecyclerView.Adapter<RecyclerView.V
         questionDialog.setCanceledOnTouchOutside(true);
         questionDialog.setContentView(R.layout.question_dialog);
         TextView question = questionDialog.findViewById(R.id.question_id);
+        final TextView comments =  questionDialog.findViewById(R.id.question_comment);
         // skip stamp visibility
         questionDialog.findViewById(R.id.question_skip_stamp).
                 setVisibility("skipped".equals(userQA.getAnswer()) ? View.VISIBLE :View.GONE);
 
         question.setText(userQA.getQuestion().trim());
+
+        DatabaseReference commentRef = FirebaseDatabase.getInstance().getReference()
+                .child("Comments")
+                .child(userQA.getQuestionId());
+        commentRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                long count = dataSnapshot.getChildrenCount();
+                String str = count>0 ? ""+count :"";
+                comments.setText("Comments "+str );
+
+                comments.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(mContext, QuestionActivity.class);
+                        intent.putExtra("questionId",userQA.getQuestionId());
+                        mContext.startActivity(intent);
+                    }
+                });
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         // get question and type
 
         ref.addListenerForSingleValueEvent(new ValueEventListener() {

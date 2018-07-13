@@ -19,12 +19,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 
@@ -47,8 +55,7 @@ public class Comment_Fragment extends Fragment {
 
     // TODO: Rename and change types of parameters
     private String questionId;
-    private MyEditText editText;
-    private ImageView send;
+    private TextView noComments;
     private View mView;
     private RecyclerView mRecyclerView;
     private CommentAdapter mAdapter;
@@ -56,7 +63,8 @@ public class Comment_Fragment extends Fragment {
     private ProgressBar mProgressBar;
     private RecyclerView.LayoutManager mLayoutManager;
     private FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-    private Comment loadingComment = new Comment("loading",null,null,"load",null,null);
+    private final Comment loadingComment = new Comment("loading",null,null,"load",null,null,null);
+    private final Comment inputComment = new Comment("input",null,null,"input",null,null,null);
 
 
 
@@ -72,7 +80,7 @@ public class Comment_Fragment extends Fragment {
      *
      * @return A new instance of fragment Comment_Fragment.
      */
-    // TODO: Rename and change types and number of parameters
+
     public static Comment_Fragment newInstance(String param1) {
         Comment_Fragment fragment = new Comment_Fragment();
         Bundle args = new Bundle();
@@ -86,7 +94,7 @@ public class Comment_Fragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             questionId = getArguments().getString(QUESTION_ID);
-            Toast.makeText(getActivity(), questionId, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getActivity(), questionId, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -98,9 +106,12 @@ public class Comment_Fragment extends Fragment {
 
         mRecyclerView = mView.findViewById(R.id.comment_list);
         mProgressBar = mView.findViewById(R.id.comment_progressBar);
-        editText = (MyEditText) mView.findViewById(R.id.comment_input);
-        send = mView.findViewById(R.id.comment_send);
+        mProgressBar.setIndeterminate(true);
+        mProgressBar.setVisibility(View.VISIBLE);
+        
         comments = new ArrayList<>();
+        // add input text box as the first item
+        comments.add(inputComment);
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
@@ -111,7 +122,7 @@ public class Comment_Fragment extends Fragment {
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         // specify an adapter
-        mAdapter = new CommentAdapter(comments,mRecyclerView ,getActivity());
+        mAdapter = new CommentAdapter(comments,questionId, mRecyclerView ,getActivity(),getFragmentManager());
         mRecyclerView.setAdapter(mAdapter);
         mAdapter.setLoaded();
 
@@ -137,62 +148,19 @@ public class Comment_Fragment extends Fragment {
             }
         });
 
-
-        editText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                // if filed is empty send button is disabled
-                if (charSequence.toString().trim().isEmpty()) {
-                    send.setEnabled(false);
-                } else {
-                    send.setEnabled(true);
-
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
+        getComments();
 
 
-            }
-        });
-
-        send.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(checkInternet()){
-                    sendComment();
-                }else{
-                    Snackbar snackbar = Snackbar
-                            .make(mRecyclerView, "No Internet Connection", Snackbar.LENGTH_LONG)
-                            .setAction("Setting", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    startActivity(new Intent(Settings.ACTION_SETTINGS));
-                                }
-                            });
-
-                    snackbar.show();
-                }
 
 
-            }
-        });
+
+
+
+
         return mView;
     }
 
-    private void sendComment() {
-        Comment comment = new Comment(UUID.randomUUID().toString(),currentUser.getUid(), editText.getText().toString(),"text",new Date().getTime(),null);
-        comments.add(0,comment);
-        mAdapter.notifyItemInserted(0);
 
-
-    }
 
 
     public boolean checkInternet() {
@@ -209,25 +177,59 @@ public class Comment_Fragment extends Fragment {
     }
 
 
-    void addData(){
+    void getComments(){
         mProgressBar.setVisibility(View.VISIBLE);
-        mAdapter.setLoaded();
-        if (comments.contains(loadingComment)) {
-            int index = comments.indexOf(loadingComment);
-            comments.remove(index);
-            mAdapter.notifyItemRemoved(index);
+        DatabaseReference commentRef = FirebaseDatabase.getInstance().getReference()
+                .child("Comments")
+                .child(questionId);
+        commentRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Comment comment = dataSnapshot.getValue(Comment.class);
+                comments.add(comment);
+                Collections.sort(comments);
 
-        }
+            }
 
-        for(int i=0;i<10;i++){
-            Comment comment = new Comment(UUID.randomUUID().toString(),"123","hello there","text",new Date().getTime()-1000000,i);
-            comments.add(comment);
-        }
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-        mProgressBar.setVisibility(View.GONE);
-        mAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        commentRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mProgressBar.setVisibility(View.GONE);
+                mAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
 
     }
+
+
+
 
 
 

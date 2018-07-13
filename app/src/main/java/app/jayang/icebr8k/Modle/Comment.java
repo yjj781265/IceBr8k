@@ -6,28 +6,38 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class Comment implements Comparable<Comment>, Serializable{
-    private String id, senderId, text,type;
-    private Long timestamp;
-    private Integer reply;
+    private String id, senderId, text,type,answer;
+    private Long timestamp,reply = null;
 
-    public Comment(String id, String senderId, String text, String type, Long timestamp, Integer reply) {
-        this.id = id;
-        this.senderId = senderId;
-        this.text = text;
-        this.type = type;
-        this.timestamp = timestamp;
-        this.reply = reply;
-    }
+
 
     public Comment() {
     }
 
-    public Integer getReply() {
+    public Comment(String id, String senderId, String text, String type, String answer, Long timestamp, Long reply) {
+        this.id = id;
+        this.senderId = senderId;
+        this.text = text;
+        this.type = type;
+        this.answer = answer;
+        this.timestamp = timestamp;
+        this.reply = reply;
+    }
+
+    public Long getReply() {
         return reply;
     }
 
-    public void setReply(Integer reply) {
+    public void setReply(Long reply) {
         this.reply = reply;
+    }
+
+    public String getAnswer() {
+        return answer;
+    }
+
+    public void setAnswer(String answer) {
+        this.answer = answer;
     }
 
     public String getType() {
@@ -91,7 +101,13 @@ public class Comment implements Comparable<Comment>, Serializable{
 
     @Override
     public int compareTo(@NonNull Comment o) {
-        return o.getTimestamp().compareTo(this.timestamp);
+        if(o!=null && this !=null && "text".equals(type) && "text".equals(o.getType())){
+            return o.getTimestamp().compareTo(this.timestamp);
+        }else{
+            return 0;
+        }
+
+
     }
 }
 

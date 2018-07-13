@@ -29,7 +29,6 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 import com.dd.processbutton.FlatButton;
@@ -54,14 +53,12 @@ import java.util.Collections;
 import java.util.HashMap;
 
 import app.jayang.icebr8k.Homepage;
-import app.jayang.icebr8k.Modle.CommentBottomSheetFrag;
 import app.jayang.icebr8k.Modle.SurveyQ;
 import app.jayang.icebr8k.Modle.UserQA;
 import app.jayang.icebr8k.PeopleNearby;
 import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.Utility.Compatability;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
-import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 
 
@@ -208,8 +205,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
                             Snackbar.LENGTH_SHORT)
                             .show();
                 }
-                CommentBottomSheetFrag mCommentBottomSheetFrag = new CommentBottomSheetFrag();
-                mCommentBottomSheetFrag.show(getFragmentManager(),"bottomsheet");
+
             }
 
 

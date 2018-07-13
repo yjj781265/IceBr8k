@@ -119,7 +119,7 @@
         <activity android:name=".Leaderboard">
         </activity>
         <activity android:name=".QuestionActivity"
-                  android:windowSoftInputMode="stateAlwaysHidden|adjustResize">
+                  >
 
         </activity>
     </application>
