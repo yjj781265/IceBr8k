@@ -60,6 +60,7 @@ public class QuestionActivity extends SwipeBackActivity {
     private Spinner spinner;
     private String originalAnswer =null;
     private BubbleSeekBar mSeekBar;
+    private Boolean firstTime = true;
     private final long DAYS = 60*60*48*1000;  // 2 DAYS
     private String questionId;
     private final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -391,7 +392,11 @@ public class QuestionActivity extends SwipeBackActivity {
         });
 
         mCardView.setVisibility(View.VISIBLE);
-        YoYo.with(Techniques.FadeIn).playOn(mCardView);
+        if(firstTime){
+            YoYo.with(Techniques.FadeIn).playOn(mCardView);
+            firstTime = false;
+        }
+
         mProgressBar.setVisibility(View.GONE);
 
 
@@ -521,7 +526,11 @@ public class QuestionActivity extends SwipeBackActivity {
         });
 
         mCardView.setVisibility(View.VISIBLE);
-        YoYo.with(Techniques.FadeIn).playOn(mCardView);
+        if(firstTime){
+            YoYo.with(Techniques.FadeIn).playOn(mCardView);
+            firstTime = false;
+        }
+
         mProgressBar.setVisibility(View.GONE);
     }
 
@@ -662,7 +671,11 @@ public class QuestionActivity extends SwipeBackActivity {
             }
         });
         mCardView.setVisibility(View.VISIBLE);
-        YoYo.with(Techniques.FadeIn).playOn(mCardView);
+        if(firstTime){
+            YoYo.with(Techniques.FadeIn).playOn(mCardView);
+            firstTime = false;
+        }
+
         mProgressBar.setVisibility(View.GONE);
     }
 
