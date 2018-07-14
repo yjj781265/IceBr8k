@@ -2,17 +2,13 @@ package app.jayang.icebr8k;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
-import android.widget.Toast;
 
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.database.FirebaseDatabase;
-import com.onesignal.OSNotificationOpenResult;
 import com.onesignal.OneSignal;
 import com.zplesac.connectionbuddy.ConnectionBuddy;
 import com.zplesac.connectionbuddy.ConnectionBuddyConfiguration;
-import com.zplesac.connectionbuddy.models.ConnectivityStrength;
 
+import app.jayang.icebr8k.Utility.MyNotificationOpenedHandler;
+import app.jayang.icebr8k.Utility.MyNotificationReceivedHandler;
 import cat.ereza.customactivityoncrash.config.CaocConfig;
 
 

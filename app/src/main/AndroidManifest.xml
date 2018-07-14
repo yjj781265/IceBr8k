@@ -118,9 +118,9 @@
             android:windowSoftInputMode="stateAlwaysHidden|adjustResize"/>
         <activity android:name=".Leaderboard">
         </activity>
-        <activity android:name=".QuestionActivity"
-                  >
-
+        <activity android:name=".QuestionActivity">
+        </activity>
+        <activity android:name=".Reply">
         </activity>
     </application>
 

@@ -19,11 +19,13 @@
 
         >
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             app:layout_scrollFlags="scroll|enterAlwaysCollapsed">
+
+
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/question_toolbar"
@@ -36,7 +38,9 @@
                 app:title="Comments"></android.support.v7.widget.Toolbar>
 
             <android.support.v7.widget.CardView
+
                 android:id="@+id/cardView"
+                android:layout_below="@id/question_toolbar"
                 android:layout_width="match_parent"
 
 
@@ -44,7 +48,7 @@
                 android:layout_margin="16dp"
 
 
-                android:visibility="visible"
+                android:visibility="invisible"
                 app:cardBackgroundColor="@color/creamYellow"
                 app:cardElevation="2dp">
 
@@ -188,7 +192,16 @@
                 </android.support.constraint.ConstraintLayout>
             </android.support.v7.widget.CardView>
 
-        </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/question_progressBar"
+                android:layout_margin="80dp"
+                android:layout_centerInParent="true"
+                android:visibility="visible"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </RelativeLayout>
 
 
         <android.support.design.widget.TabLayout

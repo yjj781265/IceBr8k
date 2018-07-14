@@ -1,20 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent"
+    tools:context=".Reply">
 
-    <ScrollView
+    <ProgressBar
+        android:id="@+id/reply_progressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/reply_toolbar"
+        app:layout_constraintStart_toStartOf="@+id/reply_toolbar"
+        app:layout_constraintTop_toTopOf="@+id/reply_toolbar"/>
+
+    <android.support.v7.widget.Toolbar
+
+        android:id="@+id/reply_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="56dp"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/MyActionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/reply_recyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/reply_toolbar"/>
+
+
+    <!-- input-->
     <android.support.constraint.ConstraintLayout
+        android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@color/dialog_divider"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <ImageView
-            android:id="@+id/comment_avatar"
+            android:id="@+id/reply_avatar"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginBottom="8dp"
@@ -28,15 +68,15 @@
 
 
         <app.jayang.icebr8k.Modle.MyEditText
-            android:id="@+id/comment_input"
+            android:id="@+id/reply_input"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:background="@android:color/white"
+            android:background="@color/dialog_divider"
             android:focusableInTouchMode="true"
             android:focusedByDefault="false"
             android:hint="Add a comment..."
@@ -50,7 +90,7 @@
             android:textSize="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/relativeLayout2"
-            app:layout_constraintStart_toEndOf="@+id/comment_avatar"
+            app:layout_constraintStart_toEndOf="@+id/reply_avatar"
             app:layout_constraintTop_toTopOf="parent"/>
 
 
@@ -68,7 +108,8 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
-                android:id="@+id/comment_send"
+                android:visibility="gone"
+                android:id="@+id/reply_send"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
@@ -77,16 +118,15 @@
 
             <ProgressBar
 
-                android:id="@+id/comment_input_progressBar"
+                android:id="@+id/reply_input_progressBar"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-
                 android:visibility="gone"
                 />
 
 
         </RelativeLayout>
     </android.support.constraint.ConstraintLayout>
-    </ScrollView>
+
 
 </android.support.constraint.ConstraintLayout>

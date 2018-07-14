@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -77,6 +78,7 @@ public class QuestionAnsweredAdapter extends RecyclerView.Adapter<RecyclerView.V
             ((QuestionAnsweredViewholder) holder).question.setText(userQA.getQuestion().trim());
            ((QuestionAnsweredViewholder) holder).stamp.setVisibility("skipped".equals(userQA.getAnswer()) ? View.VISIBLE:View.GONE);
             ((QuestionAnsweredViewholder) holder).answer.setVisibility("skipped".equals(userQA.getAnswer()) ? View.GONE:View.VISIBLE);
+            ((QuestionAnsweredViewholder) holder).answer_bubble.setVisibility("skipped".equals(userQA.getAnswer()) ? View.GONE:View.VISIBLE);
            ((QuestionAnsweredViewholder) holder).answer.setText(userQA.getAnswer());
             DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
                     .child("Comments")
@@ -110,18 +112,22 @@ public class QuestionAnsweredAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     class  QuestionAnsweredViewholder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView question,answer,comment;
-        ImageView stamp;
+        ImageView stamp,answer_bubble;
         CardView mCardView;
+        LinearLayout comment_layout;
 
         public QuestionAnsweredViewholder(View itemView) {
             super(itemView);
             question = itemView.findViewById(R.id.question);
             stamp = itemView.findViewById(R.id.question_stamp);
+            answer_bubble = itemView.findViewById(R.id.question_answerIcon);
+            comment_layout = itemView.findViewById(R.id.question_comment_layout);
+
             answer = itemView.findViewById(R.id.answer);
             comment = itemView.findViewById(R.id.commentNum);
             mCardView = itemView.findViewById(R.id.cardView);
             mCardView.setOnClickListener(this);
-            comment.setOnClickListener(new View.OnClickListener() {
+            comment_layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if(getAdapterPosition()!= RecyclerView.NO_POSITION){
@@ -178,6 +184,7 @@ public class QuestionAnsweredAdapter extends RecyclerView.Adapter<RecyclerView.V
 
         question.setText(userQA.getQuestion().trim());
 
+        // get num of comments
         DatabaseReference commentRef = FirebaseDatabase.getInstance().getReference()
                 .child("Comments")
                 .child(userQA.getQuestionId());
@@ -195,6 +202,7 @@ public class QuestionAnsweredAdapter extends RecyclerView.Adapter<RecyclerView.V
                         Intent intent = new Intent(mContext, QuestionActivity.class);
                         intent.putExtra("questionId",userQA.getQuestionId());
                         mContext.startActivity(intent);
+                        questionDialog.dismiss();
                     }
                 });
 

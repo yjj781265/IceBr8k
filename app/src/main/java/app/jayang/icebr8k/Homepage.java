@@ -117,7 +117,7 @@ public class Homepage extends AppCompatActivity  implements
     //job scheduler variables
     private static final String Job_TaG ="MY_JOB_TAG";
     private FirebaseJobDispatcher mDispatcher;
-    private int mCurrentPosition =-1;
+
 
 
     @Override
@@ -200,20 +200,33 @@ public class Homepage extends AppCompatActivity  implements
         setHomepageTab();
 
         if(getIntent().getExtras()!=null) {
+           // extras for chat Page
+            String chatId = getIntent().getExtras().getString("chatId");
+            String name = getIntent().getExtras().getString("chatName");
+
+            // extras for reply Page
+            String questionId = getIntent().getExtras().getString("questionId");
+            String topCommentId = getIntent().getExtras().getString("topCommentId");
+            String commentId = getIntent().getExtras().getString("commentId");
 
             if (getIntent().getExtras().getString("mainchat") != null) {
                 viewPager.setCurrentItem(1);
-            }
-            if (getIntent().getExtras().getString("chatId") != null &&
-                    getIntent().getExtras().getString("chatName") != null){
-                String chatId = getIntent().getExtras().getString("chatId");
-                String name = getIntent().getExtras().getString("chatName");
+            }else if (chatId!=null && !chatId.isEmpty() && name !=null && !name.isEmpty()){
+
+                Toast.makeText(this, chatId + name, Toast.LENGTH_SHORT).show();
                 Intent mIntent = new Intent(this, UserChatActvity.class);
                 getIntent().addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 mIntent.putExtra("chatId", chatId);
                 mIntent.putExtra("chatName", name);
                 startActivity(mIntent);
                 overridePendingTransition(R.anim.slide_from_right,0);
+            }else if(questionId!=null ){
+                Intent mIntent = new Intent(this, QuestionActivity.class);
+                mIntent.putExtra("questionId", questionId);
+                mIntent.putExtra("topCommentId", topCommentId);
+                mIntent.putExtra("commentId", commentId);
+
+                startActivity(mIntent);
             }
         }
         setScreenOnOffListener();
@@ -236,23 +249,41 @@ public class Homepage extends AppCompatActivity  implements
     @Override
     protected void onNewIntent(Intent intent) {
 
-      //Toast.makeText(getApplicationContext(),"New Intent",Toast.LENGTH_SHORT).show();
-        if (intent.getExtras() != null) {
-            if (intent.getExtras().getString("mainchat") != null) {
-                viewPager.setCurrentItem(1,false);
-            }
-            // handle notification clicked
-            else if (intent.getExtras().getString("chatId") != null &&
-                    intent.getExtras().getString("chatName") != null){
-                String chatId = intent.getExtras().getString("chatId");
-                String name = intent.getExtras().getString("chatName");
+
+
+
+
+        if(intent.getExtras()!=null) {
+            // extras for chat Page
+            String chatId = intent.getExtras().getString("chatId");
+            String name = intent.getExtras().getString("chatName");
+
+
+            // extras for reply Page
+            String questionId = intent.getExtras().getString("questionId",null);
+            String topCommentId = intent.getExtras().getString("topCommentId");
+            String commentId = intent.getExtras().getString("commentId");
+
+           if (chatId!=null && !chatId.isEmpty() && name !=null && !name.isEmpty()){
                 Intent mIntent = new Intent(this, UserChatActvity.class);
+                getIntent().addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 mIntent.putExtra("chatId", chatId);
                 mIntent.putExtra("chatName", name);
                 startActivity(mIntent);
                 overridePendingTransition(R.anim.slide_from_right,0);
+            }else if(questionId!=null && !questionId.isEmpty() ){
+                Intent mIntent = new Intent(this, QuestionActivity.class);
+                mIntent.putExtra("questionId", questionId);
+                mIntent.putExtra("topCommentId", topCommentId);
+                mIntent.putExtra("commentId", commentId);
+
+                startActivity(mIntent);
             }
-    }
+        }
+
+
+
+
         if(checkInternet()){
             // device has active internet connection
             noConnection_tv.setVisibility(View.GONE);

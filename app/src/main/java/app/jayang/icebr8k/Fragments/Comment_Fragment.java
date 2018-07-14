@@ -94,7 +94,7 @@ public class Comment_Fragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             questionId = getArguments().getString(QUESTION_ID);
-            //Toast.makeText(getActivity(), questionId, Toast.LENGTH_SHORT).show();
+
         }
     }
 
@@ -185,9 +185,38 @@ public class Comment_Fragment extends Fragment {
         commentRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Comment comment = dataSnapshot.getValue(Comment.class);
-                comments.add(comment);
-                Collections.sort(comments);
+                final Comment comment = dataSnapshot.getValue(Comment.class);
+
+                DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+                        .child("Comments")
+                        .child(questionId).
+                                child(comment.getId())
+                        .child("replies");
+                ref.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+
+                        long count = dataSnapshot.getChildrenCount();
+                        comment.setReply(count);
+                        if(comments.contains(comment)){
+                            comments.set(comments.indexOf(comment),comment);
+                            mAdapter.notifyItemChanged(comments.indexOf(comment));
+                        }else{
+                            comments.add(comment);
+                            Collections.sort(comments);
+                        }
+
+
+
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
 
             }
 

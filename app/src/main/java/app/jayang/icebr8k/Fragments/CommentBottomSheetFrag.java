@@ -1,27 +1,16 @@
 package app.jayang.icebr8k.Fragments;
 
-import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.BottomSheetDialogFragment;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -41,7 +30,6 @@ import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.UUID;
 
-import app.jayang.icebr8k.Adapter.CommentAdapter;
 import app.jayang.icebr8k.Modle.Comment;
 import app.jayang.icebr8k.Modle.MyEditText;
 import app.jayang.icebr8k.Modle.User;

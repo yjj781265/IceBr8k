@@ -1,6 +1,7 @@
 package app.jayang.icebr8k.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -29,6 +31,8 @@ import app.jayang.icebr8k.Fragments.CommentBottomSheetFrag;
 import app.jayang.icebr8k.Modle.Comment;
 import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.R;
+import app.jayang.icebr8k.Reply;
+import app.jayang.icebr8k.UserProfilePage;
 import app.jayang.icebr8k.Utility.MyDateFormatter;
 import app.jayang.icebr8k.Utility.OnLoadMoreListener;
 
@@ -127,9 +131,9 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             Comment comment = mComments.get(position);
 
             ((CommentViewHolder) holder).text.setText(comment.getText());
-            ((CommentViewHolder) holder).reply.setText(comment.getReply()!=null? comment.getReply().toString() :"");
+            ((CommentViewHolder) holder).reply.setText(comment.getReply()!=null&& comment.getReply()>0? comment.getReply().toString() :"");
              ((CommentViewHolder) holder).answer.setVisibility(comment.getAnswer()==null ? View.GONE:View.VISIBLE);
-            ((CommentViewHolder) holder).answer.setText( "A: "+ comment.getAnswer());
+            ((CommentViewHolder) holder).answer.setText( comment.getAnswer());
             ((CommentViewHolder) holder).timestamp.setText(MyDateFormatter.commentTImeConverter(comment.getTimestamp()));
             DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
                     .child("Users")
@@ -202,18 +206,69 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         return viewType;
     }
 
-    class CommentViewHolder extends RecyclerView.ViewHolder {
+    class CommentViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView avatar;
+        private LinearLayout replyBubbleLayout;
         private TextView name, text,answer,timestamp,reply;
 
         public CommentViewHolder(View itemView) {
             super(itemView);
+            itemView.setOnClickListener(this);
+
             avatar = itemView.findViewById(R.id.comment_item_avatar);
+            replyBubbleLayout = itemView.findViewById(R.id.item_comment_reply_layout);
+            replyBubbleLayout.setOnClickListener(this);
             reply = itemView.findViewById(R.id.commentNum);
             name = itemView.findViewById(R.id.comment_item_name);
             text = itemView.findViewById(R.id.comment_item_text);
             answer = itemView.findViewById(R.id.comment_item_answer);
             timestamp = itemView.findViewById(R.id.comment_item_timestamp);
+
+
+            avatar.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(getAdapterPosition()!= RecyclerView.NO_POSITION){
+                        final Comment comment = mComments.get(getAdapterPosition());
+
+                        DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+                                .child("Users")
+                                .child(comment.getSenderId());
+                        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                User user = dataSnapshot.getValue(User.class);
+                                Intent intent = new Intent(mContext, UserProfilePage.class);
+                                intent.putExtra("userInfo",user);
+                                intent.putExtra("userUid",comment.getSenderId());
+                                mContext.startActivity(intent);
+
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+
+                        }
+
+                }
+            });
+        }
+
+        @Override
+        public void onClick(View v) {
+            if(getAdapterPosition()!= RecyclerView.NO_POSITION){
+                Comment comment = mComments.get(getAdapterPosition());
+
+                Intent intent = new Intent(mContext, Reply.class);
+                intent.putExtra("questionId",questionId);
+                intent.putExtra("topCommentId",comment.getId());
+                intent.putExtra("title",name.getText().toString());
+                mContext.startActivity(intent);
+
+            }
         }
     }
 

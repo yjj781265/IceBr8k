@@ -150,6 +150,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
 
         Intent i = getIntent();
+        /*******Required extras *******************************/
         if(i!=null) {
             mUser = (User) i.getSerializableExtra("userInfo"); //user2
             uid = i.getStringExtra("userUid");

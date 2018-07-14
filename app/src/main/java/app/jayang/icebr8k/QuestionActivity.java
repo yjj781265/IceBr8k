@@ -3,16 +3,19 @@ package app.jayang.icebr8k;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -21,6 +24,8 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -41,14 +46,17 @@ import app.jayang.icebr8k.Fragments.commonFrag;
 import app.jayang.icebr8k.Fragments.diffFrag;
 import app.jayang.icebr8k.Modle.SurveyQ;
 import app.jayang.icebr8k.Modle.UserQA;
+import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 
-public class QuestionActivity extends AppCompatActivity {
+public class QuestionActivity extends SwipeBackActivity {
     private TextView questionTV, subQuestion,confirmBtn,skipBtn ;
     private TabLayout mLayout;
     private ViewPager mViewPager;
     private Toolbar mToolbar;
     private ImageView stamp;
     private RadioGroup radioGroup;
+    private CardView mCardView;
+    private ProgressBar mProgressBar;
     private Spinner spinner;
     private String originalAnswer =null;
     private BubbleSeekBar mSeekBar;
@@ -63,17 +71,19 @@ public class QuestionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_question);
-        confirmBtn = findViewById(R.id.question_reset);
-        radioGroup = findViewById(R.id.radioGroup);
-        skipBtn = findViewById(R.id.question_skip);
-        questionTV = findViewById(R.id.question_id);
-        subQuestion = findViewById(R.id.sub_question_id);
-        spinner = findViewById(R.id.spinner_id);
-        mSeekBar = findViewById(R.id.seekBar);
-        stamp = findViewById(R.id.question_skip_stamp);
-        mLayout = findViewById(R.id.question_tablayout);
-        mViewPager = findViewById(R.id.question_viewpager);
-        mToolbar = findViewById(R.id.question_toolbar);
+        confirmBtn = (TextView) findViewById(R.id.question_reset);
+        radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
+        skipBtn = (TextView) findViewById(R.id.question_skip);
+        questionTV = (TextView) findViewById(R.id.question_id);
+        subQuestion = (TextView) findViewById(R.id.sub_question_id);
+        spinner = (Spinner) findViewById(R.id.spinner_id);
+        mSeekBar = (BubbleSeekBar) findViewById(R.id.seekBar);
+        stamp = (ImageView) findViewById(R.id.question_skip_stamp);
+        mLayout = (TabLayout) findViewById(R.id.question_tablayout);
+        mViewPager = (ViewPager) findViewById(R.id.question_viewpager);
+        mToolbar = (Toolbar) findViewById(R.id.question_toolbar);
+        mProgressBar = (ProgressBar) findViewById(R.id.question_progressBar);
+        mCardView = (CardView) findViewById(R.id.cardView);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -91,11 +101,27 @@ public class QuestionActivity extends AppCompatActivity {
 
         mLayout.getTabAt(0).setText("Comments");
         getCommentCounts();
+        final Handler handler = new Handler();
 
 
 
 
-        Toast.makeText(this, questionId, Toast.LENGTH_SHORT).show();
+       // Toast.makeText(this, questionId, Toast.LENGTH_SHORT).show();
+
+        // extras for reply Page
+        String topCommentId = getIntent().getExtras().getString("topCommentId");
+        String commentId = getIntent().getExtras().getString("commentId");
+
+      if(topCommentId!=null  ){
+            Intent mIntent = new Intent(this, Reply.class);
+            mIntent.putExtra("questionId", questionId);
+            mIntent.putExtra("topCommentId", topCommentId);
+            mIntent.putExtra("commentId", commentId);
+            startActivity(mIntent);
+        }
+
+
+
 
         //if user has answered question the btn will be reset , else will be confirm
 
@@ -104,11 +130,22 @@ public class QuestionActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(questionId!=null  && dataSnapshot.hasChild(questionId)){
                     confirmBtn.setText("Reset");
-                    setUI(true);
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            setUI(true);
+                        }
+                    },666);
+
                 }else{
                     confirmBtn.setText("Confirm");
                     if(questionId!=null){
-                        setUI(false);
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                setUI(false);
+                            }
+                        },666);
                     }
 
                 }
@@ -353,7 +390,9 @@ public class QuestionActivity extends AppCompatActivity {
             }
         });
 
-
+        mCardView.setVisibility(View.VISIBLE);
+        YoYo.with(Techniques.FadeIn).playOn(mCardView);
+        mProgressBar.setVisibility(View.GONE);
 
 
 
@@ -480,6 +519,10 @@ public class QuestionActivity extends AppCompatActivity {
 
             }
         });
+
+        mCardView.setVisibility(View.VISIBLE);
+        YoYo.with(Techniques.FadeIn).playOn(mCardView);
+        mProgressBar.setVisibility(View.GONE);
     }
 
     private void isMultipleChoice(final UserQA userQA) {
@@ -618,6 +661,9 @@ public class QuestionActivity extends AppCompatActivity {
 
             }
         });
+        mCardView.setVisibility(View.VISIBLE);
+        YoYo.with(Techniques.FadeIn).playOn(mCardView);
+        mProgressBar.setVisibility(View.GONE);
     }
 
 

@@ -96,6 +96,52 @@ public class SendNotification {
                         String url = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString();
                         OneSignal.postNotification(new JSONObject("{'contents': {'en':'" + text + "'}," +
                                         " 'include_player_ids': ['" + playerId + "'],"
+
+                                        + "'headings': { 'en':'"+ name+"'},"+"large_icon :'"+ url+"'"+" }"),
+                                new OneSignal.PostNotificationResponseHandler() {
+                                    @Override
+                                    public void onSuccess(JSONObject response) {
+                                        Log.d("Jsonjay","got it");
+                                    }
+
+                                    @Override
+                                    public void onFailure(JSONObject response) {
+                                        Log.d("Jsonjay", response.toString());
+                                    }
+                                });
+                    } catch (JSONException e) {
+                        Log.d("Jsonjay", e.getMessage());
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+    }
+
+
+    public static void sendReplyNotification(final String user2Id, final String name,
+                                             final String text,final String questionId,final String topCommentId, final String commentId) {
+
+
+        DatabaseReference playserIdRef = FirebaseDatabase.getInstance().getReference()
+                .child("Notification").child(user2Id).child("player_id");
+        playserIdRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String playerId = dataSnapshot.getValue(String.class);
+                if(playerId!=null) {
+                    try {
+                        String url = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString();
+                        OneSignal.postNotification(new JSONObject("{'contents': {'en':'" + text + "'}," +
+                                        " 'include_player_ids': ['" + playerId + "'],"
+                                        +"'data': {'questionId': '"+ questionId +"', " +
+                                        " 'topCommentId': '"+ topCommentId+"', 'commentId': '"+commentId +"' },"
                                         + "'headings': { 'en':'"+ name+"'},"+"large_icon :'"+ url+"'"+" }"),
                                 new OneSignal.PostNotificationResponseHandler() {
                                     @Override
