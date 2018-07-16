@@ -10,42 +10,32 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.view.menu.MenuBuilder;
-import android.support.v7.view.menu.MenuPopupHelper;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
-import android.transition.Fade;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.SimpleTarget;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.firebase.jobdispatcher.Constraint;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
@@ -68,6 +58,16 @@ import com.karumi.dexter.listener.PermissionDeniedResponse;
 import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
+import com.mikepenz.materialdrawer.AccountHeader;
+import com.mikepenz.materialdrawer.AccountHeaderBuilder;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.holder.BadgeStyle;
+import com.mikepenz.materialdrawer.holder.StringHolder;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.onesignal.OSSubscriptionObserver;
 import com.onesignal.OSSubscriptionStateChanges;
 import com.onesignal.OneSignal;
@@ -77,15 +77,9 @@ import com.zplesac.connectionbuddy.interfaces.ConnectivityChangeListener;
 import com.zplesac.connectionbuddy.models.ConnectivityEvent;
 import com.zplesac.connectionbuddy.models.ConnectivityState;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
 import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
 import app.jayang.icebr8k.Fragments.SurveyTab_Fragment;
 import app.jayang.icebr8k.Fragments.UserMessageDialog_Frag;
-import app.jayang.icebr8k.Fragments.Userstab_Fragment;
 import app.jayang.icebr8k.Fragments.me_frag;
 import app.jayang.icebr8k.Utility.ActivityCommunicator;
 import app.jayang.icebr8k.Modle.myViewPager;
@@ -101,6 +95,7 @@ public class Homepage extends AppCompatActivity  implements
     private SwitchCompat mSwitchCompat;
     private String radius = "1 mi";
     private ImageView menu;
+    private TextView menuBadge;
     private ViewPagerAdapter mViewPagerAdapter;
     private TextView noConnection_tv;
     protected myViewPager viewPager;
@@ -110,6 +105,8 @@ public class Homepage extends AppCompatActivity  implements
     private int index =0;
     private DatabaseReference presenceRef,lastSeenRef;
      private ScreenStateReceiver mReceiver;
+     private Drawer drawer;
+
 
     private String TAG = "homePage";
     private final String DEFAULTURL = "https://i.imgur.com/xUAsoWs.png";
@@ -117,6 +114,12 @@ public class Homepage extends AppCompatActivity  implements
     //job scheduler variables
     private static final String Job_TaG ="MY_JOB_TAG";
     private FirebaseJobDispatcher mDispatcher;
+
+
+  // nav drawer item
+    private PrimaryDrawerItem friendRequest, addFriend,feedback,logOut,setting;
+
+
 
 
 
@@ -127,8 +130,12 @@ public class Homepage extends AppCompatActivity  implements
         // prevent flash on status bar
 
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        menu = findViewById(R.id.menu);
+        menuBadge = findViewById(R.id.menuBadge);
+        setSupportActionBar((Toolbar) findViewById(R.id.users_toolbar));
+        getSupportActionBar().setTitle("");
 
-        menu = findViewById(R.id.users_main_menu);
+
         homepageTab = findViewById(R.id.bottom_navigation);
         viewPager = findViewById(R.id.homepage_viewpager);
         noConnection_tv = findViewById(R.id.noConnection_tv);
@@ -145,12 +152,12 @@ public class Homepage extends AppCompatActivity  implements
 
         mDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
 
-        menu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showPopup(v);
-            }
-        });
+
+
+
+
+
+
 
 
 
@@ -188,7 +195,9 @@ public class Homepage extends AppCompatActivity  implements
 
         initialiseOnlinePresence();
         unReadCheck();
-        setBadge();
+
+        setUpNavDrawer();
+
 
 
         if("public".equals(getPrivacySharedPreference())){
@@ -299,104 +308,32 @@ public class Homepage extends AppCompatActivity  implements
     }
 
 
-    @SuppressLint("RestrictedApi")
-    public void showPopup(View v){
-        PopupMenu popupMenu = new PopupMenu(this,v);
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.log_out_item:
+    public boolean onCreateOptionsMenu(Menu menu) {
 
-                        if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
-                            return false;
-                        }
-
-                        lastClickTime = SystemClock.elapsedRealtime();
-                        Signout();
-                        finish();
-                        return true;
-
-                    case R.id.add_friend:
-                        if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
-                            return false;
-                        }
-
-                        lastClickTime = SystemClock.elapsedRealtime();
-                        Intent i = new Intent(getApplicationContext(),SearchUser.class);
-                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                        startActivity(i);
-                        return true;
-/*
-            case R.id.scan_qr:
-                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
-                    return false;
-                }
-
-                lastClickTime = SystemClock.elapsedRealtime();
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    checkCameraPermission();
-                } else {
-                    Intent intent = new Intent(getApplicationContext(),ScannerActivity.class);
-                   intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                    startActivity(intent);
-                }
-                return true;
-                */
-                    case R.id.people_nearby:
-                        if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
-                            return false;
-                        }
-                        lastClickTime = SystemClock.elapsedRealtime();
-
-                        // if share my postion is on
-                        if("public".equals(getPrivacySharedPreference())){
-                            showSingleChoiceDialog();
-                        }else {
-                            new MaterialDialog.Builder(getApplicationContext())
-                                    .content("\"Share My Location\" is disabled, you can go to Me tab to enable it.")
-                                    .positiveText(R.string.ok).onPositive(new MaterialDialog.SingleButtonCallback() {
-                                @Override
-                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    viewPager.setCurrentItem(2,true);
-                                }
-                            })
-                                    .show();
-                        }
-                        return true;
-                    case R.id.feedback:
-                        if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
-                            return false;
-                        }
-                        lastClickTime = SystemClock.elapsedRealtime();
-                        Intent intent = new Intent(getApplicationContext(),Feedback.class);
-                        startActivity(intent);
-                        return true;
-
-          /*  case R.id.leaderboard:
-                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
-                    return false;
-                }
-                lastClickTime = SystemClock.elapsedRealtime();
-                Intent mIntent = new Intent(this,Leaderboard.class);
-                startActivity(mIntent);
-                return true;
-*/
-
-                    default:
-                        return false;
-                }
-
-            }
-        });
-
-        popupMenu.inflate(R.menu.menu_main);
-        @SuppressLint("RestrictedApi") MenuPopupHelper menuHelper = new MenuPopupHelper(this,(MenuBuilder) popupMenu.getMenu(),v);
-        menuHelper.setForceShowIcon(true);
-        menuHelper.setGravity(Gravity.START);
-        menuHelper.show();
-
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return true;
     }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        //respond to menu item selection
+        switch (item.getItemId()) {
+            case R.id.add_friend:
+                startActivity(new Intent(this, SearchUser.class));
+                return true;
+            case R.id.leaderboard:
+                startActivity(new Intent(this, Leaderboard.class));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
+
+
+    @SuppressLint("RestrictedApi")
+
 
 
 
@@ -506,6 +443,171 @@ public class Homepage extends AppCompatActivity  implements
 
     }
 
+    void setUpNavDrawer(){
+
+        friendRequest = new PrimaryDrawerItem().withName("Friend Request").
+                withIcon(R.drawable.user_icon).withBadge("1").withBadgeStyle(new BadgeStyle().withTextColor(Color.WHITE).withColorRes(R.color.holo_red_light));
+        addFriend  = new PrimaryDrawerItem().withName("Add Friend").withIcon(R.drawable.ic_action_addfriend);
+        feedback  = new PrimaryDrawerItem().withName(getString(R.string.feedback)).withIcon(R.drawable.ic_action_feedback);
+        logOut  = new PrimaryDrawerItem().withName("Log Out").withIcon(R.drawable.ic_action_exit);
+
+        setting = new PrimaryDrawerItem().withName("Settings").withIcon(R.drawable.ic_action_settings);
+
+
+
+
+
+        IProfile profile =  new ProfileDrawerItem().withName(currentUser.getDisplayName()).
+                withEmail(currentUser.getEmail()).withIcon(currentUser.getPhotoUrl());
+
+
+
+        // Create the AccountHeader
+        AccountHeader headerResult = new AccountHeaderBuilder()
+                .withActivity(this)
+
+                .withSelectionListEnabledForSingleProfile(false)
+                .withAlternativeProfileHeaderSwitching(false)
+                .withHeaderBackground(R.drawable.header_img)
+                .addProfiles(
+                        profile
+                )
+                .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
+                    @Override
+                    public boolean onProfileChanged(View view, IProfile profile, boolean currentProfile) {
+                        return false;
+                    }
+                })
+                .build();
+
+
+//create the drawer and remember the `Drawer` result object
+         drawer  = new DrawerBuilder()
+                .withActivity(this)
+                .withSelectedItem(-1)
+                 .withActionBarDrawerToggle(false)
+                .withAccountHeader(headerResult)
+                .withToolbar( (Toolbar) findViewById(R.id.users_toolbar))
+                .addDrawerItems(
+                        friendRequest, addFriend,feedback, setting
+                ).addStickyDrawerItems(logOut)
+                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                        Intent intent;
+                        switch (position) {
+                            case -1:
+
+                                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                                    return false;
+                                }
+
+                                lastClickTime = SystemClock.elapsedRealtime();
+                                Signout();
+                                finish();
+                                return true;
+
+                            case 1:
+                                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                                    return false;
+                                }
+                                lastClickTime = SystemClock.elapsedRealtime();
+                                Intent i = new Intent(getApplicationContext(),FriendRequestPage.class);
+                                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                                startActivity(i);
+                                drawer.setSelection(-1);
+                                drawer.closeDrawer();
+                                return true;
+
+                            case 2:
+                                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                                    return false;
+                                }
+
+                                lastClickTime = SystemClock.elapsedRealtime();
+                                Intent mintent = new Intent(getApplicationContext(),SearchUser.class);
+                                mintent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                                startActivity(mintent);
+                                drawer.setSelection(-1);
+                                drawer.closeDrawer();
+                                return true;
+/*
+            case R.id.scan_qr:
+                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                    return false;
+                }
+
+                lastClickTime = SystemClock.elapsedRealtime();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    checkCameraPermission();
+                } else {
+                    Intent intent = new Intent(getApplicationContext(),ScannerActivity.class);
+                   intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                }
+                return true;
+                */
+                          /*  case R.id.people_nearby:
+                                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                                    return false;
+                                }
+                                lastClickTime = SystemClock.elapsedRealtime();
+
+                                // if share my postion is on
+                                if("public".equals(getPrivacySharedPreference())){
+                                    showSingleChoiceDialog();
+                                }else {
+                                    new MaterialDialog.Builder(getApplicationContext())
+                                            .content("\"Share My Location\" is disabled, you can go to Me tab to enable it.")
+                                            .positiveText(R.string.ok).onPositive(new MaterialDialog.SingleButtonCallback() {
+                                        @Override
+                                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                            viewPager.setCurrentItem(2,true);
+                                        }
+                                    })
+                                            .show();
+                                }
+                                return true;*/
+                            case 3:
+                                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                                    return false;
+                                }
+                                lastClickTime = SystemClock.elapsedRealtime();
+                                intent = new Intent(getApplicationContext(),Feedback.class);
+                                startActivity(intent);
+                                drawer.setSelection(-1);
+                                drawer.closeDrawer();
+                                return true;
+
+
+                            case 4:
+                                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                                    return false;
+                                }
+                                lastClickTime = SystemClock.elapsedRealtime();
+                                intent = new Intent(getApplicationContext(), Settings_Activity.class);
+                                startActivity(intent);
+                                drawer.setSelection(-1);
+                                drawer.closeDrawer();
+                                return true;
+
+                            default:
+                                return false;
+                        }
+                    }
+                })
+                .build();
+
+        menu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawer.openDrawer();
+            }
+        });
+        setBadge();
+
+    }
+
 
 
 
@@ -571,9 +673,17 @@ public class Homepage extends AppCompatActivity  implements
                 }
 
                 if(count==0){
-                    homepageTab.setNotification("", 2);
+                    menuBadge.setText("");
+                    menuBadge.setVisibility(View.GONE);
+                    friendRequest.withBadge( (StringHolder)(null));
+                   drawer.updateItem(friendRequest);
                 }else{
-                    homepageTab.setNotification(String.valueOf(count), 2);
+                    menuBadge.setText(""+count);
+                    menuBadge.setVisibility(View.VISIBLE);
+                    YoYo.with(Techniques.Pulse).repeat(666).playOn(menuBadge);
+                    friendRequest.withBadge(""+count);
+                    drawer.updateItem(friendRequest);
+
                 }
             }
 

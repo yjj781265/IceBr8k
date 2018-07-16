@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
@@ -42,6 +43,7 @@ import java.util.Date;
 
 import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
 import app.jayang.icebr8k.Fragments.Comment_Fragment;
+import app.jayang.icebr8k.Fragments.Result_fragment;
 import app.jayang.icebr8k.Fragments.commonFrag;
 import app.jayang.icebr8k.Fragments.diffFrag;
 import app.jayang.icebr8k.Modle.SurveyQ;
@@ -51,6 +53,7 @@ import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 public class QuestionActivity extends SwipeBackActivity {
     private TextView questionTV, subQuestion,confirmBtn,skipBtn ;
     private TabLayout mLayout;
+    private AppBarLayout mAppBarLayout;
     private ViewPager mViewPager;
     private Toolbar mToolbar;
     private ImageView stamp;
@@ -85,6 +88,8 @@ public class QuestionActivity extends SwipeBackActivity {
         mToolbar = (Toolbar) findViewById(R.id.question_toolbar);
         mProgressBar = (ProgressBar) findViewById(R.id.question_progressBar);
         mCardView = (CardView) findViewById(R.id.cardView);
+        mAppBarLayout = (AppBarLayout) findViewById(R.id.question_appBar);
+        getSwipeBackLayout().setEdgeSize(36);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -94,6 +99,7 @@ public class QuestionActivity extends SwipeBackActivity {
 
 
         viewPagerAdapter.addFragment(Comment_Fragment.newInstance(questionId));
+        viewPagerAdapter.addFragment(Result_fragment.newInstance(questionId));
 
 
 
@@ -101,6 +107,7 @@ public class QuestionActivity extends SwipeBackActivity {
         mLayout.setupWithViewPager(mViewPager);
 
         mLayout.getTabAt(0).setText("Comments");
+        mLayout.getTabAt(1).setText("Result");
         getCommentCounts();
         final Handler handler = new Handler();
 
@@ -682,8 +689,8 @@ public class QuestionActivity extends SwipeBackActivity {
 
     void showVerifyDialog (String originalAnswer, final String newAnswer, final UserQA userQA){
         String content = originalAnswer!=null ?
-                "Are you sure to change answer from "+ originalAnswer +" to "+ newAnswer+"?"
-                : "Are you sure you want to submit answer "+ newAnswer;
+                "Are you sure to change answer from \"" + originalAnswer +"\" to \""+ newAnswer+"\"?"
+                : "Are you sure you want to submit answer \""+ newAnswer+"\"?";
         new MaterialDialog.Builder(this)
                 .content(content)
                 .positiveText("Yes")
@@ -751,5 +758,9 @@ public class QuestionActivity extends SwipeBackActivity {
 
             }
         }.start();
+    }
+
+    public AppBarLayout getAppBarLayout() {
+        return mAppBarLayout;
     }
 }

@@ -42,9 +42,11 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="16dp"
+
         android:layout_marginTop="8dp"
         android:ellipsize="end"
-
         android:maxLines="1"
         android:text="I dont fdsfsdfds"
         android:textColor="@android:color/black"
@@ -78,7 +80,7 @@
         android:layout_height="30dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:visibility="invisible"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/leaderboard_item_qsum"
         app:layout_constraintStart_toEndOf="@+id/leaderboard_item_name"

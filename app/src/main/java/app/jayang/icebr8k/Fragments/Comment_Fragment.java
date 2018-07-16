@@ -204,6 +204,7 @@ public class Comment_Fragment extends Fragment {
                         }else{
                             comments.add(comment);
                             Collections.sort(comments);
+                            mAdapter.notifyDataSetChanged();
                         }
 
 
@@ -245,7 +246,7 @@ public class Comment_Fragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mProgressBar.setVisibility(View.GONE);
-                mAdapter.notifyDataSetChanged();
+
             }
 
             @Override

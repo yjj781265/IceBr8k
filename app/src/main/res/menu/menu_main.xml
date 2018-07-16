@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-<!--
-
-    <item android:id="@+id/leaderboard"
-          android:title="Leaderboard"
-          android:icon="@drawable/ic_action_leaderboard"
-          app:showAsAction="always"
-          ></item>
-          -->
 
 
 
@@ -18,9 +10,24 @@
         android:title ="Add Friend"
         android:orderInCategory="100"
         android:id="@+id/add_friend"
-        android:icon="@drawable/ic_action_addfriend"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_action_add_friend_white"
 
         />
+
+
+    <item android:id="@+id/leaderboard"
+          android:title="Leaderboard"
+          android:icon="@drawable/ic_action_leaderboard"
+          app:showAsAction="always"
+          ></item>
+
+
+
+
+
+
+
 
 <!--
     <item
@@ -31,27 +38,7 @@
     app:showAsAction="never"/>
     -->
 
-    <item
-        android:title ="People Nearby"
-        android:orderInCategory="100"
-        android:id="@+id/people_nearby"
-        android:icon="@drawable/map_icon"
-        app:showAsAction="never"/>
-    <item
-        android:title ="@string/feedback"
-        android:orderInCategory="100"
-        android:id="@+id/feedback"
-        android:icon="@drawable/ic_action_feedback"
-        app:showAsAction="never"/>
 
 
-    <item
-    android:title ="@string/log_out"
-    android:orderInCategory="100"
-    android:id="@+id/log_out_item"
-    android:icon="@drawable/ic_action_exit"
-    app:showAsAction="never"
-
-    />
 
 </menu>

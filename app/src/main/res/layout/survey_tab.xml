@@ -414,69 +414,88 @@
 
         </RelativeLayout>
 
-
-        <android.support.constraint.ConstraintLayout
-            android:id="@+id/survey_feedbackPannel"
-            android:layout_width="match_parent"
+        <android.support.v7.widget.CardView
+            android:id="@+id/survey_connect_card"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:padding="16dp"
-            android:visibility="visible">
+            app:cardBackgroundColor="@color/creamYellow"
+            app:cardCornerRadius="16dp">
 
-            <com.dd.processbutton.FlatButton
-                android:id="@+id/survey_moreq"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:padding="8dp"
-                android:text="More Questions"
-                android:textAllCaps="false"
-                android:textColor="@color/white"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:pb_colorNormal="@color/colorPrimaryDark"
-                app:pb_colorPressed="@color/colorPrimaryDark"/>
+            <android.support.constraint.ConstraintLayout
+                android:id="@+id/survey_feedbackPannel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:padding="16dp"
+                android:visibility="visible">
 
-            <com.dd.processbutton.FlatButton
-                android:id="@+id/survey_connect"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                <com.dd.processbutton.FlatButton
+                    android:id="@+id/survey_moreq"
+                    android:layout_width="134dp"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:padding="8dp"
+                    android:text="More Questions"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    app:layout_constraintEnd_toStartOf="@+id/survey_connect"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:pb_colorNormal="@color/colorPrimaryDark"
+                    app:pb_colorPressed="@color/colorPrimaryDark"
+                    />
 
-                android:layout_marginEnd="8dp"
-                android:layout_marginTop="8dp"
-                android:padding="8dp"
-                android:text="Connect"
-                android:textAllCaps="false"
-                android:textColor="@color/white"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:pb_colorNormal="@color/colorPrimary"
-                app:pb_colorPressed="@color/colorPrimary"
-                />
+                <com.dd.processbutton.FlatButton
+                    android:id="@+id/survey_connect"
+                    android:layout_width="135dp"
+                    android:layout_height="40dp"
 
-            <com.dd.processbutton.FlatButton
-                android:id="@+id/survey_feedback"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:padding="8dp"
+                    android:text="Connect"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/survey_moreq"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:pb_colorNormal="@color/colorPrimary"
+                    app:pb_colorPressed="@color/colorPrimary"
+                    />
 
-                android:layout_marginEnd="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="24dp"
-                android:foreground="?attr/selectableItemBackgroundBorderless"
-                android:padding="8dp"
-                android:text="Leave Feedback"
-                android:textAllCaps="false"
-                android:textColor="@color/white"
-                app:layout_constraintEnd_toStartOf="@+id/survey_connect"
-                app:layout_constraintHorizontal_bias="0.502"
-                app:layout_constraintStart_toEndOf="@+id/survey_moreq"
-                app:layout_constraintTop_toBottomOf="@+id/survey_connect"
-                app:pb_colorNormal="@color/colorAccent"
-                app:pb_colorPressed="@color/colorAccent"/>
+                <com.dd.processbutton.FlatButton
+                    android:id="@+id/survey_feedback"
+                    android:layout_width="134dp"
+                    android:layout_height="40dp"
 
-        </android.support.constraint.ConstraintLayout>
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:foreground="?attr/selectableItemBackgroundBorderless"
+                    android:padding="8dp"
+                    android:text="Leave Feedback"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    app:layout_constraintEnd_toStartOf="@+id/survey_connect"
+                    app:layout_constraintHorizontal_bias="0.502"
+                    app:layout_constraintStart_toEndOf="@+id/survey_moreq"
+                    app:layout_constraintTop_toBottomOf="@+id/survey_connect"
+                    app:pb_colorNormal="@color/colorAccent"
+                    app:pb_colorPressed="@color/colorAccent"/>
+
+                <android.support.constraint.Guideline
+                    android:id="@+id/guideline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    app:layout_constraintGuide_begin="20dp"/>
+
+            </android.support.constraint.ConstraintLayout>
+        </android.support.v7.widget.CardView>
 
 
 

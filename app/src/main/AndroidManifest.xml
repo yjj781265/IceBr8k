@@ -122,6 +122,8 @@
         </activity>
         <activity android:name=".Reply">
         </activity>
+        <activity android:name=".Settings_Activity">
+        </activity>
     </application>
 
 </manifest>

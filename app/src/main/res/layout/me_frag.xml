@@ -76,11 +76,12 @@
                    android:background="@color/colorPrimary"
                    app:tabTextAppearance="@android:style/TextAppearance.Widget.TabWidget"
                    app:tabMode="scrollable"
+
                    android:id="@+id/me_tablayout"
-                   app:tabTextColor="@color/gray"
+                   app:tabTextColor="@color/dark_gray"
                    app:tabSelectedTextColor="@color/white"
                    android:layout_width="match_parent"
-                   android:layout_height="wrap_content">
+                   android:layout_height="36dp">
 
                </android.support.design.widget.TabLayout>
 

@@ -77,11 +77,44 @@ public class QuestionAnswered_Fragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot childSnap : dataSnapshot.getChildren()){
-                    UserQA userQA = childSnap.getValue(UserQA.class);
+                    final UserQA userQA = childSnap.getValue(UserQA.class);
+
+
+
 
                     if(!qIdList.contains(userQA.getQuestionId())){
-                        mList.add(userQA);
-                        qIdList.add(userQA.getQuestionId());
+
+
+                        DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+                                .child("Comments")
+                                .child(userQA.getQuestionId());
+                        ref.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                                long count = dataSnapshot.getChildrenCount();
+                                String str = count>0 ? ""+count :"";
+                                userQA.setNumComments(str);
+
+                                if(!mList.contains(userQA)){
+                                    mList.add(userQA);
+                                    qIdList.add(userQA.getQuestionId());
+                                    Collections.sort(mList);
+                                    mAdapter.notifyDataSetChanged();
+                                }else {
+                                    mList.set(mList.indexOf(userQA),userQA);
+                                    mAdapter.notifyItemChanged(mList.indexOf(userQA));
+                                }
+
+
+
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
 
                     }else{
                         for(UserQA temp : mList){

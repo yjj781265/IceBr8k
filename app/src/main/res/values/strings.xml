@@ -100,6 +100,8 @@ This Service does not use these “cookies” explicitly. However, the app may u
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="share_my_location">Share My Location</string>
+    <string name="make_my_profile_public">Make My Profile Public</string>
 
 
 </resources>

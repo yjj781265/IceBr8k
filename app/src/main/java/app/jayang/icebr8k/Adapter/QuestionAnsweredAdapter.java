@@ -80,25 +80,8 @@ public class QuestionAnsweredAdapter extends RecyclerView.Adapter<RecyclerView.V
             ((QuestionAnsweredViewholder) holder).answer.setVisibility("skipped".equals(userQA.getAnswer()) ? View.GONE:View.VISIBLE);
             ((QuestionAnsweredViewholder) holder).answer_bubble.setVisibility("skipped".equals(userQA.getAnswer()) ? View.GONE:View.VISIBLE);
            ((QuestionAnsweredViewholder) holder).answer.setText(userQA.getAnswer());
-            DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
-                    .child("Comments")
-                    .child(userQA.getQuestionId());
-            ref.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
+            ((QuestionAnsweredViewholder) holder).comment.setText(userQA.getNumComments());
 
-                    long count = dataSnapshot.getChildrenCount();
-                    String str = count>0 ? ""+count :"";
-
-                    ((QuestionAnsweredViewholder) holder).comment.setText(str);
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
         }
 
 
@@ -547,7 +530,7 @@ public class QuestionAnsweredAdapter extends RecyclerView.Adapter<RecyclerView.V
     }
 
     void showVerifyDialog (String originalAnswer, final String newAnswer, final UserQA userQA){
-        String content = "Are you sure to change answer from "+ originalAnswer +" to "+ newAnswer+"?";
+        String content = "Are you sure to change answer from \""+ originalAnswer +"\" to \""+ newAnswer+"\"?";
         new MaterialDialog.Builder(mContext)
                 .content(content)
                 .positiveText("Yes")

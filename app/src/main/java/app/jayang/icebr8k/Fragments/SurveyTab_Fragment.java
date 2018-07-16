@@ -83,7 +83,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
     private MaterialDialog loadingDialog;
     private String TAG = "surveyFrag";
     private CardView cardView;
-    private ConstraintLayout feedbackPannel;
+    private CardView feedbackPannel;
     private FlatButton connect, feedback,moreQuestion;
     private DatabaseReference userQARef;
     private final String MC_TYPE = "mc";
@@ -156,7 +156,7 @@ public class SurveyTab_Fragment extends Fragment implements OnSuccessListener {
         cardView.setVisibility(View.GONE);
         loadingGif = mview.findViewById(R.id.survey_loading);
         loadingGif.setVisibility(View.VISIBLE);
-        feedbackPannel = mview.findViewById(R.id.survey_feedbackPannel);
+        feedbackPannel = mview.findViewById(R.id.survey_connect_card);
         moreQuestion = mview.findViewById(R.id.survey_moreq);
         feedback = mview.findViewById(R.id.survey_feedback);
         connect = mview.findViewById(R.id.survey_connect);

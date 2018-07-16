@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 public class UserQA implements Parcelable,Comparable<UserQA> {
     private String questionId,answer,question;
     private Boolean like,favorite;
+    private String numComments;
 
 
     public UserQA(){}
@@ -21,6 +22,15 @@ public class UserQA implements Parcelable,Comparable<UserQA> {
         this.answer = answer;
         this.question = question;
         this.like = like;
+
+    }
+
+    public String getNumComments() {
+        return numComments;
+    }
+
+    public void setNumComments(String numComments) {
+        this.numComments = numComments;
     }
 
     public Boolean getLike() {

@@ -409,7 +409,11 @@ public class Reply extends SwipeBackActivity implements ReplyAdapter.replyClicke
 
                                 String notificationText = currentUser.getDisplayName()+ " has replied to your comment \n" + text;
 
-                                SendNotification.sendReplyNotification(commentAuthorId,currentUser.getDisplayName(),notificationText,questionId,topCommentId,comment.getId());
+
+                                if(!commentAuthorId.equals(currentUser.getUid())){
+                                    SendNotification.sendReplyNotification(commentAuthorId,currentUser.getDisplayName(),notificationText,questionId,topCommentId,comment.getId());
+                                }
+
 
                                 Toast.makeText(Reply.this, "Comment Added", Toast.LENGTH_SHORT).show();
                             }

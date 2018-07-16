@@ -136,7 +136,7 @@ public class me_frag extends Fragment {
         mTabLayout.setupWithViewPager(mViewPager);
 
         mTabLayout.getTabAt(0).setText("Friends");
-        mTabLayout.getTabAt(1).setText("Questions\nAnswered");
+        mTabLayout.getTabAt(1).setText("Questions Answered");
         setTabTitle();
 
 // set my info UI

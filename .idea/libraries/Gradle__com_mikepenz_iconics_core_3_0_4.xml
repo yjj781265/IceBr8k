@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: com.mikepenz:iconics-core-3.0.4">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/iconics-core-3.0.4.aar/35480444fe129cd02af2dfc1383f6ae9/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/iconics-core-3.0.4.aar/35480444fe129cd02af2dfc1383f6ae9/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.mikepenz/iconics-core/3.0.4/8a944689cdd2b71ab5d6589042f6d533c4a32455/iconics-core-3.0.4-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

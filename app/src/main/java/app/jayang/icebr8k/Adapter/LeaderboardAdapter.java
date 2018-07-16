@@ -55,7 +55,7 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
               holder.badge.setImageResource(R.drawable.bronze_medal);
               holder.badge.setVisibility(View.VISIBLE);
           }else{
-              holder.badge.setVisibility(View.INVISIBLE);
+              holder.badge.setVisibility(View.GONE);
           }
 
           if(dialog.getId().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())){

@@ -36,6 +36,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.onesignal.OneSignal;
 
@@ -585,23 +587,28 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
     private void setUnread(){
         final DatabaseReference checkUnreadRef = receiverMessageRef.child("unread");
-        checkUnreadRef.keepSynced(true);
-        checkUnreadRef.addListenerForSingleValueEvent(new ValueEventListener() {
+
+        checkUnreadRef.runTransaction(new Transaction.Handler() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Integer unRead = dataSnapshot.getValue(Integer.class);
+            public Transaction.Result doTransaction(MutableData mutableData) {
+
+                Integer unRead = mutableData.getValue(Integer.class);
                 if(unRead==null){
                     checkUnreadRef.setValue(1);
                 }else if( user2Inchat ==null||!user2Inchat) {
                     checkUnreadRef.setValue(++unRead);
                 }
+                return Transaction.success(mutableData);
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
 
             }
         });
+
+
+
 
 
     }
