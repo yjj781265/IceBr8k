@@ -78,6 +78,7 @@ import com.zplesac.connectionbuddy.models.ConnectivityEvent;
 import com.zplesac.connectionbuddy.models.ConnectivityState;
 
 import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
+import app.jayang.icebr8k.Fragments.PeopleNearby_Fragment;
 import app.jayang.icebr8k.Fragments.SurveyTab_Fragment;
 import app.jayang.icebr8k.Fragments.UserMessageDialog_Frag;
 import app.jayang.icebr8k.Fragments.me_frag;
@@ -88,21 +89,20 @@ import app.jayang.icebr8k.Utility.MyJobService;
 
 public class Homepage extends AppCompatActivity  implements
         OSSubscriptionObserver,
-        ConnectivityChangeListener,
-        SharedPreferences.OnSharedPreferenceChangeListener,ActivityCommunicator {
-    private final int  REQUEST_CHECK_SETTINGS =9000;
+        ConnectivityChangeListener
+        {
     private AHBottomNavigation homepageTab;
-    private SwitchCompat mSwitchCompat;
-    private String radius = "1 mi";
+
+
     private ImageView menu;
     private TextView menuBadge;
     private ViewPagerAdapter mViewPagerAdapter;
     private TextView noConnection_tv;
     protected myViewPager viewPager;
-    private FirebaseUser currentUser;
+    private FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
     private long lastClickTime = 0;
     private DatabaseReference mRef;
-    private int index =0;
+
     private DatabaseReference presenceRef,lastSeenRef;
      private ScreenStateReceiver mReceiver;
      private Drawer drawer;
@@ -139,7 +139,7 @@ public class Homepage extends AppCompatActivity  implements
         homepageTab = findViewById(R.id.bottom_navigation);
         viewPager = findViewById(R.id.homepage_viewpager);
         noConnection_tv = findViewById(R.id.noConnection_tv);
-        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
         mRef = FirebaseDatabase.getInstance().getReference();
         mRef.keepSynced(true);
         presenceRef = FirebaseDatabase.getInstance().getReference().child("Users").
@@ -200,11 +200,7 @@ public class Homepage extends AppCompatActivity  implements
 
 
 
-        if("public".equals(getPrivacySharedPreference())){
-            startJob();
-        }else if("private".equals(getPrivacySharedPreference())){
-            stopJob();
-        }
+
         // bottom nav bar
         setHomepageTab();
 
@@ -242,17 +238,6 @@ public class Homepage extends AppCompatActivity  implements
 
     }
 
-    public void startJob(){
-        Job job = mDispatcher.newJobBuilder().setService(MyJobService.class).
-                setLifetime(Lifetime.FOREVER).setRecurring(true).setTag(Job_TaG).setTrigger(Trigger.executionWindow(600,900))
-                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL).setConstraints(Constraint.ON_ANY_NETWORK).setReplaceCurrent(true).build();
-        mDispatcher.mustSchedule(job);
-        //Toast.makeText(this,"Sharing Location in the background ",Toast.LENGTH_LONG).show();
-    }
-    public void stopJob(){
-        mDispatcher.cancel(Job_TaG);
-       // Toast.makeText(this,"Sharing Location off",Toast.LENGTH_LONG).show();
-    }
 
 
     @Override
@@ -332,7 +317,7 @@ public class Homepage extends AppCompatActivity  implements
     }
 
 
-    @SuppressLint("RestrictedApi")
+
 
 
 
@@ -347,7 +332,7 @@ public class Homepage extends AppCompatActivity  implements
         super.onStart();
         showLog("onStart");
         setOnline();
-
+// change icon when minimize
         Bitmap icon = BitmapFactory.decodeResource(this.getResources(),
                 R.drawable.ic_stat_onesignal_default);
         String label =Html.fromHtml("<font color=\"#fffff4\">" + "IceBr8k"+ "</font>").toString();
@@ -356,8 +341,7 @@ public class Homepage extends AppCompatActivity  implements
                 TaskDescription(label, icon, getResources().getColor(R.color.colorPrimary));
         ((Activity)this).setTaskDescription(taskDescription);
 
-        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-        sharedPref.registerOnSharedPreferenceChangeListener(this);
+
 
         ConnectionBuddy.getInstance().registerForConnectivityEvents(this, this);
 
@@ -410,8 +394,7 @@ public class Homepage extends AppCompatActivity  implements
     protected void onStop() {
         super.onStop();
 
-        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-        sharedPref.unregisterOnSharedPreferenceChangeListener(this);
+
         try {
             if (ConnectionBuddy.getInstance() != null) {
                 ConnectionBuddy.getInstance().unregisterFromConnectivityEvents(this);
@@ -611,24 +594,7 @@ public class Homepage extends AppCompatActivity  implements
 
 
 
-    public void checkCameraPermission(){
-        Dexter.withActivity(this)
-                .withPermission(Manifest.permission.CAMERA)
-                .withListener(new PermissionListener() {
-                    @Override public void onPermissionGranted(PermissionGrantedResponse response) {
-                        Intent intent = new Intent(getApplicationContext(),ScannerActivity.class);
-                       intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                        startActivity(intent);
 
-                    }
-                    @Override public void onPermissionDenied(PermissionDeniedResponse response) {
-                        showSnackbarWithSetting("Camera Permission needed for Scanning QR Code",viewPager);
-                    }
-                    @Override public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
-                        token.continuePermissionRequest();
-                    }
-                }).check();
-    }
 
     public void unReadCheck() {
         DatabaseReference unReadcountRef = FirebaseDatabase.getInstance().
@@ -644,10 +610,10 @@ public class Homepage extends AppCompatActivity  implements
                     }
                 }
                 if (count > 0) {
-                    homepageTab.setNotification(String.valueOf(count), 1);
+                    homepageTab.setNotification(String.valueOf(count), 2);
 
                 } else {
-                    homepageTab.setNotification("", 1);
+                    homepageTab.setNotification("", 2);
 
                 }
             }
@@ -725,10 +691,12 @@ public class Homepage extends AppCompatActivity  implements
     public void setHomepageTab(){ mViewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
 
 
-    mViewPagerAdapter.addFragment(new SurveyTab_Fragment());
+        mViewPagerAdapter.addFragment(new SurveyTab_Fragment());
+        mViewPagerAdapter.addFragment(new PeopleNearby_Fragment());
 
-    mViewPagerAdapter.addFragment(new UserMessageDialog_Frag());
-      mViewPagerAdapter.addFragment(new me_frag());
+        mViewPagerAdapter.addFragment(new UserMessageDialog_Frag());
+        mViewPagerAdapter.addFragment(new me_frag());
+
 
 
 
@@ -744,10 +712,12 @@ public class Homepage extends AppCompatActivity  implements
 
         AHBottomNavigationItem item1 = new AHBottomNavigationItem("Questions",
                 R.drawable.survey_tab_icon);
+        AHBottomNavigationItem item2 = new AHBottomNavigationItem("Nearby",R.drawable.peoplenearby );
 
-        AHBottomNavigationItem item2 = new AHBottomNavigationItem("Chat",
+        AHBottomNavigationItem item3 = new AHBottomNavigationItem("Chat",
                 R.drawable.message_selector);
-          AHBottomNavigationItem item3 = new AHBottomNavigationItem("Me", R.drawable.me_selector);
+          AHBottomNavigationItem item4 = new AHBottomNavigationItem("Me", R.drawable.me_selector);
+
 
         // set my avatar via firebase changes
 
@@ -761,14 +731,14 @@ public class Homepage extends AppCompatActivity  implements
         homepageTab.addItem(item1);
         homepageTab.addItem(item2);
         homepageTab.addItem(item3);
+        homepageTab.addItem(item4);
 
 
 
 
 
         // for smooth swipe
-        viewPager.setOffscreenPageLimit(2);
-
+        viewPager.setOffscreenPageLimit(3);
         // Set listeners
         homepageTab.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
@@ -869,7 +839,10 @@ public class Homepage extends AppCompatActivity  implements
         snackbar.show();
     }
 
-
+    public void stopJob(){
+                mDispatcher.cancel(Job_TaG);
+                // Toast.makeText(this,"Sharing Location off",Toast.LENGTH_LONG).show();
+            }
 
 
 
@@ -878,13 +851,14 @@ public class Homepage extends AppCompatActivity  implements
          setOffline();
         //user will not receive notification
         OneSignal.setSubscription(false);
+        setUserPrivacy(false);
         if(FirebaseAuth.getInstance()!=null) {
             FirebaseAuth.getInstance().signOut();
         }
         stopJob();
 
 
-        setUserPrivacy(false);
+
 
         Intent intent = new Intent(this, SplashScreen.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -939,24 +913,8 @@ public class Homepage extends AppCompatActivity  implements
 
 
 
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-        String privacy = sharedPreferences.getString(s, null);
-        if(privacy!=null){
-            if("public".equals(privacy)){
-                //initGoogleMapLocation();
-                startJob();
 
-            }else if("private".equals(privacy)) {
-                stopJob();
-            }
-        }
-    }
 
-    @Override
-    public void passDataToActivity(Object view,String tag) {
-        mSwitchCompat= (SwitchCompat) view;
-    }
 
 
 
@@ -982,66 +940,30 @@ public class Homepage extends AppCompatActivity  implements
 
 
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode,resultCode,data);
-
-        if(requestCode ==REQUEST_CHECK_SETTINGS && resultCode   ==RESULT_OK){
-            setSharedPreference(true);
-
-        }else if(requestCode ==REQUEST_CHECK_SETTINGS && resultCode!=RESULT_OK){
-            setSharedPreference(false);
-
-
-        }
-    }
-
 
 
 
     private String getPrivacySharedPreference(){
-        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-        String defaultValue = "private";
-        String privacy = sharedPref.getString(currentUser.getUid()+"privacy", defaultValue);
-        return privacy;
-    }
+                SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+                String defaultValue = "private";
+                String privacy = sharedPref.getString(currentUser.getUid()+"privacy", defaultValue);
+                return privacy;
+            }
 
-    private void showSingleChoiceDialog() {
 
-        new MaterialDialog.Builder(this)
-                .title(R.string.radius_title)
-                .items(R.array.radius)
-                .itemsCallbackSingleChoice(index, new MaterialDialog.ListCallbackSingleChoice() {
-                    @Override
-                    public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
-                        index =which;
-                        radius = String.valueOf(text);
-                        Intent intent = new Intent(getApplicationContext(),PeopleNearby.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                        intent.putExtra("radius",radius);
-                        intent.putExtra("index",index);
-                         startActivity(intent);
-                        return true;
-                    }
-                })
-                .positiveText(R.string.ok).show();
-    }
 
-    private void setSharedPreference(boolean isChecked){
+
+            private void setSharedPreference(boolean isChecked){
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         if(isChecked) {
             editor.putString(currentUser.getUid()+"privacy", "public");
             editor.commit();
-            if(mSwitchCompat!=null){
-                mSwitchCompat.setChecked(true);
-            }
+
         }else{
             editor.putString(currentUser.getUid()+"privacy", "private");
             editor.commit();
-            if(mSwitchCompat!=null){
-                mSwitchCompat.setChecked(false);
-            }
+
         }
     }
 

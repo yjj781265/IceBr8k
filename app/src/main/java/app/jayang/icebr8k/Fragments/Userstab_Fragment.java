@@ -22,7 +22,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -73,6 +75,7 @@ public class Userstab_Fragment extends Fragment  {
     TextView seachView;
     Integer friendCount;
     BootstrapButton addFriend;
+    FrameLayout searchLayout;
     Button filter_btn;
     private BroadcastReceiver tickReceiver;
     private SharedPreferences sharedPref;
@@ -156,6 +159,7 @@ public class Userstab_Fragment extends Fragment  {
         addFriend.setVisibility(View.GONE);
         filter_btn = view.findViewById(R.id.filter_btn);
         seachView = view.findViewById(R.id.searchview_user);
+        searchLayout = view.findViewById(R.id.search_layout);
 
 
         final LinearLayoutManager manager = new LinearLayoutManager(view.getContext());
@@ -371,6 +375,7 @@ public class Userstab_Fragment extends Fragment  {
                 }
                 done =true;
                 loadingGif.setVisibility(View.GONE);
+                searchLayout.setVisibility(mUserDialogArrayList.isEmpty()? View.GONE:View.VISIBLE);
 
 
             }

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+                android:background="@color/lightBlue"
+             tools:context=".Fragments.PeopleNearby_Fragment">
+
+
+
+
+    <FrameLayout
+        android:layout_alignParentTop="true"
+        android:id="@+id/search_layout"
+        android:layout_width="match_parent"
+        android:layout_margin="8dp"
+        android:padding="2dp"
+        android:layout_marginBottom="8dp"
+        android:background="@color/ripple"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:id="@+id/linearLayout"
+
+            android:background="@color/white"
+
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:id="@+id/searchIcon_id"
+                android:src="@drawable/ic_search"
+                android:layout_marginStart="10dp"
+                android:layout_gravity="center_vertical"
+                android:layout_height="30dp"/>
+
+            <TextView
+                android:id="@+id/searchview_user"
+                android:layout_marginLeft="10dp"
+                android:layout_centerInParent="true"
+                android:textSize="16sp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:layout_toRightOf="@id/searchIcon_id"
+                android:layout_weight="6"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/hint1"/>
+            <Button
+                android:id="@+id/filter_btn"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/ic_action_filter"
+                android:foreground="?android:attr/selectableItemBackground"/>
+        </LinearLayout>
+    </FrameLayout>
+
+    <RelativeLayout
+        android:layout_centerInParent="true"
+    android:id="@+id/loadingImg_peopleNearbyTab"
+    android:layout_gravity="center"
+    android:visibility="visible"
+    android:paddingBottom="50dp"
+    android:layout_width="wrap_content"
+    android:layout_height="150dp">
+    <pl.droidsonroids.gif.GifImageView
+        android:id="@+id/loadingImg"
+        android:layout_centerHorizontal="true"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:src="@drawable/icebr8k_load"
+        android:paddingTop="10dp"
+        android:paddingLeft="6dp"
+        />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:textSize="14dp"
+        android:paddingLeft="15dp"
+        android:text="Loading..."/>
+
+</RelativeLayout>
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:layout_below="@id/search_layout"
+        android:id="@+id/peoplenearby_swipeRLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/peoplenearby_recyclerview"
+
+        android:overScrollMode="never"
+        android:scrollbars="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </android.support.v7.widget.RecyclerView>
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+    <TextView
+        android:id="@+id/peoplenearby_centerText"
+        android:gravity="center"
+        android:layout_centerInParent="true"
+        android:layout_width="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:textSize="14dp"
+        android:text="0x02699"
+
+        android:layout_height="wrap_content"/>
+
+
+
+</RelativeLayout>

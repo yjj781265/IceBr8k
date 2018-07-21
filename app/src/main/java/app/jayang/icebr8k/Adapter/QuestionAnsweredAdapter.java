@@ -122,27 +122,16 @@ public class QuestionAnsweredAdapter extends RecyclerView.Adapter<RecyclerView.V
 
                 }
             });
-            mCardView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
 
-                    if(getAdapterPosition()!= RecyclerView.NO_POSITION){
-                        UserQA userQA = mList.get(getAdapterPosition());
-                        Intent intent = new Intent(mContext, QuestionActivity.class);
-                        intent.putExtra("questionId",userQA.getQuestionId());
-                        mContext.startActivity(intent);
-                    }
-
-                    return true;
-                }
-            });
         }
 
         @Override
         public void onClick(View v) {
             if(getAdapterPosition()!= RecyclerView.NO_POSITION){
                 UserQA userQA = mList.get(getAdapterPosition());
-                showQuestionCard(userQA);
+                Intent intent = new Intent(mContext, QuestionActivity.class);
+                intent.putExtra("questionId",userQA.getQuestionId());
+                mContext.startActivity(intent);
             }
 
         }

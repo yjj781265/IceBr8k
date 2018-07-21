@@ -169,9 +169,14 @@ public class QuestionActivity extends SwipeBackActivity {
         userQARef.child(questionId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+
                 UserQA userQA = dataSnapshot.getValue(UserQA.class);
-                // skip stamp visibility
-              stamp.setVisibility("skipped".equals(userQA.getAnswer()) ? View.VISIBLE :View.GONE);
+                if (userQA != null) {
+                    // skip stamp visibility
+                    stamp.setVisibility("skipped".equals(userQA.getAnswer()) ? View.VISIBLE : View.GONE);
+                }
+
+
             }
 
             @Override

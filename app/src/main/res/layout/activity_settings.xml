@@ -61,7 +61,7 @@
             android:background="@color/dialog_divider"
             android:layout_marginTop="16dp"
             android:layout_height="1dp"/>
-
+<!--
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_marginTop="16dp"
@@ -89,7 +89,7 @@
             android:background="@color/dialog_divider"
             android:layout_marginTop="16dp"
             android:layout_height="1dp"/>
-
+-->
 
     </LinearLayout>
 

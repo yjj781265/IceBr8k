@@ -102,6 +102,14 @@ This Service does not use these “cookies” explicitly. However, the app may u
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="share_my_location">Share My Location</string>
     <string name="make_my_profile_public">Make My Profile Public</string>
+    <string name="_1_hate_it_10_love_it">1:Hate it 10:Love it</string>
+    <string name="result">Result</string>
+    <string name="confirm">Confirm</string>
+    <string name="skip">Skip</string>
+    <string name="more_questions">More Questions</string>
+    <string name="connect">Connect</string>
+    <string name="leave_feedback">Leave Feedback</string>
+    <string name="title_activity_search_people_nearby">SearchPeopleNearby</string>
 
 
 </resources>

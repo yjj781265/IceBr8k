@@ -3,6 +3,7 @@ package app.jayang.icebr8k;
 import android.content.Context;
 import android.support.v4.view.MenuItemCompat;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -19,13 +20,12 @@ import app.jayang.icebr8k.Modle.UserDialog;
 import me.imid.swipebacklayout.lib.SwipeBackLayout;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 
-public class SearchName extends SwipeBackActivity implements SearchView.OnQueryTextListener {
+public class SearchName extends AppCompatActivity implements SearchView.OnQueryTextListener {
     android.support.v7.widget.Toolbar mToolbar;
 
     private ArrayList<UserDialog> friendList;
     private ArrayList<UserDialog> filterdList;
     private RecyclerAdapter mAdapter;
-    private SwipeBackLayout mSwipeBackLayout;
     private RecyclerView mRecyclerView;
     private  SearchView searchView;
 
@@ -40,8 +40,7 @@ public class SearchName extends SwipeBackActivity implements SearchView.OnQueryT
         RecyclerView.LayoutManager manager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(manager);
         filterdList =new ArrayList<>();
-        mSwipeBackLayout =getSwipeBackLayout();
-        mSwipeBackLayout.setEdgeTrackingEnabled(SwipeBackLayout.EDGE_LEFT);
+
 
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -52,24 +51,6 @@ public class SearchName extends SwipeBackActivity implements SearchView.OnQueryT
             mAdapter = new RecyclerAdapter(this, filterdList);
             mRecyclerView.setAdapter(mAdapter);
         }
-        mSwipeBackLayout.addSwipeListener(new SwipeBackLayout.SwipeListener() {
-            @Override
-            public void onScrollStateChange(int state, float scrollPercent) {
-
-            }
-
-            @Override
-            public void onEdgeTouch(int edgeFlag) {
-                if(edgeFlag== SwipeBackLayout.EDGE_LEFT &&searchView.hasFocus()){
-                    hideKeyboard();
-                }
-            }
-
-            @Override
-            public void onScrollOverThreshold() {
-
-            }
-        });
 
     }
 

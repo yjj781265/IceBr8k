@@ -4,14 +4,18 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
+import java.io.Serializable;
+
 /**
  * Created by yjj781265 on 11/2/2017.
  */
 
-public class UserQA implements Parcelable,Comparable<UserQA> {
+public class UserQA implements Parcelable,Comparable<UserQA>,Serializable {
     private String questionId,answer,question;
     private Boolean like,favorite;
+    private String type;
     private String numComments;
+    private Long reset;
 
 
     public UserQA(){}
@@ -23,6 +27,29 @@ public class UserQA implements Parcelable,Comparable<UserQA> {
         this.question = question;
         this.like = like;
 
+    }
+
+    public UserQA(String questionId, String answer, String question, String type) {
+        this.questionId = questionId;
+        this.answer = answer;
+        this.question = question;
+        this.type = type;
+    }
+
+    public Long getReset() {
+        return reset;
+    }
+
+    public void setReset(Long reset) {
+        this.reset = reset;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getNumComments() {
@@ -112,6 +139,7 @@ public class UserQA implements Parcelable,Comparable<UserQA> {
       this.questionId = in.readString();
         this.answer = in.readString();
         this.question = in.readString();
+        this.numComments = in.readString();
 
     }
 
@@ -120,6 +148,7 @@ public class UserQA implements Parcelable,Comparable<UserQA> {
         parcel.writeString(this.questionId);
         parcel.writeString(this.answer);
         parcel.writeString(this.question);
+        parcel.writeString(this.numComments);
 
     }
 

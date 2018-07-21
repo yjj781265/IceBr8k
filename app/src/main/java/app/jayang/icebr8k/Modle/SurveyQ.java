@@ -1,6 +1,7 @@
 package app.jayang.icebr8k.Modle;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Created by LoLJay on 10/22/2017.
@@ -76,17 +77,13 @@ public class SurveyQ {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         SurveyQ surveyQ = (SurveyQ) o;
-
-        if (type != null ? !type.equals(surveyQ.type) : surveyQ.type != null) return false;
-        return questionId.equals(surveyQ.questionId);
+        return Objects.equals(questionId, surveyQ.questionId);
     }
 
     @Override
     public int hashCode() {
-        int result = type != null ? type.hashCode() : 0;
-        result = 31 * result + questionId.hashCode();
-        return result;
+
+        return Objects.hash(questionId);
     }
 }

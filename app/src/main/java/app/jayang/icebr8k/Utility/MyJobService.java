@@ -21,6 +21,8 @@ import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -196,6 +198,10 @@ public class MyJobService extends com.firebase.jobdispatcher.JobService implemen
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 // Builds the notification and issues it.
         mNotifyMgr.notify(mNotificationId, mBuilder.build());
+        FirebaseJobDispatcher mDispatcher=   new FirebaseJobDispatcher(new GooglePlayDriver(this));
+        //job scheduler variables
+        String Job_TaG ="MY_JOB_TAG";
+        mDispatcher.cancel(Job_TaG);
 
     }
 

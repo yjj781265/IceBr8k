@@ -112,7 +112,6 @@ public class Result_fragment extends Fragment {
         mView = inflater.inflate(R.layout.fragment_result_fragment, container, false);
         mPieChart = mView.findViewById(R.id.chart);
         mProgressBar =mView.findViewById(R.id.result_progressBar);
-        mPieChart.setCenterText(questionId);
         mPieChart.setUsePercentValues(true);
         mPieChart.animateY(1400, Easing.EasingOption.EaseInOutQuad);
         mPieChart.setUsePercentValues(true);
@@ -140,10 +139,11 @@ public class Result_fragment extends Fragment {
         mPieChart.setHighlightPerTapEnabled(false);
 
         Legend l = mPieChart.getLegend();
-        l.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
-        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT);
-        l.setOrientation(Legend.LegendOrientation.VERTICAL);
+        l.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+        l.setOrientation(Legend.LegendOrientation.HORIZONTAL);
         l.setDrawInside(false);
+        l.setWordWrapEnabled(true);
         l.setXEntrySpace(7f);
         l.setYEntrySpace(1f);
         l.setYOffset(8f);

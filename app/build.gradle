@@ -28,8 +28,8 @@ android {
         applicationId "app.jayang.icebr8k"
         minSdkVersion 21
         targetSdkVersion 26
-        versionCode 11
-        versionName "0.5.2"
+        versionCode 12
+        versionName "0.6.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [onesignal_app_id               : "c1189c2a-37e1-4db8-8f8e-c236f552131a",
                                 // Project number pulled from dashboard, local value is ignored.
@@ -47,6 +47,7 @@ android {
 }
 
 dependencies {
+    implementation 'com.google.firebase:firebase-firestore:15.0.0'
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.github.d-max:spots-dialog:0.7@aar'
     implementation 'com.android.support:support-v4:27.1.1'
@@ -79,8 +80,8 @@ dependencies {
     compile 'com.github.lzyzsd:circleprogress:1.2.1'
     compile 'com.github.javiersantos:MaterialStyledDialogs:2.1'
     compile 'com.github.drawers:SpinnerDatePicker:1.0.6'
-    compile 'com.github.deano2390:MaterialShowcaseView:1.2.0'
 
+    implementation 'com.github.faruktoptas:FancyShowCaseView:1.0.1'
     implementation 'com.android.support:recyclerview-v7:27.1.1'
     implementation 'com.android.support:gridlayout-v7:27.1.1'
     implementation 'com.android.support:cardview-v7:27.1.1'
@@ -96,7 +97,7 @@ dependencies {
     compile 'com.onesignal:OneSignal:[3.9.0, 3.99.99]'
 
     compile 'com.github.jkwiecien:EasyImage:1.3.1'
-    compile 'com.karumi:dexter:4.2.0'
+    implementation 'com.karumi:dexter:5.0.0'
     compile 'com.theartofdev.edmodo:android-image-cropper:2.6.+'
 
     compile 'id.zelory:compressor:2.1.0'

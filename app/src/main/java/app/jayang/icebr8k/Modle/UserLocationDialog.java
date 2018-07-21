@@ -1,6 +1,8 @@
 package app.jayang.icebr8k.Modle;
 
 import android.location.Location;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -12,9 +14,8 @@ import java.util.Comparator;
  * Created by yjj781265 on 1/25/2018.
  */
 
-public class UserLocationDialog implements Comparable<UserLocationDialog> {
+public class UserLocationDialog implements Comparable<UserLocationDialog>,Parcelable {
     private String id,distance,score;
-    private Long timestamp;
     private User mUser;
     private LatLng latLng;
 
@@ -28,16 +29,11 @@ public class UserLocationDialog implements Comparable<UserLocationDialog> {
         this.mUser = mUser;
         this.latLng = latLng;
         this.score = score;
-        this.timestamp = timestamp;
+
     }
 
-    public Long getTimestamp() {
-        return timestamp;
-    }
 
-    public void setTimestamp(Long timestamp) {
-        this.timestamp = timestamp;
-    }
+
 
     public User getUser() {
         return mUser;
@@ -111,9 +107,47 @@ public class UserLocationDialog implements Comparable<UserLocationDialog> {
                 "id='" + id + '\'' +
                 ", distance='" + distance + '\'' +
                 ", score='" + score + '\'' +
-                ", timestamp=" + timestamp +
+                ", timestamp=" +
                 ", mUser=" + mUser +
                 ", latLng=" + latLng +
                 '}';
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public UserLocationDialog(Parcel in){
+        this.id = in.readString();
+        this.distance = in.readString();
+        this.score = in.readString();
+        this.mUser = (User) in.readSerializable();
+
+
+
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+       dest.writeString(this.id);
+       dest.writeString(this.distance);
+       dest.writeString(this.score);
+       dest.writeSerializable(mUser);
+
+
+    }
+
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator(){
+        @Override
+        public UserLocationDialog createFromParcel(Parcel parcel) {
+            return  new UserLocationDialog(parcel);
+        }
+
+        @Override
+        public UserLocationDialog[] newArray(int i) {
+            return new UserLocationDialog[i];
+        }
+    };
 }

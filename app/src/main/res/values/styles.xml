@@ -19,14 +19,11 @@
         <item name="android:titleTextAppearance">@style/ActionBarTitleText</item>
 
 
-
-
         <item name="android:actionBarWidgetTheme">@style/PopupMenuTextView</item>
         <!-- Change Overflow Menu ListView Item Height & Property -->
         <item name="android:listPreferredItemHeight">36dp</item>
 
     </style>
-
 
 
     <style name="OverflowMenu" parent="Widget.AppCompat.PopupMenu">
@@ -41,7 +38,7 @@
 
         <!--<item name="android:popupBackground">#FFF</item>-->
     </style>
-      <!-- Custome Date Picker theme for bithdate with spinner -->
+    <!-- Custome Date Picker theme for bithdate with spinner -->
     <style name="CustomDatePickerDialogTheme" parent="android:Theme.Material.Light.Dialog">
         <item name="android:datePickerStyle">@style/MyDatePickerStyle</item>
         <item name="android:textColorPrimary">@color/colorPrimaryDark</item>
@@ -64,6 +61,7 @@
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@android:style/Animation</item>
     </style>
+
     <style name="MyActionBarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="android:textColor">@android:color/black</item>
 
@@ -73,6 +71,7 @@
         <item name="android:windowIsTranslucent">false</item>
         <item name="android:windowBackground">@drawable/splashscreen</item>
     </style>
+
     <style name="TextAppearence.App.TextInputLayout" parent="@android:style/TextAppearance">
         <item name="android:textColor">@color/black</item>
         <item name="android:textSize">14sp</item>
@@ -113,7 +112,6 @@
     </style>
 
 
-
     <!-- Change Overflow Menu ListView Text Size and Text Size -->
     <style name="PopupMenuTextView" parent="@style/android:Theme.Holo.Light">
         <item name="android:textColor">#00FF00</item>
@@ -128,9 +126,10 @@
     <style name="NumberPickerStyle">
         <item name="android:textSize">18dp</item>
         <item name="android:textColorPrimary">@color/dark_gray</item>
-        <item name="android:colorControlNormal" tools:targetApi="lollipop">@color/colorPrimary</item>
+        <item name="android:colorControlNormal" tools:targetApi="lollipop">@color/colorPrimary
+        </item>
     </style>
-   <!-- for showcase text style-->
+    <!-- for showcase text style-->
     <style name="MyTitleStyle" parent="@android:style/Widget.TextView">
         <item name="android:textSize">20sp</item>
         <item name="android:paddingTop">150dp</item>
@@ -146,9 +145,9 @@
         <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
 
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
-
-
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
 
 
 </resources>

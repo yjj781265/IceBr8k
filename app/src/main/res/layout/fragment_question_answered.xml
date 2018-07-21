@@ -7,7 +7,7 @@
     android:layout_height="match_parent">
 
     <FrameLayout
-        android:id="@+id/frameLayout"
+        android:id="@+id/search_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
@@ -65,6 +65,24 @@
     </FrameLayout>
 
 
+
+
+    <android.support.v7.widget.RecyclerView
+
+        android:id="@+id/recyclerView_questionTab"
+
+        android:scrollbars="vertical"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/search_layout"
+        app:layout_constraintVertical_bias="0.0"/>
+
+
     <RelativeLayout
         android:id="@+id/loadingImg_questionTab"
         android:layout_width="351dp"
@@ -79,7 +97,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/frameLayout">
+        app:layout_constraintTop_toTopOf="@+id/search_layout">
 
         <pl.droidsonroids.gif.GifImageView
             android:id="@+id/loadingImg"
@@ -101,20 +119,6 @@
             android:textSize="14dp"/>
 
     </RelativeLayout>
-
-    <android.support.v7.widget.RecyclerView
-
-        android:id="@+id/recyclerView_questionTab"
-        android:scrollbars="vertical"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/frameLayout"
-        app:layout_constraintVertical_bias="0.0"/>
 
 
 </android.support.constraint.ConstraintLayout>

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+
+
+    android:layout_width="match_parent"
+    android:layout_margin="8dp"
+    android:layout_height="match_parent">
+    <android.support.v7.widget.CardView
+        android:layout_centerInParent="true"
+
+
+        android:background="?attr/selectableItemBackground"
+        app:cardCornerRadius="8dp"
+        app:cardBackgroundColor="@color/creamYellow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true">
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/survey_sc_piechart"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:srcCompat="@drawable/piechart"/>
+
+
+            <TextView
+                android:id="@+id/survey_sc_question"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+
+                android:text="Question"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/survey_sc_piechart"/>
+
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/_1_hate_it_10_love_it"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/survey_sc_question"/>
+
+
+
+
+            <ImageView
+
+                android:id="@+id/survey_sc_stamp"
+                android:layout_width="75dp"
+                android:layout_height="30dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
+                android:alpha="0.2"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/survey_sc_question"
+                app:srcCompat="@drawable/skipped_stamp"/>
+
+            <com.xw.repo.BubbleSeekBar
+                android:id="@+id/survey_sc_seekBar"
+                android:layout_width="match_parent"
+                android:layout_height="37dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:visibility="visible"
+                app:bsb_hide_bubble="true"
+                app:bsb_max="10"
+                app:bsb_min="1"
+                app:bsb_progress="5"
+                app:bsb_second_track_color="@color/colorAccent"
+                app:bsb_section_count="9"
+                app:bsb_section_text_position="below_section_mark"
+                app:bsb_seek_by_section="true"
+                app:bsb_show_section_mark="true"
+                app:bsb_show_section_text="true"
+                app:bsb_show_thumb_text="false"
+                app:bsb_touch_to_seek="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView4"/>
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:gravity="center_vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.52"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/survey_sc_seekBar">
+
+                <LinearLayout
+                    android:id="@+id/survey_sc_result_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="bottom"
+                    android:orientation="horizontal">
+
+
+                    <TextView
+                        android:background="?attr/selectableItemBackground"
+                        android:text="Comment"
+                        android:visibility="gone"
+                        android:id="@+id/survey_sc_comment"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="3dp"
+                        android:textSize="14sp"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/survey_sc_confirm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:background="?attr/selectableItemBackground"
+                    android:text="@string/confirm"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="16sp"/>
+
+                <ProgressBar
+                    android:visibility="gone"
+                    android:id="@+id/survey_sc_progressBar"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_alignBottom="@+id/survey_sc_confirm"
+                    android:layout_centerInParent="true"
+                    />
+                <ImageView
+                    android:visibility="gone"
+                    android:id="@+id/checked"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/check_mark"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"/>
+                <TextView
+
+                    android:id="@+id/survey_sc_skip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:background="?attr/selectableItemBackground"
+                    android:text="@string/skip"
+                    android:textSize="14sp"/>
+
+
+            </RelativeLayout>
+
+
+        </android.support.constraint.ConstraintLayout>
+    </android.support.v7.widget.CardView>
+</RelativeLayout>
+
+
+
+
+
+
+
+
+
+
+

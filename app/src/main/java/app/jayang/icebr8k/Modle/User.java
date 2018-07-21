@@ -1,5 +1,7 @@
 package app.jayang.icebr8k.Modle;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.InterpolatorRes;
 import android.support.annotation.NonNull;
 
@@ -9,7 +11,7 @@ import java.io.Serializable;
  * Created by LoLJay on 10/20/2017.
  */
 
-public class User implements Serializable,Comparable<User> {
+public class User implements Serializable,Comparable<User>{
     private String displayname,username,photourl,email,score,privacy;
     private Long lastseen;
     private String onlinestats;
@@ -132,4 +134,6 @@ public class User implements Serializable,Comparable<User> {
     public int hashCode() {
         return username != null ? username.hashCode() : 0;
     }
+
+
 }

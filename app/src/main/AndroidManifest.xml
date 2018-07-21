@@ -90,13 +90,11 @@
         <activity
             android:name=".SearchName"
             android:noHistory="true"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Translucent">
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH"/>
             </intent-filter>
         </activity>
-        <activity android:name=".PeopleNearby"/>
         <activity
             android:name=".FullImageView"
             android:label="@string/title_activity_full_image_view"
@@ -118,11 +116,25 @@
             android:windowSoftInputMode="stateAlwaysHidden|adjustResize"/>
         <activity android:name=".Leaderboard">
         </activity>
-        <activity android:name=".QuestionActivity">
+        <activity android:name=".QuestionActivity"
+                  android:screenOrientation="portrait">
         </activity>
         <activity android:name=".Reply">
         </activity>
         <activity android:name=".Settings_Activity">
+        </activity>
+        <activity android:name=".SearchableActivity"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH"/>
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable"/>
+        </activity>
+        <activity
+            android:name=".SearchPeopleNearby">
         </activity>
     </application>
 
