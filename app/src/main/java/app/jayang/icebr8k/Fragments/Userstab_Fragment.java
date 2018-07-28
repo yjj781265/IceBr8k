@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
@@ -43,11 +44,11 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
+
 
 import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.Modle.UserDialog;
-import app.jayang.icebr8k.Modle.UserMessage;
+
 import app.jayang.icebr8k.Modle.UserQA;
 import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.Adapter.RecyclerAdapter;
@@ -196,10 +197,21 @@ public class Userstab_Fragment extends Fragment  {
                             editor.putString("sort", "yes");
                             editor.commit();
                             sortByScore=true;
-                            Collections.sort(mUserDialogArrayList,SCORE);
-                            ArrayList<UserDialog> newList = new ArrayList<>();
-                            newList.addAll(mUserDialogArrayList);
-                            mAdapter.submitList(newList);
+                            new AsyncTask<Void,Void,Void>(){
+                                @Override
+                                protected Void doInBackground(Void... voids) {
+                                    Collections.sort(mUserDialogArrayList,SCORE);
+
+                                    return null;
+                                }
+
+                                @Override
+                                protected void onPostExecute(Void aVoid) {
+                                    ArrayList<UserDialog> newList = new ArrayList<>();
+                                    newList.addAll(mUserDialogArrayList);
+                                    mAdapter.submitList(newList);
+                                }
+                            }.execute();
                         }
                         if (id == R.id.online_stats){
                             //save user setting locally
@@ -207,10 +219,21 @@ public class Userstab_Fragment extends Fragment  {
                             editor.putString("sort", "no");
                             editor.commit();
                             sortByScore=false;
-                            Collections.sort(mUserDialogArrayList,ONLINESTATS);
-                             ArrayList<UserDialog> newList = new ArrayList<>();
-                            newList.addAll(mUserDialogArrayList);
-                            mAdapter.submitList(newList);
+                            new AsyncTask<Void,Void,Void>(){
+                                @Override
+                                protected Void doInBackground(Void... voids) {
+                                    Collections.sort(mUserDialogArrayList,ONLINESTATS);
+
+                                    return null;
+                                }
+
+                                @Override
+                                protected void onPostExecute(Void aVoid) {
+                                    ArrayList<UserDialog> newList = new ArrayList<>();
+                                    newList.addAll(mUserDialogArrayList);
+                                    mAdapter.submitList(newList);
+                                }
+                            }.execute();
                         }
 
                         return true;
@@ -442,10 +465,21 @@ public class Userstab_Fragment extends Fragment  {
                     if(mUserDialogArrayList.contains(dialog)){
                         int index = mUserDialogArrayList.indexOf(dialog);
                         if(!sortByScore){
-                            Collections.sort(mUserDialogArrayList,ONLINESTATS);
-                            ArrayList<UserDialog> newList = new ArrayList<>();
-                            newList.addAll(mUserDialogArrayList);
-                            mAdapter.submitList(newList);
+                            new AsyncTask<Void,Void,Void>(){
+                                @Override
+                                protected Void doInBackground(Void... voids) {
+                                    Collections.sort(mUserDialogArrayList,ONLINESTATS);
+
+                                    return null;
+                                }
+
+                                @Override
+                                protected void onPostExecute(Void aVoid) {
+                                    ArrayList<UserDialog> newList = new ArrayList<>();
+                                    newList.addAll(mUserDialogArrayList);
+                                    mAdapter.submitList(newList);
+                                }
+                            }.execute();
                         }else{
                             mAdapter.notifyItemChanged(index);
 
@@ -485,10 +519,23 @@ public class Userstab_Fragment extends Fragment  {
                     if(mUserDialogArrayList.contains(dialog)){
                         int index = mUserDialogArrayList.indexOf(dialog);
                         if(sortByScore){
-                            Collections.sort(mUserDialogArrayList,SCORE);
-                            ArrayList<UserDialog> newList = new ArrayList<>();
-                            newList.addAll(mUserDialogArrayList);
-                           mAdapter.submitList(newList);
+                            new AsyncTask<Void,Void,Void>(){
+                                @Override
+                                protected Void doInBackground(Void... voids) {
+                                    Collections.sort(mUserDialogArrayList,SCORE);
+
+                                    return null;
+                                }
+
+                                @Override
+                                protected void onPostExecute(Void aVoid) {
+                                    ArrayList<UserDialog> newList = new ArrayList<>();
+                                    newList.addAll(mUserDialogArrayList);
+                                    mAdapter.submitList(newList);
+                                }
+                            }.execute();
+
+
                         }else{
                             mAdapter.notifyItemChanged(index);
 
@@ -539,10 +586,21 @@ public class Userstab_Fragment extends Fragment  {
                         dialog.setScore(mCompatability.getScore().toString());
                         setScoreNode(dialog.getId(),mCompatability.getScore().toString());
                         if(sortByScore){
-                            Collections.sort(mUserDialogArrayList,SCORE);
-                            ArrayList<UserDialog> newList = new ArrayList<>();
-                            newList.addAll(mUserDialogArrayList);
-                            mAdapter.submitList(newList);
+                            new AsyncTask<Void,Void,Void>(){
+                                @Override
+                                protected Void doInBackground(Void... voids) {
+                                    Collections.sort(mUserDialogArrayList,SCORE);
+
+                                    return null;
+                                }
+
+                                @Override
+                                protected void onPostExecute(Void aVoid) {
+                                    ArrayList<UserDialog> newList = new ArrayList<>();
+                                    newList.addAll(mUserDialogArrayList);
+                                    mAdapter.submitList(newList);
+                                }
+                            }.execute();
                         }else{
                             ArrayList<UserDialog> newList = new ArrayList<>();
                             newList.addAll(mUserDialogArrayList);

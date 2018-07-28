@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -21,6 +22,7 @@ import android.transition.Fade;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -74,6 +76,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
     Toolbar profileToolbar;
     ImageView mImageView,qrImage;
     ActionProcessButton  compare_btn;
+    ArcProgress mArcProgress;
     FlatButton message_btn,addFriend_btn,deleteFriend_btn,reset_btn;
     TextView displayname_profile, username_profile;
     MaterialDialog mProgressDialog;
@@ -87,11 +90,10 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
     User mUser;
     String uid;
     Dialog dialog;
-    ArcProgress arcProgress;
-    String User2Uid;
-    ArrayList<String> User1QArr, User2QArr;
-    ArrayList<UserQA> User1QA, User2QA;
-    ArrayList<UserQA> temp1QA, temp2QA;
+    boolean firstTime  = true;
+    ProgressBar mProgressBar;
+
+
     private Compatability mCompatability;
     int score;
 
@@ -100,16 +102,6 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile_page);
-
-        // prevent flash on status bar
-        Fade fade = new Fade();
-        View decor =  getWindow().getDecorView();
-        fade.excludeTarget(decor.findViewById(R.id.action_bar_container),true);
-        fade.excludeTarget(android.R.id.statusBarBackground,true);
-        fade.excludeTarget(android.R.id.navigationBarBackground,true);
-        getWindow().setEnterTransition(fade);
-        getWindow().setExitTransition(fade);
-
         mRef= FirebaseDatabase.getInstance().getReference();
         mProgressDialog =  new MaterialDialog.Builder(this)
                 .content("Updating Avatar...")
@@ -131,6 +123,8 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         reset_btn = (FlatButton) findViewById(R.id.reset_btn);
         displayname_profile = (TextView) findViewById(R.id.displayname_profile);
         username_profile = (TextView) findViewById(R.id.username_profile);
+        mArcProgress = (ArcProgress) findViewById(R.id.arc_progress);
+        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         database = FirebaseDatabase.getInstance();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         compare_btn.setOnClickListener(this);
@@ -168,6 +162,34 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
             compare_btn.setMode(ActionProcessButton.Mode.PROGRESS);
             updateUI(mUser);
             checkFriendStats();
+            final DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + currentUser.getUid());
+            final DatabaseReference mRef2 = FirebaseDatabase.getInstance().getReference("UserQA/" + uid);
+
+            mRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    compareWithUser2();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+            mRef2.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    compareWithUser2();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+
 
 
 
@@ -198,7 +220,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
 
     public void updateUI(User user) {
-        getSupportActionBar().setTitle("Profile");
+        getSupportActionBar().setTitle("");
 
         Glide.with(getBaseContext()).load(user.getPhotourl()).
                 apply(RequestOptions.circleCropTransform()).into(mImageView);
@@ -220,10 +242,14 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
 
     public void compareWithUser2() {
-        compare_btn.setProgress(0);
+        if(firstTime){
+            mProgressBar.setVisibility(View.VISIBLE);
+            mArcProgress.setVisibility(View.INVISIBLE);
+        }
+
         final ArrayList<UserQA> userQA1 = new ArrayList<>();
         final ArrayList<UserQA> userQA2 = new ArrayList<>();
-        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + currentUser.getUid());
+        final DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + currentUser.getUid());
         final DatabaseReference mRef2 = FirebaseDatabase.getInstance().getReference("UserQA/" + uid);
 
         mRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -235,7 +261,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                     }
 
                 }
-                compare_btn.setProgress(33);
+
 
                mRef2.addListenerForSingleValueEvent(new ValueEventListener() {
                    @Override
@@ -249,8 +275,25 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                        }
 
                        mCompatability = new Compatability(userQA1,userQA2);
-                       compare_btn.setProgress(99);
-                       setProgressDialog(mCompatability.getScore());
+                       mProgressBar.setVisibility(View.GONE);
+                        score = mCompatability.getScore();
+
+                      if(score<20){
+                         mArcProgress.setTextColor(ContextCompat.getColor(UserProfilePage.this,R.color.holo_red_light));
+                         mArcProgress.setFinishedStrokeColor(ContextCompat.getColor(UserProfilePage.this,R.color.holo_red_light));
+                      }else if(score<50){
+                          mArcProgress.setTextColor(ContextCompat.getColor(UserProfilePage.this,R.color.orange_500));
+                          mArcProgress.setFinishedStrokeColor(ContextCompat.getColor(UserProfilePage.this,R.color.orange_500));
+                      }else if(score<80) {
+                          mArcProgress.setTextColor(ContextCompat.getColor(UserProfilePage.this, R.color.colorPrimary));
+                          mArcProgress.setFinishedStrokeColor(ContextCompat.getColor(UserProfilePage.this,R.color.colorPrimary));
+                      }else if (score >=80){
+                          mArcProgress.setTextColor(ContextCompat.getColor(UserProfilePage.this, R.color.colorAccent));
+                          mArcProgress.setFinishedStrokeColor(ContextCompat.getColor(UserProfilePage.this,R.color.colorAccent));
+                      }
+                       mArcProgress.setProgress(score);
+                      mArcProgress.setVisibility(View.VISIBLE);
+                      firstTime = false;
 
                    }
 
@@ -272,7 +315,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
     }
 
 
-
+/*
     private void setProgressDialog(int Score){
 
         Handler mHandler = new Handler();
@@ -333,7 +376,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         }
 
     }
-
+*/
 
     private void checkFriendStats(){
         DatabaseReference friendStatsRef = database.getReference().child("UserFriends").
@@ -533,22 +576,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         }
     }
 
-    public void showSnackbarWithSetting(String str, View view){
-        Snackbar snackbar = Snackbar
-                .make(view, str, Snackbar.LENGTH_LONG)
-                .setAction("Setting", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Context context = view.getContext();
-                        Intent myAppSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                                Uri.parse("package:" + context.getPackageName()));
-                        myAppSettings.addCategory(Intent.CATEGORY_DEFAULT);
-                        myAppSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        context.startActivity(myAppSettings);
-                    }
-                });
-        snackbar.show();
-    }
+
 
     public void uploadImage(Bitmap bitmap, final FirebaseUser currentUser){
         String filename = UUID.randomUUID().toString()+".JPEG";
@@ -679,6 +707,8 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
 
 
+
+
     @Override
     public void onClick(View view) {
         int id =view.getId();
@@ -775,4 +805,9 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         }
         return false;
     }
+
+
+
 }
+
+

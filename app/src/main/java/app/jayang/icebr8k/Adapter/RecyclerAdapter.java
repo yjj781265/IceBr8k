@@ -237,13 +237,13 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.UserDi
          public boolean areContentsTheSame(UserDialog oldItem, UserDialog newItem) {
               return oldItem.getScore().
                      equals(newItem.getScore())
-                     ||oldItem.getOnlinestats().
+                     &&oldItem.getOnlinestats().
                      equals(newItem.getOnlinestats())
-                     ||oldItem.getPhotoUrl().
+                     &&oldItem.getPhotoUrl().
                      equals(newItem.getPhotoUrl())
-                     ||oldItem.getName().
+                     && oldItem.getName().
                      equals(newItem.getName())
-                     ||oldItem.getLastseen().
+                     &&oldItem.getLastseen().
                      equals(newItem.getLastseen());
          }
      };

@@ -1,4 +1,5 @@
 package app.jayang.icebr8k;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -14,10 +15,13 @@ import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
@@ -31,18 +35,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.MaterialDialog;
+
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
-import com.firebase.jobdispatcher.Constraint;
+
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
-import com.firebase.jobdispatcher.Job;
-import com.firebase.jobdispatcher.Lifetime;
-import com.firebase.jobdispatcher.RetryStrategy;
-import com.firebase.jobdispatcher.Trigger;
+
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -50,14 +51,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
 import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
-import com.karumi.dexter.Dexter;
-import com.karumi.dexter.PermissionToken;
-import com.karumi.dexter.listener.PermissionDeniedResponse;
-import com.karumi.dexter.listener.PermissionGrantedResponse;
-import com.karumi.dexter.listener.PermissionRequest;
-import com.karumi.dexter.listener.single.PermissionListener;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -77,20 +74,25 @@ import com.zplesac.connectionbuddy.interfaces.ConnectivityChangeListener;
 import com.zplesac.connectionbuddy.models.ConnectivityEvent;
 import com.zplesac.connectionbuddy.models.ConnectivityState;
 
+import java.util.ArrayList;
+
 import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
 import app.jayang.icebr8k.Fragments.PeopleNearby_Fragment;
 import app.jayang.icebr8k.Fragments.SurveyTab_Fragment;
 import app.jayang.icebr8k.Fragments.UserMessageDialog_Frag;
 import app.jayang.icebr8k.Fragments.me_frag;
+import app.jayang.icebr8k.Modle.UserQA;
 import app.jayang.icebr8k.Utility.ActivityCommunicator;
 import app.jayang.icebr8k.Modle.myViewPager;
+import app.jayang.icebr8k.Utility.Compatability;
+import app.jayang.icebr8k.Utility.DimmedPromptBackground;
 import app.jayang.icebr8k.Utility.MyJobService;
+import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;
 
 
-public class Homepage extends AppCompatActivity  implements
+public class Homepage extends AppCompatActivity implements
         OSSubscriptionObserver,
-        ConnectivityChangeListener
-        {
+        ConnectivityChangeListener {
     private AHBottomNavigation homepageTab;
 
 
@@ -103,24 +105,22 @@ public class Homepage extends AppCompatActivity  implements
     private long lastClickTime = 0;
     private DatabaseReference mRef;
 
-    private DatabaseReference presenceRef,lastSeenRef;
-     private ScreenStateReceiver mReceiver;
-     private Drawer drawer;
+    private DatabaseReference presenceRef, lastSeenRef;
+    private ScreenStateReceiver mReceiver;
+    private Drawer drawer;
 
 
     private String TAG = "homePage";
     private final String DEFAULTURL = "https://i.imgur.com/xUAsoWs.png";
 
     //job scheduler variables
-    private static final String Job_TaG ="MY_JOB_TAG";
+    private static final String Job_TaG = "MY_JOB_TAG";
     private FirebaseJobDispatcher mDispatcher;
+    private SharedPreferences sharedPref;
+    private SharedPreferences.Editor editor;
 
-
-  // nav drawer item
-    private PrimaryDrawerItem friendRequest, addFriend,feedback,logOut,setting;
-
-
-
+    // nav drawer item
+    private PrimaryDrawerItem friendRequest, addFriend, feedback, logOut, setting;
 
 
     @Override
@@ -151,19 +151,10 @@ public class Homepage extends AppCompatActivity  implements
         lastSeenRef.keepSynced(true);
 
         mDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
-
-
-
-
-
-
-
-
-
-
-
-
-
+//tutorial sharedPref
+        sharedPref = this.getSharedPreferences(
+                "tutorial", Context.MODE_PRIVATE);
+        editor = sharedPref.edit();
 
 
         showLog("onCreate");
@@ -177,13 +168,7 @@ public class Homepage extends AppCompatActivity  implements
                 .build();
 
 
-
-
-
         /**************************************************************//////
-
-
-
 
 
         //enable onesignal notification service
@@ -199,13 +184,12 @@ public class Homepage extends AppCompatActivity  implements
         setUpNavDrawer();
 
 
-
-
         // bottom nav bar
         setHomepageTab();
+        //addUserQAListener();
 
-        if(getIntent().getExtras()!=null) {
-           // extras for chat Page
+        if (getIntent().getExtras() != null) {
+            // extras for chat Page
             String chatId = getIntent().getExtras().getString("chatId");
             String name = getIntent().getExtras().getString("chatName");
 
@@ -216,7 +200,7 @@ public class Homepage extends AppCompatActivity  implements
 
             if (getIntent().getExtras().getString("mainchat") != null) {
                 viewPager.setCurrentItem(1);
-            }else if (chatId!=null && !chatId.isEmpty() && name !=null && !name.isEmpty()){
+            } else if (chatId != null && !chatId.isEmpty() && name != null && !name.isEmpty()) {
 
                 Toast.makeText(this, chatId + name, Toast.LENGTH_SHORT).show();
                 Intent mIntent = new Intent(this, UserChatActvity.class);
@@ -224,8 +208,8 @@ public class Homepage extends AppCompatActivity  implements
                 mIntent.putExtra("chatId", chatId);
                 mIntent.putExtra("chatName", name);
                 startActivity(mIntent);
-                overridePendingTransition(R.anim.slide_from_right,0);
-            }else if(questionId!=null ){
+                overridePendingTransition(R.anim.slide_from_right, 0);
+            } else if (questionId != null) {
                 Intent mIntent = new Intent(this, QuestionActivity.class);
                 mIntent.putExtra("questionId", questionId);
                 mIntent.putExtra("topCommentId", topCommentId);
@@ -239,33 +223,29 @@ public class Homepage extends AppCompatActivity  implements
     }
 
 
-
     @Override
     protected void onNewIntent(Intent intent) {
 
 
-
-
-
-        if(intent.getExtras()!=null) {
+        if (intent.getExtras() != null) {
             // extras for chat Page
             String chatId = intent.getExtras().getString("chatId");
             String name = intent.getExtras().getString("chatName");
 
 
             // extras for reply Page
-            String questionId = intent.getExtras().getString("questionId",null);
+            String questionId = intent.getExtras().getString("questionId", null);
             String topCommentId = intent.getExtras().getString("topCommentId");
             String commentId = intent.getExtras().getString("commentId");
 
-           if (chatId!=null && !chatId.isEmpty() && name !=null && !name.isEmpty()){
+            if (chatId != null && !chatId.isEmpty() && name != null && !name.isEmpty()) {
                 Intent mIntent = new Intent(this, UserChatActvity.class);
                 getIntent().addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 mIntent.putExtra("chatId", chatId);
                 mIntent.putExtra("chatName", name);
                 startActivity(mIntent);
-                overridePendingTransition(R.anim.slide_from_right,0);
-            }else if(questionId!=null && !questionId.isEmpty() ){
+                overridePendingTransition(R.anim.slide_from_right, 0);
+            } else if (questionId != null && !questionId.isEmpty()) {
                 Intent mIntent = new Intent(this, QuestionActivity.class);
                 mIntent.putExtra("questionId", questionId);
                 mIntent.putExtra("topCommentId", topCommentId);
@@ -276,15 +256,12 @@ public class Homepage extends AppCompatActivity  implements
         }
 
 
-
-
-        if(checkInternet()){
+        if (checkInternet()) {
             // device has active internet connection
             noConnection_tv.setVisibility(View.GONE);
             setOnline();
 
-        }
-        else{
+        } else {
             // there is no active internet connection on this device
             noConnection_tv.setVisibility(View.VISIBLE);
         }
@@ -295,8 +272,65 @@ public class Homepage extends AppCompatActivity  implements
 
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        MenuInflater inflater = getMenuInflater();
+        final MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+
+                final DatabaseReference userQARef = FirebaseDatabase.getInstance()
+                        .getReference().child("UserQA")
+                        .child(currentUser.getUid());
+                final DatabaseReference friendsRef = FirebaseDatabase.getInstance()
+                        .getReference().child("UserFriends")
+                        .child(currentUser.getUid());
+                userQARef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.getChildrenCount() >= 16) {
+                            Log.d("homepage123", "more than 16 questions answered");
+                            friendsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(final DataSnapshot dataSnapshot) {
+                                    boolean show = false;
+                                    if (dataSnapshot == null || dataSnapshot.getChildrenCount() == 0) {
+                                        Log.d("homepage123", "hasn o friends");
+                                        show = true;
+                                    } else if (dataSnapshot.getChildrenCount() > 0) {
+                                        int counter = 0;
+                                        for (DataSnapshot childSnap : dataSnapshot.getChildren()) {
+                                            if (childSnap.child("stats").getValue(String.class).equals("accepted")) {
+                                                counter++;
+                                                break;
+                                            }
+                                        }
+                                        Log.d("homepage123", "hasn " + counter + "friends");
+                                        show = (counter == 0);
+                                    }
+
+                                    if (show) {
+                                        showAddFriendPrompt(Homepage.this);
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+
+            }
+        });
+
         return true;
     }
 
@@ -307,24 +341,15 @@ public class Homepage extends AppCompatActivity  implements
             case R.id.add_friend:
                 startActivity(new Intent(this, SearchUser.class));
                 return true;
-            case R.id.leaderboard:
+         /*   case R.id.leaderboard:
                 startActivity(new Intent(this, Leaderboard.class));
-                return true;
+                return true;*/
+
             default:
                 return super.onOptionsItemSelected(item);
 
         }
     }
-
-
-
-
-
-
-
-
-
-
 
 
     @Override
@@ -335,12 +360,11 @@ public class Homepage extends AppCompatActivity  implements
 // change icon when minimize
         Bitmap icon = BitmapFactory.decodeResource(this.getResources(),
                 R.drawable.ic_stat_onesignal_default);
-        String label =Html.fromHtml("<font color=\"#fffff4\">" + "IceBr8k"+ "</font>").toString();
+        String label = Html.fromHtml("<font color=\"#fffff4\">" + "IceBr8k" + "</font>").toString();
         ActivityManager.TaskDescription taskDescription = new ActivityManager.
 
                 TaskDescription(label, icon, getResources().getColor(R.color.colorPrimary));
-        ((Activity)this).setTaskDescription(taskDescription);
-
+        ((Activity) this).setTaskDescription(taskDescription);
 
 
         ConnectionBuddy.getInstance().registerForConnectivityEvents(this, this);
@@ -366,13 +390,12 @@ public class Homepage extends AppCompatActivity  implements
     @Override
     protected void onResume() {
         super.onResume();
-        if(checkInternet()){
+        if (checkInternet()) {
             // device has active internet connection
             noConnection_tv.setVisibility(View.GONE);
             setOnline();
 
-        }
-        else{
+        } else {
             // there is no active internet connection on this device
             noConnection_tv.setVisibility(View.VISIBLE);
         }
@@ -399,10 +422,9 @@ public class Homepage extends AppCompatActivity  implements
             if (ConnectionBuddy.getInstance() != null) {
                 ConnectionBuddy.getInstance().unregisterFromConnectivityEvents(this);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
-
 
 
         showLog("onStop");
@@ -412,8 +434,6 @@ public class Homepage extends AppCompatActivity  implements
     protected void onDestroy() {
 
         super.onDestroy();
-
-
 
 
         setOffline();
@@ -426,23 +446,19 @@ public class Homepage extends AppCompatActivity  implements
 
     }
 
-    void setUpNavDrawer(){
+    void setUpNavDrawer() {
 
         friendRequest = new PrimaryDrawerItem().withName("Friend Request").
                 withIcon(R.drawable.user_icon).withBadge("1").withBadgeStyle(new BadgeStyle().withTextColor(Color.WHITE).withColorRes(R.color.holo_red_light));
-        addFriend  = new PrimaryDrawerItem().withName("Add Friend").withIcon(R.drawable.ic_action_addfriend);
-        feedback  = new PrimaryDrawerItem().withName(getString(R.string.feedback)).withIcon(R.drawable.ic_action_feedback);
-        logOut  = new PrimaryDrawerItem().withName("Log Out").withIcon(R.drawable.ic_action_exit);
+        addFriend = new PrimaryDrawerItem().withName("Add Friend").withIcon(R.drawable.ic_action_addfriend);
+        feedback = new PrimaryDrawerItem().withName(getString(R.string.feedback)).withIcon(R.drawable.ic_action_feedback);
+        logOut = new PrimaryDrawerItem().withName("Log Out").withIcon(R.drawable.ic_action_exit);
 
         setting = new PrimaryDrawerItem().withName("Settings").withIcon(R.drawable.ic_action_settings);
 
 
-
-
-
-        IProfile profile =  new ProfileDrawerItem().withName(currentUser.getDisplayName()).
+        IProfile profile = new ProfileDrawerItem().withName(currentUser.getDisplayName()).
                 withEmail(currentUser.getEmail()).withIcon(currentUser.getPhotoUrl());
-
 
 
         // Create the AccountHeader
@@ -465,14 +481,14 @@ public class Homepage extends AppCompatActivity  implements
 
 
 //create the drawer and remember the `Drawer` result object
-         drawer  = new DrawerBuilder()
+        drawer = new DrawerBuilder()
                 .withActivity(this)
                 .withSelectedItem(-1)
-                 .withActionBarDrawerToggle(false)
+                .withActionBarDrawerToggle(false)
                 .withAccountHeader(headerResult)
-                .withToolbar( (Toolbar) findViewById(R.id.users_toolbar))
+                .withToolbar((Toolbar) findViewById(R.id.users_toolbar))
                 .addDrawerItems(
-                        friendRequest, addFriend,feedback, setting
+                        friendRequest, addFriend, feedback, setting
                 ).addStickyDrawerItems(logOut)
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
@@ -481,7 +497,7 @@ public class Homepage extends AppCompatActivity  implements
                         switch (position) {
                             case -1:
 
-                                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                                if (SystemClock.elapsedRealtime() - lastClickTime < 1000) {
                                     return false;
                                 }
 
@@ -491,25 +507,25 @@ public class Homepage extends AppCompatActivity  implements
                                 return true;
 
                             case 1:
-                                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                                if (SystemClock.elapsedRealtime() - lastClickTime < 1000) {
                                     return false;
                                 }
                                 lastClickTime = SystemClock.elapsedRealtime();
-                                Intent i = new Intent(getApplicationContext(),FriendRequestPage.class);
-                                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                                Intent i = new Intent(getApplicationContext(), FriendRequestPage.class);
+                                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                                 startActivity(i);
                                 drawer.setSelection(-1);
                                 drawer.closeDrawer();
                                 return true;
 
                             case 2:
-                                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                                if (SystemClock.elapsedRealtime() - lastClickTime < 1000) {
                                     return false;
                                 }
 
                                 lastClickTime = SystemClock.elapsedRealtime();
-                                Intent mintent = new Intent(getApplicationContext(),SearchUser.class);
-                                mintent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                                Intent mintent = new Intent(getApplicationContext(), SearchUser.class);
+                                mintent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                                 startActivity(mintent);
                                 drawer.setSelection(-1);
                                 drawer.closeDrawer();
@@ -552,11 +568,11 @@ public class Homepage extends AppCompatActivity  implements
                                 }
                                 return true;*/
                             case 3:
-                                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                                if (SystemClock.elapsedRealtime() - lastClickTime < 1000) {
                                     return false;
                                 }
                                 lastClickTime = SystemClock.elapsedRealtime();
-                                intent = new Intent(getApplicationContext(),Feedback.class);
+                                intent = new Intent(getApplicationContext(), Feedback.class);
                                 startActivity(intent);
                                 drawer.setSelection(-1);
                                 drawer.closeDrawer();
@@ -564,7 +580,7 @@ public class Homepage extends AppCompatActivity  implements
 
 
                             case 4:
-                                if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                                if (SystemClock.elapsedRealtime() - lastClickTime < 1000) {
                                     return false;
                                 }
                                 lastClickTime = SystemClock.elapsedRealtime();
@@ -592,10 +608,6 @@ public class Homepage extends AppCompatActivity  implements
     }
 
 
-
-
-
-
     public void unReadCheck() {
         DatabaseReference unReadcountRef = FirebaseDatabase.getInstance().
                 getReference("UserMessages/" + currentUser.getUid());
@@ -617,13 +629,14 @@ public class Homepage extends AppCompatActivity  implements
 
                 }
             }
+
             @Override
             public void onCancelled(DatabaseError databaseError) {
             }
         });
     }
 
-    private void setBadge(){
+    private void setBadge() {
         DatabaseReference badgeRef = FirebaseDatabase.getInstance().getReference().child("UserFriends")
                 .child(currentUser.getUid());
         badgeRef.keepSynced(true);
@@ -631,23 +644,23 @@ public class Homepage extends AppCompatActivity  implements
         badgeRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                int count =0;
-                for(DataSnapshot chidSnapShot : dataSnapshot.getChildren()){
-                    if("pending".equals(chidSnapShot.child("stats").getValue(String.class))){
+                int count = 0;
+                for (DataSnapshot chidSnapShot : dataSnapshot.getChildren()) {
+                    if ("pending" .equals(chidSnapShot.child("stats").getValue(String.class))) {
                         count++;
                     }
                 }
 
-                if(count==0){
+                if (count == 0) {
                     menuBadge.setText("");
                     menuBadge.setVisibility(View.GONE);
-                    friendRequest.withBadge( (StringHolder)(null));
-                   drawer.updateItem(friendRequest);
-                }else{
-                    menuBadge.setText(""+count);
+                    friendRequest.withBadge((StringHolder) (null));
+                    drawer.updateItem(friendRequest);
+                } else {
+                    menuBadge.setText("" + count);
                     menuBadge.setVisibility(View.VISIBLE);
                     YoYo.with(Techniques.Pulse).repeat(666).playOn(menuBadge);
-                    friendRequest.withBadge(""+count);
+                    friendRequest.withBadge("" + count);
                     drawer.updateItem(friendRequest);
 
                 }
@@ -680,85 +693,170 @@ public class Homepage extends AppCompatActivity  implements
         });
     }
 
-    public void showToast(String str){
-        Toast.makeText(getApplicationContext(),str,Toast.LENGTH_LONG).show();
+    public void showToast(String str) {
+        Toast.makeText(getApplicationContext(), str, Toast.LENGTH_LONG).show();
     }
 
-    private void showLog(String str){ Log.d(TAG,str);}
+    private void showLog(String str) {
+        Log.d(TAG, str);
+    }
 
 
+    private void setHomepageTab() {
 
-    public void setHomepageTab(){ mViewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
 
-
+        mViewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
         mViewPagerAdapter.addFragment(new SurveyTab_Fragment());
         mViewPagerAdapter.addFragment(new PeopleNearby_Fragment());
-
         mViewPagerAdapter.addFragment(new UserMessageDialog_Frag());
         mViewPagerAdapter.addFragment(new me_frag());
-
-
-
-
-
-
-      viewPager.setAdapter(mViewPagerAdapter);
-      viewPager.setCurrentItem(0);
+        viewPager.setAdapter(mViewPagerAdapter);
+        viewPager.setCurrentItem(0);
 
 
         homepageTab.setTitleState(AHBottomNavigation.TitleState.ALWAYS_SHOW);
         homepageTab.setAccentColor(getResources().getColor(R.color.colorPrimary));
+        homepageTab.setForceTint(true);
 
 
         AHBottomNavigationItem item1 = new AHBottomNavigationItem("Questions",
                 R.drawable.survey_tab_icon);
-        AHBottomNavigationItem item2 = new AHBottomNavigationItem("Nearby",R.drawable.peoplenearby );
+        AHBottomNavigationItem item2 = new AHBottomNavigationItem("Nearby", R.drawable.peoplenearby);
 
         AHBottomNavigationItem item3 = new AHBottomNavigationItem("Chat",
                 R.drawable.message_selector);
-          AHBottomNavigationItem item4 = new AHBottomNavigationItem("Me", R.drawable.me_selector);
+        AHBottomNavigationItem item4 = new AHBottomNavigationItem("Me", R.drawable.me_selector);
 
-
-        // set my avatar via firebase changes
-
-
-
-
-
+        ArrayList<AHBottomNavigationItem> itemArrayList = new ArrayList<>();
+        itemArrayList.add(item1);
+        itemArrayList.add(item2);
+        itemArrayList.add(item3);
+        itemArrayList.add(item4);
 
         // Add items
 
-        homepageTab.addItem(item1);
-        homepageTab.addItem(item2);
-        homepageTab.addItem(item3);
-        homepageTab.addItem(item4);
+        homepageTab.addItems(itemArrayList);
 
-
-
-
+        homepageTab.setCurrentItem(0);
 
         // for smooth swipe
         viewPager.setOffscreenPageLimit(3);
+
+        Log.d("HomePage123", "OutSide tabSelected " + homepageTab.getViewAtPosition(0));
+
         // Set listeners
         homepageTab.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
-                viewPager.setCurrentItem(position,false);
+                viewPager.setCurrentItem(position, false);
+                if (position == 1) {
+                    showNearbyPrompt(position);
+                }
+                Log.d("HomePage123", "Under tabSelected " + homepageTab.getViewAtPosition(0));
                 return true;
             }
         });
+
+
     }
 
 
+    void showAddFriendPrompt(Activity activity) {
+
+        boolean show = sharedPref.getBoolean("tutorialAddFriend", true);
+
+        if (show) {
+            // show tutorial if necessary
+            new MaterialTapTargetPrompt.Builder(activity)
+                    .setPromptBackground(new DimmedPromptBackground())
+                    .setBackgroundColour(ContextCompat.getColor(activity, R.color.colorPrimary))
+                    .setIcon(R.drawable.ic_action_add_friend_white)
+                    .setIconDrawableColourFilter(ContextCompat.getColor(this, R.color.colorPrimary))
+                    .setTarget(R.id.add_friend).
+                    setSecondaryText("If you already know some people using IceBr8k, you can put their username here and add them")
+                    .show();
+
+            editor.putBoolean("tutorialAddFriend", false);
+            editor.commit();
+        }
 
 
+    }
+
+    void showNearbyPrompt(final int position) {
+        final boolean showPrompt = sharedPref.getBoolean("tutorialNearBy", true);
+
+        if (showPrompt) {
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+
+                    final DatabaseReference userQARef = FirebaseDatabase.getInstance()
+                            .getReference().child("UserQA")
+                            .child(currentUser.getUid());
+                    final DatabaseReference friendsRef = FirebaseDatabase.getInstance()
+                            .getReference().child("UserFriends")
+                            .child(currentUser.getUid());
+                    userQARef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.getChildrenCount() >= 16) {
+                                Log.d("homepage123", "more than 16 questions answered");
+                                friendsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(final DataSnapshot dataSnapshot) {
+                                        boolean noFriend = false;
+                                        if (dataSnapshot == null || dataSnapshot.getChildrenCount() == 0) {
+                                            Log.d("homepage123", "hasn o friends");
+                                            noFriend = true;
+                                        } else if (dataSnapshot.getChildrenCount() > 0) {
+                                            int counter = 0;
+                                            for (DataSnapshot childSnap : dataSnapshot.getChildren()) {
+                                                if (childSnap.child("stats").getValue(String.class).equals("accepted")) {
+                                                    counter++;
+                                                    break;
+                                                }
+                                            }
+                                            Log.d("homepage123", "hasn " + counter + "friends");
+                                            noFriend = (counter == 0);
+                                        }
+
+                                        if (noFriend) {
+                                            // show tutorial if necessary
+                                            new MaterialTapTargetPrompt.Builder(Homepage.this)
+                                                    .setPromptBackground(new DimmedPromptBackground())
+                                                    .setBackgroundColour(ContextCompat.getColor(Homepage.this, R.color.colorPrimary))
+                                                    .setTarget(homepageTab.getViewAtPosition(position)).
+                                                    setSecondaryText("We see you haven't added anyone on IceBr8k yet. This tab will show who is using IceBr8k close to you")
+                                                    .show();
+
+                                            editor.putBoolean("tutorialNearBy", false);
+                                            editor.commit();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
 
 
+                }
+            });
+        }
+    }
 
 
-
-
-    public void setOnline(){
+    public void setOnline() {
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             presenceRef.setValue("2");
             lastSeenRef.removeValue();
@@ -769,7 +867,7 @@ public class Homepage extends AppCompatActivity  implements
         oldOnLineref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.hasChild("onlineStats")){
+                if (dataSnapshot.hasChild("onlineStats")) {
                     oldOnLineref.child("onlineStats").removeValue();
                 }
             }
@@ -781,13 +879,13 @@ public class Homepage extends AppCompatActivity  implements
         });
     }
 
-    public void setBusy(){
+    public void setBusy() {
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             presenceRef.setValue("1");
         }
     }
 
-    public void setOffline(){
+    public void setOffline() {
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             presenceRef.setValue("0");
             lastSeenRef.setValue(ServerValue.TIMESTAMP);
@@ -796,6 +894,176 @@ public class Homepage extends AppCompatActivity  implements
 
     }
 
+
+    public void addUserQAListener() {
+        final DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + currentUser.getUid());
+
+
+        mRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        compareWithFriends();
+                        return null;
+                    }
+                }.execute();
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    public void compareWithFriends() {
+
+        DatabaseReference mFriendRef = FirebaseDatabase.getInstance().getReference()
+                .child("UserFriends").child(currentUser.getUid());
+        mFriendRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                            if (childSnapshot.hasChild("stats") &&
+                                    childSnapshot.child("stats").getValue(String.class).equals("accepted")) {
+                                compareWithUser2(childSnapshot.getKey());
+                            }
+                        }
+                        return null;
+                    }
+                }.execute();
+
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+    }
+
+    public void compareWithUser2(final String user2Uid) {
+        final ArrayList<UserQA> userQA1 = new ArrayList<>();
+        final ArrayList<UserQA> userQA2 = new ArrayList<>();
+        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + currentUser.getUid());
+        final DatabaseReference mRef2 = FirebaseDatabase.getInstance().getReference("UserQA/" + user2Uid);
+
+        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        for (DataSnapshot child : dataSnapshot.getChildren()) {
+                            if (!"skipped" .equals(child.getValue(UserQA.class).getAnswer())) {
+                                userQA1.add(child.getValue(UserQA.class));
+                            }
+
+                        }
+
+
+                        mRef2.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(final DataSnapshot dataSnapshot) {
+
+                                new AsyncTask<Void, Void, Void>() {
+
+                                    @Override
+                                    protected Void doInBackground(Void... voids) {
+                                        for (DataSnapshot child : dataSnapshot.getChildren()) {
+                                            if (!"skipped" .equals(child.getValue(UserQA.class).getAnswer())) {
+                                                userQA2.add(child.getValue(UserQA.class));
+                                            }
+
+
+                                        }
+
+                                        final Compatability mCompatability = new Compatability(userQA1, userQA2);
+                                        setScoreNode(user2Uid, mCompatability.getScore().toString());
+
+
+                                        return null;
+                                    }
+                                }.execute();
+
+
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                        return null;
+                    }
+                }.execute();
+
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+    }
+
+    public void setScoreNode(final String user2Uid, final String score) {
+        DatabaseReference scoreRef = FirebaseDatabase.getInstance().getReference()
+                .child("UserFriends")
+                .child(currentUser.getUid())
+                .child(user2Uid)
+                .child("score");
+        scoreRef.runTransaction(new Transaction.Handler() {
+            @Override
+            public Transaction.Result doTransaction(MutableData mutableData) {
+
+                mutableData.setValue(score);
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+
+            }
+        });
+
+        DatabaseReference scoreRef2 = FirebaseDatabase.getInstance().getReference()
+                .child("UserFriends")
+                .child(user2Uid)
+                .child(currentUser.getUid())
+                .child("score");
+
+        scoreRef2.runTransaction(new Transaction.Handler() {
+            @Override
+            public Transaction.Result doTransaction(MutableData mutableData) {
+
+                mutableData.setValue(score);
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+// Transaction completed
+                //Log.d("SurveyAdapter123r", "postTransaction:onComplete:" + databaseError);
+            }
+        });
+
+
+    }
 
 
     @Override
@@ -822,7 +1090,7 @@ public class Homepage extends AppCompatActivity  implements
 
     }
 
-    public void showSnackbarWithSetting(String str, View view){
+    public void showSnackbarWithSetting(String str, View view) {
         Snackbar snackbar = Snackbar
                 .make(view, str, Snackbar.LENGTH_LONG)
                 .setAction("Setting", new View.OnClickListener() {
@@ -839,25 +1107,21 @@ public class Homepage extends AppCompatActivity  implements
         snackbar.show();
     }
 
-    public void stopJob(){
-                mDispatcher.cancel(Job_TaG);
-                // Toast.makeText(this,"Sharing Location off",Toast.LENGTH_LONG).show();
-            }
-
-
+    public void stopJob() {
+        mDispatcher.cancel(Job_TaG);
+        // Toast.makeText(this,"Sharing Location off",Toast.LENGTH_LONG).show();
+    }
 
 
     public void Signout() {
-         setOffline();
+        setOffline();
         //user will not receive notification
         OneSignal.setSubscription(false);
         setUserPrivacy(false);
-        if(FirebaseAuth.getInstance()!=null) {
+        if (FirebaseAuth.getInstance() != null) {
             FirebaseAuth.getInstance().signOut();
         }
         stopJob();
-
-
 
 
         Intent intent = new Intent(this, SplashScreen.class);
@@ -871,51 +1135,44 @@ public class Homepage extends AppCompatActivity  implements
     // check internet connections
     @Override
     public void onConnectionChange(ConnectivityEvent event) {
-        if(event.getState().getValue() == ConnectivityState.CONNECTED){
+        if (event.getState().getValue() == ConnectivityState.CONNECTED) {
             // device has active internet connection
             noConnection_tv.setVisibility(View.GONE);
             setOnline();
 
-        }
-        else{
+        } else {
             // there is no active internet connection on this device
             noConnection_tv.setVisibility(View.VISIBLE);
             showToast("Lost Internet Connection");
         }
     }
 
-    private void setUserPrivacy(boolean isChecked){
+    private void setUserPrivacy(boolean isChecked) {
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Users").
                 child(currentUser.getUid());
-        if(isChecked) {
+        if (isChecked) {
             ref.child("privacy").setValue("public");
-        }else{
+        } else {
             ref.child("privacy").setValue("private");
         }
     }
 
-    public void setScreenOnOffListener(){
+    public void setScreenOnOffListener() {
         IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         mReceiver = new ScreenStateReceiver();
         registerReceiver(mReceiver, intentFilter);
     }
 
-    private  boolean checkInternet(){
+    private boolean checkInternet() {
         ConnectivityManager cm =
-                (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
+                (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
-        return  isConnected;
+        return isConnected;
     }
-
-
-
-
-
-
 
 
     public class ScreenStateReceiver extends BroadcastReceiver {
@@ -933,40 +1190,27 @@ public class Homepage extends AppCompatActivity  implements
     }
 
 
+    private String getPrivacySharedPreference() {
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        String defaultValue = "private";
+        String privacy = sharedPref.getString(currentUser.getUid() + "privacy", defaultValue);
+        return privacy;
+    }
 
 
-
-
-
-
-
-
-
-
-    private String getPrivacySharedPreference(){
-                SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-                String defaultValue = "private";
-                String privacy = sharedPref.getString(currentUser.getUid()+"privacy", defaultValue);
-                return privacy;
-            }
-
-
-
-
-            private void setSharedPreference(boolean isChecked){
+    private void setSharedPreference(boolean isChecked) {
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        if(isChecked) {
-            editor.putString(currentUser.getUid()+"privacy", "public");
+        if (isChecked) {
+            editor.putString(currentUser.getUid() + "privacy", "public");
             editor.commit();
 
-        }else{
-            editor.putString(currentUser.getUid()+"privacy", "private");
+        } else {
+            editor.putString(currentUser.getUid() + "privacy", "private");
             editor.commit();
 
         }
     }
-
 
 
     public myViewPager getViewPager() {

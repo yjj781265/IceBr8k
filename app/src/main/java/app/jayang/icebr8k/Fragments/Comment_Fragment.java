@@ -48,12 +48,12 @@ import app.jayang.icebr8k.Utility.OnLoadMoreListener;
  * create an instance of this fragment.
  */
 public class Comment_Fragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
+
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String QUESTION_ID = "param1";
 
 
-    // TODO: Rename and change types of parameters
+
     private String questionId;
     private TextView noComments;
     private View mView;

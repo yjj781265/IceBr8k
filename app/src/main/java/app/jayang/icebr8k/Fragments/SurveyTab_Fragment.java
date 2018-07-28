@@ -1,10 +1,12 @@
 package app.jayang.icebr8k.Fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,9 +20,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.beardedhen.androidbootstrap.BootstrapProgressBar;
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.github.javiersantos.materialstyleddialogs.enums.Style;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,26 +31,22 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
 
 import app.jayang.icebr8k.Adapter.SurveyQuestionAdapter;
-import app.jayang.icebr8k.Homepage;
 import app.jayang.icebr8k.Modle.SurveyQ;
 import app.jayang.icebr8k.R;
-import me.toptas.fancyshowcase.FancyShowCaseQueue;
-import me.toptas.fancyshowcase.FancyShowCaseView;
-import me.toptas.fancyshowcase.FocusShape;
+import app.jayang.icebr8k.Utility.DimmedPromptBackground;
+import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;
 
 
 /**
  * Created by LoLJay on 10/22/2017.
  */
 
-public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapter.SubmitedListener{
+public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapter.SubmitedListener,MaterialTapTargetPrompt.PromptStateChangeListener{
     View mview;
     private RecyclerView mRecyclerView;
     private RelativeLayout loadingGif;
@@ -64,6 +60,9 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
     final PagerSnapHelper snapHelper = new PagerSnapHelper();
     private final SurveyQ feedbackCard = new SurveyQ();
     private FloatingActionButton fab;
+    private  SharedPreferences sharedPref;
+    private SharedPreferences.Editor editor;
+    private final Handler mHandler = new Handler();
    ;
 
     private ImageView back,forward;
@@ -112,7 +111,13 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
         // add pager behavior
 
         snapHelper.attachToRecyclerView(mRecyclerView);
+
+        // init sharePref
+        sharedPref = getActivity().getSharedPreferences("tutorial", Context.MODE_PRIVATE);
+         editor = sharedPref.edit();
+
         getSurveyQ();
+        fabflag();
 
         forward.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -202,11 +207,22 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         if(getView()!=null){
-            if (isVisibleToUser){
-                fab.show();
+           boolean show = sharedPref.getBoolean("fabTutorial",false);
+            if(isVisibleToUser){
+                if(show){
+                   mHandler.postDelayed(new Runnable() {
+                       @Override
+                       public void run() {
+                           fab.show();
+                       }
+                   },300);
+
+                }
             }else{
                 fab.hide();
             }
+
+
         }
     }
 
@@ -244,6 +260,45 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
         back.setVisibility(View.GONE);
         forward.setVisibility(View.GONE);
     }
+    // if has more than 8 questions answered show fab all the time, show tutorial after first 8 questions answered
+    void fabflag(){
+        final DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+                .child("UserQA")
+                .child(currentUser.getUid());
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Long count = dataSnapshot.getChildrenCount();
+                // true user has already done the tutorial for fab
+                boolean flag = sharedPref.getBoolean("fabTutorial",false);
+
+                if(count>=8 ){
+                    fab.show();
+                    if(!flag) {
+                        // show tutorial for the first time
+                        new MaterialTapTargetPrompt.Builder(getActivity())
+                                .setTarget(fab)
+                                .setPromptStateChangeListener(SurveyTab_Fragment.this)
+                                .setPromptBackground(new DimmedPromptBackground())
+                                .setBackgroundColour(ContextCompat.getColor(getActivity(), R.color.colorPrimary))
+                                .setSecondaryText("When you finish answering this set of 8 questions, click here to load 8 new questions")
+                                .show();
+                        editor.putBoolean("fabTutorial", true);
+                        editor.apply();
+                        ref.removeEventListener(this);
+                    }
+
+                }else{
+                    fab.hide();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
 
     void getSurveyQ(){
 
@@ -265,16 +320,7 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
 
                 }
 
-                if(answeredList.isEmpty()){
-                    new MaterialStyledDialog.Builder(getContext())
-                            .setIcon(R.mipmap.ic_launcher)
-                            .setHeaderColor(R.color.lightBlue)
-                            .withDialogAnimation(true)
-                            .setDescription(getString(R.string.first_login_message))
-                            .setStyle(Style.HEADER_WITH_ICON)
-                            .setPositiveText(getString(R.string.ok))
-                            .show();
-                }
+
 
                 // get first 8 questions
 
@@ -378,28 +424,18 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
 
     @Override
     public void onClick() {
-
-
-              if(counter >1){
-                  new FancyShowCaseView.Builder(getActivity())
-                          .focusOn(fab).fitSystemWindows(true)
-                          .title("Click here to load  more or change current set of  questions , don't worry we have already saved your answered questions in this session")
-                          .showOnce("tutorialfab")
-                          .build().show();
-
-              }
-
-
-
-
-
-
-
-
-
+        // answered questions counter
         counter++;
         mTextView.setText("Answered " + counter +"/"+ (mList.size()));
     }
 
 
+    @Override
+    public void onPromptStateChanged(@NonNull MaterialTapTargetPrompt prompt, int state) {
+        if (state == MaterialTapTargetPrompt.STATE_NON_FOCAL_PRESSED)
+        {
+            // User has pressed the prompt target
+            prompt.dismiss();
+        }
+    }
 }
