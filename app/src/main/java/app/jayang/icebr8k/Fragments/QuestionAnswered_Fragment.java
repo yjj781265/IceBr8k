@@ -1,12 +1,15 @@
 package app.jayang.icebr8k.Fragments;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -105,21 +108,9 @@ public class QuestionAnswered_Fragment extends Fragment {
                         Long numComments = dataSnapshot.getChildrenCount();
                         String num = numComments>0 ? String.valueOf(numComments) :"";
                         userQA.setNumComments(num);
-                        if(qIdList.contains(userQA.getQuestionId())){
-                            for(UserQA temp : mList){
-                                if(temp.getQuestionId().equals(userQA.getQuestionId())){
-                                    mList.set(mList.indexOf(temp),userQA);
-                                    mAdapter.notifyItemChanged(mList.indexOf(temp));
-                                }
-                            }
 
+                        new addItem().execute(userQA);
 
-                        }else{
-                            mList.add(userQA);
-                            qIdList.add(userQA.getQuestionId());
-                            Collections.sort(mList);
-                            mAdapter.notifyDataSetChanged();
-                        }
 
 
                     }
@@ -133,17 +124,7 @@ public class QuestionAnswered_Fragment extends Fragment {
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                UserQA userQA = dataSnapshot.getValue(UserQA.class);
-                if(qIdList.contains(userQA.getQuestionId())){
-                    for(UserQA temp : mList){
-                        if(temp.getQuestionId().equals(userQA.getQuestionId())){
-                            mList.set(mList.indexOf(temp),userQA);
-                            mAdapter.notifyItemChanged(mList.indexOf(temp));
-                        }
-                    }
-
-
-                }
+                new updateItem().execute(dataSnapshot);
 
 
             }
@@ -179,6 +160,77 @@ public class QuestionAnswered_Fragment extends Fragment {
             }
         });
 
+    }
+
+
+    public  Boolean isMainThread(){
+        return Looper.myLooper() == Looper.getMainLooper();
+    }
+
+    public class addItem extends AsyncTask<UserQA,Void,Void>{
+
+
+        @Override
+        protected Void doInBackground(UserQA... userQAS) {
+            Log.d("question123"," adding item"+ isMainThread());
+            UserQA userQA = userQAS[0];
+            if(qIdList.contains(userQA.getQuestionId())){
+                for(final UserQA temp : mList){
+                    if(temp.getQuestionId().equals(userQA.getQuestionId())){
+                        mList.set(mList.indexOf(temp),userQA);
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mAdapter.notifyItemChanged(mList.indexOf(temp));
+                            }
+                        });
+
+                    }
+                }
+
+
+            }else{
+                mList.add(userQA);
+                qIdList.add(userQA.getQuestionId());
+                Collections.sort(mList);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mAdapter.notifyDataSetChanged();
+                    }
+                });
+
+            }
+            return null;
+        }
+    }
+
+    public class updateItem extends AsyncTask<DataSnapshot,Void,Void>{
+
+        @Override
+        protected Void doInBackground(DataSnapshot... dataSnapshots) {
+            Log.d("question123"," updating item"+ isMainThread());
+            DataSnapshot dataSnapshot = dataSnapshots[0];
+            UserQA userQA = dataSnapshot.getValue(UserQA.class);
+            if(qIdList.contains(userQA.getQuestionId())){
+                for(final UserQA temp : mList){
+                    if(temp.getQuestionId().equals(userQA.getQuestionId())){
+                        mList.set(mList.indexOf(temp),userQA);
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mAdapter.notifyItemChanged(mList.indexOf(temp));
+                            }
+                        });
+
+                    }
+                }
+
+
+            }
+
+            return null;
+        }
     }
 }
 

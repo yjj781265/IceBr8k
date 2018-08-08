@@ -233,6 +233,11 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     @Override
+    public long getItemId(int position) {
+        return  mMessages.get(position).getMessageid().hashCode();
+    }
+
+    @Override
     public int getItemViewType(int position) {
         String messageType = mMessages.get(position).getMessagetype();
         int viewType;

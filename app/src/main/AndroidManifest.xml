@@ -69,10 +69,6 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateAlwaysHidden|adjustResize"/>
         <activity
-            android:name=".FriendRequestPage"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait"/>
-        <activity
             android:name=".SearchUser"
             android:noHistory="true"
             android:screenOrientation="portrait">
@@ -96,6 +92,9 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".FriendRequestPage"
+            android:launchMode="singleTask"/>
+        <activity
             android:name=".FullImageView"
             android:label="@string/title_activity_full_image_view"
             android:screenOrientation="portrait"/>
@@ -116,15 +115,17 @@
             android:windowSoftInputMode="stateAlwaysHidden|adjustResize"/>
         <activity android:name=".Leaderboard">
         </activity>
-        <activity android:name=".QuestionActivity"
-                  android:screenOrientation="portrait">
+        <activity
+            android:name=".QuestionActivity"
+            android:screenOrientation="portrait">
         </activity>
         <activity android:name=".Reply">
         </activity>
         <activity android:name=".Settings_Activity">
         </activity>
-        <activity android:name=".SearchableActivity"
-            >
+        <activity
+            android:name=".SearchableActivity"
+            android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH"/>
             </intent-filter>
@@ -133,8 +134,9 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable"/>
         </activity>
-        <activity
-            android:name=".SearchPeopleNearby">
+        <activity android:name=".SearchPeopleNearby">
+        </activity>
+        <activity android:name=".SearchResult">
         </activity>
     </application>
 

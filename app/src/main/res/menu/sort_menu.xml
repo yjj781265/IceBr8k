@@ -6,7 +6,7 @@
 
 
            <item
-                android:title ="Online Status"
+                android:title ="A-Z"
                 android:orderInCategory="100"
                 android:id="@+id/online_stats"
                 app:showAsAction="never"
@@ -14,7 +14,7 @@
 
 
             <item
-                android:title ="Score"
+                android:title ="Compatibility"
                 android:orderInCategory="100"
                 android:id="@+id/score"
                 app:showAsAction="never"/>

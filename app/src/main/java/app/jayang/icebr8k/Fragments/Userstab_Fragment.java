@@ -1,5 +1,6 @@
 package app.jayang.icebr8k.Fragments;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -7,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
@@ -28,10 +30,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
+import com.google.android.gms.common.api.Scope;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -46,6 +50,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 
+import app.jayang.icebr8k.Homepage;
 import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.Modle.UserDialog;
 
@@ -54,6 +59,7 @@ import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.Adapter.RecyclerAdapter;
 import app.jayang.icebr8k.SearchName;
 import app.jayang.icebr8k.SearchUser;
+import app.jayang.icebr8k.Utility.ActivityCommunicator;
 import app.jayang.icebr8k.Utility.Compatability;
 import app.jayang.icebr8k.Utility.MyDateFormatter;
 
@@ -62,11 +68,12 @@ import app.jayang.icebr8k.Utility.MyDateFormatter;
  * Created by LoLJay on 10/20/2017.
  */
 
-public class Userstab_Fragment extends Fragment  {
+public class Userstab_Fragment extends Fragment{
     View view;
-    String TAG ="UserFrag";
+    String TAG ="UserFrag123";
 
     FirebaseDatabase mDatabase;
+    me_frag parentFrag;
     DatabaseReference databaseReference;
     ArrayList<UserDialog> mUserDialogArrayList;
     RelativeLayout loadingGif;
@@ -78,10 +85,12 @@ public class Userstab_Fragment extends Fragment  {
     BootstrapButton addFriend;
     FrameLayout searchLayout;
     Button filter_btn;
+    Boolean isVisiable = false;
     private BroadcastReceiver tickReceiver;
     private SharedPreferences sharedPref;
     private Boolean sortByScore,done;
     private String sortByScoreStr;
+    private Boolean firstTime = true;
     private long lastClickTime = 0;
 
 
@@ -90,13 +99,13 @@ public class Userstab_Fragment extends Fragment  {
         @Override
         public int compare(UserDialog dialog, UserDialog t1) {
             int result =0;
-            if(t1.getOnlinestats()!=null && dialog.getOnlinestats()!=null) {
-                result = Integer.valueOf(t1.getOnlinestats()).
-                        compareTo(Integer.valueOf(dialog.getOnlinestats()));
+            if(t1.getUser()!=null && dialog.getUser()!=null) {
+                result = Integer.valueOf(t1.getUser().getOnlinestats()).
+                        compareTo(Integer.valueOf(dialog.getUser().getOnlinestats()));
             }
             if(result==0){
-                if(t1.getName()!=null && dialog.getName()!=null) {
-                    result =dialog.getName().compareTo(t1.getName());
+                if(t1.getUser()!=null && dialog.getUser()!=null) {
+                    result =dialog.getUser().getDisplayname().compareTo(t1.getUser().getDisplayname());
                 }
 
             }
@@ -114,8 +123,8 @@ public class Userstab_Fragment extends Fragment  {
             }
 
             if(result==0){
-                if(t1.getName()!=null &&dialog.getName()!=null){
-                    result =dialog.getName() .compareTo(t1.getName());
+                if(t1.getUser()!=null && dialog.getUser()!=null) {
+                    result =dialog.getUser().getDisplayname().compareTo(t1.getUser().getDisplayname());
                 }
 
             }
@@ -167,16 +176,17 @@ public class Userstab_Fragment extends Fragment  {
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.setHasFixedSize(true);
         mAdapter = new RecyclerAdapter(getActivity(),mUserDialogArrayList);
-        mRecyclerView.setItemAnimator(null);
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mAdapter.setHasStableIds(true);
         mRecyclerView.setAdapter(mAdapter);
-
-
-
-
-
         populateUserDialogList();
-        setTimeChsngeListener();
+        parentFrag = (me_frag) getParentFragment();
+        if(parentFrag!=null){
+            parentFrag.getFragmentVisiable();
+            Log.d("interface123",    ""+ parentFrag.getFragmentVisiable());
+        }
+
+
 
 
 
@@ -188,6 +198,7 @@ public class Userstab_Fragment extends Fragment  {
                 popup.getMenuInflater().inflate(R.menu.sort_menu,popup.getMenu());
                 popup.show();
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @SuppressLint("StaticFieldLeak")
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         int id = item.getItemId();
@@ -197,19 +208,19 @@ public class Userstab_Fragment extends Fragment  {
                             editor.putString("sort", "yes");
                             editor.commit();
                             sortByScore=true;
-                            new AsyncTask<Void,Void,Void>(){
+                            new  AsyncTask<Void,Void,Void>(){
                                 @Override
                                 protected Void doInBackground(Void... voids) {
                                     Collections.sort(mUserDialogArrayList,SCORE);
+
 
                                     return null;
                                 }
 
                                 @Override
                                 protected void onPostExecute(Void aVoid) {
-                                    ArrayList<UserDialog> newList = new ArrayList<>();
-                                    newList.addAll(mUserDialogArrayList);
-                                    mAdapter.submitList(newList);
+                                    mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+                                    mAdapter.notifyDataSetChanged();
                                 }
                             }.execute();
                         }
@@ -229,9 +240,8 @@ public class Userstab_Fragment extends Fragment  {
 
                                 @Override
                                 protected void onPostExecute(Void aVoid) {
-                                    ArrayList<UserDialog> newList = new ArrayList<>();
-                                    newList.addAll(mUserDialogArrayList);
-                                    mAdapter.submitList(newList);
+                                    mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+                                    mAdapter.notifyDataSetChanged();
                                 }
                             }.execute();
                         }
@@ -254,11 +264,9 @@ public class Userstab_Fragment extends Fragment  {
                 if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
                     return;
                 }
-
                 lastClickTime = SystemClock.elapsedRealtime();
                 Intent i = new Intent(getContext(), SearchName.class);
-                i.putParcelableArrayListExtra("friendList",mUserDialogArrayList);
-                i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                i.putExtra("friendList",mUserDialogArrayList);
                 startActivity(i);
                 getActivity().overridePendingTransition(0,0);
             }
@@ -284,218 +292,260 @@ public class Userstab_Fragment extends Fragment  {
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
+         if(getView()!=null){
+             //Toast.makeText(getActivity(), ""+parentFrag.getFragmentVisiable(), Toast.LENGTH_SHORT).show();
+             isVisiable =isVisibleToUser;
+             if(isVisibleToUser && parentFrag.getFragmentVisiable()){
+                 if(!sortByScore){
 
+                     Collections.sort(mUserDialogArrayList,ONLINESTATS);
+                     mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+                     mAdapter.notifyDataSetChanged();
+                 }else{
+                     Collections.sort(mUserDialogArrayList, SCORE);
+                     mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+                     mAdapter.notifyDataSetChanged();
+                 }
+             }
+         }
 
-
-
-    }
+        }
 
     @Override
     public void onResume() {
         super.onResume();
 
-        Log.d(TAG,"OnResume");
 
-    }
+        }
+
 
     private  void showLog(Object str){
         Log.d(TAG,String.valueOf(str));
     }
 
-
+  //  added then call notifydataset changed in the value listener , update in the adapter
 
     public void populateUserDialogList() {
-        mUserDialogArrayList.clear();
-        addFriend.setVisibility(View.GONE);
-        loadingGif.setVisibility(View.VISIBLE);
-        databaseReference = mDatabase.getReference("UserFriends").child(currentUser.getUid());
-        databaseReference.keepSynced(true);
+      loadingGif .setVisibility(View.VISIBLE);
+
+      databaseReference = FirebaseDatabase.getInstance().getReference().child("UserFriends")
+              .child(currentUser.getUid());
+      databaseReference.orderByChild("stats").equalTo("accepted").addChildEventListener(new ChildEventListener() {
+          @SuppressLint("StaticFieldLeak")
+          @Override
+          public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+              showLog(dataSnapshot.getKey() + " added" );
+              final UserDialog userDialog = new UserDialog(null,null,dataSnapshot.getKey());
+
+              if(dataSnapshot.hasChild("score")){
+                  userDialog.setScore(dataSnapshot.child("score").getValue(String.class));
+              }
+              if(!mUserDialogArrayList.contains(userDialog)){
+                  mUserDialogArrayList.add(userDialog);
+              }
 
 
+              // add onLine ref
+              DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+                      .child("Users")
+                      .child(userDialog.getId());
+              ref.addValueEventListener(new ValueEventListener() {
+                  @Override
+                  public void onDataChange(final DataSnapshot dataSnapshot) {
 
-        databaseReference.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                      new AsyncTask<Void,Void,Void>(){
 
-                if(dataSnapshot.hasChild("stats")){
-                    showLog(dataSnapshot.getKey() +" added");
-                    if(dataSnapshot.child("stats").getValue(String.class).equals("accepted")){
-                        UserDialog dialog = new UserDialog();
-                        dialog.setId(dataSnapshot.getKey());
-                        if(!mUserDialogArrayList.contains(dialog)){
-                            mUserDialogArrayList.add(dialog);
-                            addFriend.setVisibility(View.GONE);
-                            getUserinfo(dialog);
-
-                        }
-                    }
-                }
-
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                showLog("Changed "+dataSnapshot.getKey());
-                if(dataSnapshot.hasChild("stats")){
-                    showLog(dataSnapshot.getKey() +" added");
-                    if(dataSnapshot.child("stats").getValue(String.class).equals("accepted")){
-                        UserDialog dialog = new UserDialog();
-                        dialog.setId(dataSnapshot.getKey());
-                        if(!mUserDialogArrayList.contains(dialog)){
-                            mUserDialogArrayList.add(dialog);
-                            getUserinfo(dialog);
-                            loadingGif.setVisibility(View.GONE);
-                            addFriend.setVisibility(View.GONE);
+                          @Override
+                          protected Void doInBackground(Void... voids) {
+                              User user = dataSnapshot.getValue(User.class);
+                              if(user!=null){
+                                  userDialog.setUser(user);
+                              }
 
 
-                        }
-                    }
-                }
-            }
+                              return null;
+                          }
 
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                UserDialog dialog = new UserDialog();
-                dialog.setId(dataSnapshot.getKey());
-                if(mUserDialogArrayList.contains(dialog)) {
-                    mUserDialogArrayList.remove(dialog);
-                }
-                ArrayList<UserDialog> newList = new ArrayList<>();
-                newList.addAll(mUserDialogArrayList);
-                mAdapter.submitList(newList);
-                if(mUserDialogArrayList.isEmpty()){
-                    addFriend.setVisibility(View.VISIBLE);
-
-                }
-
-                showLog("Child Removed"+dataSnapshot.getKey());
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(!mUserDialogArrayList.isEmpty()){
-
-                    addFriend.setVisibility(View.GONE);
-                    YoYo.with(Techniques.FadeIn).duration(500).playOn(mRecyclerView);
-                    for(UserDialog dialog :mUserDialogArrayList){
-                        getUserinfo(dialog);
-                    }
-                }else{
-
-
-                    addFriend.setVisibility(View.VISIBLE);
-                }
-                done =true;
-                loadingGif.setVisibility(View.GONE);
-                searchLayout.setVisibility(mUserDialogArrayList.isEmpty()? View.GONE:View.VISIBLE);
-
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+                          @Override
+                          protected void onPostExecute(Void aVoid) {
+                              if(parentFrag.getFragmentVisiable() &&isVisiable){
+                                  if(!sortByScore){
+                                      Collections.sort(mUserDialogArrayList,ONLINESTATS);
+                                      mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+                                      mAdapter.notifyDataSetChanged();
+                                  }else{
+                                      int index = mUserDialogArrayList.indexOf(userDialog);
+                                      mRecyclerView.setItemAnimator(null);
+                                      mAdapter.notifyItemChanged(index);
+                                  }
+                              }
+                          }
+                      }.execute();
 
 
 
 
+
+                  }
+
+                  @Override
+                  public void onCancelled(DatabaseError databaseError) {
+
+                  }
+              });
+
+              // add score ref
+              DatabaseReference ref2 = FirebaseDatabase.getInstance().getReference()
+                      .child("UserFriends")
+                      .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                      .child(userDialog.getId())
+                      .child("score");
+              ref2.addValueEventListener(new ValueEventListener() {
+                  @Override
+                  public void onDataChange(final DataSnapshot dataSnapshot) {
+
+
+                      new AsyncTask<Void,Void,Void>(){
+
+                          @Override
+                          protected Void doInBackground(Void... voids) {
+                           String score = dataSnapshot.getValue(String.class);
+                              if(score!=null ) {
+                                  userDialog.setScore(score);
+                                  Log.d("usertab123",""+ isMainThread());
+                              }
+                              return null;
+                          }
+
+                          @Override
+                          protected void onPostExecute(Void aVoid) {
+                              Log.d("usertab123","after"+ isMainThread());
+                              if(parentFrag.getFragmentVisiable()&&isVisiable){
+                                  if(sortByScore){
+                                      Collections.sort(mUserDialogArrayList,SCORE);
+                                      mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+                                      mAdapter.notifyDataSetChanged();
+                                  }else{
+                                      int index = mUserDialogArrayList.indexOf(userDialog);
+                                      mRecyclerView.setItemAnimator(null);
+                                      mAdapter.notifyItemChanged(index);
+                                  }
+                              }
+                          }
+                      }.execute();
+
+
+
+                  }
+
+                  @Override
+                  public void onCancelled(DatabaseError databaseError) {
+
+                  }
+              });
+
+              showLog(userDialog.getScore() + " score " );
+
+              if(!firstTime){
+                  new AsyncTask<Void,Void,Void>(){
+                      @Override
+                      protected Void doInBackground(Void... voids) {
+                          if(!mUserDialogArrayList.isEmpty()){
+                              getUserInfo(userDialog);
+
+                          }
+                          return null;
+                      }
+
+                      @Override
+                      protected void onPostExecute(Void aVoid) {
+                          if(isVisiable){
+                              if(sortByScore){
+                                  Collections.sort(mUserDialogArrayList,SCORE);
+                              }else{
+                                  Collections.sort(mUserDialogArrayList,ONLINESTATS);
+                              }
+                              mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+                              mAdapter.notifyDataSetChanged();
+                          }
+
+
+                      }
+
+                      @Override
+                      protected void onPreExecute() {
+                          showLog("getting user info");
+                      }
+                  }.execute();
+              }
+
+          }
+
+          @Override
+          public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+              showLog(dataSnapshot.getKey() + " changed" );
+          }
+
+          @Override
+          public void onChildRemoved(DataSnapshot dataSnapshot) {
+              showLog(dataSnapshot.getKey() + " moved" );
+              UserDialog userDialog = new UserDialog(null,null,dataSnapshot.getKey());
+              if(mUserDialogArrayList.contains(userDialog)){
+                  int index = mUserDialogArrayList.indexOf(userDialog);
+                  mUserDialogArrayList.remove(index);
+                  mAdapter.notifyItemRemoved(index);
+              }
+          }
+
+          @Override
+          public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+          }
+
+          @Override
+          public void onCancelled(DatabaseError databaseError) {
+
+          }
+      });
+
+      databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+
+
+          @Override
+          public void onDataChange(DataSnapshot dataSnapshot) {
+              showLog(dataSnapshot.getKey() + " value listener" );
+              // getting userinfo in the background first time
+              new getting_user_info().execute();
+
+
+          }
+
+          @Override
+          public void onCancelled(DatabaseError databaseError) {
+
+          }
+      });
     }
 
-    private void setTimeChsngeListener() {
-
-        tickReceiver = new BroadcastReceiver() {
-
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                for(UserDialog dialog : mUserDialogArrayList){
-                    if(dialog.getLastseen()!=null){
-                        dialog.setLastseen(MyDateFormatter.lastSeenConverterShort(dialog.getTimestamp()));
-                    }
-                }
-                ArrayList<UserDialog> newList = new ArrayList<>();
-                newList.addAll(mUserDialogArrayList);
-                mAdapter.submitList(newList);
-            }
-        };
-        getActivity().registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK)); // register the broadcast receiver to receive TIME_TICK
-
-    }
-
-
-
-    private void getUserinfo(final UserDialog dialog){
-        DatabaseReference userinfoRef = mDatabase.getReference().child("Users").child(dialog.getId());
-        userinfoRef.keepSynced(true);
-        userinfoRef.addValueEventListener(new ValueEventListener() {
+// get user obj and score
+   void  getUserInfo(final UserDialog userDialog){
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference()
+                .child("Users")
+                .child(userDialog.getId());
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
-                if(dataSnapshot.hasChild("lastseen") && "0".equals(user.getOnlinestats())){
-                    Long timestamp = dataSnapshot.child("lastseen").getValue(Long.class);
-                    dialog.setTimestamp(timestamp);
-                    dialog.setLastseen(MyDateFormatter.lastSeenConverterShort(timestamp));
+                userDialog.setUser(user);
+                if(userDialog.getScore()==null){
+                    compareWithUser2(userDialog);
+                    }
+                if(sortByScore){
+                    Collections.sort(mUserDialogArrayList,SCORE);
                 }else{
-                    dialog.setLastseen(null);
+                    Collections.sort(mUserDialogArrayList,ONLINESTATS);
                 }
-                if(user!=null) {
-                    dialog.setName(user.getDisplayname());
-                    dialog.setOnlinestats(user.getOnlinestats());
-                    dialog.setUsername(user.getUsername());
-                    dialog.setPhotoUrl(user.getPhotourl());
-                    dialog.setEmail(user.getEmail());
-
-                    if(!dialog.getHasScoreListener()){
-                        addScoreListener(dialog);
-                        dialog.setHasScoreListener(true);
-                    }
-
-                    if(mUserDialogArrayList.contains(dialog)){
-                        int index = mUserDialogArrayList.indexOf(dialog);
-                        if(!sortByScore){
-                            new AsyncTask<Void,Void,Void>(){
-                                @Override
-                                protected Void doInBackground(Void... voids) {
-                                    Collections.sort(mUserDialogArrayList,ONLINESTATS);
-
-                                    return null;
-                                }
-
-                                @Override
-                                protected void onPostExecute(Void aVoid) {
-                                    ArrayList<UserDialog> newList = new ArrayList<>();
-                                    newList.addAll(mUserDialogArrayList);
-                                    mAdapter.submitList(newList);
-                                }
-                            }.execute();
-                        }else{
-                            mAdapter.notifyItemChanged(index);
-
-                        }
-
-                    }
-
-
-
                 }
-
-
-
-            }
-
-
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
@@ -503,62 +553,17 @@ public class Userstab_Fragment extends Fragment  {
             }
         });
 
-    }
-
-    private void addScoreListener(final UserDialog dialog) {
-        DatabaseReference scoreRef = FirebaseDatabase.getInstance().getReference()
-                .child("UserFriends")
-                .child(currentUser.getUid())
-                .child(dialog.getId());
-        scoreRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.hasChild("score")){
-                    String score =dataSnapshot.child("score").getValue(String.class);
-                    dialog.setScore(score);
-                    if(mUserDialogArrayList.contains(dialog)){
-                        int index = mUserDialogArrayList.indexOf(dialog);
-                        if(sortByScore){
-                            new AsyncTask<Void,Void,Void>(){
-                                @Override
-                                protected Void doInBackground(Void... voids) {
-                                    Collections.sort(mUserDialogArrayList,SCORE);
-
-                                    return null;
-                                }
-
-                                @Override
-                                protected void onPostExecute(Void aVoid) {
-                                    ArrayList<UserDialog> newList = new ArrayList<>();
-                                    newList.addAll(mUserDialogArrayList);
-                                    mAdapter.submitList(newList);
-                                }
-                            }.execute();
 
 
-                        }else{
-                            mAdapter.notifyItemChanged(index);
+   }
 
-                        }
 
-                    }
-                }else if(dataSnapshot!=null && dataSnapshot.hasChild("stats")){
-                    compareWithUser2(dialog);
-                }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    public void compareWithUser2(final UserDialog dialog) {
+    public void compareWithUser2(final UserDialog userDialog) {
         final ArrayList<UserQA> userQA1 = new ArrayList<>();
         final ArrayList<UserQA> userQA2 = new ArrayList<>();
-        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + currentUser.getUid());
-        final DatabaseReference mRef2 = FirebaseDatabase.getInstance().getReference("UserQA/" + dialog.getId());
+        final DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + currentUser.getUid());
+        final DatabaseReference mRef2 = FirebaseDatabase.getInstance().getReference("UserQA/" + userDialog.getId());
 
         mRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -579,33 +584,25 @@ public class Userstab_Fragment extends Fragment  {
                                 userQA2.add(child.getValue(UserQA.class));
                             }
 
-
-                        }
+                            }
 
                         Compatability mCompatability = new Compatability(userQA1,userQA2);
-                        dialog.setScore(mCompatability.getScore().toString());
-                        setScoreNode(dialog.getId(),mCompatability.getScore().toString());
-                        if(sortByScore){
-                            new AsyncTask<Void,Void,Void>(){
-                                @Override
-                                protected Void doInBackground(Void... voids) {
-                                    Collections.sort(mUserDialogArrayList,SCORE);
+                        // important
+                        int score = mCompatability.getScore();
+                        userDialog.setScore(String.valueOf(score));
+                        if(sortByScore && isVisiable){
+                            Collections.sort(mUserDialogArrayList,SCORE);
+                            mAdapter.notifyDataSetChanged();
+                            }
 
-                                    return null;
-                                }
+                        DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+                                .child("UserFriends")
+                                .child(currentUser.getUid())
+                                .child(userDialog.getId())
+                                .child("score");
+                        ref.setValue(String.valueOf(score));
+                        showLog(String.valueOf(score) + " SCORE IS HERE");
 
-                                @Override
-                                protected void onPostExecute(Void aVoid) {
-                                    ArrayList<UserDialog> newList = new ArrayList<>();
-                                    newList.addAll(mUserDialogArrayList);
-                                    mAdapter.submitList(newList);
-                                }
-                            }.execute();
-                        }else{
-                            ArrayList<UserDialog> newList = new ArrayList<>();
-                            newList.addAll(mUserDialogArrayList);
-                            mAdapter.submitList(newList);
-                        }
 
 
 
@@ -628,34 +625,15 @@ public class Userstab_Fragment extends Fragment  {
 
     }
 
-
-
-
-
-    public void setScoreNode(String user2Uid,String score){
-        DatabaseReference scoreRef = FirebaseDatabase.getInstance().getReference()
-                .child("UserFriends")
-                .child(currentUser.getUid())
-                .child(user2Uid)
-                .child("score");
-        scoreRef.setValue(score);
-
-        DatabaseReference scoreRef2 = FirebaseDatabase.getInstance().getReference()
-                .child("UserFriends")
-                .child(user2Uid)
-                .child(currentUser.getUid())
-                .child("score");
-
-        scoreRef2.setValue(score);
+    @Override
+    public void onStart() {
+        super.onStart();
     }
-
-
-
-
 
     @Override
     public void onStop() {
         super.onStop();
+
 
     }
 
@@ -671,6 +649,60 @@ public class Userstab_Fragment extends Fragment  {
         super.onDestroy();
     }
 
+    void reLoad(){
+        if(getView()!=null){
 
+            if(isVisiable && parentFrag.getFragmentVisiable()){
+                if(!sortByScore){
+
+                    Collections.sort(mUserDialogArrayList,ONLINESTATS);
+                    mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+                    mAdapter.notifyDataSetChanged();
+                }else{
+                    Collections.sort(mUserDialogArrayList, SCORE);
+                    mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
+        }
+    }
+
+
+
+
+    public  Boolean isMainThread(){
+        return Looper.myLooper() == Looper.getMainLooper();
+    }
+
+
+
+
+
+    public  class  getting_user_info extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            if (!mUserDialogArrayList.isEmpty()) {
+                for (UserDialog userDialog : mUserDialogArrayList) {
+                    getUserInfo(userDialog);
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+
+            mAdapter.notifyDataSetChanged();
+            loadingGif.setVisibility(View.GONE);
+            addFriend.setVisibility(mUserDialogArrayList.isEmpty() ? View.VISIBLE : View.GONE);
+            searchLayout.setVisibility(mUserDialogArrayList.isEmpty() ? View.GONE : View.VISIBLE);
+            firstTime = false;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            showLog("getting user info");
+        }
+    };
 
 }

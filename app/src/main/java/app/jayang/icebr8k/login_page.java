@@ -605,6 +605,7 @@ public class login_page extends AppCompatActivity implements
                 if (!dataSnapshot.hasChild("username")) {
                     //user doesn't have username
                     User user = dataSnapshot.getValue(User.class);
+                    user.setId(currentUser.getUid());
                     user.setDisplayname(currentUser.getDisplayName());
                     user.setEmail(currentUser.getEmail());
                     user.setPhotourl(currentUser.getPhotoUrl().toString());

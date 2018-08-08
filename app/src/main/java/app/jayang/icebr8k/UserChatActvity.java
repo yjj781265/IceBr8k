@@ -6,10 +6,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -70,10 +72,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
     private final String VIEWTYPE_TYPE = "type";
     private final String LOAD_ID = "loading";
     private final String TYPE_ID = "typing";
-
     private  String user2Uid = null;
-
-
     private MyEditText editText;
     private TextView toast;
     private Long lastTimeStamp;
@@ -173,8 +172,12 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         // use a linear layout manager
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.getItemAnimator().setChangeDuration(0);
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mAdapter = new UserMessageAdapter(mMessages, mRecyclerView, userPhotoUrlMap);
+        mRecyclerView.getItemAnimator().setChangeDuration(0);
+        mRecyclerView.getItemAnimator().setRemoveDuration(0);
+        mRecyclerView.getItemAnimator().setAddDuration(0);
+
 
         // set the adapter object to the Recyclerview
 
@@ -437,11 +440,20 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
     private void updateIsTyping(boolean istyping) {
         senderMessageRef.child("istyping").setValue(istyping);
+
     }
 
 
-    private void inChat(boolean inChat) {
-        inChatRef.setValue(inChat);
+    private void inChat(final boolean inChat) {
+        new AsyncTask<Void,Void,Void>(){
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                inChatRef.setValue(inChat);
+                return null;
+            }
+        }.execute();
+
     }
 
     private void setMute(boolean isMute) {
@@ -526,7 +538,6 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
     }
 
     private void setSubTitle(){
-        subTitleRef.keepSynced(true);
         subTitleRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -753,51 +764,13 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
     }
 
     private void newMessageReceived(UserMessage message) {
+        // run in background thread
+        new newMessageRecived().execute(message);
 
 
-        int index =0 , prevIndex =0;
-        if(mMessages.contains(isTypingMessage)){
-            removeIsTypingMessage();
-            index = mMessages.indexOf(isTypingMessage)+1;
-            prevIndex = index;
-        }
 
-        if (!mMessages.isEmpty()) {
-            UserMessage prevMessage = mMessages.get(prevIndex);
 
-            if (!VIEWTYPE_HEADER.equals(message.getMessagetype())&& !VIEWTYPE_HEADER.equals(prevMessage.getMessagetype())
-                    && message.getTimestamp()!=null && prevMessage.getTimestamp()!=null
-                    && !MyDateFormatter.isSameDay(new Date(message.getTimestamp()), new Date(prevMessage.getTimestamp()))) {
-                UserMessage dateHeaderMessage = new UserMessage();
-                dateHeaderMessage.setMessageid(VIEWTYPE_HEADER + UUID.randomUUID().toString());
-                dateHeaderMessage.setTimestamp(message.getTimestamp());
-                dateHeaderMessage.setMessagetype(VIEWTYPE_HEADER);
-                mMessages.add(index, dateHeaderMessage);
-                mMessages.add(index, message);
-                mAdapter.notifyItemRangeInserted(index, mMessages.size() - 1);
-            }else {
-                mMessages.add(index, message);
-                mAdapter.notifyItemInserted(index);
-            }
-        } else {
-            UserMessage dateHeaderMessage = new UserMessage();
-            dateHeaderMessage.setMessageid(VIEWTYPE_HEADER + UUID.randomUUID().toString());
-            dateHeaderMessage.setTimestamp(message.getTimestamp());
-            dateHeaderMessage.setMessagetype(VIEWTYPE_HEADER);
-            mMessages.add(index, dateHeaderMessage);
-            mMessages.add(index, message);
-            mAdapter.notifyDataSetChanged();
-        }
 
-        if(firstVisablePos>index && (lastVisablePos -firstVisablePos+toastThreshhold)<lastVisablePos){
-            toast.setText("New Message \u2193");
-            toast.setVisibility(View.VISIBLE);
-            YoYo.with(Techniques.ZoomIn).duration(300).playOn(toast);
-        }else{
-            YoYo.with(Techniques.ZoomOut).duration(300).playOn(toast);
-            toast.setVisibility(View.GONE);
-             mRecyclerView.scrollToPosition(0);
-        }
     }
 
 
@@ -874,6 +847,8 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
     // add headers for  messages list that as argument
     private void generateDateHeaders(ArrayList<UserMessage> messageArrayList) {
+
+
 
         for (int i = 0; i < messageArrayList.size(); i++) {
             UserMessage message1 = messageArrayList.get(i);
@@ -1026,6 +1001,89 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
 
     }
+
+
+    public class newMessageRecived extends AsyncTask<UserMessage,Void,Integer>{
+
+        @Override
+        protected void onPostExecute(Integer integer) {
+            super.onPostExecute(integer);
+            int index = integer;
+            if(firstVisablePos>index && (lastVisablePos -firstVisablePos+toastThreshhold)<lastVisablePos){
+                toast.setText("New Message \u2193");
+                toast.setVisibility(View.VISIBLE);
+                YoYo.with(Techniques.ZoomIn).duration(300).playOn(toast);
+            }else{
+                YoYo.with(Techniques.ZoomOut).duration(300).playOn(toast);
+                toast.setVisibility(View.GONE);
+                mRecyclerView.scrollToPosition(0);
+            }
+        }
+
+        @Override
+        protected Integer doInBackground(UserMessage... userMessages) {
+            UserMessage message = userMessages[0];
+
+            int index =0 , prevIndex =0;
+            if(mMessages.contains(isTypingMessage)){
+                removeIsTypingMessage();
+                index = mMessages.indexOf(isTypingMessage)+1;
+                prevIndex = index;
+            }
+
+            if (!mMessages.isEmpty()) {
+                UserMessage prevMessage = mMessages.get(prevIndex);
+
+                if (!VIEWTYPE_HEADER.equals(message.getMessagetype())&& !VIEWTYPE_HEADER.equals(prevMessage.getMessagetype())
+                        && message.getTimestamp()!=null && prevMessage.getTimestamp()!=null
+                        && !MyDateFormatter.isSameDay(new Date(message.getTimestamp()), new Date(prevMessage.getTimestamp()))) {
+                    UserMessage dateHeaderMessage = new UserMessage();
+                    dateHeaderMessage.setMessageid(VIEWTYPE_HEADER + UUID.randomUUID().toString());
+                    dateHeaderMessage.setTimestamp(message.getTimestamp());
+                    dateHeaderMessage.setMessagetype(VIEWTYPE_HEADER);
+                    mMessages.add(index, dateHeaderMessage);
+                    mMessages.add(index, message);
+                    final int finalIndex = index;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mAdapter.notifyItemRangeInserted(finalIndex, mMessages.size() - 1);
+
+                        }
+                    });
+
+                }else {
+                    mMessages.add(index, message);
+                    final int finalIndex1 = index;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mAdapter.notifyItemInserted(finalIndex1);
+                        }
+                    });
+
+                }
+            } else {
+                UserMessage dateHeaderMessage = new UserMessage();
+                dateHeaderMessage.setMessageid(VIEWTYPE_HEADER + UUID.randomUUID().toString());
+                dateHeaderMessage.setTimestamp(message.getTimestamp());
+                dateHeaderMessage.setMessagetype(VIEWTYPE_HEADER);
+                mMessages.add(index, dateHeaderMessage);
+                mMessages.add(index, message);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mAdapter.notifyDataSetChanged();
+                    }
+                });
+
+            }
+
+
+
+            return index;
+        }
+    }
     @Override
     public void onChildViewAttachedToWindow(View view) {
         handler .postDelayed(new Runnable() {
@@ -1076,7 +1134,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
     public boolean onTouch(View view, MotionEvent motionEvent) {
 
         if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-            view.setAlpha(0.6f);
+            view.setAlpha(0.8f);
         } else {
             view.setAlpha(1f);
         }
@@ -1114,8 +1172,9 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
     @Override
     protected void onStop() {
-        super.onStop();
         inChat(false);
+        super.onStop();
+
 
 
     }
@@ -1129,6 +1188,8 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
 
     }
+
+
 
 
 

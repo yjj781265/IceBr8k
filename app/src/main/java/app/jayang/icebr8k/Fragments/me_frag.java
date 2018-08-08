@@ -3,42 +3,30 @@ package app.jayang.icebr8k.Fragments;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.SystemClock;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.PopupMenu;
-import android.support.v7.widget.SwitchCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
-import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.daimajia.androidanimations.library.Techniques;
-import com.daimajia.androidanimations.library.YoYo;
-import com.dd.processbutton.FlatButton;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -57,11 +45,8 @@ import com.google.firebase.storage.UploadTask;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
-import com.karumi.dexter.listener.PermissionDeniedResponse;
-import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
-import com.karumi.dexter.listener.single.PermissionListener;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -72,14 +57,10 @@ import java.util.List;
 import java.util.UUID;
 
 import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
-import app.jayang.icebr8k.FriendRequestPage;
 import app.jayang.icebr8k.FullImageView;
-import app.jayang.icebr8k.Homepage;
-import app.jayang.icebr8k.Modle.UserQA;
-import app.jayang.icebr8k.MyQR_Code;
-import app.jayang.icebr8k.Utility.ActivityCommunicator;
 import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.R;
+import app.jayang.icebr8k.Utility.ActivityCommunicator;
 import id.zelory.compressor.Compressor;
 import pl.aprilapps.easyphotopicker.DefaultCallback;
 import pl.aprilapps.easyphotopicker.EasyImage;
@@ -92,6 +73,7 @@ import static android.app.Activity.RESULT_OK;
 
 public class me_frag extends Fragment {
     private View mView;
+    private Boolean fragmentVisiable,firstTime =true;
     private ImageView avatar;
     private TextView username, name;
     private TabLayout mTabLayout;
@@ -106,11 +88,13 @@ public class me_frag extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
+
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
 
 
     }
@@ -130,14 +114,7 @@ public class me_frag extends Fragment {
                 .content("Updating Avatar...")
                 .progress(true, 0).build();
 
-        mViewPagerAdapter.addFragment(new Userstab_Fragment());
-        mViewPagerAdapter.addFragment(new QuestionAnswered_Fragment());
-        mViewPager.setAdapter(mViewPagerAdapter);
-        mTabLayout.setupWithViewPager(mViewPager);
 
-        mTabLayout.getTabAt(0).setText("Friends");
-        mTabLayout.getTabAt(1).setText("Questions Answered");
-        setTabTitle();
 
 // set my info UI
         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference()
@@ -203,6 +180,34 @@ public class me_frag extends Fragment {
 
         return mView;
 
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if(getView()!=null){
+            Log.d("Interface123"," meetab"+ isVisibleToUser);
+            fragmentVisiable = isVisibleToUser;
+            if(isVisibleToUser && firstTime){
+                mViewPagerAdapter.addFragment(new Userstab_Fragment());
+                mViewPagerAdapter.addFragment(new QuestionAnswered_Fragment());
+                mViewPager.setAdapter(mViewPagerAdapter);
+                mTabLayout.setupWithViewPager(mViewPager);
+
+                mTabLayout.getTabAt(0).setText("Friends");
+                mTabLayout.getTabAt(1).setText("Questions Answered");
+                setTabTitle();
+                firstTime = false;
+            }else if(isVisibleToUser && !firstTime){
+                Userstab_Fragment userstab_fragment = (Userstab_Fragment) mViewPagerAdapter.getItem(0);
+                userstab_fragment.reLoad();
+            }
+        }
+
+    }
+
+    public Boolean getFragmentVisiable() {
+        return fragmentVisiable;
     }
 
     void setTabTitle(){

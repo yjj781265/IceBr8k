@@ -6,13 +6,14 @@ import android.support.annotation.InterpolatorRes;
 import android.support.annotation.NonNull;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Created by LoLJay on 10/20/2017.
  */
 
 public class User implements Serializable,Comparable<User>{
-    private String displayname,username,photourl,email,score,privacy;
+    private String displayname,username,photourl,email,score,privacy,id;
     private Long lastseen;
     private String onlinestats;
     private Birthdate mBirthdate;
@@ -27,7 +28,13 @@ public class User implements Serializable,Comparable<User>{
         this.email = email;
     }
 
+    public String getId() {
+        return id;
+    }
 
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getPrivacy() {
         return privacy;
@@ -124,16 +131,13 @@ public class User implements Serializable,Comparable<User>{
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         User user = (User) o;
-
-        return username != null ? username.equals(user.username) : user.username == null;
+        return Objects.equals(username, user.username);
     }
 
     @Override
     public int hashCode() {
-        return username != null ? username.hashCode() : 0;
+
+        return Objects.hash(username);
     }
-
-
 }

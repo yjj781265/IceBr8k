@@ -40,6 +40,7 @@ import app.jayang.icebr8k.Adapter.CommentAdapter;
 import app.jayang.icebr8k.Modle.Comment;
 import app.jayang.icebr8k.Modle.MyEditText;
 import app.jayang.icebr8k.R;
+import app.jayang.icebr8k.Utility.ActivityCommunicator;
 import app.jayang.icebr8k.Utility.OnLoadMoreListener;
 
 /**
@@ -51,6 +52,7 @@ public class Comment_Fragment extends Fragment {
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String QUESTION_ID = "param1";
+
 
 
 
@@ -87,6 +89,12 @@ public class Comment_Fragment extends Fragment {
         args.putString(QUESTION_ID, param1);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
     }
 
     @Override
@@ -206,11 +214,7 @@ public class Comment_Fragment extends Fragment {
                             Collections.sort(comments);
                             mAdapter.notifyDataSetChanged();
                         }
-
-
-
-
-                    }
+                        }
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {

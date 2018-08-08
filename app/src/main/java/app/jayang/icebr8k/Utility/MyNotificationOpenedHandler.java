@@ -10,10 +10,8 @@ import com.onesignal.OneSignal;
 
 import org.json.JSONObject;
 
-import app.jayang.icebr8k.FriendRequestPage;
 import app.jayang.icebr8k.Homepage;
 import app.jayang.icebr8k.MyApplication;
-import app.jayang.icebr8k.QuestionActivity;
 
 
 /**
@@ -64,9 +62,9 @@ public class MyNotificationOpenedHandler implements OneSignal.NotificationOpened
                 MyApplication.getContext().startActivity(mIntent);
 
             } else{
-                Intent mIntent = new Intent(MyApplication.getContext(),FriendRequestPage.class);
+               /* Intent mIntent = new Intent(MyApplication.getContext(),FriendRequestPage.class);
                 mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT );
-                MyApplication.getContext().startActivity(mIntent);
+                MyApplication.getContext().startActivity(mIntent);*/
             }
 
 

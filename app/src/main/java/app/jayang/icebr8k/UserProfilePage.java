@@ -315,68 +315,23 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
     }
 
 
-/*
-    private void setProgressDialog(int Score){
 
-        Handler mHandler = new Handler();
-
-        dialog = new Dialog(UserProfilePage.this);
-        dialog.setCanceledOnTouchOutside(true);
-        dialog.setContentView(R.layout.score_dialog);
-        TextView textview = dialog.findViewById(R.id.compareText);
-        textview.setText("Compare with " + mUser.getUsername()+"\n\t\t"+mCompatability.getCommonList().size()+"/"+mCompatability.getCommonQ());
-        TextView cancel = dialog.findViewById(R.id.cancel_btn);
-        TextView details = dialog.findViewById(R.id.details_btn);
-        arcProgress = dialog.findViewById(R.id.arc_progress);
-        dialog.show();
-        compare_btn.setProgress(0);
-        arcProgress.setProgress(0);
-
-        for(int i =0 ; i<Score+1;i++){
-            final int finalI = i;
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    arcProgress.setProgress(finalI);
-                }
-            },20*i);
-        }
-
-
-        cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.dismiss();
-
-            }
-        });
-        if(mCompatability.getCommonQ()==0){
-            details.setClickable(false);
-            details.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.ripple));
-            details.setEnabled(false);
-        }else{
-            details.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    // send user QA data to the result details activity
+    private void toDetailPage(){
+        // send user QA data to the result details activity
                     Intent i = new Intent(getApplicationContext(), ResultActivity.class);
-                    i.putExtra("sameAnswer", mCompatability.getCommonList());
                     i.putExtra("user2", mUser);
                     i.putExtra("user2Id" ,uid);
-                    i.putExtra("diffAnswer1", mCompatability.getDiffList());
-                    i.putExtra("diffAnswer2", mCompatability.getDiffList2());
                     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
                             FLAG_ACTIVITY_BROUGHT_TO_FRONT);
 
                     startActivity(i);
-                    overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
-                    dialog.dismiss();
-                }
-            });
-        }
+
+
+
+
 
     }
-*/
+
 
     private void checkFriendStats(){
         DatabaseReference friendStatsRef = database.getReference().child("UserFriends").
@@ -722,7 +677,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
              showBasicDialog("Are you sure to reset all the questions ?");
             } else if (id == R.id.compare_btn) {
                 if (mUser != null) {
-                    compareWithUser2();
+                   toDetailPage();
                 }
             } else if (id == R.id.message_btn) {
                 if (!uid.equals(currentUser.getUid())) {
@@ -771,7 +726,6 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                             startActivity(new Intent(Settings.ACTION_SETTINGS));
                         }
                     });
-
             snackbar.show();
         }
 

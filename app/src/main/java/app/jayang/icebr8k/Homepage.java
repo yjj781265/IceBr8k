@@ -75,12 +75,14 @@ import com.zplesac.connectionbuddy.models.ConnectivityEvent;
 import com.zplesac.connectionbuddy.models.ConnectivityState;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
 import app.jayang.icebr8k.Fragments.PeopleNearby_Fragment;
 import app.jayang.icebr8k.Fragments.SurveyTab_Fragment;
 import app.jayang.icebr8k.Fragments.UserMessageDialog_Frag;
 import app.jayang.icebr8k.Fragments.me_frag;
+import app.jayang.icebr8k.Modle.UserComp;
 import app.jayang.icebr8k.Modle.UserQA;
 import app.jayang.icebr8k.Utility.ActivityCommunicator;
 import app.jayang.icebr8k.Modle.myViewPager;
@@ -92,11 +94,12 @@ import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;
 
 public class Homepage extends AppCompatActivity implements
         OSSubscriptionObserver,
-        ConnectivityChangeListener {
+        ConnectivityChangeListener{
     private AHBottomNavigation homepageTab;
 
 
     private ImageView menu;
+    private ActivityCommunicator mCommunicator;
     private TextView menuBadge;
     private ViewPagerAdapter mViewPagerAdapter;
     private TextView noConnection_tv;
@@ -121,6 +124,8 @@ public class Homepage extends AppCompatActivity implements
 
     // nav drawer item
     private PrimaryDrawerItem friendRequest, addFriend, feedback, logOut, setting;
+
+
 
 
     @Override
@@ -186,7 +191,7 @@ public class Homepage extends AppCompatActivity implements
 
         // bottom nav bar
         setHomepageTab();
-        //addUserQAListener();
+         addUserQAListener();
 
         if (getIntent().getExtras() != null) {
             // extras for chat Page
@@ -219,6 +224,23 @@ public class Homepage extends AppCompatActivity implements
             }
         }
         setScreenOnOffListener();
+
+        // update Id;
+        final DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+                .child("Users");
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    ref.child(snapshot.getKey()).child("id").setValue(snapshot.getKey());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
     }
 
@@ -296,7 +318,7 @@ public class Homepage extends AppCompatActivity implements
                                     if (dataSnapshot == null || dataSnapshot.getChildrenCount() == 0) {
                                         Log.d("homepage123", "hasn o friends");
                                         show = true;
-                                    } else if (dataSnapshot.getChildrenCount() > 0) {
+                                    } else if (dataSnapshot.hasChild("stats") && dataSnapshot.getChildrenCount() > 0) {
                                         int counter = 0;
                                         for (DataSnapshot childSnap : dataSnapshot.getChildren()) {
                                             if (childSnap.child("stats").getValue(String.class).equals("accepted")) {
@@ -447,9 +469,13 @@ public class Homepage extends AppCompatActivity implements
     }
 
     void setUpNavDrawer() {
+        BadgeStyle badgeStyle = new BadgeStyle();
+        badgeStyle.withBadgeBackground(getDrawable(R.drawable.badge_circle));
+        badgeStyle.withCornersDp(16);
+        badgeStyle.withTextColor(ContextCompat.getColor(this, R.color.white));
 
         friendRequest = new PrimaryDrawerItem().withName("Friend Request").
-                withIcon(R.drawable.user_icon).withBadge("1").withBadgeStyle(new BadgeStyle().withTextColor(Color.WHITE).withColorRes(R.color.holo_red_light));
+                withIcon(R.drawable.user_icon).withBadge("").withBadgeStyle(badgeStyle);
         addFriend = new PrimaryDrawerItem().withName("Add Friend").withIcon(R.drawable.ic_action_addfriend);
         feedback = new PrimaryDrawerItem().withName(getString(R.string.feedback)).withIcon(R.drawable.ic_action_feedback);
         logOut = new PrimaryDrawerItem().withName("Log Out").withIcon(R.drawable.ic_action_exit);
@@ -511,11 +537,12 @@ public class Homepage extends AppCompatActivity implements
                                     return false;
                                 }
                                 lastClickTime = SystemClock.elapsedRealtime();
+                                drawer.setSelection(-1);
+                                drawer.closeDrawer();
                                 Intent i = new Intent(getApplicationContext(), FriendRequestPage.class);
                                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                                 startActivity(i);
-                                drawer.setSelection(-1);
-                                drawer.closeDrawer();
+
                                 return true;
 
                             case 2:
@@ -524,11 +551,12 @@ public class Homepage extends AppCompatActivity implements
                                 }
 
                                 lastClickTime = SystemClock.elapsedRealtime();
+                                drawer.setSelection(-1);
+                                drawer.closeDrawer();
                                 Intent mintent = new Intent(getApplicationContext(), SearchUser.class);
                                 mintent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                                 startActivity(mintent);
-                                drawer.setSelection(-1);
-                                drawer.closeDrawer();
+
                                 return true;
 /*
             case R.id.scan_qr:
@@ -572,10 +600,11 @@ public class Homepage extends AppCompatActivity implements
                                     return false;
                                 }
                                 lastClickTime = SystemClock.elapsedRealtime();
-                                intent = new Intent(getApplicationContext(), Feedback.class);
-                                startActivity(intent);
                                 drawer.setSelection(-1);
                                 drawer.closeDrawer();
+                                intent = new Intent(getApplicationContext(), Feedback.class);
+                                startActivity(intent);
+
                                 return true;
 
 
@@ -584,10 +613,11 @@ public class Homepage extends AppCompatActivity implements
                                     return false;
                                 }
                                 lastClickTime = SystemClock.elapsedRealtime();
-                                intent = new Intent(getApplicationContext(), Settings_Activity.class);
-                                startActivity(intent);
                                 drawer.setSelection(-1);
                                 drawer.closeDrawer();
+                                intent = new Intent(getApplicationContext(), Settings_Activity.class);
+                                startActivity(intent);
+
                                 return true;
 
                             default:
@@ -646,7 +676,7 @@ public class Homepage extends AppCompatActivity implements
             public void onDataChange(DataSnapshot dataSnapshot) {
                 int count = 0;
                 for (DataSnapshot chidSnapShot : dataSnapshot.getChildren()) {
-                    if ("pending" .equals(chidSnapShot.child("stats").getValue(String.class))) {
+                    if ("pending".equals(chidSnapShot.child("stats").getValue(String.class))) {
                         count++;
                     }
                 }
@@ -900,6 +930,7 @@ public class Homepage extends AppCompatActivity implements
 
 
         mRef.addValueEventListener(new ValueEventListener() {
+            @SuppressLint("StaticFieldLeak")
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 new AsyncTask<Void, Void, Void>() {
@@ -927,18 +958,17 @@ public class Homepage extends AppCompatActivity implements
         mFriendRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
-                new AsyncTask<Void, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(Void... voids) {
-                        for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                            if (childSnapshot.hasChild("stats") &&
-                                    childSnapshot.child("stats").getValue(String.class).equals("accepted")) {
-                                compareWithUser2(childSnapshot.getKey());
-                            }
-                        }
-                        return null;
+                ArrayList<String> friendUidList = new ArrayList<>();
+
+                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                    if (childSnapshot.hasChild("stats") &&
+                            childSnapshot.child("stats").getValue(String.class).equals("accepted")) {
+                        friendUidList.add(childSnapshot.getKey());
                     }
-                }.execute();
+                }
+                if (!friendUidList.isEmpty()) {
+                    new CompareWithFriends().execute(friendUidList);
+                }
 
 
             }
@@ -960,56 +990,40 @@ public class Homepage extends AppCompatActivity implements
 
         mRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(final DataSnapshot dataSnapshot) {
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot child : dataSnapshot.getChildren()) {
+                    if (!"skipped".equals(child.getValue(UserQA.class).getAnswer())) {
+                        userQA1.add(child.getValue(UserQA.class));
+                    }
 
-                new AsyncTask<Void, Void, Void>() {
+                }
+
+
+                mRef2.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    protected Void doInBackground(Void... voids) {
+                    public void onDataChange(DataSnapshot dataSnapshot) {
                         for (DataSnapshot child : dataSnapshot.getChildren()) {
-                            if (!"skipped" .equals(child.getValue(UserQA.class).getAnswer())) {
-                                userQA1.add(child.getValue(UserQA.class));
+                            if (!"skipped".equals(child.getValue(UserQA.class).getAnswer())) {
+                                userQA2.add(child.getValue(UserQA.class));
                             }
+
 
                         }
 
 
-                        mRef2.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(final DataSnapshot dataSnapshot) {
+                        Compatability mCompatability = new Compatability(userQA1, userQA2);
+                        UserComp userComp = new UserComp(mCompatability,user2Uid);
 
-                                new AsyncTask<Void, Void, Void>() {
-
-                                    @Override
-                                    protected Void doInBackground(Void... voids) {
-                                        for (DataSnapshot child : dataSnapshot.getChildren()) {
-                                            if (!"skipped" .equals(child.getValue(UserQA.class).getAnswer())) {
-                                                userQA2.add(child.getValue(UserQA.class));
-                                            }
+                        new SetScoreNodes().execute(userComp);
 
 
-                                        }
-
-                                        final Compatability mCompatability = new Compatability(userQA1, userQA2);
-                                        setScoreNode(user2Uid, mCompatability.getScore().toString());
-
-
-                                        return null;
-                                    }
-                                }.execute();
-
-
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
-                        return null;
                     }
-                }.execute();
 
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
 
+                    }
+                });
             }
 
             @Override
@@ -1175,6 +1189,8 @@ public class Homepage extends AppCompatActivity implements
     }
 
 
+
+
     public class ScreenStateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -1217,10 +1233,43 @@ public class Homepage extends AppCompatActivity implements
         return viewPager;
     }
 
+
+
     public void setViewPager(myViewPager viewPager) {
         this.viewPager = viewPager;
     }
+
+    public class CompareWithFriends extends AsyncTask<ArrayList<String>, Void, Void> {
+
+
+        @Override
+        protected Void doInBackground(ArrayList<String>... arrayLists) {
+            ArrayList<String> mList = arrayLists[0];
+            if (!mList.isEmpty()) {
+                for (String uid : mList) {
+                    compareWithUser2(uid);
+                }
+            }
+            return null;
+        }
+    }
+
+    public class SetScoreNodes extends AsyncTask<UserComp, Void, Void> {
+
+
+        @Override
+        protected Void doInBackground(UserComp... userComps) {
+            Compatability compatability = userComps[0].getCompatability();
+            String user2Uid = userComps[0].getUserUid();
+            int score = compatability.getScore();
+            setScoreNode(user2Uid,String.valueOf(score));
+            return null;
+        }
+    }
 }
+
+
+
 
 
 

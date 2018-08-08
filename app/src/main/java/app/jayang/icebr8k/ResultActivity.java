@@ -10,38 +10,60 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
 import app.jayang.icebr8k.Fragments.commonFrag;
 import app.jayang.icebr8k.Fragments.diffFrag;
+import app.jayang.icebr8k.Modle.ResultItem;
 import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.Modle.UserQA;
+import app.jayang.icebr8k.Utility.ActivityCommunicator;
+import app.jayang.icebr8k.Utility.Compatability;
 
-public class ResultActivity extends AppCompatActivity {
+public class ResultActivity extends AppCompatActivity implements ActivityCommunicator{
     TabLayout mLayout;
     ViewPager mViewPager;
     Toolbar mToolbar;
+    TextView mTextView;
+    FirebaseUser currentUser;
+    FrameLayout searchLayout;
     User user2;
     ImageView user2Icon;
-    ArrayList<UserQA> mArrayList, diffAnswer1, diffAnswer2;
+
+
     String user2Id ;
     private long lastClickTime = 0;
+    private ArrayList<ResultItem> commonItems,diffItems,mResultItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_result);
-
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         mLayout = findViewById(R.id.tabs_result);
         mToolbar = findViewById(R.id.toolbar_result);
         user2Icon = findViewById(R.id.user2_icon);
+        searchLayout = findViewById(R.id.search_layout);
+
 
 
         setSupportActionBar(mToolbar);
@@ -51,15 +73,21 @@ public class ResultActivity extends AppCompatActivity {
 
         mViewPager = findViewById(R.id.viewpager_result);
 
-        mArrayList = getIntent().getParcelableArrayListExtra("sameAnswer");
-        Log.d("mapArr", mArrayList.toString());
-        user2 = (User) getIntent().getSerializableExtra("user2");
-        Log.d("mapArr", user2.getDisplayname());
         user2Id = getIntent().getExtras().getString("user2Id");
-        diffAnswer1 = getIntent().getParcelableArrayListExtra("diffAnswer1");
-        Log.d("diff", diffAnswer1.toString());
-        diffAnswer2 = getIntent().getParcelableArrayListExtra("diffAnswer2");
-        Log.d("diff", diffAnswer2.toString());
+        user2 = (User) getIntent().getExtras().getSerializable("user2");
+        mTextView = findViewById(R.id.result_comp);
+         // set score top
+        if(user2Id!=null){
+            compareWithUser2(user2Id);
+        }
+
+        // init arraylist
+        diffItems = new ArrayList<>();
+        commonItems = new ArrayList<>();
+        mResultItems = new ArrayList<>();
+
+
+
 //user2 avatar on toolbar
         Glide.with(getBaseContext()).load(user2.getPhotourl()).
                 apply(RequestOptions.circleCropTransform()).into(user2Icon);
@@ -68,8 +96,9 @@ public class ResultActivity extends AppCompatActivity {
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
 
 
-        viewPagerAdapter.addFragment(new commonFrag());
-        viewPagerAdapter.addFragment(new diffFrag());
+        viewPagerAdapter.addFragment(commonFrag.newInstance(user2Id));
+        viewPagerAdapter.addFragment(diffFrag.newInstance(user2Id));
+
 
 
         mViewPager.setAdapter(viewPagerAdapter);
@@ -78,6 +107,20 @@ public class ResultActivity extends AppCompatActivity {
         mLayout.getTabAt(0).setIcon(R.drawable.check_mark);
         mLayout.getTabAt(1).setIcon(R.drawable.axe_mark);
 
+        searchLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Toast.makeText(ResultActivity.this, ""+ commonItems.size(), Toast.LENGTH_SHORT).show();
+                mResultItems.clear();
+                mResultItems.addAll(commonItems);
+                mResultItems.addAll(diffItems);
+
+                Intent intent = new Intent(ResultActivity.this,SearchResult.class);
+                intent.putExtra("resultList",mResultItems);
+                startActivity(intent);
+
+            }
+        });
 
     }
     //create an action bar button
@@ -114,12 +157,67 @@ public class ResultActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void compareWithUser2(final String user2Uid) {
+        final ArrayList<UserQA> userQA1 = new ArrayList<>();
+        final ArrayList<UserQA> userQA2 = new ArrayList<>();
+        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + currentUser.getUid());
+        final DatabaseReference mRef2 = FirebaseDatabase.getInstance().getReference("UserQA/" + user2Uid);
+
+        mRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                userQA1.clear();
+                for(DataSnapshot child : dataSnapshot.getChildren()){
+                    if( !"skipped".equals(child.getValue(UserQA.class).getAnswer())){
+                        userQA1.add(child.getValue(UserQA.class));
+                    }
+
+                }
+
+
+                mRef2.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        userQA2.clear();
+                        for(DataSnapshot child : dataSnapshot.getChildren()){
+                            if(!"skipped".equals(child.getValue(UserQA.class).getAnswer())){
+                                userQA2.add(child.getValue(UserQA.class));
+                            }
+
+
+                        }
+
+                        Compatability mCompatability = new Compatability(userQA1,userQA2);
+                        int score = mCompatability.getScore();
+                        mTextView.setText(score+"%");
+
+
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+
+    }
+
 
     @Override
     public boolean onSupportNavigateUp() {
         super.onSupportNavigateUp();
         finish();
-        overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
+       // overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
         return true;
     }
 
@@ -127,22 +225,21 @@ public class ResultActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         finish();
-        overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
+        //overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
     }
 
-    public User getUser2() {
-        return user2;
-    }
 
-    public ArrayList<UserQA> getArrayList() {
-        return mArrayList;
-    }
 
-    public ArrayList<UserQA> getDiffAnswer1() {
-        return diffAnswer1;
-    }
-
-    public ArrayList<UserQA> getDiffAnswer2() {
-        return diffAnswer2;
+    @Override
+    public void passDataToActivity(Object o, String tag) {
+        if(o instanceof ArrayList){
+            if(tag!=null && tag.equals("common")){
+                commonItems.clear();
+                commonItems .addAll ((Collection<? extends ResultItem>) o);
+            }else if(tag!=null && tag.equals("diff")){
+                diffItems.clear();
+                diffItems.addAll((Collection<? extends ResultItem>) o);
+            }
+        }
     }
 }

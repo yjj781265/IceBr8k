@@ -151,14 +151,15 @@ public class SearchUser extends SwipeBackActivity implements SearchView.OnQueryT
     }
 
     private void searchUser(final String usernameStr){
-        if(!checkString(usernameStr))  {
+        final String string = usernameStr.trim();
+        if(!checkString(string))  {
             searchingDialog.dismiss();
             mLinearLayout.setVisibility(View.GONE);
             notfound.setVisibility(View.VISIBLE);
             return;
         }
         DatabaseReference usernameRef = FirebaseDatabase.getInstance().getReference().
-                child("Usernames").child(usernameStr);
+                child("Usernames").child(string);
 
         usernameRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

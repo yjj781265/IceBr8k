@@ -2,8 +2,10 @@ package app.jayang.icebr8k;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
@@ -13,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -61,6 +64,7 @@ public class QuestionActivity extends SwipeBackActivity {
     private CardView mCardView;
     private ProgressBar mProgressBar;
     private Spinner spinner;
+    private MaterialDialog loadingDialog,submittedDialog;
     private String originalAnswer =null;
     private BubbleSeekBar mSeekBar;
     private Boolean firstTime = true;
@@ -89,29 +93,42 @@ public class QuestionActivity extends SwipeBackActivity {
         mProgressBar = (ProgressBar) findViewById(R.id.question_progressBar);
         mCardView = (CardView) findViewById(R.id.cardView);
         mAppBarLayout = (AppBarLayout) findViewById(R.id.question_appBar);
+        loadingDialog = new MaterialDialog.Builder(this)
+                .content("Submitting your answer....")
+                .canceledOnTouchOutside(false)
+                .build();
+
+        submittedDialog =  new MaterialDialog.Builder(QuestionActivity.this)
+                .canceledOnTouchOutside(false)
+                .content("Answer Submitted")
+                .positiveText(R.string.ok)
+                .build();
         getSwipeBackLayout().setEdgeSize(36);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        questionId = getIntent().getExtras().getString("questionId",null);
-
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
 
 
-        viewPagerAdapter.addFragment(Comment_Fragment.newInstance(questionId));
-        viewPagerAdapter.addFragment(Result_fragment.newInstance(questionId));
 
 
 
-        mViewPager.setAdapter(viewPagerAdapter);
-        mLayout.setupWithViewPager(mViewPager);
 
-        mLayout.getTabAt(0).setText("Comments");
-        mLayout.getTabAt(1).setText("Result");
-        getCommentCounts();
+
+
         final Handler handler = new Handler();
 
 
+        questionId = getIntent().getExtras().getString("questionId",null);
+        if(questionId !=null){
+            getCommentCounts();
+            viewPagerAdapter.addFragment(Comment_Fragment.newInstance(questionId));
+            viewPagerAdapter.addFragment(Result_fragment.newInstance(questionId));
+            mViewPager.setAdapter(viewPagerAdapter);
+            mLayout.setupWithViewPager(mViewPager);
+            mLayout.getTabAt(0).setText("Comments");
+            mLayout.getTabAt(1).setText("Result");
+        }
 
 
        // Toast.makeText(this, questionId, Toast.LENGTH_SHORT).show();
@@ -208,7 +225,7 @@ public class QuestionActivity extends SwipeBackActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 long count = dataSnapshot.getChildrenCount();
-                String str = count>0 ? "("+count+")" :"";
+                String str = count>0 ? " ("+count+")" :"";
                 mLayout.getTabAt(0).setText("Comments" +str );
             }
 
@@ -238,6 +255,7 @@ public class QuestionActivity extends SwipeBackActivity {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             UserQA userQA = dataSnapshot.getValue(UserQA.class);
+                            skipBtn.setVisibility(userQA.getAnswer()!=null && "skipped".equals(userQA.getAnswer())? View.GONE: View.VISIBLE);
                             switch (type) {
                                 case "mc":
                                     isMultipleChoice(userQA);
@@ -304,6 +322,7 @@ public class QuestionActivity extends SwipeBackActivity {
 
         mSeekBar.setVisibility(View.VISIBLE);
         subQuestion.setVisibility(View.VISIBLE);
+
 
         if(userQA!=null){
             originalAnswer= userQA.getAnswer();
@@ -703,33 +722,18 @@ public class QuestionActivity extends SwipeBackActivity {
                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                     @Override
                     public void onClick(@NonNull final MaterialDialog dialog, @NonNull DialogAction which) {
-                        // update the database
-                        userQARef.child(userQA.getQuestionId()).setValue(userQA);
-                        userQARef.child(userQA.getQuestionId()).child("reset").setValue(new Date().getTime()+
-                                (DAYS)).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        loadingDialog.show();
+                        new Handler().postDelayed(new Runnable() {
                             @Override
-                            public void onSuccess(Void aVoid) {
-                                // show updating dialog
-                                final MaterialDialog resetDialog =  new MaterialDialog.Builder(QuestionActivity.this)
-                                        .content("Submitting your answer...")
-                                        .positiveText(R.string.ok)
-                                        .show();
-
-                                resetDialog.setContent("Answer Submitted");
-                                resetDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                                    @Override
-                                    public void onDismiss(DialogInterface mdialog) {
-                                      stamp.setVisibility("skipped".equals(newAnswer)? View.VISIBLE :View.GONE);
-                                    }
-                                });
-
-
-
+                            public void run() {
+                                new updateToDatabase().execute(userQA);
                             }
-                        });
+                        },666);
+
+
+
                     }
                 })
-
                 .negativeText("NO")
                 .negativeColor(ContextCompat.getColor(this, R.color.holo_red_light))
                 .show();
@@ -765,7 +769,44 @@ public class QuestionActivity extends SwipeBackActivity {
         }.start();
     }
 
+    public class updateToDatabase extends AsyncTask<UserQA ,Void,Void>{
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected Void doInBackground(UserQA... userQAS) {
+            UserQA userQA = userQAS[0];
+            Log.d("question123", "is Main thread ?"+ isMainThread());
+            userQARef.child(userQA.getQuestionId()).setValue(userQA);
+            userQARef.child(userQA.getQuestionId()).child("reset").setValue(new Date().getTime()+
+                    (DAYS)).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Log.d("question123", "succ is Main thread ?"+ isMainThread());
+
+                    }
+            });
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            loadingDialog.dismiss();
+            submittedDialog.show();
+
+
+        }
+    }
+
     public AppBarLayout getAppBarLayout() {
         return mAppBarLayout;
+    }
+
+    public boolean isMainThread(){
+        return Looper.myLooper() == Looper.getMainLooper();
     }
 }

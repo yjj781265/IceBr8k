@@ -1,5 +1,6 @@
 package app.jayang.icebr8k.Adapter;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -7,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -58,6 +60,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import app.jayang.icebr8k.Modle.SurveyQ;
+import app.jayang.icebr8k.Modle.UserDialog;
 import app.jayang.icebr8k.Modle.UserQA;
 import app.jayang.icebr8k.QuestionActivity;
 import app.jayang.icebr8k.R;
@@ -266,6 +269,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             pieChart.setVisibility(View.GONE);
             stamp.setVisibility(View.GONE);
 
+
             // check to show tutorial or not
             Log.d("surveyTab123", ""+getAdapterPosition());
             showfirstLoginPrompt(confirm,skip);
@@ -303,14 +307,14 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                         Toast.makeText(getContext(), "Make a selection", Toast.LENGTH_SHORT).show();
 
                     } else if (mRadioGroup.getCheckedRadioButtonId() != -1) {
+                        skip.setVisibility(View.GONE);
+                        confirm.setVisibility(View.GONE);
+                        mProgressBar.setVisibility(View.VISIBLE);
                         int id = mRadioGroup.getCheckedRadioButtonId();
                         View radioButton = mRadioGroup.findViewById(id);
                         int radioId = mRadioGroup.indexOfChild(radioButton);
                         RadioButton btn = (RadioButton) mRadioGroup.getChildAt(radioId);
                         final String selection = (String) btn.getText();
-                        mProgressBar.setVisibility(View.VISIBLE);
-                        skip.setVisibility(View.GONE);
-                        confirm.setVisibility(View.GONE);
 
 
                         mHandler.postDelayed(new Runnable() {
@@ -325,10 +329,10 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
                     }
                 } else if (v == skip) {
-                    mProgressBar.setVisibility(View.VISIBLE);
+
                     skip.setVisibility(View.GONE);
                     confirm.setVisibility(View.GONE);
-
+                    mProgressBar.setVisibility(View.VISIBLE);
                     mHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -375,6 +379,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             pieChart.setVisibility(View.GONE);
             stamp.setVisibility(View.GONE);
 
+
             // check to show tutorial or not
             Log.d("surveyTab123", ""+getAdapterPosition());
             showfirstLoginPrompt(confirm,skip);
@@ -404,10 +409,11 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 mSurveyQ = mQArrayList.get(getAdapterPosition());
             }
             if (mSurveyQ != null) {
-                mProgressBar.setVisibility(View.VISIBLE);
                 skip.setVisibility(View.GONE);
                 confirm.setVisibility(View.GONE);
+                mProgressBar.setVisibility(View.VISIBLE);
                 if (v == confirm) {
+
 
                     mHandler.postDelayed(new Runnable() {
                         @Override
@@ -421,6 +427,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
 
                 } else if (v == skip) {
+
 
                     mHandler.postDelayed(new Runnable() {
                         @Override
@@ -468,6 +475,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             pieChart.setVisibility(View.GONE);
             stamp.setVisibility(View.GONE);
 
+
             // check to show tutorial or not
             Log.d("surveyTab123", ""+getAdapterPosition());
             showfirstLoginPrompt(confirm,skip);
@@ -496,10 +504,11 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 mSurveyQ = mQArrayList.get(getAdapterPosition());
             }
             if (mSurveyQ != null) {
-                mProgressBar.setVisibility(View.VISIBLE);
                 skip.setVisibility(View.GONE);
                 confirm.setVisibility(View.GONE);
+                mProgressBar.setVisibility(View.VISIBLE);
                 if (v == confirm) {
+
 
                     mHandler.postDelayed(new Runnable() {
                         @Override
@@ -513,9 +522,11 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
                 } else if (v == skip) {
 
+
                     mHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
+
                             uploadtoDatabase(mSurveyQ, skip, confirm, "skipped",
                                     mProgressBar, check,
                                     comment, pieChart, stamp);
@@ -538,6 +549,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     }
 
 
+    @SuppressLint("StaticFieldLeak")
     void uploadtoDatabase(final SurveyQ surveyQ, final TextView skip, final TextView confirm, final String answer, final ProgressBar progressBar,
                           final ImageView check, final TextView comment, final ImageView pieChart, final ImageView stamp) {
 
@@ -556,6 +568,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         if (!dsk) {
             new MaterialDialog.Builder(mContext)
                     .title("Reminder")
+                    .canceledOnTouchOutside(false)
                     .content("Once the answer is submitted, you can't change the answer in next 48 hours")
                     .positiveText(R.string.ok)
                     .negativeText(R.string.cancel).negativeColor(ContextCompat.getColor(mContext, R.color.black))
@@ -570,39 +583,65 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            // upload the answer
-                            final UserQA userQA = new UserQA();
-                            userQA.setQuestionId(surveyQ.getQuestionId());
-                            userQA.setQuestion(surveyQ.getQuestion());
-                            userQA.setAnswer(answer);
-                            userQA.setReset(new Date().getTime() +
-                                    (DAYS));
 
-                            stamp.setVisibility("skipped" .equals(answer) ? View.VISIBLE : View.GONE);
-
-
-                            final DatabaseReference userQARef = FirebaseDatabase.getInstance().getReference()
-                                    .child("UserQA")
-                                    .child(currentUser.getUid())
-                                    .child(userQA.getQuestionId());
-
-                            userQARef.setValue(userQA).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            new AsyncTask<Void,Void,Void>(){
                                 @Override
-                                public void onSuccess(Void aVoid) {
-                                    check.setVisibility(View.VISIBLE);
-                                    progressBar.setVisibility(View.GONE);
+                                protected void onPreExecute() {
 
-                                    mHashMap.put(surveyQ, answer);
-                                    mListener.onClick();
+                                    }
+
+                                @Override
+                                protected void onPostExecute(Void aVoid) {
+                                    progressBar.setVisibility(View.GONE);
                                     comment.setVisibility(View.VISIBLE);
                                     pieChart.setVisibility(View.VISIBLE);
-
-                                    //show tutorial for piechart and comments
-                                    showPieChartCommentPrompt(comment,pieChart);
-
-
                                 }
-                            });
+
+                                @Override
+                                protected Void doInBackground(Void... voids) {
+                                    // upload the answer
+                                    final UserQA userQA = new UserQA();
+                                    userQA.setQuestionId(surveyQ.getQuestionId());
+                                    userQA.setQuestion(surveyQ.getQuestion());
+                                    userQA.setAnswer(answer);
+                                    userQA.setReset(new Date().getTime() +
+                                            (DAYS));
+
+
+
+
+                                    final DatabaseReference userQARef = FirebaseDatabase.getInstance().getReference()
+                                            .child("UserQA")
+                                            .child(currentUser.getUid())
+                                            .child(userQA.getQuestionId());
+
+                                    userQARef.setValue(userQA).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            check.setVisibility(View.VISIBLE);
+                                            progressBar.setVisibility(View.GONE);
+                                            stamp.setVisibility("skipped" .equals(answer) ? View.VISIBLE : View.GONE);
+
+
+                                            mHashMap.put(surveyQ, answer);
+                                            mListener.onClick(surveyQ,answer);
+
+
+
+                                            //show tutorial for piechart and comments
+                                            showPieChartCommentPrompt(comment,pieChart);
+
+
+                                        }
+                                    });
+                                    return null;
+                                }
+                            }.execute();
+
+
+
+
+
 
 
                         }
@@ -622,42 +661,60 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                     .show();
             // don't show agian is checked
         } else {
-            // upload the answer
-            final UserQA userQA = new UserQA();
-            userQA.setQuestionId(surveyQ.getQuestionId());
-            userQA.setQuestion(surveyQ.getQuestion());
-            userQA.setAnswer(answer);
-            userQA.setReset(new Date().getTime() +
-                    (DAYS));
 
 
-            stamp.setVisibility("skipped" .equals(answer) ? View.VISIBLE : View.GONE);
-
-
-            final DatabaseReference userQARef = FirebaseDatabase.getInstance().getReference()
-                    .child("UserQA")
-                    .child(currentUser.getUid())
-                    .child(userQA.getQuestionId());
-
-            userQARef.setValue(userQA).addOnSuccessListener(new OnSuccessListener<Void>() {
+            new AsyncTask<Void,Void,Void>(){
                 @Override
-                public void onSuccess(Void aVoid) {
-                    check.setVisibility(View.VISIBLE);
+                protected void onPreExecute() {
+                    }
+
+                @Override
+                protected void onPostExecute(Void aVoid) {
                     progressBar.setVisibility(View.GONE);
-                    mHashMap.put(surveyQ, answer);
-                    mListener.onClick();
                     comment.setVisibility(View.VISIBLE);
                     pieChart.setVisibility(View.VISIBLE);
 
-                    //show tutorial for piechart
-
-
-                    //show tutorial for comment
-                    showPieChartCommentPrompt(comment,pieChart);
-
-
                 }
-            });
+
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    // upload the answer
+                    final UserQA userQA = new UserQA();
+                    userQA.setQuestionId(surveyQ.getQuestionId());
+                    userQA.setQuestion(surveyQ.getQuestion());
+                    userQA.setAnswer(answer);
+                    userQA.setReset(new Date().getTime() +
+                            (DAYS));
+
+
+
+
+                    final DatabaseReference userQARef = FirebaseDatabase.getInstance().getReference()
+                            .child("UserQA")
+                            .child(currentUser.getUid())
+                            .child(userQA.getQuestionId());
+
+                    userQARef.setValue(userQA).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            check.setVisibility(View.VISIBLE);
+                            progressBar.setVisibility(View.GONE);
+                            stamp.setVisibility("skipped" .equals(answer) ? View.VISIBLE : View.GONE);
+
+
+                            mHashMap.put(surveyQ, answer);
+                            mListener.onClick(surveyQ,answer);
+
+
+                            //show tutorial for piechart and comments
+                            showPieChartCommentPrompt(comment,pieChart);
+
+
+                        }
+                    });
+                    return null;
+                }
+            }.execute();
 
         }
 
@@ -676,9 +733,6 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             public void onDataChange(DataSnapshot dataSnapshot) {
                 String str = dataSnapshot.getChildrenCount() > 0 ? "" + dataSnapshot.getChildrenCount() : "";
                 comment.setText("Comment " + str);
-
-
-                //Todo add tutorial here
 
                 comment.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -918,6 +972,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                         ((McViewHolder) holder).pieChart.setVisibility(View.VISIBLE);
                         ((McViewHolder) holder).stamp.setVisibility(answer != null && answer.equals("skipped") ? View.VISIBLE : View.GONE);
 
+
                     } else if (holder instanceof ScViewHolder) {
                         ((ScViewHolder) holder).mProgressBar.setVisibility(View.GONE);
                         ((ScViewHolder) holder).skip.setVisibility(View.GONE);
@@ -926,6 +981,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                         ((ScViewHolder) holder).comment.setVisibility(View.VISIBLE);
                         ((ScViewHolder) holder).pieChart.setVisibility(View.VISIBLE);
                         ((ScViewHolder) holder).stamp.setVisibility(answer != null && answer.equals("skipped") ? View.VISIBLE : View.GONE);
+
                     } else if (holder instanceof SpViewHolder) {
                         ((SpViewHolder) holder).mProgressBar.setVisibility(View.GONE);
                         ((SpViewHolder) holder).skip.setVisibility(View.GONE);
@@ -934,6 +990,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                         ((SpViewHolder) holder).comment.setVisibility(View.VISIBLE);
                         ((SpViewHolder) holder).pieChart.setVisibility(View.VISIBLE);
                         ((SpViewHolder) holder).stamp.setVisibility(answer != null && answer.equals("skipped") ? View.VISIBLE : View.GONE);
+
                     }
 
 
@@ -1086,7 +1143,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
 
     public interface SubmitedListener {
-        void onClick();
+        void onClick(SurveyQ surveyQ, String Answer);
 
 
     }

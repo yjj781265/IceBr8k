@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">IceBr8k</string>
+    <string name="app_name">Icebr8k</string>
     <string name="error_field_required">This field is required</string>
     <string name="error_field_nospace">No space in username</string>
     <string name="error_invalid_username">Username needs at least 5 characters</string>
@@ -32,12 +32,13 @@
     <string name="message_input_hint">Type Here</string>
     <string name="google_maps_api_key">AIzaSyDGE7baQEbkmk4wCJZhp4V9vO9hT9_c64w</string>
     <string name="firebase_path_error">username should not contain character . # $ / [ ]</string>
-    <string name="location_reminder">By enabling Location Service, other IceBr8k users may be able to locate you, and it may reduce phone battery life.</string>
+    <string name="location_reminder">By enabling Location Service, other IceBr8k users may be able to locate you, and it may reduce phone battery life.To turn off Location Service go to Settings at the top left menu</string>
     <string name="radius_title">Choose A Radius</string>
     <string name="cancel">Cancel</string>
     <string name="no_users">No Users Found</string>
     <string name="ok">OK</string>
     <string name="no_question_left">No more questions, try your luck with refresh button ☺ </string>
+    <string name="dont_show_again">Don\'t show again </string>
 
     <string name="title_activity_full_image_view">FullImageView</string>
     <string name="dummy_button">Dummy Button</string>

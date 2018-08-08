@@ -1,5 +1,7 @@
 package app.jayang.icebr8k.Utility;
 
+import android.widget.Toast;
+
 import com.google.android.gms.common.util.NumberUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -76,12 +78,7 @@ public class Compatability {
             }
             float num = (float)commonList.size()/(float)commonQ;
             score = Math.round (num*100);
-
-
-
-
-
-        return score;
+            return score;
     }
 
     public ArrayList<UserQA> getCommonList() {
@@ -134,6 +131,7 @@ public class Compatability {
                         }
 
                         Compatability mCompatability = new Compatability(userQA1,userQA2);
+                          int score = mCompatability.getScore();
                         setScoreNode(user2Uid,mCompatability.getScore().toString());
 
 

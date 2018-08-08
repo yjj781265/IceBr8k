@@ -2,8 +2,8 @@ package app.jayang.icebr8k;
 
 import android.content.Context;
 import android.support.v4.view.MenuItemCompat;
-import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -14,28 +14,29 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import app.jayang.icebr8k.Adapter.RecyclerAdapter;
+import app.jayang.icebr8k.Adapter.ResultItemAdapter;
+import app.jayang.icebr8k.Modle.ResultItem;
 import app.jayang.icebr8k.Modle.UserDialog;
-import me.imid.swipebacklayout.lib.SwipeBackLayout;
-import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 
-public class SearchName extends AppCompatActivity implements SearchView.OnQueryTextListener {
+public class SearchResult extends AppCompatActivity implements SearchView.OnQueryTextListener{
     android.support.v7.widget.Toolbar mToolbar;
 
-    private ArrayList<UserDialog> friendList;
-    private ArrayList<UserDialog> filterdList;
-    private RecyclerAdapter mAdapter;
+    private ArrayList<ResultItem> resultList;
+    private ArrayList<ResultItem> filterdList;
+    private ResultItemAdapter mAdapter;
     private RecyclerView mRecyclerView;
-    private  SearchView searchView;
+    private SearchView searchView;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search_name);
-        mToolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.searchname_toolbar);
-        mRecyclerView = (RecyclerView) findViewById(R.id.searchname_recyclerView);
+        setContentView(R.layout.activity_search_result);
+        mToolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.searchresult_toolbar);
+        mRecyclerView = findViewById(R.id.searchresult_recyclerView);
         mRecyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager manager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(manager);
@@ -46,12 +47,12 @@ public class SearchName extends AppCompatActivity implements SearchView.OnQueryT
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("");
         if(getIntent()!=null){
-            friendList = (ArrayList<UserDialog>) getIntent().getExtras().getSerializable("friendList");
+            resultList = (ArrayList<ResultItem>) getIntent().getExtras().getSerializable("resultList");
         }
 
-        if(friendList!=null) {
+        if(resultList!=null) {
 
-            mAdapter = new RecyclerAdapter(this, filterdList);
+            mAdapter = new ResultItemAdapter( filterdList,this);
             mRecyclerView.setAdapter(mAdapter);
         }
 
@@ -75,7 +76,7 @@ public class SearchName extends AppCompatActivity implements SearchView.OnQueryT
         searchView =(SearchView) MenuItemCompat.getActionView(searchItem);
         searchView.setIconified(false);
         searchView.setIconifiedByDefault(false);
-        searchView.setQueryHint(getString(R.string.hint1));
+        searchView.setQueryHint("Search Question");
         searchView.setOnQueryTextListener(this);
         searchView.requestFocus();
         return true;
@@ -114,12 +115,13 @@ public class SearchName extends AppCompatActivity implements SearchView.OnQueryT
     @Override
     public boolean onQueryTextChange(String newText) {
         filterdList.clear();
-        for(UserDialog dialog : friendList){
-            if(dialog.getUser().getDisplayname().toLowerCase().contains(newText)&& !newText.isEmpty()){
+        for(ResultItem dialog : resultList){
+            if(dialog.getQuesiton().toLowerCase().contains(newText)&& !newText.isEmpty()){
                 filterdList.add(dialog);
             }
         }
         if(!filterdList.isEmpty()) {
+            Collections.sort(filterdList);
             mAdapter.notifyDataSetChanged();
             mRecyclerView.setVisibility(View.VISIBLE);
         }else{

@@ -1,11 +1,10 @@
 package app.jayang.icebr8k;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -21,92 +20,124 @@ import com.onesignal.OneSignal;
 
 import java.util.ArrayList;
 
-import app.jayang.icebr8k.Adapter.FriendReqestItemAdapter;
+import app.jayang.icebr8k.Adapter.FriendRequestAdapter;
 import app.jayang.icebr8k.Modle.User;
-import app.jayang.icebr8k.Modle.UserDialog;
+import app.jayang.icebr8k.Modle.UserQA;
+import app.jayang.icebr8k.Utility.Compatability;
+import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 
-public class FriendRequestPage extends AppCompatActivity {
-
-    private Toolbar mToolbar;
-    private ArrayList<UserDialog> mUserDialogs;
-    private FriendReqestItemAdapter mAdapter;
+public class FriendRequestPage extends SwipeBackActivity {
     private RecyclerView mRecyclerView;
-    private TextView noFrt;
-    private FirebaseUser currentUser;
+    private TextView nofrt;
+    private Toolbar mToolbar;
+    private LinearLayoutManager mLayoutManager;
+    private ArrayList<User> mUsers;
+    private FriendRequestAdapter mAdapter;
+    private FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+   public  void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friend_request_page);
-        mToolbar = findViewById(R.id.friendRequestToolbar);
-        currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        mUserDialogs =new ArrayList<>();
-        mRecyclerView = findViewById(R.id.frt_recycler);
-        noFrt = findViewById(R.id.frt_noFrt);
-        mAdapter =new FriendReqestItemAdapter(mUserDialogs,getApplicationContext());
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        mRecyclerView = (RecyclerView) findViewById(R.id.frt_recycler);
+        nofrt = (TextView) findViewById(R.id.frt_noFrt);
+        mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mUsers = new ArrayList<>();
+        mToolbar = (Toolbar) findViewById(R.id.friendRequestToolbar);
+        mAdapter = new FriendRequestAdapter(mUsers,this);
         mRecyclerView.setAdapter(mAdapter);
-        getData();
+        mRecyclerView.setItemAnimator(null);
+        mRecyclerView.setHasFixedSize(true);
+        nofrt.setVisibility(View.VISIBLE);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         OneSignal.clearOneSignalNotifications();
+        loadData();
     }
 
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        finish();
-        return true;
-    }
-
-    @Override
-    public void onBackPressed() {
-        finish();
-
-    }
-
-    private void getData(){
-        DatabaseReference requestRef = FirebaseDatabase.getInstance().getReference().child("UserFriends")
-                .child(currentUser.getUid());
-        requestRef.keepSynced(true);
-
-        requestRef.addChildEventListener(new ChildEventListener() {
+    void loadData(){
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+                .child("UserFriends")
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        ref.orderByChild("stats").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Log.d("friend123",dataSnapshot.getKey() +"added");
                 if("pending".equals(dataSnapshot.child("stats").getValue(String.class))){
-                    addToDialog( dataSnapshot.getKey());
-                }
+                    nofrt.setVisibility(View.GONE);
+                    DatabaseReference userRef = FirebaseDatabase.getInstance().getReference()
+                            .child("Users").child(dataSnapshot.getKey());
+                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            User user = dataSnapshot.getValue(User.class);
+                            mUsers.add(user);
+                            mAdapter.notifyItemInserted(mUsers.indexOf(user));
+                            compareWithUser2(dataSnapshot.getKey(),user);
+                            nofrt.setVisibility(mUsers.isEmpty()? View.VISIBLE:View.GONE);
+                        }
 
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                }
 
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                if("accepted".equals(dataSnapshot.child("stats").getValue(String.class))){
-                    UserDialog dialog = new UserDialog();
-                    dialog.setId(dataSnapshot.getKey());
-                    mUserDialogs.remove(dialog);
-                    mAdapter.notifyDataSetChanged();
-                    if(mAdapter.getItemCount() ==0){
-                        noFrt.setVisibility(View.VISIBLE);
-                    }
+                Log.d("friend123",dataSnapshot.getValue().toString());
+                if(!"pending".equals(dataSnapshot.child("stats").getValue(String.class))){
+                    DatabaseReference userRef = FirebaseDatabase.getInstance().getReference()
+                            .child("Users").child(dataSnapshot.getKey());
+                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            User user = dataSnapshot.getValue(User.class);
+                            if(mUsers.contains(user)){
+                                mUsers.remove(user);
+                                mAdapter.notifyItemRemoved(mUsers.indexOf(user));
+                                nofrt.setVisibility(mUsers.isEmpty()? View.VISIBLE:View.GONE);
+                            }
+
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
                 }
 
+
+                if("pending".equals(dataSnapshot.child("stats").getValue(String.class))){
+                    DatabaseReference userRef = FirebaseDatabase.getInstance().getReference()
+                            .child("Users").child(dataSnapshot.getKey());
+                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            User user = dataSnapshot.getValue(User.class);
+                            mUsers.add(user);
+                            mAdapter.notifyItemInserted(mUsers.indexOf(user));
+                            compareWithUser2(dataSnapshot.getKey(),user);
+                            nofrt.setVisibility(mUsers.isEmpty()? View.VISIBLE:View.GONE);
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                }
 
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-                UserDialog dialog = new UserDialog();
-                dialog.setId(dataSnapshot.getKey());
-                mUserDialogs.remove(dialog);
-                mAdapter.notifyDataSetChanged();
-                if(mAdapter.getItemCount() ==0){
-                    noFrt.setVisibility(View.VISIBLE);
-                }
 
             }
 
@@ -121,15 +152,53 @@ public class FriendRequestPage extends AppCompatActivity {
             }
         });
 
-        requestRef.equalTo("pending").addValueEventListener(new ValueEventListener() {
+
+    }
+    public void compareWithUser2(final String user2Uid, final User user) {
+        final ArrayList<UserQA> userQA1 = new ArrayList<>();
+        final ArrayList<UserQA> userQA2 = new ArrayList<>();
+        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + currentUser.getUid());
+        final DatabaseReference mRef2 = FirebaseDatabase.getInstance().getReference("UserQA/" + user2Uid);
+
+        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.hasChildren()){
-                    noFrt.setVisibility(View.GONE);
-                }else{
-                    noFrt.setVisibility(View.VISIBLE);
+                for(DataSnapshot child : dataSnapshot.getChildren()){
+                    if( !"skipped".equals(child.getValue(UserQA.class).getAnswer())){
+                        userQA1.add(child.getValue(UserQA.class));
+                    }
+
                 }
 
+
+                mRef2.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for(DataSnapshot child : dataSnapshot.getChildren()){
+                            if(!"skipped".equals(child.getValue(UserQA.class).getAnswer())){
+                                userQA2.add(child.getValue(UserQA.class));
+                            }
+
+
+                        }
+
+                        Compatability mCompatability = new Compatability(userQA1,userQA2);
+                        int score = mCompatability.getScore();
+                        user.setScore(""+score);
+                        if(mUsers.contains(user)){
+                            mAdapter.notifyItemChanged(mUsers.indexOf(user));
+                        }
+
+
+
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
             }
 
             @Override
@@ -137,36 +206,14 @@ public class FriendRequestPage extends AppCompatActivity {
 
             }
         });
+
 
 
     }
-
-
-
-
-
-    private void addToDialog(final String user2Uid){
-
-        DatabaseReference userref = FirebaseDatabase.getInstance().getReference().child("Users").
-                child(user2Uid);
-        userref.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                User user = dataSnapshot.getValue(User.class);
-                UserDialog dialog  =new UserDialog(user.getDisplayname(),user.getUsername()
-                        ,user.getPhotourl(), null,null,user.getEmail(),user2Uid,null,null);
-                mUserDialogs.add(dialog);
-                noFrt.setVisibility(View.GONE);
-                mAdapter.notifyDataSetChanged();
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
     }
 
 }

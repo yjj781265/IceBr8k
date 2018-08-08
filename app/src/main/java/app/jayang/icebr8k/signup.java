@@ -541,6 +541,7 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
                         if (task.isSuccessful()) {
                             FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
                             User user = new User();
+                            user.setId(currentUser.getUid());
                             user.setDisplayname(displayname);
                             user.setUsername(username);
                             user.setEmail(email);

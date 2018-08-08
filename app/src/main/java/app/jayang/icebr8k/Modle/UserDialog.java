@@ -8,93 +8,31 @@ import android.support.v7.widget.util.SortedListAdapterCallback;
 
 import com.github.wrdlbrnft.sortedlistadapter.SortedListAdapter;
 
+import java.io.Serializable;
+import java.util.Objects;
+
 
 /**
- * Created by yjj781265 on 1/2/2018.
+ * Edited by yjj781265 on 7/29/2018.
  */
 
-public class UserDialog implements Parcelable{
-    private String name, username,photoUrl,score,onlinestats,email,id,lastseen;
-    private Long timestamp;
-    private Boolean hasScoreListener =false;
+public class UserDialog implements Serializable{
+    private User user;
+    private String score = "" , id;
 
-
-    public UserDialog() {
-    }
-
-
-
-
-    public String getOnlinestats() {
-        return onlinestats;
-    }
-
-    public Boolean getHasScoreListener() {
-        return hasScoreListener;
-    }
-
-    public void setHasScoreListener(Boolean hasScoreListener) {
-        this.hasScoreListener = hasScoreListener;
-    }
-
-    public UserDialog(String name, String username, String photoUrl, String score, String onlinestats, String email, String id, String lastseen, Long timestamp) {
-        this.name = name;
-        this.username = username;
-        this.photoUrl = photoUrl;
+    public UserDialog(User user, String score, String id) {
+        this.user = user;
         this.score = score;
-        this.onlinestats = onlinestats;
-        this.email = email;
         this.id = id;
-        this.lastseen = lastseen;
-        this.timestamp = timestamp;
     }
 
-    public Long getTimestamp() {
-        return timestamp;
+
+    public User getUser() {
+        return user;
     }
 
-    public void setTimestamp(Long timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public void setOnlinestats(String onlinestats) {
-        this.onlinestats = onlinestats;
-    }
-
-    public String getLastseen() {
-        return lastseen;
-    }
-
-    public void setLastseen(String lastseen) {
-        this.lastseen = lastseen;
-    }
-
-    public static Creator getCREATOR() {
-        return CREATOR;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPhotoUrl() {
-        return photoUrl;
-    }
-
-    public void setPhotoUrl(String photoUrl) {
-        this.photoUrl = photoUrl;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getScore() {
@@ -105,15 +43,6 @@ public class UserDialog implements Parcelable{
         this.score = score;
     }
 
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public String getId() {
         return id;
     }
@@ -122,78 +51,48 @@ public class UserDialog implements Parcelable{
         this.id = id;
     }
 
-
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
-        UserDialog dialog = (UserDialog) o;
-
-        return id.equals(dialog.id);
+        UserDialog that = (UserDialog) o;
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+
+        return Objects.hash(id);
     }
-
-    @Override
-    public String toString() {
-        return "UserDialog{" +
-                "name='" + name + '\'' +
-                ", username='" + username + '\'' +
-                ", photoUrl='" + photoUrl + '\'' +
-                ", score='" + score + '\'' +
-                ", onlinestats='" + onlinestats + '\'' +
-                ", email='" + email + '\'' +
-                ", id='" + id + '\'' +
-                ", lastseen='" + lastseen + '\'' +
-                '}';
-    }
-
-
-
-
+/*
     @Override
     public int describeContents() {
         return 0;
     }
 
-    public UserDialog(Parcel in){
-        this.id = in.readString();
-        this.name = in.readString();
-        this.username = in.readString();
-        this.photoUrl = in.readString();
-        this.score = in.readString();
-        this.onlinestats = in.readString();
-        this.email = in.readString();
-        this.lastseen = in.readString();
-
-
-    }
-
-
     @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(this.id);
-        parcel.writeString(this.name);
-        parcel.writeString(this.username);
-        parcel.writeString(this.photoUrl);
-        parcel.writeString(this.score);
-        parcel.writeString(this.onlinestats);
-        parcel.writeString(this.email);
-        parcel.writeString(this.lastseen);
-
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(score);
+        dest.writeSerializable(user);
     }
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
-        public UserDialog createFromParcel(Parcel in) {
-            return new UserDialog(in);
+
+    public static final Parcelable.Creator<UserDialog> CREATOR
+            = new Parcelable.Creator<UserDialog>(){
+        @Override
+        public UserDialog createFromParcel(Parcel source) {
+            return new UserDialog(source);
         }
 
+        @Override
         public UserDialog[] newArray(int size) {
             return new UserDialog[size];
         }
     };
+
+    public UserDialog(Parcel source) {
+         score = source.readString();
+         user = (User) source.readSerializable();
+    }
+*/
+
 }

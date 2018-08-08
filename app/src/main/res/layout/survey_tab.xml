@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-
-
-
-
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:background="@color/lightBlue">
@@ -14,67 +10,56 @@
 
     <android.support.v7.widget.RecyclerView
         android:layout_centerInParent="true"
-        android:overScrollMode="never"
+        android:overScrollMode="always"
         android:orientation="horizontal"
         android:id="@+id/survey_recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"></android.support.v7.widget.RecyclerView>
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="16dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
 
 
-    <RelativeLayout
-        android:layout_gravity="center_horizontal|top"
-        android:gravity="center_vertical"
-        android:layout_margin="32dp"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content">
 
-        <ImageView
-            android:visibility="gone"
-            android:id="@+id/backward"
-            android:src="@drawable/ic_action_backarrow"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:layout_width="40dp"
-            android:layout_height="40dp"/>
-        <TextView
-            android:id="@+id/survey_text"
-            android:layout_centerInParent="true"
-            android:textColor="@color/primary"
-            android:text="ANswer 1/8"
-            android:textSize="16dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+<LinearLayout
+    android:layout_marginTop="64dp"
+    android:visibility="gone"
+    android:id="@+id/survey_nav"
+    android:layout_gravity="top|center_horizontal"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+ <ImageView
+     android:layout_marginRight="16dp"
+     android:background="?attr/selectableItemBackgroundBorderless"
+     android:layout_width="wrap_content"
+     android:id="@+id/back"
+     android:src="@drawable/ic_action_backarrow"
+     android:layout_height="wrap_content"/>
 
-        <ImageView
-            android:id="@+id/forward"
-            android:layout_alignParentEnd="true"
-            android:visibility="gone"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_action_arrow_forward"
-            android:layout_width="40dp"
-            android:layout_height="40dp"/>
-        </RelativeLayout>
+
+
 
 <LinearLayout
     android:orientation="horizontal"
-    android:layout_gravity="top|center_horizontal"
+    android:layout_gravity="center_vertical"
+    android:gravity="center_vertical"
+
     android:layout_width="wrap_content"
     android:id="@+id/dot"
-    android:layout_marginTop="80dp"
 
-    android:layout_height="wrap_content"/>
+    android:layout_height="wrap_content" />
 
+    <ImageView
+        android:layout_marginLeft="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:layout_width="wrap_content"
+        android:id="@+id/forward"
+        android:src="@drawable/ic_action_arrow_forward"
+        android:layout_height="wrap_content"/>
 
+</LinearLayout>
 
     <RelativeLayout
-
         android:id="@+id/survey_loading"
         android:layout_width="wrap_content"
         android:layout_height="150dp"
@@ -101,6 +86,35 @@
             android:paddingLeft="15dp"
             android:text="Loading..."
             android:textSize="14dp"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:visibility="gone"
+        android:id="@+id/noMoreQGif"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:adjustViewBounds= "true"
+            android:layout_centerHorizontal="true"
+            android:maxHeight="150dp"
+            android:maxWidth="150dp"
+            android:layout_below="@id/congratsTV"
+            android:layout_margin="16dp"
+            android:id="@+id/congratsGif"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/congratsTV"
+            android:layout_width="wrap_content"
+            android:textSize="24dp"
+            android:textColor="@color/colorAccent"
+            android:gravity="center_horizontal"
+            android:text="Congratulation, you have answered all the questions !"
+            android:layout_height="wrap_content"/>
 
     </RelativeLayout>
 

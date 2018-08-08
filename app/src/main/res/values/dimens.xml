@@ -1,3 +1,8 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="imageview_width">14dp</dimen>
+    <dimen name="imageview_height">14dp</dimen>
+    <dimen name="imageview_width_selected">18dp</dimen>
+    <dimen name="imageview_height_selected">18dp</dimen>
+    <dimen name="material_drawer_item_primary_text">12dp</dimen>
 </resources>

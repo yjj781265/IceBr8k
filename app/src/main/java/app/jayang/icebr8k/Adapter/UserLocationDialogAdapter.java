@@ -58,11 +58,17 @@ public class UserLocationDialogAdapter extends RecyclerView.Adapter<UserLocation
                     user.getOnlinestats()!=null &&user.getUsername()!=null ){
                 holder.username.setText(user.getUsername());
                 holder.displayname.setText(user.getDisplayname());
-                holder.score.setText(user.getScore());
+                if(dialog.getScore()==null){
+                    holder.score.setText("");
+                }else{
+                    holder.score.setText(dialog.getScore()+"%");
+                }
+
                 Glide.with(holder.image.getContext()).load(user.getPhotourl()).
                         apply(RequestOptions.circleCropTransform()).into(holder.image);
 
-                holder.score.setText( dialog.getScore()+"%");
+
+
             }
 
             String uid =  mLocationDialogs.get(position).getId();
@@ -99,8 +105,6 @@ public class UserLocationDialogAdapter extends RecyclerView.Adapter<UserLocation
                     User user2 =dataSnapshot.getValue(User.class);
 
                     if(user2!=null){
-
-
                         String online =user2.getOnlinestats();
                         if(online!=null){
                             if(holder.image.getAlpha()!=1.0f) {

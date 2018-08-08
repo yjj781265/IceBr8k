@@ -13,36 +13,43 @@
     android:theme="@style/AppTheme"
     >
 
-
-    <ImageView
-        android:id="@+id/imageview_id"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:alpha="0.5"
-
-
+    <FrameLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/default_avatar3"
-        android:transitionName="user_avatar_transition"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent">
 
-    <ImageView
-        android:id="@+id/onlineStats"
+        <ImageView
+            android:id="@+id/imageview_id"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:alpha="0.5"
+            android:scaleType="centerCrop"
+            android:src="@drawable/default_avatar3"
+            android:transitionName="user_avatar_transition"
+            />
 
-        android:layout_width="10dp"
-        android:layout_height="10dp"
-        android:layout_marginBottom="6dp"
-        android:layout_marginStart="46dp"
-        android:elevation="10dp"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/circle_shape_busy"/>
+        <ImageView
+            android:id="@+id/onlineStats"
+
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_gravity="end|bottom"
+
+            android:elevation="10dp"
+            android:visibility="invisible"
+            app:srcCompat="@drawable/circle_shape_busy"/>
+
+
+    </FrameLayout>
+
+
+
 
 
     <TextView
@@ -61,7 +68,7 @@
         android:transitionName="user_name_transition"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/linearLayout"
-        app:layout_constraintStart_toEndOf="@+id/imageview_id"
+        app:layout_constraintStart_toEndOf="@+id/frameLayout"
         app:layout_constraintTop_toTopOf="parent"
         tools:fontFamily="sans-serif"/>
 

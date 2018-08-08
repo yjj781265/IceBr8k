@@ -13,14 +13,17 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.github.javiersantos.materialstyleddialogs.enums.Style;
 import com.google.firebase.auth.FirebaseAuth;
@@ -33,6 +36,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.UUID;
 
 import app.jayang.icebr8k.Adapter.SurveyQuestionAdapter;
@@ -46,9 +50,11 @@ import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;
  * Created by LoLJay on 10/22/2017.
  */
 
-public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapter.SubmitedListener,MaterialTapTargetPrompt.PromptStateChangeListener{
+public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapter.SubmitedListener,MaterialTapTargetPrompt.PromptStateChangeListener,View.OnClickListener{
     View mview;
     private RecyclerView mRecyclerView;
+    private RelativeLayout noMoreQLayout;
+    private ImageView congratsGif;
     private RelativeLayout loadingGif;
     private SurveyQuestionAdapter mAdapter;
     private LinearLayout mLinearLayout;
@@ -63,11 +69,14 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
     private  SharedPreferences sharedPref;
     private SharedPreferences.Editor editor;
     private final Handler mHandler = new Handler();
-   ;
+    private SurveyQ currentSurveyQ;
+    private HashMap<SurveyQ,String> indicatorMap =  new HashMap();
+    private LinearLayout surveyNav;
+
 
     private ImageView back,forward;
     private  int counter =0, currentPosition =0;
-    private TextView mTextView;
+
 
 
 
@@ -88,15 +97,18 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
     public View onCreateView(LayoutInflater inflater, @Nullable  ViewGroup container, @Nullable final Bundle savedInstanceState) {
 
       mview = inflater.inflate(R.layout.survey_tab,container,false);
+      surveyNav = mview.findViewById(R.id.survey_nav);
         mRecyclerView = mview.findViewById(R.id.survey_recyclerView);
-        back =  mview.findViewById(R.id.backward);
+        back =  mview.findViewById(R.id.back);
         forward = mview.findViewById(R.id.forward);
-        mTextView = mview.findViewById(R.id.survey_text);
-        mTextView.setText("");
         fab =  mview.findViewById(R.id.survey_fab);
         mLinearLayout = mview.findViewById(R.id.dot);
         loadingGif = mview.findViewById(R.id.survey_loading);
         loadingGif.setVisibility(View.VISIBLE);
+        noMoreQLayout = mview.findViewById(R.id.noMoreQGif);
+        noMoreQLayout.setVisibility(View.GONE);
+        congratsGif = mview.findViewById(R.id.congratsGif);
+        Glide.with(this).load(R.drawable.congrats_gif).into(congratsGif);
 
         feedbackCard.setQuestionId(UUID.randomUUID().toString());
         feedbackCard.setType("fb");
@@ -112,9 +124,12 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
 
         snapHelper.attachToRecyclerView(mRecyclerView);
 
+
         // init sharePref
         sharedPref = getActivity().getSharedPreferences("tutorial", Context.MODE_PRIVATE);
          editor = sharedPref.edit();
+
+
 
         getSurveyQ();
         fabflag();
@@ -130,7 +145,7 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
                 }else{
                     mRecyclerView.smoothScrollToPosition(currentPosition);
                 }
-                btnAction(currentPosition,mList.size());
+
 
             }
         });
@@ -147,7 +162,7 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
                     mRecyclerView.smoothScrollToPosition(currentPosition);
 
                 }
-                btnAction(currentPosition,mList.size());
+
 
             }
         });
@@ -160,6 +175,7 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
             public void onClick(View view) {
 
                 loadingGif.setVisibility(View.VISIBLE);
+                noMoreQLayout.setVisibility(View.GONE);
                 hideView();
                new Handler().postDelayed(new Runnable() {
                    @Override
@@ -197,8 +213,6 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
 
 
 
-
-
         return  mview;
     }
 
@@ -213,6 +227,7 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
                    mHandler.postDelayed(new Runnable() {
                        @Override
                        public void run() {
+
                            fab.show();
                        }
                    },300);
@@ -254,11 +269,9 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
         currentPosition =0;
         counter =0;
         mRecyclerView.scrollToPosition(currentPosition);
-        mLinearLayout.setVisibility(View.GONE);
+        surveyNav.setVisibility(View.GONE);
         mRecyclerView.setVisibility(View.GONE);
-        mTextView.setText("");
-        back.setVisibility(View.GONE);
-        forward.setVisibility(View.GONE);
+
     }
     // if has more than 8 questions answered show fab all the time, show tutorial after first 8 questions answered
     void fabflag(){
@@ -301,8 +314,6 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
     }
 
     void getSurveyQ(){
-
-
         mRecyclerView.setVisibility(View.GONE);
         answeredList.clear();;
         mList.clear();
@@ -319,11 +330,7 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
                     }
 
                 }
-
-
-
                 // get first 8 questions
-
                 DatabaseReference questionRef = FirebaseDatabase.getInstance().getReference()
                         .child("Questions_8");
                 questionRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -343,49 +350,94 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
                         for(SurveyQ surveyQ : temptList){
                             if(!answeredList.contains(surveyQ.getQuestionId())){
                                 mList.add(surveyQ);
+                                indicatorMap.put(surveyQ,"default");
+
                             }
                             if(mList.size()>7){
                                 break;
                             }
                         }
 
-
-                        Log.d("SurvetFrag",mList.toString());
-                        mLinearLayout.removeAllViews();
-                        for (int i = 0; i < mList.size(); i++) {
-                            ImageView imageView = new ImageView(getContext());
-                            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                            lp.setMargins(2, 0, 2, 0);
-                            imageView.setLayoutParams(lp);
-                            mLinearLayout.addView(imageView, i);
-                            imageView.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.indicator_default));
-                        }
-                        mLinearLayout.setVisibility(View.VISIBLE);
-                       btnAction(currentPosition,mList.size());
-
-                        mAdapter.notifyDataSetChanged();
-                        mTextView.setText("Answered 0/"+(mList.size()) );
-                        loadingGif.setVisibility(View.GONE);
-                        mRecyclerView.setVisibility(View.VISIBLE);
-                        back.setVisibility(View.VISIBLE);
-                        forward.setVisibility(View.VISIBLE);
-                        fab.show();
+                        if(mList.isEmpty()){
+                            noMoreQLayout.setVisibility(View.VISIBLE);
+                            loadingGif.setVisibility(View.GONE);
+                            hideView();
+                            fab.show();
+                        }else{
+                            Log.d("SurvetFrag",mList.toString());
+                            mLinearLayout.removeAllViews();
+                            currentSurveyQ = mList.get(0);
+                            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                            params.gravity = Gravity.CENTER_VERTICAL;
+                            mLinearLayout.setLayoutParams(params);
 
 
-
-                        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                            @Override
-                            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                                super.onScrollStateChanged(recyclerView, newState);
-                                if(newState == RecyclerView.SCROLL_STATE_IDLE){
-                                    View centerView = snapHelper.findSnapView(mLayoutManager);
-                                    currentPosition = mLayoutManager.getPosition(centerView);
-                                    btnAction(currentPosition,mList.size());
-
-                                }
+                            // add indicators
+                            for (int i = 0; i < mList.size(); i++) {
+                                ImageView imageView = new ImageView(getContext());
+                                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                                lp.setMargins(8, 0, 8, 0);
+                                imageView.setLayoutParams(lp);
+                                mLinearLayout.addView(imageView, i);
+                                imageView.setTag(i);
+                                imageView.setOnClickListener(SurveyTab_Fragment.this);
+                                imageView.requestLayout();
+                                imageView.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.indicator_default));
+                                imageView.getLayoutParams().height = (int) getResources().getDimension(R.dimen.imageview_height);
+                                imageView.getLayoutParams().width = (int) getResources().getDimension(R.dimen.imageview_width);
 
                             }
-                        });
+                            btnAction(currentSurveyQ);
+
+                            mAdapter.notifyDataSetChanged();
+                            loadingGif.setVisibility(View.GONE);
+                            mRecyclerView.setVisibility(View.VISIBLE);
+                            surveyNav.setVisibility(View.VISIBLE);
+                            fab.show();
+                          /*  mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+
+
+
+                                @Override
+                                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                                    super.onScrollStateChanged(recyclerView, newState);
+                                    if(newState == RecyclerView.SCROLL_STATE_IDLE){
+                                        View centerView = snapHelper.findSnapView(mLayoutManager);
+                                        currentPosition = mLayoutManager.getPosition(centerView);
+                                        currentSurveyQ = mList.get(currentPosition);
+                                        btnAction(currentSurveyQ);
+
+                                    }
+
+                                }
+                            });*/
+                          if(mRecyclerView.getLayoutManager() instanceof LinearLayoutManager) {
+                                final LinearLayoutManager linearLayoutManager = (LinearLayoutManager) mRecyclerView
+                                        .getLayoutManager();
+
+                                mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                                    @Override
+                                    public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                                        super.onScrolled(recyclerView, dx, dy);
+
+                                        Log.d("Survey123", "first visable"+ String.valueOf(linearLayoutManager.findFirstVisibleItemPosition()) +"last Visiable"+ linearLayoutManager.findLastVisibleItemPosition());
+
+                                        currentPosition = (linearLayoutManager.findFirstVisibleItemPosition() + linearLayoutManager.findLastVisibleItemPosition())/2;
+                                        currentSurveyQ = mList.get(currentPosition);
+                                        btnAction(currentSurveyQ);
+                                    }
+                                });
+
+                            }
+
+
+
+
+                        }
+
+
+
 
 
                     }
@@ -411,22 +463,47 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
 
 
     }
-    private void btnAction(int position, int bannerListSize) {
-        for (int i = 0; i < bannerListSize; i++) {
+    private void btnAction(SurveyQ surveyQ) {
+        for(int i = 0; i < mList.size(); i++){
             ImageView imageView2 = (ImageView) mLinearLayout.getChildAt(i);
-            if (i == position) {
-                imageView2.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.indicator_selected));
-            } else {
-                imageView2.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.indicator_default));
+            String answertemp;
+            answertemp = indicatorMap.get(mList.get(i));
+            int id ;
+            if(answertemp!=null && answertemp.equals("skipped")){
+                id = R.drawable.indicator_skip;
+            }else if(answertemp==null || answertemp.equals("default")){
+                id = R.drawable.indicator_default;
+            }else{
+                id = R.drawable.indicator_answered;
             }
+
+            if(mList.get(i).equals(surveyQ) ){
+               if(id == R.drawable.indicator_default){
+                   id = R.drawable.indicator_selected;
+               }
+                imageView2.getLayoutParams().height = (int) getResources().getDimension(R.dimen.imageview_height_selected);
+                imageView2.getLayoutParams().width = (int) getResources().getDimension(R.dimen.imageview_width_selected);
+
+            }else{
+                imageView2.getLayoutParams().height = (int) getResources().getDimension(R.dimen.imageview_height);
+                imageView2.getLayoutParams().width = (int) getResources().getDimension(R.dimen.imageview_width);
+            }
+            imageView2.requestLayout();
+            imageView2.setImageDrawable(ContextCompat.getDrawable(getActivity(), id));
+
         }
     }
 
+
+
+
     @Override
-    public void onClick() {
+    public void onClick(SurveyQ surveyQ, String answer) {
         // answered questions counter
-        counter++;
-        mTextView.setText("Answered " + counter +"/"+ (mList.size()));
+        indicatorMap.put(surveyQ,answer);
+        btnAction(surveyQ);
+
+
     }
 
 
@@ -437,5 +514,12 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
             // User has pressed the prompt target
             prompt.dismiss();
         }
+    }
+
+// when user click on the indicator
+    @Override
+    public void onClick(View v) {
+      mRecyclerView.scrollToPosition((int)v.getTag());
+      btnAction(mList.get((int)v.getTag()));
     }
 }

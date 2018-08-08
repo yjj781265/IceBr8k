@@ -3,6 +3,7 @@ package app.jayang.icebr8k;
 import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -61,14 +62,7 @@ public class Settings_Activity extends AppCompatActivity {
         mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    showReminderDialog();
-
-                }else{
-                    setSharedPreference(isChecked);
-                    setUserPrivacy(isChecked);
-                    stopJob();
-                }
+               new UpdateLocation().execute(isChecked);
             }
         });
     }
@@ -97,6 +91,14 @@ public class Settings_Activity extends AppCompatActivity {
                 mSwitch.setChecked(isChecked);
                 setSharedPreference(isChecked);
                 setUserPrivacy(isChecked);
+            }
+        }).checkBoxPromptRes(R.string.dont_show_again, false, new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferences sharedPreferences = getSharedPreferences("setting",MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean("shareLocationDialog",isChecked);
+                editor.commit();
             }
         }).show();
     }
@@ -175,4 +177,40 @@ public class Settings_Activity extends AppCompatActivity {
         mDispatcher.cancel(Job_TaG);
         // Toast.makeText(this,"Sharing Location off",Toast.LENGTH_LONG).show();
     }
+
+    public class UpdateLocation extends AsyncTask<Boolean,Void,Void>{
+        @Override
+        protected Void doInBackground(Boolean... booleans) {
+            Boolean isChecked =booleans[0];
+
+            if(isChecked){
+                SharedPreferences sharedPreferences = getSharedPreferences("setting", MODE_PRIVATE);
+                boolean notShow = sharedPreferences.getBoolean("shareLocationDialog", false);
+
+                if (notShow) {
+                    checkLocationPermission();
+                } else {
+                  runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showReminderDialog();
+                        }
+                    });
+
+
+
+
+                }
+
+            }else{
+                setSharedPreference(isChecked);
+                setUserPrivacy(isChecked);
+                stopJob();
+            }
+
+
+            return null;
+        }
+    }
+
 }
