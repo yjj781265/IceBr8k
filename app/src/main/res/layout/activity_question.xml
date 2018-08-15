@@ -11,20 +11,39 @@
 
 
     <android.support.design.widget.AppBarLayout
+
         android:id="@+id/question_appBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:animateLayoutChanges="true"
         android:background="@android:color/transparent"
 
         >
 
-        <RelativeLayout
+
+
+
+
+        <android.support.constraint.ConstraintLayout
+
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             app:layout_scrollFlags="scroll|enterAlwaysCollapsed">
 
+
+            <ProgressBar
+                android:id="@+id/question_progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:layout_marginBottom="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/question_toolbar"/>
 
 
             <android.support.v7.widget.Toolbar
@@ -35,26 +54,37 @@
                 android:background="@color/colorPrimary"
                 android:elevation="1dp"
                 android:theme="@style/MyActionBarTheme"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
                 app:title="Comments"></android.support.v7.widget.Toolbar>
 
             <android.support.v7.widget.CardView
 
                 android:id="@+id/cardView"
-                android:layout_below="@id/question_toolbar"
                 android:layout_width="match_parent"
-
-
                 android:layout_height="wrap_content"
+
+
+                android:layout_below="@id/question_toolbar"
                 android:layout_margin="16dp"
 
 
+                android:layout_marginBottom="8dp"
                 android:visibility="invisible"
                 app:cardBackgroundColor="@color/creamYellow"
-                app:cardElevation="2dp">
+                app:cardElevation="2dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/question_toolbar">
 
                 <android.support.constraint.ConstraintLayout
+                    android:animateLayoutChanges="false"
+
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
+
 
                     <me.grantland.widget.AutofitTextView
                         android:id="@+id/question_id"
@@ -142,6 +172,7 @@
                     </LinearLayout>
 
                     <RelativeLayout
+                        android:id="@+id/relativeLayout3"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
@@ -192,37 +223,39 @@
             </android.support.v7.widget.CardView>
 
 
-            <ProgressBar
-                android:id="@+id/question_progressBar"
-                android:layout_margin="80dp"
-                android:layout_centerInParent="true"
-                android:visibility="visible"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-        </RelativeLayout>
 
 
-        <android.support.design.widget.TabLayout
-            android:id="@+id/question_tablayout"
-            android:layout_width="match_parent"
-            android:layout_height="36dp"
-            android:background="@color/white"
-            android:elevation="1dp"
-            app:tabMode="scrollable"
-            app:tabSelectedTextColor="@color/colorAccent"
-            app:tabTextAppearance="@style/TextAppearence.App.TextInputLayout"
-            app:tabTextColor="@color/gray_light">
+        </android.support.constraint.ConstraintLayout>
 
-        </android.support.design.widget.TabLayout>
+
+
     </android.support.design.widget.AppBarLayout>
 
 
-  <android.support.v4.view.ViewPager
-      app:layout_behavior="@string/appbar_scrolling_view_behavior"
-      android:id="@+id/question_viewpager"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"></android.support.v4.view.ViewPager>
+    <android.support.v4.view.ViewPager
+        android:id="@+id/question_viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="bottom"
+        app:layout_anchor="@id/question_appBar"
+        android:layout_marginTop="36dp"
+        app:layout_anchorGravity="bottom"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"></android.support.v4.view.ViewPager>
 
+    <android.support.design.widget.TabLayout
+        android:id="@+id/question_tablayout"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:layout_gravity="bottom"
+        app:layout_anchor="@id/question_appBar"
+        app:layout_anchorGravity="bottom"
+        android:background="@color/white"
+        android:elevation="1dp"
+        app:tabMode="scrollable"
+        app:tabSelectedTextColor="@color/colorAccent"
+        app:tabTextAppearance="@style/TextAppearence.App.TextInputLayout"
+        app:tabTextColor="@color/gray_light">
+
+    </android.support.design.widget.TabLayout>
 
 </android.support.design.widget.CoordinatorLayout>

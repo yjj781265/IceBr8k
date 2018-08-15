@@ -10,6 +10,9 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.onesignal.OneSignal;
 import com.zplesac.connectionbuddy.ConnectionBuddy;
 import com.zplesac.connectionbuddy.ConnectionBuddyConfiguration;
@@ -79,6 +82,16 @@ public class MyApplication extends Application {
                         .build();
         ConnectionBuddy.getInstance().init(networkInspectorConfiguration);
 
+        DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()
+
+           .cacheInMemory(true)
+                .cacheOnDisk(true)
+           .build();
+        // Create global configuration and initialize ImageLoader with this config
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this)
+                .defaultDisplayImageOptions(defaultOptions)
+			.build();
+        ImageLoader.getInstance().init(config);
     }
 
 

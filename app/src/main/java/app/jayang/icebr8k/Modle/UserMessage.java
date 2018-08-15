@@ -7,6 +7,7 @@ package app.jayang.icebr8k.Modle;
 public class UserMessage {
     private String text, senderid, messagetype, messageid;
     private Long timestamp;
+    private Boolean doneNetWorking =false;  //default value
 
 
 
@@ -19,6 +20,23 @@ public class UserMessage {
         this.messagetype = messagetype;
         this.messageid = messageid;
         this.timestamp = timestamp;
+    }
+
+    public UserMessage(String text, String senderid, String messagetype, String messageid, Long timestamp, Boolean doneNetWorking) {
+        this.text = text;
+        this.senderid = senderid;
+        this.messagetype = messagetype;
+        this.messageid = messageid;
+        this.timestamp = timestamp;
+        this.doneNetWorking = doneNetWorking;
+    }
+
+    public Boolean getDoneNetWorking() {
+        return doneNetWorking;
+    }
+
+    public void setDoneNetWorking(Boolean doneNetWorking) {
+        this.doneNetWorking = doneNetWorking;
     }
 
     public String getText() {

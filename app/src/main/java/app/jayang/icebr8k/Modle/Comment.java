@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class Comment implements Comparable<Comment>, Serializable{
+public class Comment implements Serializable{
     private String id, senderId, text,type,answer;
     private Long timestamp,reply = null;
 
@@ -99,15 +99,6 @@ public class Comment implements Comparable<Comment>, Serializable{
 
 
 
-    @Override
-    public int compareTo(@NonNull Comment o) {
-        if(o!=null && this !=null && "text".equals(type) && "text".equals(o.getType())){
-            return o.getTimestamp().compareTo(this.timestamp);
-        }else{
-            return 0;
-        }
 
-
-    }
 }
 

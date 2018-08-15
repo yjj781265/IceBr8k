@@ -19,6 +19,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.transition.Fade;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
@@ -82,7 +83,8 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
     MaterialDialog mProgressDialog;
     SwipeBackLayout mSwipeBackLayout;
     private long lastClickTime = 0;
-    DatabaseReference senderMessageRef, receiverMessageRef;
+    DatabaseReference senderMessageRef, receiverMessageRef,mUserQARef,friendStatsRef,friendStatsRef2,
+    userQA2Ref;
 
     FirebaseDatabase database;
     FirebaseUser currentUser;
@@ -96,6 +98,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
     private Compatability mCompatability;
     int score;
+    private ValueEventListener userQARefListener,friendStatsRefListener, friendStatsRef2Listener;
 
 
     @Override
@@ -162,32 +165,27 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
             compare_btn.setMode(ActionProcessButton.Mode.PROGRESS);
             updateUI(mUser);
             checkFriendStats();
-            final DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + currentUser.getUid());
-            final DatabaseReference mRef2 = FirebaseDatabase.getInstance().getReference("UserQA/" + uid);
+           mUserQARef = FirebaseDatabase.getInstance().getReference("UserQA/" + currentUser.getUid());
+           userQA2Ref = FirebaseDatabase.getInstance().getReference("UserQA/" + uid);
+           userQARefListener = new ValueEventListener() {
+               @Override
+               public void onDataChange(DataSnapshot dataSnapshot) {
+                   compareWithUser2();
+               }
 
-            mRef.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    compareWithUser2();
-                }
+               @Override
+               public void onCancelled(DatabaseError databaseError) {
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
+               }
+           };
 
-                }
-            });
+            mUserQARef.addValueEventListener(userQARefListener);
+            userQA2Ref.addValueEventListener(userQARefListener);
 
-            mRef2.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    compareWithUser2();
-                }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
 
-                }
-            });
+
+
 
 
 
@@ -243,16 +241,14 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
     public void compareWithUser2() {
         if(firstTime){
-            mProgressBar.setVisibility(View.VISIBLE);
             mArcProgress.setVisibility(View.INVISIBLE);
         }
 
         final ArrayList<UserQA> userQA1 = new ArrayList<>();
         final ArrayList<UserQA> userQA2 = new ArrayList<>();
-        final DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + currentUser.getUid());
-        final DatabaseReference mRef2 = FirebaseDatabase.getInstance().getReference("UserQA/" + uid);
 
-        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+
+        mUserQARef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot child : dataSnapshot.getChildren()){
@@ -262,8 +258,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
                 }
 
-
-               mRef2.addListenerForSingleValueEvent(new ValueEventListener() {
+                userQA2Ref.addListenerForSingleValueEvent(new ValueEventListener() {
                    @Override
                    public void onDataChange(DataSnapshot dataSnapshot) {
                        for(DataSnapshot child : dataSnapshot.getChildren()){
@@ -275,25 +270,9 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                        }
 
                        mCompatability = new Compatability(userQA1,userQA2);
-                       mProgressBar.setVisibility(View.GONE);
-                        score = mCompatability.getScore();
+                       new setScore().execute(mCompatability);
 
-                      if(score<20){
-                         mArcProgress.setTextColor(ContextCompat.getColor(UserProfilePage.this,R.color.holo_red_light));
-                         mArcProgress.setFinishedStrokeColor(ContextCompat.getColor(UserProfilePage.this,R.color.holo_red_light));
-                      }else if(score<50){
-                          mArcProgress.setTextColor(ContextCompat.getColor(UserProfilePage.this,R.color.orange_500));
-                          mArcProgress.setFinishedStrokeColor(ContextCompat.getColor(UserProfilePage.this,R.color.orange_500));
-                      }else if(score<80) {
-                          mArcProgress.setTextColor(ContextCompat.getColor(UserProfilePage.this, R.color.colorPrimary));
-                          mArcProgress.setFinishedStrokeColor(ContextCompat.getColor(UserProfilePage.this,R.color.colorPrimary));
-                      }else if (score >=80){
-                          mArcProgress.setTextColor(ContextCompat.getColor(UserProfilePage.this, R.color.colorAccent));
-                          mArcProgress.setFinishedStrokeColor(ContextCompat.getColor(UserProfilePage.this,R.color.colorAccent));
-                      }
-                       mArcProgress.setProgress(score);
-                      mArcProgress.setVisibility(View.VISIBLE);
-                      firstTime = false;
+
 
                    }
 
@@ -334,10 +313,11 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
 
     private void checkFriendStats(){
-        DatabaseReference friendStatsRef = database.getReference().child("UserFriends").
+       friendStatsRef = database.getReference().child("UserFriends").
                 child(currentUser.getUid()).child(uid).child("stats");
         friendStatsRef.keepSynced(true);
-        friendStatsRef.addValueEventListener(new ValueEventListener() {
+
+        friendStatsRefListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 String stats = dataSnapshot.getValue(String.class);
@@ -376,30 +356,33 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
+        friendStatsRef.addValueEventListener(friendStatsRefListener);
 
-        DatabaseReference friendStatsRef2 = database.getReference().child("UserFriends").
+       friendStatsRef2 = database.getReference().child("UserFriends").
               child(uid).child(currentUser.getUid()).child("stats");
-        friendStatsRef2.addValueEventListener(new ValueEventListener() {
+        friendStatsRef2Listener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                 String stats = dataSnapshot.getValue(String.class);
-                         if(stats!=null &&  stats.equals("pending")){
-                             deleteFriend_btn.setVisibility(View.GONE);
-                             addFriend_btn.setVisibility(View.VISIBLE);
-                             message_btn.setVisibility(View.VISIBLE);
-                             addFriend_btn.setText("Friend Request Pending");
-                             addFriend_btn.setBackgroundColor(getResources().getColor(R.color.darkOrange));
-                             addFriend_btn.setClickable(false);
-                             addFriend_btn.setAlpha(0.6f);
-                         }
+                String stats = dataSnapshot.getValue(String.class);
+                if(stats!=null &&  stats.equals("pending")){
+                    deleteFriend_btn.setVisibility(View.GONE);
+                    addFriend_btn.setVisibility(View.VISIBLE);
+                    message_btn.setVisibility(View.VISIBLE);
+                    addFriend_btn.setText("Friend Request Pending");
+                    addFriend_btn.setBackgroundColor(getResources().getColor(R.color.darkOrange));
+                    addFriend_btn.setClickable(false);
+                    addFriend_btn.setAlpha(0.6f);
+                }
             }
+
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
+        friendStatsRef2.addValueEventListener(friendStatsRef2Listener);
 
     }
 
@@ -656,6 +639,47 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         lastmessage2.setValue(message);
     }
 
+    public class setScore extends AsyncTask<Compatability, Void,Integer>{
+
+        @Override
+        protected void onPreExecute() {
+            mProgressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected Integer doInBackground(Compatability... compatabilities) {
+            mCompatability = compatabilities[0];
+            int score = mCompatability.getScore();
+            return score;
+        }
+
+
+        @Override
+        protected void onPostExecute(Integer integer) {
+            score = integer;
+            if(score<20){
+                mArcProgress.setTextColor(ContextCompat.getColor(UserProfilePage.this,R.color.holo_red_light));
+                mArcProgress.setFinishedStrokeColor(ContextCompat.getColor(UserProfilePage.this,R.color.holo_red_light));
+            }else if(score<50){
+                mArcProgress.setTextColor(ContextCompat.getColor(UserProfilePage.this,R.color.orange_500));
+                mArcProgress.setFinishedStrokeColor(ContextCompat.getColor(UserProfilePage.this,R.color.orange_500));
+            }else if(score<80) {
+                mArcProgress.setTextColor(ContextCompat.getColor(UserProfilePage.this, R.color.colorPrimary));
+                mArcProgress.setFinishedStrokeColor(ContextCompat.getColor(UserProfilePage.this,R.color.colorPrimary));
+            }else if (score >=80){
+                mArcProgress.setTextColor(ContextCompat.getColor(UserProfilePage.this, R.color.colorAccent));
+                mArcProgress.setFinishedStrokeColor(ContextCompat.getColor(UserProfilePage.this,R.color.colorAccent));
+            }
+            mArcProgress.setProgress(score);
+            mProgressBar.setVisibility(View.INVISIBLE);
+            mArcProgress.setVisibility(View.VISIBLE);
+            firstTime = false;
+        }
+
+
+    }
+
+
 
 
 
@@ -761,7 +785,20 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
     }
 
 
+    @Override
+    protected void onDestroy() {
 
+
+        try {
+            userQA2Ref.removeEventListener(userQARefListener);
+            mUserQARef.removeEventListener(userQARefListener);
+            friendStatsRef.removeEventListener(friendStatsRefListener);
+            friendStatsRef2.removeEventListener(friendStatsRef2Listener);
+        }catch (NullPointerException e){
+            Log.d("UserProfilePage,", e.getMessage());
+        }
+        super.onDestroy();
+    }
 }
 
 

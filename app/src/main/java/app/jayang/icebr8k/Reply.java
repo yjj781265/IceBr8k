@@ -40,6 +40,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.UUID;
 
@@ -64,16 +65,40 @@ public class Reply extends SwipeBackActivity implements ReplyAdapter.replyClicke
     private String questionId, title;
     private FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
     private DatabaseReference topCommentRef;
+    private Comparator<Comment> mComparator;
 
 
     private final String VIEWTYPE_TEXT_STR = "text";
     private final String VIEWTYPE_LOAD_STR = "load";
     private final String VIEWTYPE_TOP_STR = "top";
+    private ValueEventListener topCommentRefRepliesListener;
+    private ValueEventListener repliesRefListener;
+    private DatabaseReference repliesRef;
+    private Boolean firstTime = true;
+    private ChildEventListener repliesRefChildListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reply);
+
+       mComparator = new Comparator<Comment>() {
+           @Override
+           public int compare(Comment o1, Comment o2) {
+               if(o1!=null && o2!=null &&o1.getTimestamp()!=null && o2.getTimestamp()!=null){
+                 if(o1.getTimestamp()>o2.getTimestamp()){
+                     return 1;
+                 }else if(o1.getTimestamp()<o2.getTimestamp()){
+                     return  -1;
+                 }else{
+                     return  0;
+                 }
+               }
+
+               return 0;
+           }
+       };
+
 
         mComments = new ArrayList<>();
         mEditText = (MyEditText) findViewById(R.id.reply_input);
@@ -84,6 +109,8 @@ public class Reply extends SwipeBackActivity implements ReplyAdapter.replyClicke
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         inputProgressBar = (ProgressBar) findViewById(R.id.reply_input_progressBar);
+
+
 
 
         mRecyclerView = (RecyclerView) findViewById(R.id.reply_recyclerView);
@@ -149,7 +176,7 @@ public class Reply extends SwipeBackActivity implements ReplyAdapter.replyClicke
                         firstCommentAuthorId = commentAuthorId;
 
                         // get Num of replies
-                        topCommentRef.child("replies").addValueEventListener(new ValueEventListener() {
+                        topCommentRefRepliesListener = new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 comment.setReply(dataSnapshot.getChildrenCount());
@@ -160,9 +187,14 @@ public class Reply extends SwipeBackActivity implements ReplyAdapter.replyClicke
                                 } else {
                                     mComments.add(0, comment);
                                     mAdapter.notifyItemInserted(0);
+                                    mRecyclerView.scrollToPosition(0);
                                 }
 
-                                mRecyclerView.scrollToPosition(0);
+                                if(firstTime){
+                                    //get its repies
+                                    getReplies();
+                                    firstTime = false;
+                                }
 
 
                             }
@@ -171,7 +203,8 @@ public class Reply extends SwipeBackActivity implements ReplyAdapter.replyClicke
                             public void onCancelled(DatabaseError databaseError) {
 
                             }
-                        });
+                        };
+                        topCommentRef.child("replies").addValueEventListener(topCommentRefRepliesListener);
 
                     }
 
@@ -181,9 +214,9 @@ public class Reply extends SwipeBackActivity implements ReplyAdapter.replyClicke
                     }
                 });
 
-                //get its repies
-                getReplies();
+
             }
+
         }
         //set up editext listeners
         setEditText();
@@ -299,17 +332,17 @@ public class Reply extends SwipeBackActivity implements ReplyAdapter.replyClicke
 
     void getReplies() {
 
-        DatabaseReference repliesRef = FirebaseDatabase.getInstance().getReference()
+        repliesRef = FirebaseDatabase.getInstance().getReference()
                 .child("Comments")
                 .child(questionId)
                 .child(topCommentId)
                 .child("replies");
-        repliesRef.addChildEventListener(new ChildEventListener() {
+
+        repliesRefChildListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Comment comment = dataSnapshot.getValue(Comment.class);
                 mComments.add(comment);
-                Collections.sort(mComments);
 
             }
 
@@ -332,16 +365,19 @@ public class Reply extends SwipeBackActivity implements ReplyAdapter.replyClicke
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
+        repliesRef.addChildEventListener(repliesRefChildListener);
 
-        repliesRef.addValueEventListener(new ValueEventListener() {
+        repliesRefListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 findViewById(R.id.reply_progressBar).setVisibility(View.GONE);
                 if (mComments.size() > 1) {
-                    Collections.sort(mComments.subList(1, mComments.size() - 1));
+                    Collections.sort(mComments.subList(1, mComments.size()),mComparator);
                     mAdapter.notifyDataSetChanged();
                 }
+
+                // when user click on the notification
                 if(getIntent().getExtras().getString("commentId",null)!=null
                         && !getIntent().getExtras().getString("commentId").isEmpty()){
 
@@ -353,19 +389,20 @@ public class Reply extends SwipeBackActivity implements ReplyAdapter.replyClicke
                                     mRecyclerView. scrollToPosition(mComments.indexOf(comment));
 
                                 }
-                            },1000);
+                            },666);
 
                         }
                     }
                 }
-
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
+
+        repliesRef.addValueEventListener(repliesRefListener);
     }
 
 
@@ -459,6 +496,14 @@ public class Reply extends SwipeBackActivity implements ReplyAdapter.replyClicke
         mEditText.setSelection(mEditText.getText().length());
 
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        topCommentRef.child("replies").removeEventListener(topCommentRefRepliesListener);
+        repliesRef.removeEventListener(repliesRefListener);
+        repliesRef.removeEventListener(repliesRefChildListener);
+        super.onDestroy();
     }
 }
 

@@ -79,6 +79,7 @@ public class SearchResult extends AppCompatActivity implements SearchView.OnQuer
         searchView.setQueryHint("Search Question");
         searchView.setOnQueryTextListener(this);
         searchView.requestFocus();
+        searchView.setMaxWidth(  Integer.MAX_VALUE);
         return true;
     }
 

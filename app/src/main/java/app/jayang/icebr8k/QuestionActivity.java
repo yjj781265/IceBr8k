@@ -73,6 +73,9 @@ public class QuestionActivity extends SwipeBackActivity {
     private final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
     private final DatabaseReference userQARef = FirebaseDatabase.getInstance().getReference()
             .child("UserQA").child(currentUser.getUid());
+    private ValueEventListener skipListener;
+    private DatabaseReference commentRef;
+    private ValueEventListener commentRefListener;
 
 
     @Override
@@ -150,7 +153,7 @@ public class QuestionActivity extends SwipeBackActivity {
 
         //if user has answered question the btn will be reset , else will be confirm
 
-        userQARef .addValueEventListener(new ValueEventListener() {
+        userQARef .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(questionId!=null  && dataSnapshot.hasChild(questionId)){
@@ -183,16 +186,15 @@ public class QuestionActivity extends SwipeBackActivity {
         });
 
         // skip stamp visibility
-        userQARef.child(questionId).addValueEventListener(new ValueEventListener() {
+
+        skipListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
                 UserQA userQA = dataSnapshot.getValue(UserQA.class);
                 if (userQA != null) {
                     // skip stamp visibility
                     stamp.setVisibility("skipped".equals(userQA.getAnswer()) ? View.VISIBLE : View.GONE);
                 }
-
 
             }
 
@@ -200,7 +202,8 @@ public class QuestionActivity extends SwipeBackActivity {
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
+        userQARef.child(questionId).addValueEventListener(skipListener);
 
 
 
@@ -217,13 +220,12 @@ public class QuestionActivity extends SwipeBackActivity {
     }
 
     void getCommentCounts(){
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+      commentRef = FirebaseDatabase.getInstance().getReference()
                 .child("Comments")
                 .child(questionId);
-        ref.addValueEventListener(new ValueEventListener() {
+        commentRefListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
                 long count = dataSnapshot.getChildrenCount();
                 String str = count>0 ? " ("+count+")" :"";
                 mLayout.getTabAt(0).setText("Comments" +str );
@@ -233,7 +235,9 @@ public class QuestionActivity extends SwipeBackActivity {
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
+
+        commentRef.addValueEventListener(commentRefListener);
     }
 
     void setUI(final boolean answered) {
@@ -800,6 +804,12 @@ public class QuestionActivity extends SwipeBackActivity {
 
 
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        userQARef.child(questionId).removeEventListener(skipListener);
+        super.onDestroy();
     }
 
     public AppBarLayout getAppBarLayout() {

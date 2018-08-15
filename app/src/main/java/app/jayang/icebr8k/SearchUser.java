@@ -102,6 +102,7 @@ public class SearchUser extends SwipeBackActivity implements SearchView.OnQueryT
         searchView.setQueryHint("Search Username");
         searchView.setOnQueryTextListener(this);
         searchView.requestFocus();
+        searchView.setMaxWidth(  Integer.MAX_VALUE);
 
 
         return true;

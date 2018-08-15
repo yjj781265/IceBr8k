@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -198,9 +199,6 @@ public class me_frag extends Fragment {
                 mTabLayout.getTabAt(1).setText("Questions Answered");
                 setTabTitle();
                 firstTime = false;
-            }else if(isVisibleToUser && !firstTime){
-                Userstab_Fragment userstab_fragment = (Userstab_Fragment) mViewPagerAdapter.getItem(0);
-                userstab_fragment.reLoad();
             }
         }
 
@@ -378,8 +376,8 @@ public class me_frag extends Fragment {
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
 
-                            Glide.with(mView).load(photoUrl).
-                                    apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3)).into(avatar);
+                            Glide.with(mView).load(photoUrl).transition(DrawableTransitionOptions.withCrossFade(300))
+                                    .apply(RequestOptions.circleCropTransform()).into(avatar);
                             showToast("Avatar Updated ");
 
                         }else{

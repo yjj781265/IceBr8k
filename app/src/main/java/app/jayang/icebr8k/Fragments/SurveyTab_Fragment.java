@@ -24,6 +24,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.github.javiersantos.materialstyleddialogs.enums.Style;
 import com.google.firebase.auth.FirebaseAuth;
@@ -72,14 +74,12 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
     private SurveyQ currentSurveyQ;
     private HashMap<SurveyQ,String> indicatorMap =  new HashMap();
     private LinearLayout surveyNav;
+    private Integer annsweredCounter = 0;
 
 
     private ImageView back,forward;
     private  int counter =0, currentPosition =0;
-
-
-
-
+    private  YoYo.YoYoString fabAnimation;
 
 
     public SurveyTab_Fragment() {
@@ -174,8 +174,10 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
             @Override
             public void onClick(View view) {
 
+
                 loadingGif.setVisibility(View.VISIBLE);
                 noMoreQLayout.setVisibility(View.GONE);
+
                 hideView();
                new Handler().postDelayed(new Runnable() {
                    @Override
@@ -265,6 +267,9 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
     }
 
     void hideView(){
+        if(fabAnimation!=null){
+            fabAnimation.stop();
+        }
         fab.hide();
         currentPosition =0;
         counter =0;
@@ -316,6 +321,7 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
     void getSurveyQ(){
         mRecyclerView.setVisibility(View.GONE);
         answeredList.clear();;
+        annsweredCounter =0;
         mList.clear();
        // get all the questions user answered
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
@@ -502,7 +508,15 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
         // answered questions counter
         indicatorMap.put(surveyQ,answer);
         btnAction(surveyQ);
+        annsweredCounter ++;
+        if(annsweredCounter == mList.size()){
+            fabAnimation = YoYo.with(Techniques.Pulse).repeat(8).playOn(fab);
+        }else{
+            if(fabAnimation!=null){
+                fabAnimation.stop();
+            }
 
+        }
 
     }
 
@@ -521,5 +535,6 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
     public void onClick(View v) {
       mRecyclerView.scrollToPosition((int)v.getTag());
       btnAction(mList.get((int)v.getTag()));
+
     }
 }

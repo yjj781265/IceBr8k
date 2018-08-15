@@ -13,6 +13,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -64,8 +65,8 @@ public class UserLocationDialogAdapter extends RecyclerView.Adapter<UserLocation
                     holder.score.setText(dialog.getScore()+"%");
                 }
 
-                Glide.with(holder.image.getContext()).load(user.getPhotourl()).
-                        apply(RequestOptions.circleCropTransform()).into(holder.image);
+                Glide.with(holder.image.getContext()).load(user.getPhotourl()).transition(DrawableTransitionOptions.withCrossFade(300))
+                        .apply(RequestOptions.circleCropTransform()).into(holder.image);
 
 
 

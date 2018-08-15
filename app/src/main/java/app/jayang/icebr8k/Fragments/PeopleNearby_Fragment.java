@@ -75,6 +75,7 @@ import java.util.Date;
 
 import app.jayang.icebr8k.Adapter.UserLocationDialogAdapter;
 import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.Modle.UserComp;
 import app.jayang.icebr8k.Modle.UserLocationDialog;
 import app.jayang.icebr8k.Modle.UserQA;
 import app.jayang.icebr8k.R;
@@ -92,7 +93,7 @@ import static com.google.android.gms.location.LocationRequest.PRIORITY_BALANCED_
  */
 public class PeopleNearby_Fragment extends Fragment {
     final int MY_PERMISSIONS_LOCATION = 6666;
-    private final int   REQUEST_CHECK_SETTINGS =9000;
+    private final int REQUEST_CHECK_SETTINGS = 9000;
     View mView;
     private FirebaseJobDispatcher mDispatcher;
     private FrameLayout shareLocation;
@@ -120,6 +121,9 @@ public class PeopleNearby_Fragment extends Fragment {
     private LocationRequest locationRequest = new LocationRequest();
 
 
+
+
+
     public PeopleNearby_Fragment() {
         // Required empty public constructor
     }
@@ -128,16 +132,16 @@ public class PeopleNearby_Fragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mLocationCallback = new com.google.android.gms.location.LocationCallback() {
+        mLocationCallback =    new com.google.android.gms.location.LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 if (locationResult == null) {
                     return;
                 }
-                mLocation =  locationResult.getLocations().get(0);
+                mLocation = locationResult.getLocations().get(0);
                 DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("GeoFireLocations");
                 GeoFire geofire = new GeoFire(ref);
-                geofire.setLocation( FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                geofire.setLocation(FirebaseAuth.getInstance().getCurrentUser().getUid(),
                         new GeoLocation(mLocation.getLatitude(), mLocation.getLongitude()), new GeoFire.CompletionListener() {
                             @Override
                             public void onComplete(String key, DatabaseError error) {
@@ -214,12 +218,15 @@ public class PeopleNearby_Fragment extends Fragment {
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                mRefreshLayout.setRefreshing(false);
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        new updateAllDistance().execute();
+                        loadData();
+
                     }
-                }, 666);
+                },300);
+
 
 
             }
@@ -233,7 +240,7 @@ public class PeopleNearby_Fragment extends Fragment {
         locationSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-               new UpdateLocation().execute(isChecked);
+                new UpdateLocation().execute(isChecked);
             }
         });
 
@@ -244,29 +251,15 @@ public class PeopleNearby_Fragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    MY_PERMISSIONS_LOCATION);
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        if(mFusedLocationClient!=null){
-            mFusedLocationClient.requestLocationUpdates(locationRequest,
-                    mLocationCallback,
-                    null /* Looper */);
-        }
-        }
+
+
+    }
 
 
     @Override
@@ -282,7 +275,7 @@ public class PeopleNearby_Fragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode==REQUEST_CHECK_SETTINGS && resultCode == RESULT_OK){
+        if (requestCode == REQUEST_CHECK_SETTINGS && resultCode == RESULT_OK) {
             loadData();
         }
     }
@@ -318,13 +311,12 @@ public class PeopleNearby_Fragment extends Fragment {
 
     private void setSwitch() {
 
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+     DatabaseReference  privacyref = FirebaseDatabase.getInstance().getReference()
                 .child("Users")
                 .child(currentUser.getUid())
                 .child("privacy");
 
-        // center Text listener
-        ref.addValueEventListener(new ValueEventListener() {
+     ValueEventListener   privacyrefListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue(String.class).equals("public")) {
@@ -342,20 +334,27 @@ public class PeopleNearby_Fragment extends Fragment {
                 mRecyclerView.setVisibility(isPublic ? View.VISIBLE : View.GONE);
                 mRefreshLayout.setVisibility(isPublic ? View.VISIBLE : View.GONE);
                 searchLayout.setVisibility(isPublic ? View.VISIBLE : View.GONE);
-
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
+
+        // center Text listener
+        privacyref.addValueEventListener(privacyrefListener);
 
 
     }
 
 
     void loadData() {
+        mLocationDialogs.clear();
+        loadingGif.setVisibility(View.VISIBLE);
+        mRecyclerView.setVisibility(View.GONE);
+
+
         // check permission
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -386,7 +385,7 @@ public class PeopleNearby_Fragment extends Fragment {
 
                                 Log.d("pplnby", "" + "currentLocation got it");
                                 findPeopleNearby(mLocation.getLatitude(), mLocation.getLongitude(), radius);
-                            }else{
+                            } else {
                                 loadingGif.setVisibility(View.GONE);
                                 centerText.setVisibility(View.VISIBLE);
                                 centerText.setText("Current Location Unavailable");
@@ -411,8 +410,9 @@ public class PeopleNearby_Fragment extends Fragment {
 
     private void findPeopleNearby(final double lat, final double lng, final double radius) {
 
-        mLocationDialogs.clear();
-        mRecyclerView.setVisibility(View.GONE);
+
+
+
 
         Log.d("pplnby", "" + "finding peoplenearbyu");
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("GeoFireLocations");
@@ -428,9 +428,10 @@ public class PeopleNearby_Fragment extends Fragment {
                     userLocationDialog.setLatlng(new LatLng(location.latitude, location.longitude));
 
                     // get user info
-                    DatabaseReference reference = FirebaseDatabase.getInstance().getReference()
+                  DatabaseReference  userRef = FirebaseDatabase.getInstance().getReference()
                             .child("Users").child(userLocationDialog.getId());
-                    reference.addValueEventListener(new ValueEventListener() {
+
+                 ValueEventListener   userRefListener = new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             User user = dataSnapshot.getValue(User.class);
@@ -453,6 +454,7 @@ public class PeopleNearby_Fragment extends Fragment {
                                 userLocationDialog.setDistance(distance);
                                 if (!mLocationDialogs.contains(userLocationDialog)) {
                                     mLocationDialogs.add(userLocationDialog);
+
                                 } else {
                                     mLocationDialogs.set(mLocationDialogs.indexOf(userLocationDialog), userLocationDialog);
                                 }
@@ -468,14 +470,14 @@ public class PeopleNearby_Fragment extends Fragment {
                                 centerText.setVisibility(View.GONE);
 
                             }
-
                         }
 
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
 
                         }
-                    });
+                    };
+                    userRef.addValueEventListener(userRefListener);
                 }
 
             }
@@ -498,9 +500,9 @@ public class PeopleNearby_Fragment extends Fragment {
                     userLocationDialog.setId(dataSnapshot.getKey());
                     userLocationDialog.setLatlng(new LatLng(location.latitude, location.longitude));
                     // get user info
-                    DatabaseReference reference = FirebaseDatabase.getInstance().getReference()
+                DatabaseReference   userRef2 = FirebaseDatabase.getInstance().getReference()
                             .child("Users").child(userLocationDialog.getId());
-                    reference.addValueEventListener(new ValueEventListener() {
+                userRef2.addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             User user = dataSnapshot.getValue(User.class);
@@ -523,6 +525,7 @@ public class PeopleNearby_Fragment extends Fragment {
                                 userLocationDialog.setDistance(distance);
                                 if (!mLocationDialogs.contains(userLocationDialog)) {
                                     mLocationDialogs.add(userLocationDialog);
+
                                 } else {
                                     mLocationDialogs.set(mLocationDialogs.indexOf(userLocationDialog), userLocationDialog);
                                 }
@@ -551,7 +554,7 @@ public class PeopleNearby_Fragment extends Fragment {
 
             @Override
             public void onGeoQueryReady() {
-                loadingGif.setVisibility(View.GONE);
+
 
 
             }
@@ -576,6 +579,7 @@ public class PeopleNearby_Fragment extends Fragment {
         mRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                userQA1.clear();
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     if (!"skipped".equals(child.getValue(UserQA.class).getAnswer())) {
                         userQA1.add(child.getValue(UserQA.class));
@@ -587,6 +591,7 @@ public class PeopleNearby_Fragment extends Fragment {
                 mRef2.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
+                        userQA2.clear();
                         for (DataSnapshot child : dataSnapshot.getChildren()) {
                             if (!"skipped".equals(child.getValue(UserQA.class).getAnswer())) {
                                 userQA2.add(child.getValue(UserQA.class));
@@ -596,21 +601,12 @@ public class PeopleNearby_Fragment extends Fragment {
                         }
 
                         Compatability mCompatability = new Compatability(userQA1, userQA2);
-                        dialog.setScore(mCompatability.getScore().toString());
+
+                        new getScore().execute(new UserComp(mCompatability,dialog.getId()));
 
 
-                        if (mLocationDialogs.contains(dialog)) {
-                            int i = mLocationDialogs.indexOf(dialog);
-                            mLocationDialogs.set(i, dialog);
-                        } else {
-                            mLocationDialogs.add(dialog);
-                        }
-                        Log.d("pplnby", "" + "ADDED");
-                        Collections.sort(mLocationDialogs);
-                        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-                        mAdapter.notifyDataSetChanged();
-                        mRefreshLayout.setRefreshing(false);
-                        mRecyclerView.setVisibility(View.VISIBLE);
+
+
 
                     }
 
@@ -630,6 +626,8 @@ public class PeopleNearby_Fragment extends Fragment {
 
     }
 
+
+
     private void showSingleChoiceDialog() {
 
         new MaterialDialog.Builder(getContext())
@@ -642,7 +640,7 @@ public class PeopleNearby_Fragment extends Fragment {
                         radius = convertMileStringtoKm(String.valueOf(text));
                         ;
                         if (mLocation != null) {
-                            findPeopleNearby(mLocation.getLatitude(), mLocation.getLongitude(), radius);
+                           loadData();
 
                         }
                         return true;
@@ -777,12 +775,12 @@ public class PeopleNearby_Fragment extends Fragment {
     }
 
 
-    public class UpdateLocation extends AsyncTask<Boolean,Void,Void>{
+    public class UpdateLocation extends AsyncTask<Boolean, Void, Void> {
         @Override
         protected Void doInBackground(Boolean... booleans) {
-            Boolean isChecked =booleans[0];
+            Boolean isChecked = booleans[0];
 
-            if(isChecked){
+            if (isChecked) {
                 SharedPreferences sharedPreferences = getActivity().getSharedPreferences("setting", MODE_PRIVATE);
                 boolean notShow = sharedPreferences.getBoolean("shareLocationDialog", false);
 
@@ -799,7 +797,7 @@ public class PeopleNearby_Fragment extends Fragment {
 
                 }
 
-            }else{
+            } else {
                 setSharedPreference(isChecked);
                 setUserPrivacy(isChecked);
                 stopJob();
@@ -811,7 +809,7 @@ public class PeopleNearby_Fragment extends Fragment {
     }
 
 
-    private class updateAllDistance extends AsyncTask<Void, Void, Void> {
+    private class updateAll extends AsyncTask<Void, Void, Void> {
         @Override
         protected void onPreExecute() {
 
@@ -827,10 +825,12 @@ public class PeopleNearby_Fragment extends Fragment {
                 requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         MY_PERMISSIONS_LOCATION);
             } else {
+                if (mLocation != null && radius != null) {
+                    for(UserLocationDialog dialog : mLocationDialogs){
+                        updateDistance(dialog);
+                        compareWithUser2(dialog);
+                    }
 
-
-                for (UserLocationDialog locationDialog : mLocationDialogs) {
-                    updateDistance(locationDialog);
                 }
                 Log.d("pplnby", "" + "currentLocation got it");
 
@@ -845,16 +845,40 @@ public class PeopleNearby_Fragment extends Fragment {
         protected void onPostExecute(Void aVoid) {
             Collections.sort(mLocationDialogs);
             mAdapter.notifyDataSetChanged();
-            mRefreshLayout.setRefreshing(false);
+            mRecyclerView.setVisibility(View.VISIBLE);
+            loadingGif.setVisibility(View.GONE);
         }
     }
 
+    private class getScore extends AsyncTask<UserComp, Void, Void> {
+        @Override
+        protected Void doInBackground(UserComp... userComps) {
+            Compatability compatability = userComps[0].getCompatability();
+            int score = compatability.getScore();
+            UserLocationDialog dialog = new UserLocationDialog();
+            dialog.setId(userComps[0].getUserUid());
+            if (mLocationDialogs.contains(dialog)) {
+                int i = mLocationDialogs.indexOf(dialog);
+                mLocationDialogs.get(i).setScore(""+score);
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute() {
 
 
+        }
 
-
-
-
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            Collections.sort(mLocationDialogs);
+            mAdapter.notifyDataSetChanged();
+            mRecyclerView.setVisibility(View.VISIBLE);
+            loadingGif.setVisibility(View.GONE);
+        }
+    }
 
 
 }

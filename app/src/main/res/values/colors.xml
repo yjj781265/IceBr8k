@@ -18,6 +18,7 @@
     <color name="lightRed">#feb2b2</color>
     <color name="dialog_divider">#ebebeb</color>
     <color name="dark_gray">#3c3e42</color>
+    <color name="white">#ffffff</color>
 
     <!-- Material DEFAULT text / items colors -->
     <color name="material_drawer_primary_text">#DE000000</color>
@@ -26,5 +27,6 @@
 
 
     <color name="black_overlay">#66000000</color>
+
 
 </resources>

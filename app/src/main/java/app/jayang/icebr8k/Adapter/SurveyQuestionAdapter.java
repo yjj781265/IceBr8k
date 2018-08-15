@@ -325,7 +325,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                                         comment, pieChart, stamp);
 
                             }
-                        }, 666);
+                        }, 300);
 
                     }
                 } else if (v == skip) {
@@ -342,7 +342,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                             );
 
                         }
-                    }, 666);
+                    }, 300);
 
                 }
             }
@@ -423,7 +423,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                                     comment, pieChart, stamp);
 
                         }
-                    }, 666);
+                    }, 300);
 
 
                 } else if (v == skip) {
@@ -438,7 +438,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                             );
 
                         }
-                    }, 666);
+                    }, 300);
 
                 }
             }
@@ -518,7 +518,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                                     comment, pieChart, stamp);
 
                         }
-                    }, 666);
+                    }, 300);
 
                 } else if (v == skip) {
 
@@ -532,7 +532,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                                     comment, pieChart, stamp);
 
                         }
-                    }, 666);
+                    }, 300);
 
                 }
             }
@@ -549,7 +549,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     }
 
 
-    @SuppressLint("StaticFieldLeak")
+
     void uploadtoDatabase(final SurveyQ surveyQ, final TextView skip, final TextView confirm, final String answer, final ProgressBar progressBar,
                           final ImageView check, final TextView comment, final ImageView pieChart, final ImageView stamp) {
 
@@ -584,21 +584,9 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
 
-                            new AsyncTask<Void,Void,Void>(){
-                                @Override
-                                protected void onPreExecute() {
 
-                                    }
 
-                                @Override
-                                protected void onPostExecute(Void aVoid) {
-                                    progressBar.setVisibility(View.GONE);
-                                    comment.setVisibility(View.VISIBLE);
-                                    pieChart.setVisibility(View.VISIBLE);
-                                }
 
-                                @Override
-                                protected Void doInBackground(Void... voids) {
                                     // upload the answer
                                     final UserQA userQA = new UserQA();
                                     userQA.setQuestionId(surveyQ.getQuestionId());
@@ -618,25 +606,23 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                                     userQARef.setValue(userQA).addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
                                         public void onSuccess(Void aVoid) {
+                                            progressBar.setVisibility(View.GONE);
+                                            comment.setVisibility(View.VISIBLE);
+                                            pieChart.setVisibility(View.VISIBLE);
                                             check.setVisibility(View.VISIBLE);
                                             progressBar.setVisibility(View.GONE);
                                             stamp.setVisibility("skipped" .equals(answer) ? View.VISIBLE : View.GONE);
-
-
                                             mHashMap.put(surveyQ, answer);
                                             mListener.onClick(surveyQ,answer);
-
-
-
                                             //show tutorial for piechart and comments
                                             showPieChartCommentPrompt(comment,pieChart);
 
 
                                         }
                                     });
-                                    return null;
-                                }
-                            }.execute();
+
+
+
 
 
 
@@ -663,21 +649,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         } else {
 
 
-            new AsyncTask<Void,Void,Void>(){
-                @Override
-                protected void onPreExecute() {
-                    }
 
-                @Override
-                protected void onPostExecute(Void aVoid) {
-                    progressBar.setVisibility(View.GONE);
-                    comment.setVisibility(View.VISIBLE);
-                    pieChart.setVisibility(View.VISIBLE);
-
-                }
-
-                @Override
-                protected Void doInBackground(Void... voids) {
                     // upload the answer
                     final UserQA userQA = new UserQA();
                     userQA.setQuestionId(surveyQ.getQuestionId());
@@ -697,14 +669,13 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                     userQARef.setValue(userQA).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
+                            mHashMap.put(surveyQ, answer);
+                            mListener.onClick(surveyQ,answer);
+                            comment.setVisibility(View.VISIBLE);
+                            pieChart.setVisibility(View.VISIBLE);
                             check.setVisibility(View.VISIBLE);
                             progressBar.setVisibility(View.GONE);
                             stamp.setVisibility("skipped" .equals(answer) ? View.VISIBLE : View.GONE);
-
-
-                            mHashMap.put(surveyQ, answer);
-                            mListener.onClick(surveyQ,answer);
-
 
                             //show tutorial for piechart and comments
                             showPieChartCommentPrompt(comment,pieChart);
@@ -712,14 +683,14 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
                         }
                     });
-                    return null;
+
                 }
-            }.execute();
+
 
         }
 
 
-    }
+
 
     void getComments(final SurveyQ surveyq, final TextView comment) {
         final String questionId = surveyq.getQuestionId();

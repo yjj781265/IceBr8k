@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -54,7 +55,7 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
            holder.name .setText(user.getDisplayname());
            holder.score.setText(user.getScore()+"%");
            holder.username.setText(user.getUsername());
-           Glide.with(mContext).load(user.getPhotourl()).apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3))
+           Glide.with(mContext).load(user.getPhotourl()).apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3)).transition(DrawableTransitionOptions.withCrossFade(300))
                    .into(holder.avatar);
        }
 

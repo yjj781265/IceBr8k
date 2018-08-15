@@ -64,6 +64,7 @@ public class QuestionAnswered_Fragment extends Fragment {
 
         mRecyclerView = mView.findViewById(R.id.recyclerView_questionTab);
         searchLayout = mView.findViewById(R.id.search_layout);
+        searchLayout.setVisibility(View.GONE);
         searchView = mView.findViewById(R.id.searchview_question);
         searchView.setOnClickListener(new View.OnClickListener() {
             @Override

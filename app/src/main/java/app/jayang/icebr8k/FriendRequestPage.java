@@ -34,6 +34,8 @@ public class FriendRequestPage extends SwipeBackActivity {
     private ArrayList<User> mUsers;
     private FriendRequestAdapter mAdapter;
     private FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+    private DatabaseReference ref;
+    private ChildEventListener friendRequestChildListener;
 
 
     @Override
@@ -58,10 +60,10 @@ public class FriendRequestPage extends SwipeBackActivity {
     }
 
     void loadData(){
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+        ref = FirebaseDatabase.getInstance().getReference()
                 .child("UserFriends")
                 .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
-        ref.orderByChild("stats").addChildEventListener(new ChildEventListener() {
+        friendRequestChildListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d("friend123",dataSnapshot.getKey() +"added");
@@ -85,54 +87,10 @@ public class FriendRequestPage extends SwipeBackActivity {
                         }
                     });
                 }
-
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Log.d("friend123",dataSnapshot.getValue().toString());
-                if(!"pending".equals(dataSnapshot.child("stats").getValue(String.class))){
-                    DatabaseReference userRef = FirebaseDatabase.getInstance().getReference()
-                            .child("Users").child(dataSnapshot.getKey());
-                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            User user = dataSnapshot.getValue(User.class);
-                            if(mUsers.contains(user)){
-                                mUsers.remove(user);
-                                mAdapter.notifyItemRemoved(mUsers.indexOf(user));
-                                nofrt.setVisibility(mUsers.isEmpty()? View.VISIBLE:View.GONE);
-                            }
-
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-                }
-
-
-                if("pending".equals(dataSnapshot.child("stats").getValue(String.class))){
-                    DatabaseReference userRef = FirebaseDatabase.getInstance().getReference()
-                            .child("Users").child(dataSnapshot.getKey());
-                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            User user = dataSnapshot.getValue(User.class);
-                            mUsers.add(user);
-                            mAdapter.notifyItemInserted(mUsers.indexOf(user));
-                            compareWithUser2(dataSnapshot.getKey(),user);
-                            nofrt.setVisibility(mUsers.isEmpty()? View.VISIBLE:View.GONE);
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-                }
 
             }
 
@@ -150,7 +108,8 @@ public class FriendRequestPage extends SwipeBackActivity {
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
+        ref.orderByChild("stats").addChildEventListener(friendRequestChildListener);
 
 
     }
@@ -216,4 +175,12 @@ public class FriendRequestPage extends SwipeBackActivity {
         return true;
     }
 
+    @Override
+    protected void onDestroy() {
+        if(friendRequestChildListener!=null && ref!=null){
+            ref.removeEventListener(friendRequestChildListener);
+        }
+
+        super.onDestroy();
+    }
 }

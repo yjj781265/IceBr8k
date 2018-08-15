@@ -59,9 +59,11 @@
                 android:id="@+id/textView4"
                 android:layout_width="wrap_content"
                 android:layout_height="16dp"
+                android:layout_marginBottom="16dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
                 android:text="@string/_1_hate_it_10_love_it"
+                app:layout_constraintBottom_toTopOf="@+id/survey_sc_seekBar"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/survey_sc_question"/>
 
@@ -84,6 +86,7 @@
                 android:id="@+id/survey_sc_seekBar"
                 android:layout_width="match_parent"
                 android:layout_height="37dp"
+                android:layout_marginBottom="8dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
@@ -100,6 +103,7 @@
                 app:bsb_show_section_text="true"
                 app:bsb_show_thumb_text="false"
                 app:bsb_touch_to_seek="true"
+                app:layout_constraintBottom_toTopOf="@+id/relativeLayout8"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
@@ -107,6 +111,7 @@
 
 
             <RelativeLayout
+                android:id="@+id/relativeLayout8"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -129,14 +134,14 @@
 
 
                     <TextView
-                        android:background="?attr/selectableItemBackground"
-                        android:text="Comment"
-                        android:visibility="gone"
                         android:id="@+id/survey_sc_comment"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="3dp"
-                        android:textSize="14sp"/>
+                        android:background="?attr/selectableItemBackground"
+                        android:text="Comment"
+                        android:textSize="14sp"
+                        android:visibility="gone"/>
                 </LinearLayout>
 
                 <TextView
@@ -150,20 +155,22 @@
                     android:textSize="16sp"/>
 
                 <ProgressBar
-                    android:visibility="gone"
                     android:id="@+id/survey_sc_progressBar"
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:layout_alignBottom="@+id/survey_sc_confirm"
                     android:layout_centerInParent="true"
-                    />
-                <ImageView
                     android:visibility="gone"
+                    />
+
+                <ImageView
                     android:id="@+id/checked"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
                     android:layout_centerInParent="true"
                     android:src="@drawable/check_mark"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"/>
+                    android:visibility="gone"/>
+
                 <TextView
 
                     android:id="@+id/survey_sc_skip"

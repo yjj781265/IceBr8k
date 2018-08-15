@@ -23,6 +23,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 
 import app.jayang.icebr8k.Adapter.ResultItemAdapter;
 import app.jayang.icebr8k.Modle.ResultItem;
@@ -53,6 +54,9 @@ public class diffFrag extends Fragment {
     DatabaseReference mRef2;
     Boolean firstTime = true;
     private ActivityCommunicator mCommunicator;
+    private DatabaseReference mUserQARef;
+    private ChildEventListener mUserQARefChildListener;
+    private HashMap<DatabaseReference,ValueEventListener> mListenerHashMap = new HashMap<>();
 
     public diffFrag() {
     }
@@ -190,7 +194,8 @@ public class diffFrag extends Fragment {
                                        DatabaseReference commentRef = FirebaseDatabase.getInstance().getReference()
                                                .child("Comments")
                                                .child(resultItem.getQuestionId()) ;
-                                       commentRef.addValueEventListener(new ValueEventListener() {
+
+                                       ValueEventListener commentRefListener = new ValueEventListener() {
                                            @Override
                                            public void onDataChange(DataSnapshot dataSnapshot) {
                                                Long count = dataSnapshot.getChildrenCount();
@@ -198,14 +203,15 @@ public class diffFrag extends Fragment {
                                                if(mResultItems.contains(resultItem)){
                                                    mAdapter.notifyItemChanged(mResultItems.indexOf(resultItem));
                                                }
-
                                            }
 
                                            @Override
                                            public void onCancelled(DatabaseError databaseError) {
 
                                            }
-                                       });
+                                       };
+                                       commentRef.addValueEventListener(commentRefListener);
+                                       mListenerHashMap.put(commentRef,commentRefListener);
                                    }
                                }
 
@@ -254,8 +260,8 @@ public class diffFrag extends Fragment {
     }
 
     public void addUserQAListener() {
-        final DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("UserQA/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
-        mRef.addChildEventListener(new ChildEventListener() {
+        mUserQARef= FirebaseDatabase.getInstance().getReference("UserQA/" + FirebaseAuth.getInstance().getCurrentUser().getUid());
+        mUserQARefChildListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
@@ -268,9 +274,6 @@ public class diffFrag extends Fragment {
                     loadData();
                     childKey = dataSnapshot.getKey();
                 }
-
-
-
             }
 
             @Override
@@ -287,7 +290,22 @@ public class diffFrag extends Fragment {
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
+        mUserQARef.addChildEventListener(mUserQARefChildListener);
 
+    }
+
+    @Override
+    public void onDestroy() {
+        try {
+            mUserQARef.removeEventListener(mUserQARefChildListener);
+            for (DatabaseReference databaseReference : mListenerHashMap.keySet()) {
+                databaseReference.removeEventListener(mListenerHashMap.get(databaseReference));
+            }
+        }catch (NullPointerException e){
+            Log.d("result123",e.getMessage());
+        }
+        Log.d("result123",mListenerHashMap.size()+"");
+        super.onDestroy();
     }
 }

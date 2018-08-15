@@ -1,0 +1,71 @@
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="HardcodedText"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:layout_marginTop="2dp"
+    android:animateLayoutChanges="true"
+    android:elevation="2dp">
+
+
+    <ImageView
+        android:id="@+id/outcoming_image_avatar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/camera_selector"/>
+
+
+    <com.github.siyamed.shapeimageview.RoundedImageView
+        android:id="@+id/outcoming_image_imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:adjustViewBounds="true"
+        android:contentDescription="image"
+        android:maxHeight="150dp"
+        android:maxWidth="150dp"
+        android:scaleType="fitCenter"
+
+
+        app:layout_constraintBottom_toTopOf="@+id/outcoming_image_time"
+        app:layout_constraintEnd_toStartOf="@+id/outcoming_image_avatar"
+        app:layout_constraintTop_toTopOf="parent"
+        app:siBorderWidth="0dp"
+        app:siRadius="8dp"/>
+
+    <ProgressBar
+        android:id="@+id/outgoing_image_progressBar"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/outcoming_image_imageView"
+        app:layout_constraintEnd_toEndOf="@+id/outcoming_image_imageView"
+        app:layout_constraintStart_toStartOf="@+id/outcoming_image_imageView"
+        app:layout_constraintTop_toTopOf="@+id/outcoming_image_imageView"/>
+
+
+    <TextView
+        android:id="@+id/outcoming_image_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+
+        android:layout_marginEnd="8dp"
+        android:text="10:23 pm"
+        android:textSize="12sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toStartOf="@+id/outcoming_image_avatar"
+        app:layout_constraintTop_toBottomOf="@+id/outcoming_image_imageView"/>
+
+ \
+</android.support.constraint.ConstraintLayout>

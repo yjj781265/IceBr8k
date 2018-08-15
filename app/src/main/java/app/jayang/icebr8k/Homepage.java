@@ -191,7 +191,7 @@ public class Homepage extends AppCompatActivity implements
 
         // bottom nav bar
         setHomepageTab();
-         addUserQAListener();
+        // addUserQAListener();
 
         if (getIntent().getExtras() != null) {
             // extras for chat Page
@@ -519,7 +519,7 @@ public class Homepage extends AppCompatActivity implements
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        Intent intent;
+
                         switch (position) {
                             case -1:
 
@@ -539,9 +539,17 @@ public class Homepage extends AppCompatActivity implements
                                 lastClickTime = SystemClock.elapsedRealtime();
                                 drawer.setSelection(-1);
                                 drawer.closeDrawer();
-                                Intent i = new Intent(getApplicationContext(), FriendRequestPage.class);
-                                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                                startActivity(i);
+
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Intent i = new Intent(getApplicationContext(), FriendRequestPage.class);
+                                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                                        startActivity(i);
+                                    }
+                                },300);
+
+
 
                                 return true;
 
@@ -553,9 +561,16 @@ public class Homepage extends AppCompatActivity implements
                                 lastClickTime = SystemClock.elapsedRealtime();
                                 drawer.setSelection(-1);
                                 drawer.closeDrawer();
-                                Intent mintent = new Intent(getApplicationContext(), SearchUser.class);
-                                mintent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                                startActivity(mintent);
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Intent mintent = new Intent(getApplicationContext(), SearchUser.class);
+                                        mintent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                                        startActivity(mintent);
+                                    }
+                                },300);
+
+
 
                                 return true;
 /*
@@ -602,8 +617,14 @@ public class Homepage extends AppCompatActivity implements
                                 lastClickTime = SystemClock.elapsedRealtime();
                                 drawer.setSelection(-1);
                                 drawer.closeDrawer();
-                                intent = new Intent(getApplicationContext(), Feedback.class);
-                                startActivity(intent);
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Intent intent = new Intent(getApplicationContext(), Feedback.class);
+                                        startActivity(intent);
+                                    }
+                                },300);
+
 
                                 return true;
 
@@ -615,8 +636,13 @@ public class Homepage extends AppCompatActivity implements
                                 lastClickTime = SystemClock.elapsedRealtime();
                                 drawer.setSelection(-1);
                                 drawer.closeDrawer();
-                                intent = new Intent(getApplicationContext(), Settings_Activity.class);
-                                startActivity(intent);
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                       Intent intent = new Intent(getApplicationContext(), Settings_Activity.class);
+                                        startActivity(intent);
+                                    }
+                                },300);
 
                                 return true;
 
@@ -705,22 +731,42 @@ public class Homepage extends AppCompatActivity implements
 
 
     private void initialiseOnlinePresence() {
-
-        mRef.addValueEventListener(new ValueEventListener() {
+        final DatabaseReference connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
+        connectedRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(final DataSnapshot dataSnapshot) {
-                Log.d("haha", "DataSnapshot:" + dataSnapshot);
-                if (dataSnapshot.hasChildren()) {
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                boolean connected = dataSnapshot.getValue(Boolean.class);
+                if (connected) {
+
+
+                    // when this device disconnects, remove it
                     presenceRef.onDisconnect().setValue("0");
+
+                    // when I disconnect, update the last time I was seen online
                     lastSeenRef.onDisconnect().setValue(ServerValue.TIMESTAMP);
+
+                    presenceRef.setValue("2");
+                    lastSeenRef.removeValue();
+
+                    // add this device to my connections list
+                    // this value could contain info about the device or a timestamp too
+
+                }else{
+                    presenceRef.setValue("0");
                 }
             }
 
             @Override
-            public void onCancelled(final DatabaseError databaseError) {
-                Log.d("haha", "DatabaseError:" + databaseError);
+            public void onCancelled(DatabaseError databaseError) {
+
             }
         });
+
+
+
+
+
+
     }
 
     public void showToast(String str) {

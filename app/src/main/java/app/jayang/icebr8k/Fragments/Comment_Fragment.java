@@ -33,7 +33,9 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.UUID;
 
 import app.jayang.icebr8k.Adapter.CommentAdapter;
@@ -60,14 +62,17 @@ public class Comment_Fragment extends Fragment {
     private TextView noComments;
     private View mView;
     private RecyclerView mRecyclerView;
+    private Comparator<Comment> mComparator;
     private CommentAdapter mAdapter;
+    private HashMap<DatabaseReference,ValueEventListener> repliesMap = new HashMap<>();
     private ArrayList<Comment> comments;
     private ProgressBar mProgressBar;
     private RecyclerView.LayoutManager mLayoutManager;
     private FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
     private final Comment loadingComment = new Comment("loading",null,null,"load",null,null,null);
     private final Comment inputComment = new Comment("input",null,null,"input",null,null,null);
-
+    private DatabaseReference commentRef;
+    private ChildEventListener commentRefChildListener;
 
 
     public Comment_Fragment() {
@@ -104,6 +109,16 @@ public class Comment_Fragment extends Fragment {
             questionId = getArguments().getString(QUESTION_ID);
 
         }
+
+        mComparator =new Comparator<Comment>() {
+            @Override
+            public int compare(Comment o1, Comment o2) {
+                if(o1!=null && o1.getTimestamp()!=null &&o2!=null && o2.getTimestamp()!=null){
+                    return o2.getTimestamp().compareTo(o1.getTimestamp());
+                }
+                return 0;
+            }
+        };
     }
 
     @Override
@@ -158,13 +173,6 @@ public class Comment_Fragment extends Fragment {
 
         getComments();
 
-
-
-
-
-
-
-
         return mView;
     }
 
@@ -187,66 +195,67 @@ public class Comment_Fragment extends Fragment {
 
     void getComments(){
         mProgressBar.setVisibility(View.VISIBLE);
-        DatabaseReference commentRef = FirebaseDatabase.getInstance().getReference()
+         commentRef = FirebaseDatabase.getInstance().getReference()
                 .child("Comments")
                 .child(questionId);
-        commentRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                final Comment comment = dataSnapshot.getValue(Comment.class);
+         commentRefChildListener = new ChildEventListener() {
+             @Override
+             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                 final Comment comment = dataSnapshot.getValue(Comment.class);
 
-                DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
-                        .child("Comments")
-                        .child(questionId).
-                                child(comment.getId())
-                        .child("replies");
-                ref.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
+                 DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+                         .child("Comments")
+                         .child(questionId).
+                                 child(comment.getId())
+                         .child("replies");
+                 ValueEventListener repliesListener = new ValueEventListener() {
+                     @Override
+                     public void onDataChange(DataSnapshot dataSnapshot) {
+                         long count = dataSnapshot.getChildrenCount();
+                         comment.setReply(count);
+                         if(comments.contains(comment)){
+                             comments.set(comments.indexOf(comment),comment);
+                             mAdapter.notifyItemChanged(comments.indexOf(comment));
+                         }else{
+                             comments.add(comment);
+                             Collections.sort(comments,mComparator);
+                             mAdapter.notifyDataSetChanged();
+                         }
+                     }
 
-                        long count = dataSnapshot.getChildrenCount();
-                        comment.setReply(count);
-                        if(comments.contains(comment)){
-                            comments.set(comments.indexOf(comment),comment);
-                            mAdapter.notifyItemChanged(comments.indexOf(comment));
-                        }else{
-                            comments.add(comment);
-                            Collections.sort(comments);
-                            mAdapter.notifyDataSetChanged();
-                        }
-                        }
+                     @Override
+                     public void onCancelled(DatabaseError databaseError) {
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
+                     }
+                 };
+                 ref.addValueEventListener(repliesListener);
+                 repliesMap.put(ref,repliesListener);
 
-                    }
-                });
+             }
 
+             @Override
+             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-            }
+             }
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+             @Override
+             public void onChildRemoved(DataSnapshot dataSnapshot) {
 
-            }
+             }
 
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
+             @Override
+             public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
-            }
+             }
 
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+             @Override
+             public void onCancelled(DatabaseError databaseError) {
 
-            }
+             }
+         };
+        commentRef.addChildEventListener(commentRefChildListener);
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        commentRef.addValueEventListener(new ValueEventListener() {
+        commentRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mProgressBar.setVisibility(View.GONE);
@@ -263,9 +272,13 @@ public class Comment_Fragment extends Fragment {
     }
 
 
+    @Override
+    public void onDestroy() {
+        commentRef.removeEventListener(commentRefChildListener);
+        for(DatabaseReference ref : repliesMap.keySet()){
+            ref.removeEventListener(repliesMap.get(ref));
+        }
 
-
-
-
-
+        super.onDestroy();
+    }
 }

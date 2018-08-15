@@ -61,6 +61,7 @@ public class SearchableActivity extends AppCompatActivity implements SearchView.
         searchView.setQueryHint("Search Question");
         searchView.setOnQueryTextListener(this);
         searchView.requestFocus();
+        searchView.setMaxWidth(  Integer.MAX_VALUE);
         return true;
 
     }

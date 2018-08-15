@@ -78,6 +78,8 @@ public class SearchName extends AppCompatActivity implements SearchView.OnQueryT
         searchView.setQueryHint(getString(R.string.hint1));
         searchView.setOnQueryTextListener(this);
         searchView.requestFocus();
+        searchView.setMaxWidth(  Integer.MAX_VALUE);
+
         return true;
     }
 
