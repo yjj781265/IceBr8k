@@ -466,6 +466,7 @@ public class PeopleNearby_Fragment extends Fragment {
                             if (mLocationDialogs.isEmpty()) {
                                 centerText.setVisibility(View.VISIBLE);
                                 centerText.setText("No users nearby");
+                                loadingGif.setVisibility(View.GONE);
                             } else {
                                 centerText.setVisibility(View.GONE);
 
@@ -536,6 +537,7 @@ public class PeopleNearby_Fragment extends Fragment {
                             if (mLocationDialogs.isEmpty()) {
                                 centerText.setVisibility(View.VISIBLE);
                                 centerText.setText("No users nearby");
+                                loadingGif.setVisibility(View.GONE);
                             } else {
                                 centerText.setVisibility(View.GONE);
 

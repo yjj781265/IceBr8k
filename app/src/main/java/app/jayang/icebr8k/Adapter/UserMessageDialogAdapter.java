@@ -153,12 +153,15 @@ public class UserMessageDialogAdapter extends RecyclerView.Adapter<RecyclerView.
             }
 
             if(messageDialog.getLastMessage()!=null){
+                String lastMessage = messageDialog.getLastMessage().getMessagetype()!=null &&  messageDialog.getLastMessage().getMessagetype().equals("image")
+                        ? "[Image]" : messageDialog.getLastMessage().getText();
+
                 if(messageDialog.getUnRead()!=null && messageDialog.getUnRead()>0){
-                    ((UserMessageDialogViewHolder) holder).lastMessage.setText(messageDialog.getLastMessage().getText());
+                    ((UserMessageDialogViewHolder) holder).lastMessage.setText(lastMessage);
                     ((UserMessageDialogViewHolder) holder).lastMessage.setTypeface(null, Typeface.BOLD);
 
                 }else{
-                    ((UserMessageDialogViewHolder) holder).lastMessage.setText(messageDialog.getLastMessage().getText());
+                    ((UserMessageDialogViewHolder) holder).lastMessage.setText(lastMessage);
                     ((UserMessageDialogViewHolder) holder).lastMessage.setTypeface(null, Typeface.NORMAL);
                 }
             }

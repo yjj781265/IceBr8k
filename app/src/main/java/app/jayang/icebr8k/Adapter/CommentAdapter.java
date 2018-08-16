@@ -275,7 +275,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
 
     // load more progress bar
-    public class LoadMoreViewHolder extends RecyclerView.ViewHolder {
+    public  class LoadMoreViewHolder extends RecyclerView.ViewHolder {
         private ProgressBar mProgressBar;
         public LoadMoreViewHolder(View itemView) {
             super(itemView);
@@ -284,7 +284,7 @@ public class CommentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     // input layout
-    public class CommentInputViewHolder extends RecyclerView.ViewHolder  {
+    public  class CommentInputViewHolder extends RecyclerView.ViewHolder  {
         ImageView avatar;
 
         public CommentInputViewHolder(View itemView) {

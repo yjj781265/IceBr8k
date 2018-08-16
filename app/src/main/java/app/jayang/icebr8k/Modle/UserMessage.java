@@ -7,7 +7,7 @@ package app.jayang.icebr8k.Modle;
 public class UserMessage {
     private String text, senderid, messagetype, messageid;
     private Long timestamp;
-    private Boolean doneNetWorking =false;  //default value
+    private Boolean doneNetWorking =false,isGif = false;  //default value
 
 
 
@@ -29,6 +29,14 @@ public class UserMessage {
         this.messageid = messageid;
         this.timestamp = timestamp;
         this.doneNetWorking = doneNetWorking;
+    }
+
+    public Boolean getGif() {
+        return isGif;
+    }
+
+    public void setGif(Boolean gif) {
+        isGif = gif;
     }
 
     public Boolean getDoneNetWorking() {

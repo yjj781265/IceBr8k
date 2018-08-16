@@ -86,7 +86,7 @@ public class Userstab_Fragment extends Fragment {
     RecyclerAdapter mAdapter;
     TextView seachView;
     Integer friendCount;
-    BootstrapButton addFriend;
+    Button addFriend;
     FrameLayout searchLayout;
     Button filter_btn;
     Boolean isVisiable = false;
@@ -443,6 +443,7 @@ public class Userstab_Fragment extends Fragment {
                     mUserDialogArrayList.remove(index);
                     mAdapter.notifyItemRemoved(index);
                 }
+                addFriend.setVisibility(mUserDialogArrayList.isEmpty()? View.VISIBLE:View.GONE);
             }
 
             @Override

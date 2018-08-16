@@ -31,6 +31,8 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.github.javiersantos.materialstyleddialogs.enums.Style;
 import com.github.mikephil.charting.animation.Easing;
@@ -549,7 +551,6 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     }
 
 
-
     void uploadtoDatabase(final SurveyQ surveyQ, final TextView skip, final TextView confirm, final String answer, final ProgressBar progressBar,
                           final ImageView check, final TextView comment, final ImageView pieChart, final ImageView stamp) {
 
@@ -611,6 +612,8 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                                             pieChart.setVisibility(View.VISIBLE);
                                             check.setVisibility(View.VISIBLE);
                                             progressBar.setVisibility(View.GONE);
+                                            YoYo.with(Techniques.FadeIn).playOn(comment);
+                                            YoYo.with(Techniques.FadeIn).playOn(pieChart);
                                             stamp.setVisibility("skipped" .equals(answer) ? View.VISIBLE : View.GONE);
                                             mHashMap.put(surveyQ, answer);
                                             mListener.onClick(surveyQ,answer);
@@ -673,6 +676,8 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                             mListener.onClick(surveyQ,answer);
                             comment.setVisibility(View.VISIBLE);
                             pieChart.setVisibility(View.VISIBLE);
+                            YoYo.with(Techniques.FadeIn).playOn(comment);
+                            YoYo.with(Techniques.FadeIn).playOn(pieChart);
                             check.setVisibility(View.VISIBLE);
                             progressBar.setVisibility(View.GONE);
                             stamp.setVisibility("skipped" .equals(answer) ? View.VISIBLE : View.GONE);

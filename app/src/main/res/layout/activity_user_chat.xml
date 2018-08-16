@@ -29,25 +29,6 @@
     </android.support.v7.widget.Toolbar>
 
 
-    <TextView
-        android:id="@+id/userChat_toast"
-        android:layout_width="wrap_content"
-
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:alpha="0.9"
-        android:background="@drawable/round_rectangle_orange_border"
-        android:gravity="center"
-        android:padding="6dp"
-        android:paddingEnd="24dp"
-        android:paddingStart="24dp"
-        android:text="New Message"
-        android:textColor="@color/dark_gray"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.502"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/userChat_toolbar"/>
-
     <LinearLayout
         android:id="@+id/userChat_input_root"
         android:layout_width="match_parent"
@@ -238,6 +219,7 @@
     <HorizontalScrollView
         android:elevation="1dp"
         android:visibility="gone"
+        android:nestedScrollingEnabled="false"
         android:background="@color/creamYellow"
         android:id="@+id/userChat_imagePicker_nsv"
         android:layout_width="match_parent"
@@ -276,6 +258,25 @@
         app:layout_constraintTop_toBottomOf="@+id/userChat_toolbar">
 
     </android.support.v7.widget.RecyclerView>
+
+    <TextView
+        android:id="@+id/userChat_toast"
+        android:layout_width="wrap_content"
+
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:alpha="0.9"
+        android:background="@drawable/round_rectangle_orange_border"
+        android:gravity="center"
+        android:padding="6dp"
+        android:paddingEnd="24dp"
+        android:paddingStart="24dp"
+        android:text="New Message"
+        android:textColor="@color/dark_gray"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/userChat_toolbar"/>
 
 
 </android.support.constraint.ConstraintLayout>

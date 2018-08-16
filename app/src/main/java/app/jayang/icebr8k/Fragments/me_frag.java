@@ -376,7 +376,7 @@ public class me_frag extends Fragment {
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
 
-                            Glide.with(mView).load(photoUrl).transition(DrawableTransitionOptions.withCrossFade(300))
+                            Glide.with(getActivity().getApplicationContext()).load(photoUrl).transition(DrawableTransitionOptions.withCrossFade(300))
                                     .apply(RequestOptions.circleCropTransform()).into(avatar);
                             showToast("Avatar Updated ");
 

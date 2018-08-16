@@ -28,15 +28,15 @@ public class MyNotificationOpenedHandler implements OneSignal.NotificationOpened
 
         if (data != null) {
             // extras for chat Page
-            String user2Id = data.optString("chatId");
-            String name =data.optString("chatName");
+            String user2Id = data.optString("chatId",null);
+            String name =data.optString("chatName",null);
 
             // extras for reply Page
-            String questionId = data.optString("questionId");
-            String title = data.optString("title");
-            String commentAuthorId = data.optString("commentAuthorId");
-            String topCommentId = data.optString("topCommentId");
-            String commentId = data.optString("commentId");
+            String questionId = data.optString("questionId",null);
+            String title = data.optString("title",null);
+            String commentAuthorId = data.optString("commentAuthorId",null);
+            String topCommentId = data.optString("topCommentId",null);
+            String commentId = data.optString("commentId",null);
 
             Log.d("notificationHandler",questionId +"\n" + title +"\n" + commentAuthorId +"\n" + topCommentId +"\n" + commentId +"\n"+ user2Id + "\n chatId"+ name);
 
@@ -70,7 +70,7 @@ public class MyNotificationOpenedHandler implements OneSignal.NotificationOpened
 
         }else{
             Intent mIntent = new Intent(MyApplication.getContext(),Homepage.class);
-            mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT );
+            mIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT );
             MyApplication.getContext().startActivity(mIntent);
         }
 

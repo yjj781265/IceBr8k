@@ -5,13 +5,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
+
+import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Bundle;
+import android.os.Message;
 import android.provider.Settings;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.Snackbar;
@@ -30,6 +32,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
+import android.webkit.URLUtil;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -55,6 +58,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -69,24 +75,30 @@ import com.onesignal.OneSignal;
 
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import app.jayang.icebr8k.Adapter.UserMessageAdapter;
+import app.jayang.icebr8k.Utility.GifSelectedListener;
 import app.jayang.icebr8k.Utility.MyDateFormatter;
 import app.jayang.icebr8k.Modle.MyEditText;
 import app.jayang.icebr8k.Utility.OnLoadMoreListener;
 import app.jayang.icebr8k.Modle.UserMessage;
 import app.jayang.icebr8k.Utility.SendNotification;
+import id.zelory.compressor.Compressor;
 import me.imid.swipebacklayout.lib.SwipeBackLayout;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 
-public class UserChatActvity extends SwipeBackActivity implements View.OnTouchListener, View.OnClickListener, View.OnLongClickListener
-,RecyclerView.OnChildAttachStateChangeListener{
+public class UserChatActvity extends SwipeBackActivity implements View.OnTouchListener, View.OnClickListener, View.OnLongClickListener, GifSelectedListener
+        , RecyclerView.OnChildAttachStateChangeListener {
     private static final int MAX_COUNT = 20;
     private final String VIEWTYPE_TEXT = "text";
     private final String VIEWTYPE_VIDEO = "video";
@@ -99,9 +111,8 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
     private final String VIEWTYPE_TYPE = "type";
     private final String LOAD_ID = "loading";
     private final String TYPE_ID = "typing";
-    private  String user2Uid = null;
+    private String user2Uid = null;
     private MyEditText editText;
-    private BaseTarget target;
     private TextView toast;
     private Long lastTimeStamp;
     private FirebaseUser currentUser;
@@ -117,26 +128,25 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
     private Menu mOptionsMenu;
     private MenuItem inChatItem;
     private HashMap<String, String> userPhotoUrlMap;
-    private Boolean mute = false, loaded = false,user2Inchat =false;
+    private Boolean mute = false, loaded = false, user2Inchat = false;
     protected Handler handler;
     private UserMessage isTypingMessage, loadingMessage;
     private Long lastSeen;
-    private Integer firstVisablePos =0 , lastVisablePos =0,toastThreshhold =2;
-    private String  name;
-    private DatabaseReference senderMessageRef, receiverMessageRef, isTypingRef, inChatRef, muteRef
-            , subTitleRef,titleRef,user2InchatRef,connectedRef,loadMsgRef;
-    private ValueEventListener inChatListener,connectedRefListener,isTypingListener,subTitleListener;
+    private Integer firstVisablePos = 0, lastVisablePos = 0, toastThreshhold = 2;
+    private String name;
+    private DatabaseReference senderMessageRef, receiverMessageRef, isTypingRef, inChatRef, muteRef, subTitleRef, titleRef, user2InchatRef, connectedRef, loadMsgRef,user2Mute;
+    private ValueEventListener inChatListener, connectedRefListener, isTypingListener, subTitleListener,updateChatListener;
     private ChildEventListener loadMessagesListener;
     private HorizontalScrollView mHorizontalScrollView;
     private LinearLayout mImagePickerContainer;
-    private  LinearLayout.LayoutParams lp;
-    private FrameLayout.LayoutParams circle_close_param ;
-    private View.OnClickListener closeListener;
-    private HashMap<ImageView,FrameLayout > mImageViewHashMap = new HashMap<>();
-    private HashMap<ImageView,String > mPathHashMap= new HashMap<>();
-    private ImageLoader mImageLoader = ImageLoader.getInstance();
+    private LinearLayout.LayoutParams lp;
+    private FrameLayout.LayoutParams circle_close_param;
 
 
+    private Set<String> mUriSet = new HashSet<String>();
+    private  MenuItem item;
+    private ValueEventListener muteRefListener;
+    private ValueEventListener updateChatMessageListener;
 
 
     @Override
@@ -149,40 +159,29 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         lp = new LinearLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         lp.setMargins(16, 16, 16, 16);
 
-         circle_close_param =
-                new FrameLayout.LayoutParams((int) getResources().getDimension(R.dimen.circle_close_width),(int) getResources().getDimension(R.dimen.circle_close_heighth)
-                , Gravity.TOP|Gravity.RIGHT);
+        circle_close_param =
+                new FrameLayout.LayoutParams((int) getResources().getDimension(R.dimen.circle_close_width), (int) getResources().getDimension(R.dimen.circle_close_heighth)
+                        , Gravity.TOP | Gravity.RIGHT);
 
 
         editText = (MyEditText) findViewById(R.id.userChat_input);
+
+
         editText.clearFocus();
         hideKeyboard();
         send = (ImageView) findViewById(R.id.userChat_send);
         attachment = (ImageView) findViewById(R.id.userChat_attachment);
-        toast = (TextView)findViewById(R.id.userChat_toast);
+        toast = (TextView) findViewById(R.id.userChat_toast);
         toast.setVisibility(View.GONE);
         toast.setOnTouchListener(this);
-        if(getIntent()!=null) {
+        if (getIntent() != null) {
             user2Uid = getIntent().getExtras().getString("chatId");
             name = getIntent().getExtras().getString("chatName");
 
         }
         mHorizontalScrollView = (HorizontalScrollView) findViewById(R.id.userChat_imagePicker_nsv);
         mImagePickerContainer = (LinearLayout) findViewById(R.id.userChat_imagePicker);
-        // when user click on the image X;
-        closeListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-           FrameLayout frameLayout  =  mImageViewHashMap.get(v);
-           if(frameLayout!=null){
-               mImagePickerContainer.removeView(frameLayout);
-               mImageViewHashMap.remove(v);
-               mPathHashMap.remove(v);
-               mHorizontalScrollView.setVisibility(mImageViewHashMap.isEmpty()? View.GONE:View.VISIBLE);
-               send.setEnabled(!mPathHashMap.isEmpty());
-           }
-           }
-        };
+
 
         voice = (ImageView) findViewById(R.id.userChat_voicemessage);
         voice.setOnTouchListener(this);
@@ -234,13 +233,13 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
         mRecyclerView = (RecyclerView) findViewById(R.id.userChat_list);
 
-        mLayoutManager = new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,true);
+        mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, true);
 
         // use a linear layout manager
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        mAdapter = new UserMessageAdapter(mMessages, mRecyclerView, userPhotoUrlMap,this);
+        mAdapter = new UserMessageAdapter(mMessages, mRecyclerView, userPhotoUrlMap, this);
         mRecyclerView.getItemAnimator().setChangeDuration(0);
         mRecyclerView.getItemAnimator().setRemoveDuration(0);
         mRecyclerView.getItemAnimator().setAddDuration(0);
@@ -251,7 +250,6 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         //loadMessages();
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.addOnChildAttachStateChangeListener(this);
-
 
 
         if (!mMessages.isEmpty()) {
@@ -267,11 +265,11 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         subTitleRef = FirebaseDatabase.getInstance().getReference().child("Users").child(user2Uid);
         titleRef = FirebaseDatabase.getInstance().getReference().child("Users").
                 child(user2Uid).child("displayname");
-         user2InchatRef = receiverMessageRef.child("inchat");
+        user2InchatRef = receiverMessageRef.child("inchat");
 
 ////////////////////////////////////////////////Custom Methods/////////////////////////////////////
 
-        if(name!=null && user2Uid!=null) {
+        if (name != null && user2Uid != null) {
             getSupportActionBar().setTitle(name);
             setTitle();
             setSubTitle();
@@ -279,7 +277,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
             setIstypingListener();
 
 
-        }else{
+        } else {
             finish();
             Toast.makeText(this, "Unable to connect to the server", Toast.LENGTH_SHORT).show();
         }
@@ -362,7 +360,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
                 } else {
                     hideAttachment();
-                    if(!editText.getText().toString().trim().isEmpty()){
+                    if (!editText.getText().toString().trim().isEmpty()) {
                         updateIsTyping(true);
                     }
                 }
@@ -374,23 +372,22 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(checkInternet()){
-                    if(!editText.getText().toString().trim().isEmpty()){
+                if (checkInternet()) {
+                    if (!editText.getText().toString().trim().isEmpty()) {
                         sendMessage();
                     }
 
-                    if(!mPathHashMap.isEmpty()){
-                      for(ImageView imageView :mPathHashMap.keySet()) {
-                          sendImageMessage(mPathHashMap.get(imageView));
-                      }
-                      mPathHashMap.clear();
-                      mHorizontalScrollView.setVisibility(View.GONE);
-                      mImageViewHashMap.clear();
-                      mImagePickerContainer.removeAllViews();
-                      send.setEnabled(false);
+                    if (!mUriSet.isEmpty()) {
+                        for (String url : mUriSet) {
+                            sendImageMessage(url);
+                        }
+                        mUriSet.clear();
+                        mHorizontalScrollView.setVisibility(View.GONE);
+                        mImagePickerContainer.removeAllViews();
+                        send.setEnabled(false);
                     }
 
-                }else{
+                } else {
                     Snackbar snackbar = Snackbar
                             .make(mRecyclerView, "No Internet Connection", Snackbar.LENGTH_LONG)
                             .setAction("Setting", new View.OnClickListener() {
@@ -402,7 +399,6 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
                     snackbar.show();
                 }
-
 
 
             }
@@ -458,7 +454,6 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         inChatItem.setVisible(false);
         //make inchat Indicator unclickable
         inChatItem.setEnabled(false);
-
 
 
         // return true so that the menu pop up is opened
@@ -525,13 +520,10 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
     }
 
 
-
-
     private void updateIsTyping(boolean istyping) {
         senderMessageRef.child("istyping").setValue(istyping);
 
     }
-
 
 
     private void inChat(final boolean inChat) {
@@ -547,29 +539,31 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
     private void setMuteListener() {
 
-        muteRef.addValueEventListener(new ValueEventListener() {
+        muteRefListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                MenuItem item = mOptionsMenu.findItem(R.id.notification_switch);
-                    mute = dataSnapshot.getValue(Boolean.class);
-                    if(mute==null){
-                        setMute(false);
-                    }
+                item = mOptionsMenu.findItem(R.id.notification_switch);
+                mute = dataSnapshot.getValue(Boolean.class);
+                if (mute == null) {
+                    setMute(false);
+                }
 
-                    if (mute == null || !mute) {
-                        mute =false;
-                        item.setIcon(R.drawable.icon_notificastion_on_light);
-                    } else {
-                        item.setIcon(R.drawable.icon_notification_off_light);
-                    }
-
+                if (mute == null || !mute) {
+                    mute = false;
+                    item.setIcon(R.drawable.icon_notificastion_on_light);
+                } else {
+                    item.setIcon(R.drawable.icon_notification_off_light);
+                }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
+
+
+        muteRef.addValueEventListener(muteRefListener);
     }
 
 
@@ -600,16 +594,16 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         }
     }
 
-    private void setTitle(){
+    private void setTitle() {
 
         titleRef.keepSynced(true);
         titleRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                 name = dataSnapshot.getValue(String.class);
-                if(name!=null){
+                name = dataSnapshot.getValue(String.class);
+                if (name != null) {
                     getSupportActionBar().setTitle(name);
-                }else{
+                } else {
                     getSupportActionBar().setTitle(getString(R.string.app_name));
                 }
             }
@@ -621,30 +615,30 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         });
     }
 
-    private void setSubTitle(){
+    private void setSubTitle() {
 
         subTitleListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.hasChild("lastseen")){
+                if (dataSnapshot.hasChild("lastseen")) {
                     lastSeen = dataSnapshot.child("lastseen").getValue(Long.class);
                     setTimeChsngeListener();
                     getSupportActionBar().setSubtitle(MyDateFormatter.lastSeenConverter(lastSeen));
-                }else{
+                } else {
                     removeTimeChangeListener();
 
                     if (dataSnapshot.child("onlinestats").getValue(String.class) != null) {
                         String onlineStats = dataSnapshot.child("onlinestats").getValue(String.class);
                         if (onlineStats.equals("0")) {
                             getSupportActionBar().setSubtitle("Offline");
-                        } else if (onlineStats.equals("2") ) {
-                            getSupportActionBar().setSubtitle((Html.fromHtml("<font color=\"#cafca4\">" + "Online"+ "</font>")));
-                        }else if (onlineStats.equals("1")) {
-                            getSupportActionBar().setSubtitle((Html.fromHtml("<font color=\"#FF8C00\">" + "Busy"+ "</font>")));
+                        } else if (onlineStats.equals("2")) {
+                            getSupportActionBar().setSubtitle((Html.fromHtml("<font color=\"#cafca4\">" + "Online" + "</font>")));
+                        } else if (onlineStats.equals("1")) {
+                            getSupportActionBar().setSubtitle((Html.fromHtml("<font color=\"#FF8C00\">" + "Busy" + "</font>")));
                         } else {
                             getSupportActionBar().setSubtitle("");
                         }
-                    }else{
+                    } else {
                         getSupportActionBar().setSubtitle("");
                     }
                 }
@@ -655,7 +649,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
             }
         };
-      subTitleRef.addValueEventListener(subTitleListener);
+        subTitleRef.addValueEventListener(subTitleListener);
     }
 
     private void setTimeChsngeListener() {
@@ -672,7 +666,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
     }
 
-    private void removeTimeChangeListener(){
+    private void removeTimeChangeListener() {
         try {
             if (tickReceiver != null) {
                 unregisterReceiver(tickReceiver);
@@ -682,7 +676,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         }
     }
 
-    private void setUnread(){
+    private void setUnread() {
         final DatabaseReference checkUnreadRef = receiverMessageRef.child("unread");
 
         checkUnreadRef.runTransaction(new Transaction.Handler() {
@@ -690,9 +684,9 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
             public Transaction.Result doTransaction(MutableData mutableData) {
 
                 Integer unRead = mutableData.getValue(Integer.class);
-                if(unRead==null){
+                if (unRead == null) {
                     checkUnreadRef.setValue(1);
-                }else if( user2Inchat ==null||!user2Inchat) {
+                } else if (user2Inchat == null || !user2Inchat) {
                     checkUnreadRef.setValue(++unRead);
                 }
                 return Transaction.success(mutableData);
@@ -705,30 +699,28 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         });
 
 
-
-
-
     }
-    private void clearUnread(){
+
+    private void clearUnread() {
         final DatabaseReference clearUnreadRef = senderMessageRef.child("unread");
         clearUnreadRef.setValue(0);
 
     }
 
-    private void setInChatListener(){
+    private void setInChatListener() {
         inChatListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 user2Inchat = dataSnapshot.getValue(Boolean.class);
-                if(user2Inchat == null){
+                if (user2Inchat == null) {
                     user2InchatRef.setValue(false);
-                    user2Inchat =false;
+                    user2Inchat = false;
                 }
-                if(user2Inchat){
+                if (user2Inchat) {
                     inChatItem.setVisible(true);
                     setSubTitle();
 
-                }else{
+                } else {
                     inChatItem.setVisible(false);
                     setSubTitle();
                 }
@@ -740,9 +732,9 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
             }
         };
 
-        user2InchatRef.addValueEventListener( inChatListener );
+        user2InchatRef.addValueEventListener(inChatListener);
 
-       connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
+        connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
 
         connectedRefListener = new ValueEventListener() {
             @Override
@@ -755,7 +747,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
                     // add this device to my connections list
                     // this value could contain info about the device or a timestamp too
 
-                }else{
+                } else {
                     user2InchatRef.setValue(false);
                 }
             }
@@ -777,17 +769,17 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
                 VIEWTYPE_TEXT_PENDING, UUID.randomUUID().toString().replaceAll("-", ""),
                 new Date().getTime());
         editText.setText("");
-        int index =0 , prevIndex =0;
-      if(mMessages.contains(isTypingMessage)){
-          index = mMessages.indexOf(isTypingMessage)+1;
-          prevIndex = index;
-      }
+        int index = 0, prevIndex = 0;
+        if (mMessages.contains(isTypingMessage)) {
+            index = mMessages.indexOf(isTypingMessage) + 1;
+            prevIndex = index;
+        }
 
         if (!mMessages.isEmpty()) {
             UserMessage prevMessage = mMessages.get(prevIndex);
 
-            if (!VIEWTYPE_HEADER.equals(message.getMessagetype())&& !VIEWTYPE_HEADER.equals(prevMessage.getMessagetype())
-                    && message.getTimestamp()!=null && prevMessage.getTimestamp()!=null
+            if (!VIEWTYPE_HEADER.equals(message.getMessagetype()) && !VIEWTYPE_HEADER.equals(prevMessage.getMessagetype())
+                    && message.getTimestamp() != null && prevMessage.getTimestamp() != null
                     && !MyDateFormatter.isSameDay(new Date(message.getTimestamp()), new Date(prevMessage.getTimestamp()))) {
                 UserMessage dateHeaderMessage = new UserMessage();
                 dateHeaderMessage.setMessageid(VIEWTYPE_HEADER + UUID.randomUUID().toString());
@@ -795,8 +787,8 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
                 dateHeaderMessage.setMessagetype(VIEWTYPE_HEADER);
                 mMessages.add(index, dateHeaderMessage);
                 mMessages.add(index, message);
-                mAdapter.notifyItemRangeChanged(0,mMessages.size());
-            }else {
+                mAdapter.notifyItemRangeChanged(0, mMessages.size());
+            } else {
                 mMessages.add(index, message);
                 mAdapter.notifyItemInserted(index);
             }
@@ -821,24 +813,25 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
     }
 
-    public void sendImageMessage(String path){
+    public void sendImageMessage(String uri) {
 
-        final UserMessage message = new UserMessage(path, currentUser.getUid(),
+        final UserMessage message = new UserMessage(uri, currentUser.getUid(),
                 VIEWTYPE_IMAGE, UUID.randomUUID().toString().replaceAll("-", ""),
                 new Date().getTime());
         message.setDoneNetWorking(false);
+        message.setGif(uri.contains("gif"));
 
-        int index =0 , prevIndex =0;
-        if(mMessages.contains(isTypingMessage)){
-            index = mMessages.indexOf(isTypingMessage)+1;
+        int index = 0, prevIndex = 0;
+        if (mMessages.contains(isTypingMessage)) {
+            index = mMessages.indexOf(isTypingMessage) + 1;
             prevIndex = index;
         }
 
         if (!mMessages.isEmpty()) {
             UserMessage prevMessage = mMessages.get(prevIndex);
 
-            if (!VIEWTYPE_HEADER.equals(message.getMessagetype())&& !VIEWTYPE_HEADER.equals(prevMessage.getMessagetype())
-                    && message.getTimestamp()!=null && prevMessage.getTimestamp()!=null
+            if (!VIEWTYPE_HEADER.equals(message.getMessagetype()) && !VIEWTYPE_HEADER.equals(prevMessage.getMessagetype())
+                    && message.getTimestamp() != null && prevMessage.getTimestamp() != null
                     && !MyDateFormatter.isSameDay(new Date(message.getTimestamp()), new Date(prevMessage.getTimestamp()))) {
                 UserMessage dateHeaderMessage = new UserMessage();
                 dateHeaderMessage.setMessageid(VIEWTYPE_HEADER + UUID.randomUUID().toString());
@@ -846,8 +839,8 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
                 dateHeaderMessage.setMessagetype(VIEWTYPE_HEADER);
                 mMessages.add(index, dateHeaderMessage);
                 mMessages.add(index, message);
-                mAdapter.notifyItemRangeChanged(0,mMessages.size());
-            }else {
+                mAdapter.notifyItemRangeChanged(0, mMessages.size());
+            } else {
                 mMessages.add(index, message);
                 mAdapter.notifyItemInserted(index);
             }
@@ -865,13 +858,11 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                message.setDoneNetWorking(true);
-                if(mMessages.contains(message)){
-                    mAdapter.notifyItemChanged(mMessages.indexOf(message));
-                }
+                updateImageMessagetoFirebase(message);
             }
         }, 666);
     }
+
 
     private void updateMessagetoFirebase(final UserMessage message) {
         message.setMessagetype(VIEWTYPE_TEXT);
@@ -896,15 +887,15 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
                     }
                 });
-                DatabaseReference user2Mute = receiverMessageRef.child("mute");
-                user2Mute.addListenerForSingleValueEvent(new ValueEventListener() {
+                user2Mute = receiverMessageRef.child("mute");
+                updateChatMessageListener = new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         Boolean user2Mute = dataSnapshot.getValue(Boolean.class);
-                        if(user2Mute==null){
-                            user2Mute =false;
+                        if (user2Mute == null) {
+                            user2Mute = false;
                         }
-                        if(!user2Inchat && !user2Mute) {
+                        if (!user2Inchat && !user2Mute) {
                             SendNotification.sendNotificationTo(currentUser.getDisplayName(), message.getText(), user2Uid);
                         }
                     }
@@ -913,15 +904,23 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
                     public void onCancelled(DatabaseError databaseError) {
 
                     }
-                });
+                };
+                user2Mute .addListenerForSingleValueEvent(updateChatMessageListener);
+
 
 
             }
         });
     }
 
+    private void updateImageMessagetoFirebase(final UserMessage message) {
+        // do in background
+        new UploadImage().execute(message);
 
-    private void setLastMessageNode(UserMessage message){
+    }
+
+
+    private void setLastMessageNode(UserMessage message) {
         DatabaseReference lastMegNode = senderMessageRef.child("lastmessage");
         lastMegNode.setValue(message);
         DatabaseReference lastmessage2 = receiverMessageRef.child("lastmessage");
@@ -933,14 +932,11 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         new newMessageRecived().execute(message);
 
 
-
-
-
     }
 
 
     private void setIstypingListener() {
-    isTypingListener = isTypingRef.addValueEventListener(new ValueEventListener() {
+        isTypingListener = isTypingRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 //default value
@@ -987,12 +983,12 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
             mAdapter.notifyItemInserted(0);
 
         }
-        if(firstVisablePos>0 && (lastVisablePos -firstVisablePos+1)<lastVisablePos){
+        if (firstVisablePos > 0 && (lastVisablePos - firstVisablePos + 1) < lastVisablePos) {
             toast.setVisibility(View.VISIBLE);
             toast.setText(name + " is typing...");
             YoYo.with(Techniques.ZoomIn).duration(300).playOn(toast);
-        }else{
-             mRecyclerView.scrollToPosition(0);
+        } else {
+            mRecyclerView.scrollToPosition(0);
         }
 
     }
@@ -1002,7 +998,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
             int index = mMessages.indexOf(isTypingMessage);
             mMessages.remove(index);
             mAdapter.notifyItemRemoved(index);
-            if(toast.getVisibility()==View.VISIBLE){
+            if (toast.getVisibility() == View.VISIBLE) {
                 YoYo.with(Techniques.ZoomOut).duration(300).playOn(toast);
                 toast.setVisibility(View.GONE);
             }
@@ -1012,7 +1008,6 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
     // add headers for  messages list that as argument
     private void generateDateHeaders(ArrayList<UserMessage> messageArrayList) {
-
 
 
         for (int i = 0; i < messageArrayList.size(); i++) {
@@ -1066,11 +1061,11 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 UserMessage message = dataSnapshot.getValue(UserMessage.class);
-                if (message != null &&!loaded) {
+                if (message != null && !loaded) {
                     tempMessages.add(message);
-                }else{
-                    Log.d("userMessage","new message "+message.getText());
-                    if(!message.getSenderid().equals(currentUser.getUid())){
+                } else {
+                    Log.d("userMessage", "new message " + message.getText());
+                    if (!message.getSenderid().equals(currentUser.getUid())) {
                         newMessageReceived(message);
                     }
                 }
@@ -1096,7 +1091,6 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
             }
         };
-
 
 
         loadMsgRef.orderByChild("timestamp").limitToLast(MAX_COUNT).addChildEventListener(loadMessagesListener);
@@ -1170,17 +1164,17 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
     }
 
 
-    public class newMessageRecived extends AsyncTask<UserMessage,Void,Integer>{
+    public  class newMessageRecived extends AsyncTask<UserMessage, Void, Integer> {
 
         @Override
         protected void onPostExecute(Integer integer) {
             super.onPostExecute(integer);
             int index = integer;
-            if(firstVisablePos>index && (lastVisablePos -firstVisablePos+toastThreshhold)<lastVisablePos){
+            if (firstVisablePos > index && (lastVisablePos - firstVisablePos + toastThreshhold) < lastVisablePos) {
                 toast.setText("New Message \u2193");
                 toast.setVisibility(View.VISIBLE);
                 YoYo.with(Techniques.ZoomIn).duration(300).playOn(toast);
-            }else{
+            } else {
                 YoYo.with(Techniques.ZoomOut).duration(300).playOn(toast);
                 toast.setVisibility(View.GONE);
                 mRecyclerView.scrollToPosition(0);
@@ -1191,18 +1185,18 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         protected Integer doInBackground(UserMessage... userMessages) {
             UserMessage message = userMessages[0];
 
-            int index =0 , prevIndex =0;
-            if(mMessages.contains(isTypingMessage)){
+            int index = 0, prevIndex = 0;
+            if (mMessages.contains(isTypingMessage)) {
                 removeIsTypingMessage();
-                index = mMessages.indexOf(isTypingMessage)+1;
+                index = mMessages.indexOf(isTypingMessage) + 1;
                 prevIndex = index;
             }
 
             if (!mMessages.isEmpty()) {
                 UserMessage prevMessage = mMessages.get(prevIndex);
 
-                if (!VIEWTYPE_HEADER.equals(message.getMessagetype())&& !VIEWTYPE_HEADER.equals(prevMessage.getMessagetype())
-                        && message.getTimestamp()!=null && prevMessage.getTimestamp()!=null
+                if (!VIEWTYPE_HEADER.equals(message.getMessagetype()) && !VIEWTYPE_HEADER.equals(prevMessage.getMessagetype())
+                        && message.getTimestamp() != null && prevMessage.getTimestamp() != null
                         && !MyDateFormatter.isSameDay(new Date(message.getTimestamp()), new Date(prevMessage.getTimestamp()))) {
                     UserMessage dateHeaderMessage = new UserMessage();
                     dateHeaderMessage.setMessageid(VIEWTYPE_HEADER + UUID.randomUUID().toString());
@@ -1219,7 +1213,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
                         }
                     });
 
-                }else {
+                } else {
                     mMessages.add(index, message);
                     final int finalIndex1 = index;
                     runOnUiThread(new Runnable() {
@@ -1247,32 +1241,32 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
             }
 
 
-
             return index;
         }
     }
+
     @Override
     public void onChildViewAttachedToWindow(View view) {
-        handler .postDelayed(new Runnable() {
+        handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                Log.d("userMessage","last visable "+ mLayoutManager.findLastVisibleItemPosition());
+                Log.d("userMessage", "last visable " + mLayoutManager.findLastVisibleItemPosition());
                 lastVisablePos = mLayoutManager.findLastCompletelyVisibleItemPosition();
 
             }
-        },100);
+        }, 100);
 
-        handler .postDelayed(new Runnable() {
+        handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                Log.d("userMessage","first visable "+ mLayoutManager.findFirstVisibleItemPosition());
+                Log.d("userMessage", "first visable " + mLayoutManager.findFirstVisibleItemPosition());
                 firstVisablePos = mLayoutManager.findFirstCompletelyVisibleItemPosition();
-                if(firstVisablePos<=1){
+                if (firstVisablePos <= 1) {
                     YoYo.with(Techniques.ZoomOut).duration(300).playOn(toast);
                     toast.setVisibility(View.GONE);
                 }
             }
-        },100);
+        }, 100);
 
     }
 
@@ -1297,12 +1291,10 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
                 case PictureConfig.CHOOSE_REQUEST:
                     // 图片、视频、音频选择结果回调
                     List<LocalMedia> selectList = PictureSelector.obtainMultipleResult(data);
-                    mPathHashMap.clear();
-                    mImagePickerContainer.removeAllViews();
-                    mImageViewHashMap.clear();
-                    for(LocalMedia localMedia : selectList){
-                        Log.d("userchat123",localMedia.getPath() + " type:"+ localMedia.getPictureType() + "memetype" + localMedia.getMimeType());
-                        addImageToContainer(localMedia.getPath());
+
+                    for (LocalMedia localMedia : selectList) {
+                        Log.d("userchat123", localMedia.getPath() + " type:" + localMedia.getPictureType() + "memetype" + localMedia.getMimeType());
+                        addImageToContainer(Uri.fromFile(new File(localMedia.getPath())).toString());
                     }
                     // 例如 LocalMedia 里面返回三种path
                     // 1.media.getPath(); 为原图path
@@ -1312,37 +1304,42 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
 
                     mImagePickerContainer.setVisibility(View.VISIBLE);
                     mHorizontalScrollView.setVisibility(View.VISIBLE);
-                    send.setEnabled(!mPathHashMap.isEmpty());
+                    send.setEnabled(!mUriSet.isEmpty());
 
                     break;
             }
         }
 
 
-
     }
 
 
-    private void addImageToContainer(final String path){
+    private void addImageToContainer(final String uri) {
         // Creating a new RelativeLayout
-        FrameLayout frameLayout = new FrameLayout(this);
+        final FrameLayout frameLayout = new FrameLayout(this);
         frameLayout.setLayoutParams(lp);
         final RoundedImageView imageView = new RoundedImageView(this);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams((int) getResources().getDimension(R.dimen.imageview_max_width), (int) getResources().getDimension(R.dimen.imageview_max_width));
+        imageView.setLayoutParams(layoutParams);
+        imageView.requestLayout();
+        imageView.setScaleType(ImageView.ScaleType.FIT_END);
+        imageView.getLayoutParams().height = (int) getResources().getDimension(R.dimen.imageview_max_width);
+        imageView.getLayoutParams().width = (int) getResources().getDimension(R.dimen.imageview_max_width);
 
         imageView.setAdjustViewBounds(true);
-        imageView.setMaxWidth((int) getResources().getDimension(R.dimen.imageview_max_width));
-        imageView.setMaxHeight((int) getResources().getDimension(R.dimen.imageview_max_height));
-        imageView.setRadius(8);
+
+        imageView.setRadius(16);
         imageView.setBorderWidth(0);
-        mImageLoader.displayImage(Uri.fromFile(new File(path)).toString(),imageView);
-        Log.d("UserChat123",imageView.getDrawable() +" ");
+        Glide.with(getApplicationContext()).load(uri).into(imageView);
+        Log.d("UserChat123", "'added");
+
 
         // Defining the layout parameters of the ImageView
         FrameLayout.LayoutParams flp = new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.FILL);
 
-        flp.setMargins(12,12,12,12);
+        flp.setMargins(12, 12, 12, 12);
         imageView.setLayoutParams(flp);
 
 
@@ -1352,34 +1349,40 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         close.setLayoutParams(circle_close_param);
         frameLayout.addView(imageView);
         frameLayout.addView(close);
-        close.setOnClickListener( closeListener);
+        mImagePickerContainer.addView(frameLayout);
+        mUriSet.add(uri);
+        close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               mImagePickerContainer.removeView(frameLayout);
+               mHorizontalScrollView.setVisibility(mImagePickerContainer.getChildCount()!=0 ? View.VISIBLE : View.GONE);
+            }
+        });
         close.setOnTouchListener(UserChatActvity.this);
         imageView.setOnTouchListener(UserChatActvity.this);
         imageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+            @Override
+            public void onClick(View v) {
                /* Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_VIEW);
 
                 intent.setDataAndType(imageUri, "image/*");
                 startActivity(intent);*/
-                }
-            });
-            mImagePickerContainer.addView(frameLayout);
-            mImageViewHashMap.put (close,frameLayout);
-            mPathHashMap.put(close,path);
-
+            }
+        });
+        mHorizontalScrollView.setVisibility(View.VISIBLE);
 
 
 
     }
 
+
     @Override
     public void onClick(View view) {
         hideAttachment();
 
-        if(view == image){
-            if(mImagePickerContainer.getChildCount()<5){
+        if (view == image) {
+            if (mImagePickerContainer.getChildCount() < 5) {
                 // check permission
                 Dexter.withActivity(this)
                         .withPermissions(
@@ -1387,12 +1390,13 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
                                 android.Manifest.permission.READ_EXTERNAL_STORAGE,
                                 Manifest.permission.CAMERA
                         ).withListener(new MultiplePermissionsListener() {
-                    @Override public void onPermissionsChecked(MultiplePermissionsReport report) {
+                    @Override
+                    public void onPermissionsChecked(MultiplePermissionsReport report) {
                         PictureSelector.create(UserChatActvity.this)
                                 .openGallery(PictureMimeType.ofImage())
                                 .theme(R.style.picture_white_style)
                                 .selectionMode(PictureConfig.MULTIPLE)  // can select more than one
-                                .maxSelectNum(5- mImageViewHashMap.size())
+                                .maxSelectNum(5 - mImagePickerContainer.getChildCount())
                                 .imageFormat(PictureMimeType.PNG)
                                 .setOutputCameraPath("/Icebr8k_PIC")
                                 .compress(false)
@@ -1400,9 +1404,11 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
                                 .isGif(true)
                                 .forResult(PictureConfig.CHOOSE_REQUEST);
                     }
-                    @Override public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {/* ... */}
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {/* ... */}
                 }).check();
-            }else{
+            } else {
                 Toast.makeText(this, "Attachment Limit Reached", Toast.LENGTH_SHORT).show();
             }
 
@@ -1428,20 +1434,30 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         return false;
     }
 
+    @Override
+    public void OnGifSelected(String uri) {
+        if (mImagePickerContainer.getChildCount() < 5) {
+            addImageToContainer(uri);
+            send.setEnabled(true);
+        } else {
+            Toast.makeText(this, "Attachment Limit Reached", Toast.LENGTH_SHORT).show();
+        }
+
+
+    }
+
 
     public boolean checkInternet() {
         ConnectivityManager cm = (ConnectivityManager) getApplicationContext()
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-       return  activeNetwork!=null;
+        return activeNetwork != null;
     }
-    private  String getMimeType(String fileUrl) {
+
+    private String getMimeType(String fileUrl) {
         String extension = MimeTypeMap.getFileExtensionFromUrl(fileUrl);
         return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
     }
-
-
-
 
 
     @Override
@@ -1465,35 +1481,152 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         super.onStop();
 
 
+    }
 
+
+
+
+
+    private class UploadImage extends AsyncTask<UserMessage, Void, String> {
+        @Override
+        protected String doInBackground(UserMessage... messages) {
+            final UserMessage message = messages[0];
+            message.setMessagetype(VIEWTYPE_IMAGE);
+            if(URLUtil.isHttpsUrl(message.getText()) ||URLUtil.isHttpUrl(message.getText())){
+                message.setDoneNetWorking(true);
+                updateChatHistory(message,message.getText(),message.getText());
+                message.setGif(message.getText().contains(".gif"));
+            }else{
+                Uri file;
+                try {
+                    if (!message.getText().contains(".gif")) {
+                        message.setGif(false);
+                        File compressedImageFile;
+                        compressedImageFile = new Compressor(UserChatActvity.this)
+                                .setQuality(75)
+                                .setCompressFormat(Bitmap.CompressFormat.JPEG)
+                                .compressToFile(new File(Uri.parse(message.getText()).getPath()));
+                        file = Uri.fromFile(compressedImageFile);
+                    } else {
+                        message.setGif(true);
+                        file = Uri.parse(message.getText());
+                    }
+
+                    // Create a storage reference from our app
+                    StorageReference storageRef = FirebaseStorage.getInstance().getReference()
+                            .child("ChatImages").child(message.getSenderid())
+                            .child(message.getMessageid());
+
+                    storageRef.putFile(file).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            final Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                            message.setDoneNetWorking(true);
+                            final String oldUri = message.getText();
+                            message.setText(downloadUrl.toString());
+                            updateChatHistory(message,oldUri,downloadUrl.toString());
+
+
+
+
+                        }
+                    });
+
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+
+
+
+            return null;
+        }
+    }
+
+    void updateChatHistory(final UserMessage message, final String oldUri,final String downloadUrl){
+        message.setTimestamp(new Date().getTime());
+        // set to database
+        senderMessageRef.child("chathistory").
+                child(message.getMessageid()).setValue(message).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+
+                receiverMessageRef.child("chathistory").
+                        child(message.getMessageid()).setValue(message).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        if (mMessages.contains(message)) {
+                            int index = mMessages.indexOf(message);
+                            setLastMessageNode(message);
+                            setUnread();
+                            message.setText(oldUri);
+                            mMessages.set(index, message);
+                            mAdapter.notifyItemChanged(index);
+
+                        }
+
+                        updateChatListener = new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                Boolean user2Mute = dataSnapshot.getValue(Boolean.class);
+                                if (user2Mute == null) {
+                                    user2Mute = false;
+                                }
+                                if (!user2Inchat && !user2Mute) {
+                                    SendNotification.sendNotificationTo(currentUser.getDisplayName(), "Send you an image", user2Uid, downloadUrl);
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        };
+
+                        user2Mute = receiverMessageRef.child("mute");
+                        user2Mute.addListenerForSingleValueEvent(updateChatListener);
+
+                    }
+                });
+
+
+
+            }
+        });
     }
 
     @Override
     protected void onDestroy() {
-       removeTimeChangeListener();
+        removeTimeChangeListener();
       /*  inChatListener,connectedRefListener,isTypingListener,subTitleListener;
         loadMessagesListener;*/
-       try {
-           // remove value listener
-           inChatRef.removeEventListener(inChatListener);
-           connectedRef.removeEventListener(connectedRefListener);
-           isTypingRef.removeEventListener(isTypingListener);
-           subTitleRef.removeEventListener(subTitleListener);
-           loadMsgRef.removeEventListener(loadMessagesListener);
-       }catch (NullPointerException e){
-           Log.d("userChat123",e.getMessage());
-       }
+        try {
+            // remove value listener
+            inChatRef.removeEventListener(inChatListener);
+            connectedRef.removeEventListener(connectedRefListener);
+            isTypingRef.removeEventListener(isTypingListener);
+            subTitleRef.removeEventListener(subTitleListener);
+            loadMsgRef.removeEventListener(loadMessagesListener);
+            muteRef .removeEventListener(muteRefListener);
+            user2Mute.removeEventListener(updateChatListener); // image
+            user2Mute.removeEventListener(updateChatMessageListener); //text
+
+
+
+        } catch (NullPointerException e) {
+            Log.d("userChat123", e.getMessage());
+        }
+        userPhotoUrlMap =null;
+        userPhotoUrlMap = null;
+        mUriSet = null;
 
 
         super.onDestroy();
 
 
 
-
     }
-
-
-
-
 
 }

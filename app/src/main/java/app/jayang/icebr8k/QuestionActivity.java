@@ -74,8 +74,8 @@ public class QuestionActivity extends SwipeBackActivity {
     private final DatabaseReference userQARef = FirebaseDatabase.getInstance().getReference()
             .child("UserQA").child(currentUser.getUid());
     private ValueEventListener skipListener;
-    private DatabaseReference commentRef;
-    private ValueEventListener commentRefListener;
+    private DatabaseReference commentRef,question8Ref;
+    private ValueEventListener commentRefListener,isScListener,isMcListener,isSpListener;
 
 
     @Override
@@ -96,6 +96,7 @@ public class QuestionActivity extends SwipeBackActivity {
         mProgressBar = (ProgressBar) findViewById(R.id.question_progressBar);
         mCardView = (CardView) findViewById(R.id.cardView);
         mAppBarLayout = (AppBarLayout) findViewById(R.id.question_appBar);
+
         loadingDialog = new MaterialDialog.Builder(this)
                 .content("Submitting your answer....")
                 .canceledOnTouchOutside(false)
@@ -124,6 +125,9 @@ public class QuestionActivity extends SwipeBackActivity {
 
         questionId = getIntent().getExtras().getString("questionId",null);
         if(questionId !=null){
+            question8Ref= FirebaseDatabase.getInstance().getReference("Questions_8")
+                    .child(questionId);
+
             getCommentCounts();
             viewPagerAdapter.addFragment(Comment_Fragment.newInstance(questionId));
             viewPagerAdapter.addFragment(Result_fragment.newInstance(questionId));
@@ -337,9 +341,9 @@ public class QuestionActivity extends SwipeBackActivity {
         mSeekBar.setProgress(  userQA!=null && !"skipped".equals(userQA.getAnswer()) ? Float.valueOf(userQA.getAnswer()) :5f);
 
         // set question text
-        DatabaseReference mRef= FirebaseDatabase.getInstance().getReference("Questions_8")
-                .child(questionId);
-        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+
+
+        isScListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 SurveyQ surveyQ = dataSnapshot.getValue(SurveyQ.class);
@@ -424,7 +428,9 @@ public class QuestionActivity extends SwipeBackActivity {
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
+
+        question8Ref.addListenerForSingleValueEvent(isScListener);
 
         mCardView.setVisibility(View.VISIBLE);
         if(firstTime){
@@ -445,10 +451,7 @@ public class QuestionActivity extends SwipeBackActivity {
             originalAnswer= userQA.getAnswer();
         }
 
-        DatabaseReference mRef= FirebaseDatabase.getInstance().getReference("Questions_8")
-                .child(questionId);
-
-        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        isSpListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ArrayList<String> answer = null;
@@ -550,15 +553,15 @@ public class QuestionActivity extends SwipeBackActivity {
 
                     }
                 });
-
-
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
+
+        question8Ref.addListenerForSingleValueEvent(isSpListener);
 
         mCardView.setVisibility(View.VISIBLE);
         if(firstTime){
@@ -577,15 +580,10 @@ public class QuestionActivity extends SwipeBackActivity {
         }
 
 
-        DatabaseReference mRef= FirebaseDatabase.getInstance().getReference("Questions_8")
-                .child(questionId);
-
-        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        isMcListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ArrayList<String> answer = null;
-
-
                 String type = dataSnapshot.child("type").getValue(String.class);
                 String question = dataSnapshot.child("question").getValue(String.class);
                 String question_id = dataSnapshot.child("questionId").getValue(String.class);
@@ -608,15 +606,15 @@ public class QuestionActivity extends SwipeBackActivity {
                     }
                 }
                 // if user hasn't answered this question, create new userQA
-                    userQA.setQuestionId(questionId);
-                    userQA.setAnswer(null);
-                    userQA.setQuestion(question);
-                    userQA.setFavorite(false);
+                userQA.setQuestionId(questionId);
+                userQA.setAnswer(null);
+                userQA.setQuestion(question);
+                userQA.setFavorite(false);
 
 
 
                 // reset click listener
-               confirmBtn.setOnClickListener(new View.OnClickListener() {
+                confirmBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
 
@@ -682,7 +680,7 @@ public class QuestionActivity extends SwipeBackActivity {
 
                                     userQA.setAnswer("skipped");
                                     showVerifyDialog(originalAnswer,"skipped",userQA);
-                                    }else{
+                                }else{
                                     setTimerUI(dataSnapshot.getValue(Long.class) - new Date().getTime());
                                 }
 
@@ -696,15 +694,15 @@ public class QuestionActivity extends SwipeBackActivity {
 
                     }
                 });
-
-
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
+
+        question8Ref.addListenerForSingleValueEvent(isMcListener);
         mCardView.setVisibility(View.VISIBLE);
         if(firstTime){
             YoYo.with(Techniques.FadeIn).playOn(mCardView);
@@ -808,7 +806,16 @@ public class QuestionActivity extends SwipeBackActivity {
 
     @Override
     protected void onDestroy() {
-        userQARef.child(questionId).removeEventListener(skipListener);
+        try{
+            userQARef.child(questionId).removeEventListener(skipListener);
+            commentRef.removeEventListener(commentRefListener);
+            question8Ref.removeEventListener(isMcListener);
+            question8Ref.removeEventListener(isSpListener);
+            question8Ref.removeEventListener(isScListener);
+        }catch (NullPointerException e){
+            Log.d("Question123",e.getMessage());
+        }
+
         super.onDestroy();
     }
 

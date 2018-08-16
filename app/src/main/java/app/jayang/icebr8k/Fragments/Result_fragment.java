@@ -56,11 +56,12 @@ public class Result_fragment extends Fragment {
 
     private String questionId,question;
     private ProgressBar mProgressBar;
-    private resultFragDisplayedListener mListener;
+    private  DatabaseReference titleRef;
     private PieChart mPieChart;
     private QuestionActivity mQuestionActivity;
     private View mView;
     private boolean firstTime = true;
+    private ValueEventListener piechatListener;
 
     public Result_fragment() {
         // Required empty public constructor
@@ -99,7 +100,9 @@ public class Result_fragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             questionId = getArguments().getString("questionId");
-
+             titleRef = FirebaseDatabase .getInstance().getReference()
+                    .child("Questions_8")
+                    .child(questionId);
 
 
         }
@@ -193,17 +196,10 @@ public class Result_fragment extends Fragment {
 
 
         // get the question for this  questionId
-        DatabaseReference titleRef = FirebaseDatabase .getInstance().getReference()
-                .child("Questions_8")
-                .child(questionId);
-        titleRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        piechatListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
                 question = dataSnapshot.child("question").getValue(String.class);
-
-
-
                 // search user's answer
                 DatabaseReference answersRef = FirebaseDatabase .getInstance().getReference()
                         .child("UserQA");
@@ -211,25 +207,25 @@ public class Result_fragment extends Fragment {
                 answersRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                     for(DataSnapshot childSnap : dataSnapshot.getChildren()){
-                         if(childSnap.hasChild(questionId)){
+                        for(DataSnapshot childSnap : dataSnapshot.getChildren()){
+                            if(childSnap.hasChild(questionId)){
 
-                            String answer = childSnap.
-                                    child(questionId).
-                                    child("answer").getValue(String.class);
+                                String answer = childSnap.
+                                        child(questionId).
+                                        child("answer").getValue(String.class);
 
-                            // set up answer map default value is 0 else increment by 1
+                                // set up answer map default value is 0 else increment by 1
 
-                            if(answersMap.containsKey(answer)){
-                                int count = answersMap.get(answer);
-                                answersMap.put(answer, ++count );
-                            }else{
-                                answersMap.put(answer, 1 );
+                                if(answersMap.containsKey(answer)){
+                                    int count = answersMap.get(answer);
+                                    answersMap.put(answer, ++count );
+                                }else{
+                                    answersMap.put(answer, 1 );
+                                }
                             }
-                         }
-                     }
+                        }
                         Log.d("Result_Frag",answersMap.toString());
-                     setPieChart(answersMap);
+                        setPieChart(answersMap);
                     }
 
                     @Override
@@ -237,14 +233,14 @@ public class Result_fragment extends Fragment {
 
                     }
                 });
-
-                }
+            }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
+        titleRef.addListenerForSingleValueEvent(piechatListener);
     }
 
 
@@ -334,14 +330,13 @@ public class Result_fragment extends Fragment {
 
     }
 
-
-    interface  resultFragDisplayedListener {
-
-        void onDisplay();
+    @Override
+    public void onDestroy() {
+        try{
+           titleRef.removeEventListener(piechatListener);
+        }catch (NullPointerException e){
+            Log.d("Result_Fragment",e.getMessage());
+        }
+        super.onDestroy();
     }
-
-
-
-
-
 }

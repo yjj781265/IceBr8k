@@ -38,6 +38,7 @@ import android.widget.Toast;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
+import com.bumptech.glide.Glide;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 
@@ -65,6 +66,7 @@ import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.onesignal.OSSubscriptionObserver;
 import com.onesignal.OSSubscriptionStateChanges;
 import com.onesignal.OneSignal;
@@ -207,7 +209,7 @@ public class Homepage extends AppCompatActivity implements
                 viewPager.setCurrentItem(1);
             } else if (chatId != null && !chatId.isEmpty() && name != null && !name.isEmpty()) {
 
-                Toast.makeText(this, chatId + name, Toast.LENGTH_SHORT).show();
+
                 Intent mIntent = new Intent(this, UserChatActvity.class);
                 getIntent().addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 mIntent.putExtra("chatId", chatId);
@@ -455,6 +457,9 @@ public class Homepage extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
 
+        new clearImageCache().execute();
+
+
         super.onDestroy();
 
 
@@ -464,9 +469,24 @@ public class Homepage extends AppCompatActivity implements
         }
 
 
+
+
         showLog("onDestroy");
 
     }
+
+    public class clearImageCache extends  AsyncTask<Void,Void,Void>{
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            Glide.get(getApplicationContext()).clearDiskCache();
+            ImageLoader.getInstance().clearMemoryCache();
+            ImageLoader.getInstance().clearDiskCache();
+            return null;
+        }
+    }
+
+
 
     void setUpNavDrawer() {
         BadgeStyle badgeStyle = new BadgeStyle();

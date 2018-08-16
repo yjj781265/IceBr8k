@@ -1,11 +1,21 @@
 package app.jayang.icebr8k.Adapter;
 
 
+import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.net.Uri;
-import android.os.Message;
 import android.os.SystemClock;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -13,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -29,13 +40,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import app.jayang.icebr8k.MediaViewActivty;
 import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.UserProfilePage;
 import app.jayang.icebr8k.Utility.MyDateFormatter;
@@ -45,7 +57,6 @@ import app.jayang.icebr8k.R;
 
 
 import static app.jayang.icebr8k.MyApplication.getContext;
-import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 /**
  * Created by yjj781265 on 2/19/2018.
@@ -58,10 +69,10 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private final int VIEWTYPE_LOAD = 2;
     private final int VIEWTYPE_HEADER = 3;
     private final int VIEWTYPE_VIDEO_IN = 4;
-    private final int VIEWTYPE_IMAGE_IN= 5;
+    private final int VIEWTYPE_IMAGE_IN = 5;
     private final int VIEWTYPE_VOICE_IN = 6;
     private final int VIEWTYPE_VIDEO_OUT = 7;
-    private final int VIEWTYPE_IMAGE_OUT= 8;
+    private final int VIEWTYPE_IMAGE_OUT = 8;
     private final int VIEWTYPE_VOICE_OUT = 9;
     private final int VIEWTYPE_TYPING = 10;
     private final int VIEWTYPE_TEXT_OUT_PENDING = 11;
@@ -71,7 +82,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private final String VIEWTYPE_TYPING_STR = "type";
 
     private final String VIEWTYPE_VIDEO = "video";
-    private final String VIEWTYPE_IMAGE= "image";
+    private final String VIEWTYPE_IMAGE = "image";
     private final String VIEWTYPE_VOICE = "voice";
 
     private final String VIEWTYPE_LOAD_STR = "load";
@@ -79,21 +90,21 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private final String Default_Url = "https://i.imgur.com/zI4v7oF.png";
 
     private boolean loading;
-    private long lastClickTime =0;
-    private User user =null;
+    private long lastClickTime = 0;
+    private User user = null;
     private int lastVisibleItem, totalItemCount;
-    private int threshHold =1;
-    private HashMap<String,String> userPhotoUrlMap;
+    private int threshHold = 1;
+    private HashMap<String, String> userPhotoUrlMap;
     private OnLoadMoreListener onLoadMoreListener;
-    private  Context mContext;
+    private Activity mContext;
     private ImageLoader imageLoader = ImageLoader.getInstance();
 
-    public UserMessageAdapter(ArrayList<UserMessage> messages,RecyclerView recyclerView, HashMap<String,String> userPhotoUrlMap,Context context) {
+    public UserMessageAdapter(ArrayList<UserMessage> messages, RecyclerView recyclerView, HashMap<String, String> userPhotoUrlMap, Activity context) {
         mMessages = messages;
-        this.userPhotoUrlMap =userPhotoUrlMap;
-        mContext =context;
+        this.userPhotoUrlMap = userPhotoUrlMap;
+        mContext = context;
 
-        if(recyclerView.getLayoutManager() instanceof LinearLayoutManager){
+        if (recyclerView.getLayoutManager() instanceof LinearLayoutManager) {
             final LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView
                     .getLayoutManager();
 
@@ -104,10 +115,10 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
 
-                    if(onLoadMoreListener!=null &&!mMessages.isEmpty() && dy<-1) {
+                    if (onLoadMoreListener != null && !mMessages.isEmpty() && dy < -1) {
                         totalItemCount = linearLayoutManager.getItemCount();
                         lastVisibleItem = linearLayoutManager.findLastCompletelyVisibleItemPosition();
-                        if (!loading && totalItemCount <= (lastVisibleItem+threshHold)) {
+                        if (!loading && totalItemCount <= (lastVisibleItem + threshHold)) {
                             if (onLoadMoreListener != null) {
 
                                 onLoadMoreListener.onLoadMore();
@@ -115,20 +126,15 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                             loading = true;
                         }
                     }
-                    Log.d("myAdapter","total"+totalItemCount);
-                    Log.d("myAdapter","last"+lastVisibleItem);
-                    Log.d("myAdapter Scroll","dy "+dy);
-
-
-
-
-
+                    Log.d("myAdapter", "total" + totalItemCount);
+                    Log.d("myAdapter", "last" + lastVisibleItem);
+                    Log.d("myAdapter Scroll", "dy " + dy);
 
 
                 }
             });
         }
-        }
+    }
 
 
     @Override
@@ -137,73 +143,80 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             View v = LayoutInflater.from(mContext).inflate(
                     R.layout.item_custom_incoming_message, parent, false);
 
-           return new IncomingTextMessageViewHolder(v);
-        } else if(viewType == VIEWTYPE_TEXT_OUT) {
+            return new IncomingTextMessageViewHolder(v);
+        } else if (viewType == VIEWTYPE_TEXT_OUT) {
             View v = LayoutInflater.from(mContext).inflate(
                     R.layout.item_custom_outcoming_message, parent, false);
 
             return new OutcomingTextMessageViewHolder(v);
-        }else if(viewType == VIEWTYPE_HEADER){
+        } else if (viewType == VIEWTYPE_HEADER) {
             View v = LayoutInflater.from(mContext).inflate(
                     R.layout.dateheader, parent, false);
 
             return new DateHeaderViewHolder(v);
-        }else if(viewType == VIEWTYPE_LOAD){
+        } else if (viewType == VIEWTYPE_LOAD) {
             View v = LayoutInflater.from(mContext).inflate(
                     R.layout.loadingmore, parent, false);
 
             return new LoadMoreViewHolder(v);
-        }else if(viewType ==VIEWTYPE_TYPING){
+        } else if (viewType == VIEWTYPE_TYPING) {
             View v = LayoutInflater.from(mContext).inflate(
                     R.layout.istyping, parent, false);
             return new TypingViewHolder(v);
-        }else if(viewType ==VIEWTYPE_TEXT_OUT_PENDING) {
+        } else if (viewType == VIEWTYPE_TEXT_OUT_PENDING) {
             View v = LayoutInflater.from(mContext).inflate(
                     R.layout.item_custom_outcoming_message, parent, false);
             return new OutcomingTextMessageViewHolder(v);
-        }else if(viewType == VIEWTYPE_IMAGE_OUT) {
+        } else if (viewType == VIEWTYPE_IMAGE_OUT) {
             View v = LayoutInflater.from(mContext).inflate(
                     R.layout.item_image_outcoming_message, parent, false);
 
             return new OutcomingImageMessageViewHolder(v);
+        } else if (viewType == VIEWTYPE_IMAGE_IN) {
+            View v = LayoutInflater.from(mContext).inflate(
+                    R.layout.item_image_incoming_message, parent, false);
+
+            return new IncomingImageMessageViewHolder(v);
         }
-        return  null;
+        return null;
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
 
         UserMessage message = mMessages.get(position);
 
-
-        if(holder instanceof LoadMoreViewHolder){
+       // when user swipe top load loadmore
+        if (holder instanceof LoadMoreViewHolder) {
             ((LoadMoreViewHolder) holder).mProgressBar.setIndeterminate(true);
 
-        }else if(holder instanceof IncomingTextMessageViewHolder){
+            // Incoming message
+        } else if (holder instanceof IncomingTextMessageViewHolder) {
             ((IncomingTextMessageViewHolder) holder).text_in.setText(message.getText());
             ((IncomingTextMessageViewHolder) holder).avatar_in.setOnTouchListener(this);
-            if(message.getTimestamp()!=null) {
+            if (message.getTimestamp() != null) {
                 ((IncomingTextMessageViewHolder) holder).date_in.setText(MyDateFormatter.
                         timeStampToDateConverter(message.getTimestamp(), false));
             }
-            String url =userPhotoUrlMap.get(message.getSenderid());
-            if(url!=null && !url.isEmpty()) {
+            String url = userPhotoUrlMap.get(message.getSenderid());
+            if (url != null && !url.isEmpty()) {
                 Glide.with(mContext).load(url)
                         .apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3))
                         .into(((IncomingTextMessageViewHolder) holder).avatar_in);
-            }else{
+            } else {
                 Glide.with(mContext).load(Default_Url)
                         .apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3))
                         .into(((IncomingTextMessageViewHolder) holder).avatar_in);
             }
-        }else if(holder instanceof OutcomingTextMessageViewHolder) {
+            // Ourcoming  message
+        } else if (holder instanceof OutcomingTextMessageViewHolder) {
 
             ((OutcomingTextMessageViewHolder) holder).text_out.setText(message.getText());
             ((OutcomingTextMessageViewHolder) holder).date_out.setVisibility(View.VISIBLE);
             ((OutcomingTextMessageViewHolder) holder).avatar_out.setOnTouchListener(this);
-            if(message.getMessagetype().equals(VIEWTYPE_TEXT_PENDING)) {
+            if (message.getMessagetype().equals(VIEWTYPE_TEXT_PENDING)) {
                 ((OutcomingTextMessageViewHolder) holder).date_out.setText("Sending...");
-            }else{
+            } else {
                 if (message.getTimestamp() != null) {
                     ((OutcomingTextMessageViewHolder) holder).date_out.setText(MyDateFormatter.
                             timeStampToDateConverter(message.getTimestamp(), false));
@@ -212,58 +225,99 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
 
             //update avatar image
-            String url =FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString();
-            if(url!=null && !url.isEmpty()) {
+            String url = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString();
+            if (url != null && !url.isEmpty()) {
                 Glide.with(mContext).load(url)
                         .apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3)).transition(DrawableTransitionOptions.withCrossFade(300))
                         .into(((OutcomingTextMessageViewHolder) holder).avatar_out);
-            }else{
+            } else {
                 Glide.with(mContext).load(Default_Url)
                         .apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3)).transition(DrawableTransitionOptions.withCrossFade(300))
                         .into(((OutcomingTextMessageViewHolder) holder).avatar_out);
             }
-        }else if(holder instanceof TypingViewHolder){
-           //set image for avatar
-            String url =userPhotoUrlMap.get(message.getSenderid());
-            if(url!=null && !url.isEmpty()) {
+            // istyping  VH
+        } else if (holder instanceof TypingViewHolder) {
+            //set image for avatar
+            String url = userPhotoUrlMap.get(message.getSenderid());
+            if (url != null && !url.isEmpty()) {
                 Glide.with(mContext).load(url)
                         .apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3)).transition(DrawableTransitionOptions.withCrossFade(300))
                         .into(((TypingViewHolder) holder).avatar);
-            }else{
+            } else {
                 Glide.with(mContext).load(Default_Url)
                         .apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3)).transition(DrawableTransitionOptions.withCrossFade(300))
                         .into(((TypingViewHolder) holder).avatar);
             }
-        }else if(holder instanceof DateHeaderViewHolder){
-            if(!mMessages.isEmpty() ) {
-                if(message.getTimestamp()!=null) {
+
+            // istyping  VH
+        } else if (holder instanceof DateHeaderViewHolder) {
+            if (!mMessages.isEmpty()) {
+                if (message.getTimestamp() != null) {
                     ((DateHeaderViewHolder) holder).dateHeader.setText(MyDateFormatter.timeStampToDateConverter(message.getTimestamp(), true));
                 }
             }
-        }else if(holder instanceof OutcomingImageMessageViewHolder){
-            String url =userPhotoUrlMap.get(message.getSenderid());
-            if(url!=null && !url.isEmpty()) {
+
+            // outcoming image message
+        } else if (holder instanceof OutcomingImageMessageViewHolder) {
+            String url = userPhotoUrlMap.get(message.getSenderid());
+            if (url != null && !url.isEmpty()) {
                 Glide.with(mContext).load(url)
                         .apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3)).transition(DrawableTransitionOptions.withCrossFade(300))
                         .into(((OutcomingImageMessageViewHolder) holder).avatar);
-            }else{
+            } else {
                 Glide.with(mContext).load(Default_Url)
                         .apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3)).transition(DrawableTransitionOptions.withCrossFade(300))
                         .into(((OutcomingImageMessageViewHolder) holder).avatar);
             }
 
-            ((OutcomingImageMessageViewHolder) holder).mProgressBar.setVisibility(message.getDoneNetWorking() ? View.GONE:View.VISIBLE);
-            // if image is uploading to the cloud show progressbar
 
-            imageLoader.displayImage(Uri.fromFile(new File(message.getText())).toString(), ((OutcomingImageMessageViewHolder) holder).image);
+            // if image is uploading to the cloud show text is sending
+            ((OutcomingImageMessageViewHolder) holder).timeStamp.setText(message.getDoneNetWorking() ? MyDateFormatter.timeStampToDateConverter(message.getTimestamp(), false)
+                    : "Sending...");
+            ((OutcomingImageMessageViewHolder) holder).timeStamp.setVisibility(View.VISIBLE);
+
+            if (message.getGif()) {
+                ((OutcomingImageMessageViewHolder) holder).image.setVisibility(View.GONE);
+                ((OutcomingImageMessageViewHolder) holder).gifImage.setVisibility(View.VISIBLE);
+                Glide.with(mContext).asGif().load(message.getText()).apply(new RequestOptions().placeholder(R.drawable.img_placeholder)).transition(DrawableTransitionOptions.withCrossFade(300)).into(((OutcomingImageMessageViewHolder) holder).gifImage);
+            } else {
+                ((OutcomingImageMessageViewHolder) holder).image.setVisibility(View.VISIBLE);
+                ((OutcomingImageMessageViewHolder) holder).gifImage.setVisibility(View.GONE);
+                imageLoader.displayImage(message.getText(), ((OutcomingImageMessageViewHolder) holder).image);
 
 
-
-            if(message.getTimestamp()!=null){
-                ((OutcomingImageMessageViewHolder) holder).timeStamp.setVisibility(message.getDoneNetWorking() ? View.VISIBLE:View.GONE);
-                ((OutcomingImageMessageViewHolder) holder).timeStamp.setText(MyDateFormatter.timeStampToDateConverter(message.getTimestamp(),false));
             }
 
+            // incoming image message
+        } else if (holder instanceof IncomingImageMessageViewHolder) {
+            String url = userPhotoUrlMap.get(message.getSenderid());
+            if (url != null && !url.isEmpty()) {
+                Glide.with(mContext).load(url)
+                        .apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3)).transition(DrawableTransitionOptions.withCrossFade(300))
+                        .into(((IncomingImageMessageViewHolder) holder).avatar);
+            } else {
+                Glide.with(mContext).load(Default_Url)
+                        .apply(RequestOptions.circleCropTransform().placeholder(R.drawable.default_avatar3)).transition(DrawableTransitionOptions.withCrossFade(300))
+                        .into(((IncomingImageMessageViewHolder) holder).avatar);
+            }
+
+
+            // if image is uploading to the cloud show text is sending
+            ((IncomingImageMessageViewHolder) holder).timeStamp.setText(message.getDoneNetWorking() ? MyDateFormatter.timeStampToDateConverter(message.getTimestamp(), false)
+                    : "Sending...");
+            ((IncomingImageMessageViewHolder) holder).timeStamp.setVisibility(View.VISIBLE);
+
+            if (message.getGif()) {
+                ((IncomingImageMessageViewHolder) holder).image.setVisibility(View.GONE);
+                ((IncomingImageMessageViewHolder) holder).gifImage.setVisibility(View.VISIBLE);
+                Glide.with(mContext).asGif().load(message.getText()).apply(new RequestOptions().placeholder(R.drawable.img_placeholder)).transition(DrawableTransitionOptions.withCrossFade(300)).into(((IncomingImageMessageViewHolder) holder).gifImage);
+            } else {
+
+                ((IncomingImageMessageViewHolder) holder).image.setVisibility(View.VISIBLE);
+                ((IncomingImageMessageViewHolder) holder).gifImage.setVisibility(View.GONE);
+                imageLoader.displayImage(message.getText(), ((IncomingImageMessageViewHolder) holder).image);
+
+            }
         }
 
 
@@ -276,7 +330,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     @Override
     public long getItemId(int position) {
-        return  mMessages.get(position).getMessageid().hashCode();
+        return mMessages.get(position).getMessageid().hashCode();
     }
 
     @Override
@@ -285,76 +339,78 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         int viewType;
         boolean income;
         // check is income or outcome message
-        if(!FirebaseAuth.getInstance().getCurrentUser().getUid().
-                equals(mMessages.get(position).getSenderid())){
-           income =true;
-        }else{
-            income =false;
+        if (!FirebaseAuth.getInstance().getCurrentUser().getUid().
+                equals(mMessages.get(position).getSenderid())) {
+            income = true;
+        } else {
+            income = false;
         }
-        if(income &&VIEWTYPE_TEXT.equals(messageType) ){
+        if (income && VIEWTYPE_TEXT.equals(messageType)) {
             viewType = VIEWTYPE_TEXT_IN;
             return viewType;
-        }else if(!income &&VIEWTYPE_TEXT.equals(messageType)){
+        } else if (!income && VIEWTYPE_TEXT.equals(messageType)) {
             viewType = VIEWTYPE_TEXT_OUT;
             return viewType;
-        }else if(!income && VIEWTYPE_IMAGE.equals(messageType)){
+        } else if (!income && VIEWTYPE_IMAGE.equals(messageType)) {
             viewType = VIEWTYPE_IMAGE_OUT;
+            return viewType;
+        } else if (income && VIEWTYPE_IMAGE.equals(messageType)) {
+            viewType = VIEWTYPE_IMAGE_IN;
             return viewType;
         }
         // add more view type here//////////////////////////
 
-        switch (messageType){
-            case VIEWTYPE_HEADER_STR: viewType =VIEWTYPE_HEADER;
-            break;
-            case VIEWTYPE_LOAD_STR: viewType =VIEWTYPE_LOAD;
+        switch (messageType) {
+            case VIEWTYPE_HEADER_STR:
+                viewType = VIEWTYPE_HEADER;
                 break;
-            case VIEWTYPE_TYPING_STR: viewType =VIEWTYPE_TYPING;
+            case VIEWTYPE_LOAD_STR:
+                viewType = VIEWTYPE_LOAD;
                 break;
-            case VIEWTYPE_TEXT_PENDING: viewType =VIEWTYPE_TEXT_OUT_PENDING;
+            case VIEWTYPE_TYPING_STR:
+                viewType = VIEWTYPE_TYPING;
                 break;
-            default: viewType = VIEWTYPE_HEADER;
+            case VIEWTYPE_TEXT_PENDING:
+                viewType = VIEWTYPE_TEXT_OUT_PENDING;
+                break;
+            default:
+                viewType = VIEWTYPE_HEADER;
                 break;
         }
 
         return viewType;
 
 
-
     }
-
-
-
-
 
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
-        if(motionEvent.getAction() == MotionEvent.ACTION_DOWN)
-        {
+        if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
             view.setAlpha(0.6f);
         } else {
             view.setAlpha(1f);
         }
 
-        return true;
+        return false;
 
     }
 
     public void setOnLoadMoreListener(OnLoadMoreListener onLoadMoreListener) {
         this.onLoadMoreListener = onLoadMoreListener;
     }
+
     public void setLoaded() {
         loading = false;
     }
-
-
 
 
     //incoming text message
     public class IncomingTextMessageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView avatar_in;
         private LinearLayout text_container_in;
-        private TextView text_in,date_in;
+        private TextView text_in, date_in;
+
         public IncomingTextMessageViewHolder(View itemView) {
             super(itemView);
             avatar_in = itemView.findViewById(R.id.incoming_avatar);
@@ -367,22 +423,22 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         @Override
         public void onClick(View view) {
-            if(view.getId() == text_container_in.getId()){
-               // Toast.makeText(view.mContext, "clicked", Toast.LENGTH_SHORT).show();
-            }else if(view.getId() == avatar_in.getId()){
-               int postion = getAdapterPosition();
-               if(postion != RecyclerView.NO_POSITION){
-                   UserMessage message = mMessages.get(postion);
-                   toUserProfilePage(message);
-               }
+            if (view.getId() == text_container_in.getId()) {
+                // Toast.makeText(view.mContext, "clicked", Toast.LENGTH_SHORT).show();
+            } else if (view.getId() == avatar_in.getId()) {
+                int postion = getAdapterPosition();
+                if (postion != RecyclerView.NO_POSITION) {
+                    UserMessage message = mMessages.get(postion);
+                    toUserProfilePage(message);
+                }
             }
 
         }
     }
 
-    private void toUserProfilePage(UserMessage message){
+    private void toUserProfilePage(UserMessage message) {
         // preventing double, using threshold of 1000 ms
-        if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+        if (SystemClock.elapsedRealtime() - lastClickTime < 1000) {
             return;
         }
         lastClickTime = SystemClock.elapsedRealtime();
@@ -395,8 +451,8 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 User mUser = dataSnapshot.getValue(User.class);
                 Intent intent = new Intent(mContext, UserProfilePage.class);
                 intent.putExtra("userInfo", mUser);
-                intent.putExtra("userUid",uid);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                intent.putExtra("userUid", uid);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 mContext.startActivity(intent);
             }
 
@@ -412,7 +468,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     //outcoming text message
     public class OutcomingTextMessageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView avatar_out;
-        private TextView text_out,date_out,status;
+        private TextView text_out, date_out, status;
         private LinearLayout text_container_out;
 
         public OutcomingTextMessageViewHolder(View itemView) {
@@ -427,11 +483,11 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         @Override
         public void onClick(View view) {
-            if(view.getId() == text_container_out.getId()){
-               // Toast.makeText(view.mContext, "clicked", Toast.LENGTH_SHORT).show();
-            }else if(view.getId() == avatar_out.getId()){
+            if (view.getId() == text_container_out.getId()) {
+                // Toast.makeText(view.mContext, "clicked", Toast.LENGTH_SHORT).show();
+            } else if (view.getId() == avatar_out.getId()) {
                 int postion = getAdapterPosition();
-                if(postion != RecyclerView.NO_POSITION){
+                if (postion != RecyclerView.NO_POSITION) {
                     UserMessage message = mMessages.get(postion);
                     toUserProfilePage(message);
                 }
@@ -443,7 +499,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     //outcoming text pending message
     public class OutcomingTextPendingMessageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView avatar_out;
-        private TextView text_out,date_out,status;
+        private TextView text_out, date_out, status;
         private LinearLayout text_container_out;
 
         public OutcomingTextPendingMessageViewHolder(View itemView) {
@@ -458,7 +514,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         @Override
         public void onClick(View view) {
-            if(view.getId() == text_container_out.getId()){
+            if (view.getId() == text_container_out.getId()) {
                 //Toast.makeText(view.mContext, "clicked", Toast.LENGTH_SHORT).show();
             }
 
@@ -466,55 +522,179 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     public class OutcomingImageMessageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        RoundedImageView image ;
+        RoundedImageView image;
+        ImageView gifImage;
         TextView timeStamp;
-        ProgressBar mProgressBar;
         ImageView avatar;
+
         public OutcomingImageMessageViewHolder(View itemView) {
             super(itemView);
             image = itemView.findViewById(R.id.outcoming_image_imageView);
-            mProgressBar = itemView.findViewById(R.id.outgoing_image_progressBar);
+            gifImage = itemView.findViewById(R.id.outcoming_image_gif);
+
             timeStamp = itemView.findViewById(R.id.outcoming_image_time);
             avatar = itemView.findViewById(R.id.outcoming_image_avatar);
+            avatar.setOnClickListener(this);
+            image.setOnClickListener(this);
+            gifImage.setOnClickListener(this);
             image.setOnTouchListener(UserMessageAdapter.this);
             avatar.setOnTouchListener(UserMessageAdapter.this);
         }
 
         @Override
         public void onClick(View v) {
+            if (getAdapterPosition() != RecyclerView.NO_POSITION) {
+                UserMessage message = mMessages.get(getAdapterPosition());
 
+                if (v == image) {
+                    if (message.getDoneNetWorking()) {
+                        String uri = message.getText();
+                        Intent i = new Intent(mContext, MediaViewActivty.class);
+                        i.putExtra("Uri", uri);
+                        i.putExtra("Gif",message.getGif());
+                        ActivityOptionsCompat options = ActivityOptionsCompat.
+                                makeSceneTransitionAnimation(mContext, v, "photoView");
+                        mContext.startActivity(i, options.toBundle());
+
+                    }
+                }else  if (v == gifImage) {
+                    if (message.getDoneNetWorking()) {
+                        String uri = message.getText();
+                        Intent i = new Intent(mContext, MediaViewActivty.class);
+                        i.putExtra("Uri", uri);
+                        i.putExtra("Gif",message.getGif());
+                        mContext.startActivity(i);
+
+                    }
+                }else  if (v == avatar) {
+                    toUserProfilePage(message);
+                }
+            }
+        }
+    }
+
+    public class IncomingImageMessageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        RoundedImageView image;
+        ImageView gifImage;
+        TextView timeStamp;
+        ImageView avatar;
+
+        public IncomingImageMessageViewHolder(View itemView) {
+            super(itemView);
+            image = itemView.findViewById(R.id.incoming_image_imageView);
+            gifImage = itemView.findViewById(R.id.incoming_image_gif);
+
+            timeStamp = itemView.findViewById(R.id.outcoming_image_time);
+            avatar = itemView.findViewById(R.id.outcoming_image_avatar);
+            avatar.setOnClickListener(this);
+            image.setOnClickListener(this);
+            gifImage.setOnClickListener(this);
+            image.setOnTouchListener(UserMessageAdapter.this);
+            avatar.setOnTouchListener(UserMessageAdapter.this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (getAdapterPosition() != RecyclerView.NO_POSITION) {
+                UserMessage message = mMessages.get(getAdapterPosition());
+
+                if (v == image) {
+                    if (message.getDoneNetWorking()) {
+                        String uri = message.getText();
+                        Intent i = new Intent(mContext, MediaViewActivty.class);
+                        i.putExtra("Uri", uri);
+                        i.putExtra("Gif",message.getGif());
+                        ActivityOptionsCompat options = ActivityOptionsCompat.
+                                makeSceneTransitionAnimation(mContext, v, "photoView");
+                        mContext.startActivity(i, options.toBundle());
+
+                    }
+                }else  if (v == gifImage) {
+                    if (message.getDoneNetWorking()) {
+                        String uri = message.getText();
+                        Intent i = new Intent(mContext, MediaViewActivty.class);
+                        i.putExtra("Uri", uri);
+                        i.putExtra("Gif",message.getGif());
+
+                        mContext.startActivity(i);
+
+                    }
+                }else  if (v == avatar) {
+                    toUserProfilePage(message);
+                }
+            }
         }
     }
 
     //Date Header
     public class DateHeaderViewHolder extends RecyclerView.ViewHolder {
         private TextView dateHeader;
+
         public DateHeaderViewHolder(View itemView) {
             super(itemView);
             dateHeader = itemView.findViewById(R.id.dateHeader_text);
         }
     }
- // load more progress bar
+
+    // load more progress bar
     public class LoadMoreViewHolder extends RecyclerView.ViewHolder {
         private ProgressBar mProgressBar;
+
         public LoadMoreViewHolder(View itemView) {
             super(itemView);
-            mProgressBar =itemView.findViewById(R.id.loadingmore);
+            mProgressBar = itemView.findViewById(R.id.loadingmore);
         }
     }
 
     public class TypingViewHolder extends RecyclerView.ViewHolder {
         private ImageView avatar;
+
         public TypingViewHolder(View itemView) {
             super(itemView);
-            avatar =itemView.findViewById(R.id.isTyping_avatar);
+            avatar = itemView.findViewById(R.id.isTyping_avatar);
 
 
         }
     }
 
 
+    public String getMimeType(Uri uri) {
+        String mimeType = null;
+        if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+            ContentResolver cr = getContext().getContentResolver();
+            mimeType = cr.getType(uri);
+        } else {
+            String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
+                    .toString());
+            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                    fileExtension.toLowerCase());
+        }
+        return mimeType;
 
+
+    }
+
+    public static Bitmap getRoundedCornerBitmap(Bitmap bitmap) {
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
+                bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        final RectF rectF = new RectF(rect);
+        final float roundPx = 12;
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
+
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+
+        return output;
+    }
 
 
 }

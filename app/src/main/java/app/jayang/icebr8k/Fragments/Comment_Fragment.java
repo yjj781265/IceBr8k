@@ -14,6 +14,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,7 +41,6 @@ import java.util.UUID;
 
 import app.jayang.icebr8k.Adapter.CommentAdapter;
 import app.jayang.icebr8k.Modle.Comment;
-import app.jayang.icebr8k.Modle.MyEditText;
 import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.Utility.ActivityCommunicator;
 import app.jayang.icebr8k.Utility.OnLoadMoreListener;
@@ -274,10 +274,15 @@ public class Comment_Fragment extends Fragment {
 
     @Override
     public void onDestroy() {
-        commentRef.removeEventListener(commentRefChildListener);
-        for(DatabaseReference ref : repliesMap.keySet()){
-            ref.removeEventListener(repliesMap.get(ref));
+        try{
+            commentRef.removeEventListener(commentRefChildListener);
+            for(DatabaseReference ref : repliesMap.keySet()){
+                ref.removeEventListener(repliesMap.get(ref));
+            }
+        }catch (NullPointerException e){
+            Log.d("CommentFrag123",e.getMessage());
         }
+
 
         super.onDestroy();
     }

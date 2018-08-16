@@ -81,15 +81,17 @@
     </android.support.v4.widget.SwipeRefreshLayout>
 
 
-   <com.beardedhen.androidbootstrap.BootstrapButton
-       android:layout_width="wrap_content"
-       android:id="@+id/add_friend_frag"
-       android:layout_height="wrap_content"
-       app:bootstrapBrand="success"
-       app:roundedCorners="true"
-      android:layout_centerInParent="true"
-       android:visibility="gone"
-       android:text="Add Friend"/>
+    <Button
+        android:id="@+id/add_friend_frag"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
+        android:layout_centerInParent="true"
+        android:backgroundTint="@color/colorAccent"
+        android:text="Add Friend"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="12dp"
+        android:visibility="gone"/>
 
     <RelativeLayout
         android:id="@+id/loadingImg_userTab"

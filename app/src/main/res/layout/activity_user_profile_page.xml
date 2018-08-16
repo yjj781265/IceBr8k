@@ -128,7 +128,7 @@
     </LinearLayout>
 
         <LinearLayout
-            android:animateLayoutChanges="true"
+            android:animateLayoutChanges="false"
         android:elevation="1dp"
         android:background="@color/creamYellow"
         android:layout_width="match_parent"

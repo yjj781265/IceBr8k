@@ -14,6 +14,7 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.onesignal.OneSignal;
+import com.squareup.leakcanary.LeakCanary;
 import com.zplesac.connectionbuddy.ConnectionBuddy;
 import com.zplesac.connectionbuddy.ConnectionBuddyConfiguration;
 
@@ -44,10 +45,24 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+
+        if (LeakCanary.isInAnalyzerProcess(this)) {
+            // This process is dedicated to LeakCanary for heap analysis.
+            // You should not init your app in this process.
+            return;
+        }
+        LeakCanary.install(this);
+        // Normal app init code...
+
+
         context = getApplicationContext();
 
+
+
+
 // url loading logic for drawer header account image
-        DrawerImageLoader.init(new AbstractDrawerImageLoader() {
+       /* DrawerImageLoader.init(new AbstractDrawerImageLoader() {
             @Override
             public void set(ImageView imageView, Uri uri, Drawable placeholder) {
                 Glide.with(imageView.getContext()).load(uri).apply(new RequestOptions().placeholder(placeholder)).into(imageView);
@@ -57,7 +72,7 @@ public class MyApplication extends Application {
             public void cancel(ImageView imageView) {
                 Glide.with(imageView.getContext()).clear(imageView);
             }
-        });
+        });*/
 
 
         CaocConfig.Builder.create()
@@ -92,6 +107,9 @@ public class MyApplication extends Application {
                 .defaultDisplayImageOptions(defaultOptions)
 			.build();
         ImageLoader.getInstance().init(config);
+
+
+
     }
 
 

@@ -24,6 +24,16 @@
         <item name="android:listPreferredItemHeight">36dp</item>
 
     </style>
+    <style name="PhotoViewTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/black</item>
+        <item name="android:windowContentTransitions">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:fitsSystemWindows">true</item>
+
+        <item name="colorPrimaryDark">@color/black</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
 
 
     <style name="OverflowMenu" parent="Widget.AppCompat.PopupMenu">
@@ -156,7 +166,7 @@
     <style name="picture.white.style" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <!-- Customize your theme here. -->
         <!--标题栏背景色-->
-        <item name="colorPrimary">@color/dark_gray</item>
+        <item name="colorPrimary">@color/black</item>
         <!--状态栏背景色-->
         <item name="colorPrimaryDark">@color/black</item>
         <!--是否改变图片列表界面状态栏字体颜色为黑色-->
@@ -178,7 +188,7 @@
         <!--选择图片样式0/9-->
         <item name="picture.style.numComplete">true</item>
         <!--图片列表底部背景色-->
-        <item name="picture.bottom.bg">@color/dark_gray</item>
+        <item name="picture.bottom.bg">@color/black</item>
         <!--图片列表预览文字颜色-->
         <item name="picture.preview.textColor">@color/colorPrimary</item>
         <!--图片列表已完成文字颜色-->
@@ -186,13 +196,13 @@
         <!--图片已选数量圆点背景色-->
         <item name="picture.num.style">@drawable/inchat_indicator_dot</item>
         <!--预览界面标题栏背景色-->
-        <item name="picture.ac_preview.title.bg">@color/black_overlay</item>
+        <item name="picture.ac_preview.title.bg">@color/black</item>
         <!--预览界面标题文字颜色-->
         <item name="picture.ac_preview.title.textColor">@color/white</item>
         <!--预览界面已完成文字颜色-->
         <item name="picture.ac_preview.complete.textColor">@color/colorAccent</item>
         <!--预览界面底部背景色-->
-        <item name="picture.ac_preview.bottom.bg">@color/dark_gray</item>
+        <item name="picture.ac_preview.bottom.bg">@color/black</item>
         <!--预览界面返回箭头-->
         <item name="picture.preview.leftBack.icon">@drawable/picture_back</item>
         <!--裁剪页面标题背景色-->
