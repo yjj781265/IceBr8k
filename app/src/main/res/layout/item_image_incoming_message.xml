@@ -16,62 +16,38 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginStart="8dp"
-        app:layout_constraintBottom_toBottomOf="@+id/relativeLayout"
+        app:layout_constraintBottom_toTopOf="@+id/outcoming_image_time"
         app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@drawable/camera_selector"/>
 
-    <RelativeLayout
-        android:id="@+id/relativeLayout"
+
+    <ImageView
+        android:id="@+id/incoming_image_imageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:adjustViewBounds="true"
+        android:minWidth="100dp"
+        android:minHeight="100dp"
+        android:contentDescription="image"
+        android:maxHeight="150dp"
+        android:maxWidth="150dp"
+        android:transitionName="photoView"
         app:layout_constraintBottom_toTopOf="@+id/outcoming_image_time"
-        app:layout_constraintStart_toEndOf="@+id/outcoming_image_avatar"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <com.github.siyamed.shapeimageview.RoundedImageView
-            android:id="@+id/incoming_image_imageView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:adjustViewBounds="true"
-            android:transitionName="photoView"
-            android:contentDescription="image"
-
-            android:maxHeight="120dp"
-            android:maxWidth="120dp"
-            android:scaleType="fitEnd"
-            android:src="@drawable/img_placeholder"
-            app:siBorderWidth="0dp"
-            app:siRadius="8dp"/>
-
-        <ImageView
-
-            android:id="@+id/incoming_image_gif"
-            android:transitionName="photoView"
-            android:layout_width="120dp"
-            android:layout_height="100dp"
-            android:layout_marginEnd="8dp"
-            android:adjustViewBounds="true"
-            android:scaleType="fitXY"
-            />
-
-    </RelativeLayout>
+        app:layout_constraintStart_toEndOf="@+id/outcoming_image_avatar"/>
 
 
     <TextView
         android:id="@+id/outcoming_image_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
-
+        android:text="123"
         android:textSize="12sp"
         android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="@+id/relativeLayout"
-        app:layout_constraintTop_toBottomOf="@+id/relativeLayout"
-        tools:text="123"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/incoming_image_imageView"/>
 
 
 
-    \
+
 </android.support.constraint.ConstraintLayout>

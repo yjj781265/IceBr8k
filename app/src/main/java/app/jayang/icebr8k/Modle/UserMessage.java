@@ -1,10 +1,15 @@
 package app.jayang.icebr8k.Modle;
 
+import android.support.annotation.NonNull;
+
+import java.io.Serializable;
+import java.util.Comparator;
+
 /**
  * Created by Jayang on 2/16/2018.
  */
 
-public class UserMessage {
+public class UserMessage implements Serializable, Comparable<UserMessage> {
     private String text, senderid, messagetype, messageid;
     private Long timestamp;
     private Boolean doneNetWorking =false,isGif = false;  //default value
@@ -111,6 +116,11 @@ public class UserMessage {
                 ", messageType='" + messagetype + '\'' +
                 ", messageId='" + messageid + '\'' +
                 '}';
+    }
+
+    @Override
+    public int compareTo(@NonNull UserMessage o) {
+        return this.timestamp.compareTo(o.getTimestamp());
     }
 }
 

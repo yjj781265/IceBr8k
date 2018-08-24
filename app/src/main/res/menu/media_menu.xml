@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+
+    <item
+        android:title ="Save File"
+        android:orderInCategory="100"
+        android:id="@+id/save_file"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_action_save"
+
+        />
+    <item
+        android:title ="Share"
+        android:orderInCategory="100"
+        android:id="@+id/share"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_action_share"
+
+        />
+
+
+</menu>

@@ -141,7 +141,7 @@ public class FullImageView extends AppCompatActivity {
 
             // Add the image to the system gallery
             galleryAddPic(savedImagePath);
-            Toast.makeText(getApplicationContext(), "Image Saved Under Folder IceBr8k_PIC", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Image Saved Under Folder Icebr8k_PIC", Toast.LENGTH_LONG).show();
         }
         return savedImagePath;
     }

@@ -91,6 +91,48 @@ public class FriendRequestPage extends SwipeBackActivity {
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                if("accepted".equals(dataSnapshot.child("stats").getValue(String.class))){
+                    nofrt.setVisibility(View.GONE);
+                    DatabaseReference userRef = FirebaseDatabase.getInstance().getReference()
+                            .child("Users").child(dataSnapshot.getKey());
+                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            User user = dataSnapshot.getValue(User.class);
+
+                            if(mUsers.contains(user)){
+                                mUsers.remove(mUsers.indexOf(user));
+                                mAdapter.notifyItemRemoved(mUsers.indexOf(user));
+                            }
+
+                            nofrt.setVisibility(mUsers.isEmpty()? View.VISIBLE:View.GONE);
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                }else if("pending".equals(dataSnapshot.child("stats").getValue(String.class))){
+                    nofrt.setVisibility(View.GONE);
+                    DatabaseReference userRef = FirebaseDatabase.getInstance().getReference()
+                            .child("Users").child(dataSnapshot.getKey());
+                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            User user = dataSnapshot.getValue(User.class);
+                            mUsers.add(user);
+                            mAdapter.notifyItemInserted(mUsers.indexOf(user));
+                            compareWithUser2(dataSnapshot.getKey(),user);
+                            nofrt.setVisibility(mUsers.isEmpty()? View.VISIBLE:View.GONE);
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                }
 
             }
 

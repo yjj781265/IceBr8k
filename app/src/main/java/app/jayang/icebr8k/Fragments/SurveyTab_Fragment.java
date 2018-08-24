@@ -380,7 +380,7 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
 
                             // add indicators
                             for (int i = 0; i < mList.size(); i++) {
-                                ImageView imageView = new ImageView(getActivity());
+                                ImageView imageView = new ImageView(getContext());
                                 LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                                 lp.setMargins(8, 0, 8, 0);
                                 imageView.setLayoutParams(lp);

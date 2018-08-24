@@ -20,27 +20,34 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".login_page"
-            android:screenOrientation="portrait"
             android:theme="@style/AppThemeMain"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustResize"/>
+            android:windowSoftInputMode="stateAlwaysHidden|adjustResize">
+        </activity>
         <activity
             android:name=".UserProfilePage"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait"/>
+            android:configChanges="orientation|screenSize|keyboardHidden">
+        </activity>
         <activity
             android:name=".Homepage"
-            android:label="@string/app_name"
             android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeMain"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustResize"/>
+            android:windowSoftInputMode="stateAlwaysHidden|adjustResize">
+        </activity>
         <activity
-            android:name=".ResultActivity"
-            android:screenOrientation="portrait"/>
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:screenOrientation="user"
+            android:name=".ResultActivity">
+        </activity>
+
         <activity
             android:name=".SplashScreen"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:screenOrientation="user"
             android:noHistory="true"
-            android:screenOrientation="portrait"
+
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -50,7 +57,8 @@
         </activity>
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
-            android:theme="@style/Base.Theme.AppCompat"/>
+            android:theme="@style/Base.Theme.AppCompat">
+        </activity>
 
         <meta-data
             android:name="com.onesignal.NotificationOpened.DEFAULT"
@@ -67,12 +75,13 @@
 
         <activity
             android:name=".signup"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustResize"/>
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustResize">
+        </activity>
         <activity
             android:name=".SearchUser"
-            android:noHistory="true"
-            android:screenOrientation="portrait">
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH"/>
             </intent-filter>
@@ -86,19 +95,23 @@
             android:screenOrientation="portrait"/>
         <activity
             android:name=".SearchName"
-            android:noHistory="true"
-            android:screenOrientation="portrait">
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH"/>
             </intent-filter>
         </activity>
         <activity
             android:name=".FriendRequestPage"
-            android:launchMode="singleTask"/>
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:screenOrientation="user"
+            android:launchMode="singleTask">
+        </activity>
         <activity
             android:name=".FullImageView"
-            android:label="@string/title_activity_full_image_view"
-            android:screenOrientation="portrait"/>
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:label="@string/title_activity_full_image_view">
+        </activity>
 
         <service
             android:name=".Utility.MyJobService"
@@ -110,23 +123,48 @@
 
         <activity
             android:name=".UserChatActvity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
             android:launchMode="singleTask"
-            android:windowSoftInputMode="stateHidden"/>
+            android:screenOrientation="user"
+            android:windowSoftInputMode="stateHidden">
+
+            <intent-filter>
+                <action
+                    android:name="android.intent.action.PICK"/>
+                <category
+                    android:name="android.intent.category.DEFAULT"/>
+                <category
+                    android:name="android.intent.category.OPENABLE"/>
+                <data android:mimeType="text/plain"/>
+                <data android:mimeType="image/*"/>
+            </intent-filter>
+        </activity>
         <activity
             android:name=".Feedback"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:screenOrientation="user"
             android:windowSoftInputMode="stateAlwaysHidden|adjustResize"/>
         <activity android:name=".Leaderboard">
         </activity>
         <activity
             android:name=".QuestionActivity"
-            android:screenOrientation="portrait">
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:screenOrientation="user">
         </activity>
-        <activity android:name=".Reply">
+
+        <activity android:name=".Reply"
+                  android:configChanges="orientation|screenSize|keyboardHidden"
+                  android:screenOrientation="user">
         </activity>
-        <activity android:name=".Settings_Activity">
+
+        <activity android:name=".Settings_Activity"
+                  android:configChanges="orientation|screenSize|keyboardHidden"
+                  android:screenOrientation="user">
         </activity>
         <activity
             android:name=".SearchableActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:screenOrientation="user"
             android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH"/>
@@ -136,15 +174,37 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable"/>
         </activity>
-        <activity android:name=".SearchPeopleNearby">
+        <activity
+            android:name=".SearchPeopleNearby"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:screenOrientation="user">
         </activity>
-        <activity android:name=".SearchResult">
+        <activity
+            android:name=".SearchResult"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:screenOrientation="user">
         </activity>
-        <activity android:name=".MediaViewActivty"
-                  android:screenOrientation="portrait"
-            android:theme="@style/PhotoViewTheme">
 
-        </activity>
+
+        <activity
+            android:name=".MediaViewActivty"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:theme="@style/PhotoViewTheme"
+            android:screenOrientation="user"/>
+
+
+
+        <provider
+            tools:replace="android:authorities"
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="app.jayang.icebr8k.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                tools:replace="android:resource"
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/pick_file_paths" />
+        </provider>
     </application>
 
 </manifest>

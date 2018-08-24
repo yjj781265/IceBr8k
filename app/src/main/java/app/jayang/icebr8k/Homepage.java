@@ -66,7 +66,6 @@ import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
-import com.nostra13.universalimageloader.core.ImageLoader;
 import com.onesignal.OSSubscriptionObserver;
 import com.onesignal.OSSubscriptionStateChanges;
 import com.onesignal.OneSignal;
@@ -384,7 +383,7 @@ public class Homepage extends AppCompatActivity implements
 // change icon when minimize
         Bitmap icon = BitmapFactory.decodeResource(this.getResources(),
                 R.drawable.ic_stat_onesignal_default);
-        String label = Html.fromHtml("<font color=\"#fffff4\">" + "IceBr8k" + "</font>").toString();
+        String label = Html.fromHtml("<font color=\"#fffff4\">" + "Icebr8k" + "</font>").toString();
         ActivityManager.TaskDescription taskDescription = new ActivityManager.
 
                 TaskDescription(label, icon, getResources().getColor(R.color.colorPrimary));
@@ -457,7 +456,7 @@ public class Homepage extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
 
-        new clearImageCache().execute();
+
 
 
         super.onDestroy();
@@ -475,16 +474,6 @@ public class Homepage extends AppCompatActivity implements
 
     }
 
-    public class clearImageCache extends  AsyncTask<Void,Void,Void>{
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            Glide.get(getApplicationContext()).clearDiskCache();
-            ImageLoader.getInstance().clearMemoryCache();
-            ImageLoader.getInstance().clearDiskCache();
-            return null;
-        }
-    }
 
 
 

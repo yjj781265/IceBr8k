@@ -2,6 +2,8 @@ package app.jayang.icebr8k.Adapter;
 
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,7 +17,6 @@ import android.graphics.RectF;
 import android.net.Uri;
 import android.os.SystemClock;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -28,33 +29,32 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
-import com.github.siyamed.shapeimageview.RoundedImageView;
+import com.bumptech.glide.request.transition.DrawableCrossFadeFactory;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
-
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 import app.jayang.icebr8k.MediaViewActivty;
 import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.Modle.UserMessage;
+import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.UserProfilePage;
 import app.jayang.icebr8k.Utility.MyDateFormatter;
 import app.jayang.icebr8k.Utility.OnLoadMoreListener;
-import app.jayang.icebr8k.Modle.UserMessage;
-import app.jayang.icebr8k.R;
-
 
 import static app.jayang.icebr8k.MyApplication.getContext;
 
@@ -97,7 +97,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private HashMap<String, String> userPhotoUrlMap;
     private OnLoadMoreListener onLoadMoreListener;
     private Activity mContext;
-    private ImageLoader imageLoader = ImageLoader.getInstance();
+
 
     public UserMessageAdapter(ArrayList<UserMessage> messages, RecyclerView recyclerView, HashMap<String, String> userPhotoUrlMap, Activity context) {
         mMessages = messages;
@@ -184,9 +184,9 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
 
-        UserMessage message = mMessages.get(position);
+        final UserMessage message = mMessages.get(position);
 
-       // when user swipe top load loadmore
+        // when user swipe top load loadmore
         if (holder instanceof LoadMoreViewHolder) {
             ((LoadMoreViewHolder) holder).mProgressBar.setIndeterminate(true);
 
@@ -276,17 +276,18 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     : "Sending...");
             ((OutcomingImageMessageViewHolder) holder).timeStamp.setVisibility(View.VISIBLE);
 
-            if (message.getGif()) {
-                ((OutcomingImageMessageViewHolder) holder).image.setVisibility(View.GONE);
-                ((OutcomingImageMessageViewHolder) holder).gifImage.setVisibility(View.VISIBLE);
-                Glide.with(mContext).asGif().load(message.getText()).apply(new RequestOptions().placeholder(R.drawable.img_placeholder)).transition(DrawableTransitionOptions.withCrossFade(300)).into(((OutcomingImageMessageViewHolder) holder).gifImage);
-            } else {
-                ((OutcomingImageMessageViewHolder) holder).image.setVisibility(View.VISIBLE);
-                ((OutcomingImageMessageViewHolder) holder).gifImage.setVisibility(View.GONE);
-                imageLoader.displayImage(message.getText(), ((OutcomingImageMessageViewHolder) holder).image);
+              DrawableCrossFadeFactory factory =
+                        new DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build();
+                Glide.with(mContext).load(message.getText()).
+                        apply(new RequestOptions()
+                                .error(R.drawable.noimage)
+                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                .placeholder(R.drawable.img_placeholder)
+                                .transform(new RoundedCorners(24))
+                                .override(500, 500))
+                        .into(((OutcomingImageMessageViewHolder) holder).image);
 
 
-            }
 
             // incoming image message
         } else if (holder instanceof IncomingImageMessageViewHolder) {
@@ -302,22 +303,23 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             }
 
 
-            // if image is uploading to the cloud show text is sending
-            ((IncomingImageMessageViewHolder) holder).timeStamp.setText(message.getDoneNetWorking() ? MyDateFormatter.timeStampToDateConverter(message.getTimestamp(), false)
-                    : "Sending...");
+            ((IncomingImageMessageViewHolder) holder).timeStamp.setText(MyDateFormatter.timeStampToDateConverter(message.getTimestamp(), false));
+
             ((IncomingImageMessageViewHolder) holder).timeStamp.setVisibility(View.VISIBLE);
 
-            if (message.getGif()) {
-                ((IncomingImageMessageViewHolder) holder).image.setVisibility(View.GONE);
-                ((IncomingImageMessageViewHolder) holder).gifImage.setVisibility(View.VISIBLE);
-                Glide.with(mContext).asGif().load(message.getText()).apply(new RequestOptions().placeholder(R.drawable.img_placeholder)).transition(DrawableTransitionOptions.withCrossFade(300)).into(((IncomingImageMessageViewHolder) holder).gifImage);
-            } else {
+            DrawableCrossFadeFactory factory =
+                    new DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build();
+            Glide.with(mContext).load(message.getText()).
+                    apply(new RequestOptions()
+                            .error(R.drawable.noimage)
+                            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                            .placeholder(R.drawable.img_placeholder)
+                            .transform(new RoundedCorners(24))
+                            .override(500, 500))
+                    .into(((IncomingImageMessageViewHolder) holder).image);
 
-                ((IncomingImageMessageViewHolder) holder).image.setVisibility(View.VISIBLE);
-                ((IncomingImageMessageViewHolder) holder).gifImage.setVisibility(View.GONE);
-                imageLoader.displayImage(message.getText(), ((IncomingImageMessageViewHolder) holder).image);
 
-            }
+
         }
 
 
@@ -406,7 +408,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
 
     //incoming text message
-    public class IncomingTextMessageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class IncomingTextMessageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,View.OnLongClickListener {
         private ImageView avatar_in;
         private LinearLayout text_container_in;
         private TextView text_in, date_in;
@@ -418,11 +420,17 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             text_in = itemView.findViewById(R.id.incoming_text);
             text_container_in = itemView.findViewById(R.id.incoming_main);
             text_container_in.setOnClickListener(this);
+            text_container_in.setOnLongClickListener(this);
             avatar_in.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
+            if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                return;
+            }
+
+            lastClickTime = SystemClock.elapsedRealtime();
             if (view.getId() == text_container_in.getId()) {
                 // Toast.makeText(view.mContext, "clicked", Toast.LENGTH_SHORT).show();
             } else if (view.getId() == avatar_in.getId()) {
@@ -434,39 +442,26 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             }
 
         }
-    }
 
-    private void toUserProfilePage(UserMessage message) {
-        // preventing double, using threshold of 1000 ms
-        if (SystemClock.elapsedRealtime() - lastClickTime < 1000) {
-            return;
+        @Override
+        public boolean onLongClick(View v) {
+            int postion = getAdapterPosition();
+            if (postion != RecyclerView.NO_POSITION) {
+                UserMessage message = mMessages.get(postion);
+                ClipboardManager clipboard = (ClipboardManager)  mContext.getSystemService (Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("IceBr8k", message.getText());
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(mContext, "Text Copied ", Toast.LENGTH_SHORT).show();
+            }
+            return true;
         }
-        lastClickTime = SystemClock.elapsedRealtime();
-        final String uid = message.getSenderid();
-        DatabaseReference infoRef = FirebaseDatabase.getInstance().getReference()
-                .child("Users").child(uid);
-        infoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                User mUser = dataSnapshot.getValue(User.class);
-                Intent intent = new Intent(mContext, UserProfilePage.class);
-                intent.putExtra("userInfo", mUser);
-                intent.putExtra("userUid", uid);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                mContext.startActivity(intent);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
     }
+
+
 
 
     //outcoming text message
-    public class OutcomingTextMessageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class OutcomingTextMessageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,View.OnLongClickListener {
         private ImageView avatar_out;
         private TextView text_out, date_out, status;
         private LinearLayout text_container_out;
@@ -478,11 +473,17 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             text_out = itemView.findViewById(R.id.outcoming_text);
             text_container_out = itemView.findViewById(R.id.outcoming_main);
             text_container_out.setOnClickListener(this);
+            text_container_out.setOnLongClickListener(this);
             avatar_out.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
+            if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                return;
+            }
+            lastClickTime = SystemClock.elapsedRealtime();
+
             if (view.getId() == text_container_out.getId()) {
                 // Toast.makeText(view.mContext, "clicked", Toast.LENGTH_SHORT).show();
             } else if (view.getId() == avatar_out.getId()) {
@@ -493,6 +494,19 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 }
             }
 
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            int postion = getAdapterPosition();
+            if (postion != RecyclerView.NO_POSITION) {
+                UserMessage message = mMessages.get(postion);
+                ClipboardManager clipboard = (ClipboardManager)  mContext.getSystemService (Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("IceBr8k", message.getText());
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(mContext, "Text Copied", Toast.LENGTH_SHORT).show();
+            }
+            return true;
         }
     }
 
@@ -522,104 +536,76 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     public class OutcomingImageMessageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        RoundedImageView image;
-        ImageView gifImage;
+        ImageView image;
         TextView timeStamp;
         ImageView avatar;
 
         public OutcomingImageMessageViewHolder(View itemView) {
             super(itemView);
             image = itemView.findViewById(R.id.outcoming_image_imageView);
-            gifImage = itemView.findViewById(R.id.outcoming_image_gif);
+
 
             timeStamp = itemView.findViewById(R.id.outcoming_image_time);
             avatar = itemView.findViewById(R.id.outcoming_image_avatar);
             avatar.setOnClickListener(this);
             image.setOnClickListener(this);
-            gifImage.setOnClickListener(this);
             image.setOnTouchListener(UserMessageAdapter.this);
             avatar.setOnTouchListener(UserMessageAdapter.this);
         }
 
         @Override
         public void onClick(View v) {
+            if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                return;
+            }
+            lastClickTime = SystemClock.elapsedRealtime();
+
             if (getAdapterPosition() != RecyclerView.NO_POSITION) {
                 UserMessage message = mMessages.get(getAdapterPosition());
 
                 if (v == image) {
                     if (message.getDoneNetWorking()) {
-                        String uri = message.getText();
-                        Intent i = new Intent(mContext, MediaViewActivty.class);
-                        i.putExtra("Uri", uri);
-                        i.putExtra("Gif",message.getGif());
-                        ActivityOptionsCompat options = ActivityOptionsCompat.
-                                makeSceneTransitionAnimation(mContext, v, "photoView");
-                        mContext.startActivity(i, options.toBundle());
-
+                        toMediaGallary(message,v);
+                    } else if (v == avatar) {
+                        toUserProfilePage(message);
                     }
-                }else  if (v == gifImage) {
-                    if (message.getDoneNetWorking()) {
-                        String uri = message.getText();
-                        Intent i = new Intent(mContext, MediaViewActivty.class);
-                        i.putExtra("Uri", uri);
-                        i.putExtra("Gif",message.getGif());
-                        mContext.startActivity(i);
-
-                    }
-                }else  if (v == avatar) {
-                    toUserProfilePage(message);
                 }
             }
         }
     }
 
     public class IncomingImageMessageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        RoundedImageView image;
-        ImageView gifImage;
+        ImageView image;
         TextView timeStamp;
         ImageView avatar;
 
         public IncomingImageMessageViewHolder(View itemView) {
             super(itemView);
             image = itemView.findViewById(R.id.incoming_image_imageView);
-            gifImage = itemView.findViewById(R.id.incoming_image_gif);
-
             timeStamp = itemView.findViewById(R.id.outcoming_image_time);
             avatar = itemView.findViewById(R.id.outcoming_image_avatar);
             avatar.setOnClickListener(this);
             image.setOnClickListener(this);
-            gifImage.setOnClickListener(this);
             image.setOnTouchListener(UserMessageAdapter.this);
             avatar.setOnTouchListener(UserMessageAdapter.this);
         }
 
         @Override
         public void onClick(View v) {
+            if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                return;
+            }
+            lastClickTime = SystemClock.elapsedRealtime();
             if (getAdapterPosition() != RecyclerView.NO_POSITION) {
                 UserMessage message = mMessages.get(getAdapterPosition());
 
                 if (v == image) {
                     if (message.getDoneNetWorking()) {
-                        String uri = message.getText();
-                        Intent i = new Intent(mContext, MediaViewActivty.class);
-                        i.putExtra("Uri", uri);
-                        i.putExtra("Gif",message.getGif());
-                        ActivityOptionsCompat options = ActivityOptionsCompat.
-                                makeSceneTransitionAnimation(mContext, v, "photoView");
-                        mContext.startActivity(i, options.toBundle());
+                        toMediaGallary(message,v);
 
                     }
-                }else  if (v == gifImage) {
-                    if (message.getDoneNetWorking()) {
-                        String uri = message.getText();
-                        Intent i = new Intent(mContext, MediaViewActivty.class);
-                        i.putExtra("Uri", uri);
-                        i.putExtra("Gif",message.getGif());
 
-                        mContext.startActivity(i);
-
-                    }
-                }else  if (v == avatar) {
+                } else if (v == avatar) {
                     toUserProfilePage(message);
                 }
             }
@@ -657,44 +643,60 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
     }
 
-
-    public String getMimeType(Uri uri) {
-        String mimeType = null;
-        if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
-            ContentResolver cr = getContext().getContentResolver();
-            mimeType = cr.getType(uri);
-        } else {
-            String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
-                    .toString());
-            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                    fileExtension.toLowerCase());
+    private void toUserProfilePage(UserMessage message) {
+        // preventing double, using threshold of 1000 ms
+        if (SystemClock.elapsedRealtime() - lastClickTime < 1000) {
+            return;
         }
-        return mimeType;
+        lastClickTime = SystemClock.elapsedRealtime();
+        final String uid = message.getSenderid();
+        DatabaseReference infoRef = FirebaseDatabase.getInstance().getReference()
+                .child("Users").child(uid);
+        infoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User mUser = dataSnapshot.getValue(User.class);
+                Intent intent = new Intent(mContext, UserProfilePage.class);
+                intent.putExtra("userInfo", mUser);
+                intent.putExtra("userUid", uid);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                mContext.startActivity(intent);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    private void toMediaGallary(UserMessage message,View view){
+        ArrayList<UserMessage> imgMessages = new ArrayList<>();
+
+        for(UserMessage message1 : mMessages) {
+            if (message1.getMessagetype().equals(VIEWTYPE_IMAGE)) {
+                imgMessages.add(message1);
+            }
+        }
+        Collections.sort(imgMessages);
+        Intent intent = new Intent(mContext,MediaViewActivty.class);
+        intent.putExtra("photoViews",imgMessages);
+        intent.putExtra("photoView",message);
+        ActivityOptionsCompat options = ActivityOptionsCompat.
+                makeSceneTransitionAnimation(mContext,view, "photoView");
+        if(message.getGif()){
+            mContext.startActivity(intent);
+        }else{
+            mContext.startActivity (intent, options.toBundle());
+        }
+
+
 
 
     }
 
-    public static Bitmap getRoundedCornerBitmap(Bitmap bitmap) {
-        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
-                bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(output);
-
-        final int color = 0xff424242;
-        final Paint paint = new Paint();
-        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-        final RectF rectF = new RectF(rect);
-        final float roundPx = 12;
-
-        paint.setAntiAlias(true);
-        canvas.drawARGB(0, 0, 0, 0);
-        paint.setColor(color);
-        canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
-
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawBitmap(bitmap, rect, rect, paint);
-
-        return output;
     }
 
 
-}
+

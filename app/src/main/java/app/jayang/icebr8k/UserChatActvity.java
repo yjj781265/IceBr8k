@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Bundle;
 import android.os.Message;
+import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.Snackbar;
@@ -42,11 +43,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.BaseTarget;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.bumptech.glide.request.RequestOptions;
+
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
-
-import com.github.siyamed.shapeimageview.RoundedImageView;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -70,13 +72,13 @@ import com.luck.picture.lib.PictureSelector;
 import com.luck.picture.lib.config.PictureConfig;
 import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.entity.LocalMedia;
-import com.nostra13.universalimageloader.core.ImageLoader;
+
+
 import com.onesignal.OneSignal;
 
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -182,7 +184,6 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         mHorizontalScrollView = (HorizontalScrollView) findViewById(R.id.userChat_imagePicker_nsv);
         mImagePickerContainer = (LinearLayout) findViewById(R.id.userChat_imagePicker);
 
-
         voice = (ImageView) findViewById(R.id.userChat_voicemessage);
         voice.setOnTouchListener(this);
         voice.setOnClickListener(this);
@@ -191,7 +192,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         image = (ImageView) findViewById(R.id.userChat_image);
         image.setOnTouchListener(this);
         image.setOnClickListener(this);
-        image.setOnLongClickListener(this);
+
 
         voiceChat = (ImageView) findViewById(R.id.userChat_voicechat);
         voiceChat.setOnTouchListener(this);
@@ -819,7 +820,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
                 VIEWTYPE_IMAGE, UUID.randomUUID().toString().replaceAll("-", ""),
                 new Date().getTime());
         message.setDoneNetWorking(false);
-        message.setGif(uri.contains("gif"));
+        message.setGif(uri.contains(".gif"));
 
         int index = 0, prevIndex = 0;
         if (mMessages.contains(isTypingMessage)) {
@@ -1318,59 +1319,75 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         // Creating a new RelativeLayout
         final FrameLayout frameLayout = new FrameLayout(this);
         frameLayout.setLayoutParams(lp);
-        final RoundedImageView imageView = new RoundedImageView(this);
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams((int) getResources().getDimension(R.dimen.imageview_max_width), (int) getResources().getDimension(R.dimen.imageview_max_width));
-        imageView.setLayoutParams(layoutParams);
-        imageView.requestLayout();
-        imageView.setScaleType(ImageView.ScaleType.FIT_END);
-        imageView.getLayoutParams().height = (int) getResources().getDimension(R.dimen.imageview_max_width);
-        imageView.getLayoutParams().width = (int) getResources().getDimension(R.dimen.imageview_max_width);
+        final ImageView imageView = new ImageView(this);
+        imageView.setAdjustViewBounds(false);
+      /*  imageView.setRadius(16);
+        imageView.setBorderWidth(0);*/
 
-        imageView.setAdjustViewBounds(true);
 
-        imageView.setRadius(16);
-        imageView.setBorderWidth(0);
-        Glide.with(getApplicationContext()).load(uri).into(imageView);
+
+
+
+
         Log.d("UserChat123", "'added");
 
 
         // Defining the layout parameters of the ImageView
         FrameLayout.LayoutParams flp = new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.FILL);
+                (int) getResources().getDimension(R.dimen.imageview_max_height), (int) getResources().getDimension(R.dimen.imageview_max_width),Gravity.FILL);
 
-        flp.setMargins(12, 12, 12, 12);
+        flp.setMargins(8, 8, 8, 8);
         imageView.setLayoutParams(flp);
+        imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+
+        Glide.with(UserChatActvity.this).
+                    load(uri).apply(new RequestOptions().
+                    transform(new RoundedCorners(24))).
+                    transition(DrawableTransitionOptions.withCrossFade()).into(imageView);
+
+
+
+
+
 
 
         // Defining the layout parameters of the close
         ImageView close = new ImageView(this);
         close.setImageResource(R.drawable.circle_close);
         close.setLayoutParams(circle_close_param);
-        frameLayout.addView(imageView);
-        frameLayout.addView(close);
-        mImagePickerContainer.addView(frameLayout);
-        mUriSet.add(uri);
-        close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-               mImagePickerContainer.removeView(frameLayout);
-               mHorizontalScrollView.setVisibility(mImagePickerContainer.getChildCount()!=0 ? View.VISIBLE : View.GONE);
-            }
-        });
-        close.setOnTouchListener(UserChatActvity.this);
-        imageView.setOnTouchListener(UserChatActvity.this);
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        if(!mUriSet.contains(uri)){
+            frameLayout.addView(imageView);
+            frameLayout.addView(close);
+            mImagePickerContainer.addView(frameLayout);
+            YoYo.with(Techniques.BounceIn).playOn(close);
+            frameLayout.getParent().requestChildFocus(frameLayout,frameLayout);
+            mUriSet.add(uri);
+
+            close.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mImagePickerContainer.removeView(frameLayout);
+                    mUriSet.remove(uri);
+                    send.setEnabled(!mUriSet.isEmpty());
+                    mHorizontalScrollView.setVisibility(mImagePickerContainer.getChildCount()!=0 ? View.VISIBLE : View.GONE);
+                }
+            });
+            close.setOnTouchListener(UserChatActvity.this);
+            imageView.setOnTouchListener(UserChatActvity.this);
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
                /* Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_VIEW);
 
                 intent.setDataAndType(imageUri, "image/*");
                 startActivity(intent);*/
-            }
-        });
-        mHorizontalScrollView.setVisibility(View.VISIBLE);
+                }
+            });
+            mHorizontalScrollView.setVisibility(View.VISIBLE);
+        }
+
+
 
 
 
@@ -1600,6 +1617,7 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
     @Override
     protected void onDestroy() {
         removeTimeChangeListener();
+
       /*  inChatListener,connectedRefListener,isTypingListener,subTitleListener;
         loadMessagesListener;*/
         try {
@@ -1621,12 +1639,23 @@ public class UserChatActvity extends SwipeBackActivity implements View.OnTouchLi
         userPhotoUrlMap =null;
         userPhotoUrlMap = null;
         mUriSet = null;
-
-
+        //Glide.get(UserChatActvity.this).clearMemory();
+       // new clearCache().execute();
         super.onDestroy();
 
 
 
+
+
+    }
+
+    public class clearCache extends AsyncTask<Void,Void,Void>{
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            Glide.get(UserChatActvity.this).clearDiskCache();
+            return  null;
+        }
     }
 
 }

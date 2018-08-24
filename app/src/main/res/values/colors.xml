@@ -27,6 +27,9 @@
 
 
     <color name="black_overlay">#66000000</color>
+    <color name="translucent_black">#7e000000</color>
+    <color name="black">#000000</color>
+    <color name="trasnlucentBlack">#7e000000</color>
 
 
 </resources>

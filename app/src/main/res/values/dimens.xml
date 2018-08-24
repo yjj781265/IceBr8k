@@ -6,8 +6,8 @@
     <dimen name="imageview_height_selected">18dp</dimen>
     <dimen name="material_drawer_item_primary_text">12dp</dimen>
 
-    <dimen name="imageview_max_width">100dp</dimen>
-    <dimen name="imageview_max_height">100dp</dimen>
+    <dimen name="imageview_max_width">75dp</dimen>
+    <dimen name="imageview_max_height">75dp</dimen>
 
     <dimen name="circle_close_width">20dp</dimen>
     <dimen name="circle_close_heighth">20dp</dimen>

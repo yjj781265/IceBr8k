@@ -34,7 +34,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.beardedhen.androidbootstrap.BootstrapButton;
+
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 import com.google.android.gms.common.api.Scope;
@@ -553,6 +553,7 @@ public class Userstab_Fragment extends Fragment {
                             loadingGif.setVisibility(View.GONE);
                             mAdapter.notifyDataSetChanged();
                             mRecyclerView.setVisibility(View.VISIBLE);
+                            addFriend.setVisibility(mUserDialogArrayList.isEmpty() ? View.VISIBLE : View.GONE);
                         }
 
                         DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
@@ -568,7 +569,7 @@ public class Userstab_Fragment extends Fragment {
                                 .child(userDialog.getId())
                                 .child(currentUser.getUid())
                                 .child("score");
-                        ref.setValue(String.valueOf(score));
+                        ref2.setValue(String.valueOf(score));
                         showLog(String.valueOf(score) + " SCORE IS HERE");
 
 

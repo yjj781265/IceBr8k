@@ -10,13 +10,12 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+
 import com.onesignal.OneSignal;
-import com.squareup.leakcanary.LeakCanary;
 import com.zplesac.connectionbuddy.ConnectionBuddy;
 import com.zplesac.connectionbuddy.ConnectionBuddyConfiguration;
+
+import java.io.File;
 
 import app.jayang.icebr8k.Utility.MyNotificationOpenedHandler;
 import app.jayang.icebr8k.Utility.MyNotificationReceivedHandler;
@@ -46,7 +45,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-
+/*
         if (LeakCanary.isInAnalyzerProcess(this)) {
             // This process is dedicated to LeakCanary for heap analysis.
             // You should not init your app in this process.
@@ -54,7 +53,7 @@ public class MyApplication extends Application {
         }
         LeakCanary.install(this);
         // Normal app init code...
-
+*/
 
         context = getApplicationContext();
 
@@ -62,7 +61,7 @@ public class MyApplication extends Application {
 
 
 // url loading logic for drawer header account image
-       /* DrawerImageLoader.init(new AbstractDrawerImageLoader() {
+        DrawerImageLoader.init(new AbstractDrawerImageLoader() {
             @Override
             public void set(ImageView imageView, Uri uri, Drawable placeholder) {
                 Glide.with(imageView.getContext()).load(uri).apply(new RequestOptions().placeholder(placeholder)).into(imageView);
@@ -72,7 +71,7 @@ public class MyApplication extends Application {
             public void cancel(ImageView imageView) {
                 Glide.with(imageView.getContext()).clear(imageView);
             }
-        });*/
+        });
 
 
         CaocConfig.Builder.create()
@@ -97,16 +96,9 @@ public class MyApplication extends Application {
                         .build();
         ConnectionBuddy.getInstance().init(networkInspectorConfiguration);
 
-        DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()
 
-           .cacheInMemory(true)
-                .cacheOnDisk(true)
-           .build();
-        // Create global configuration and initialize ImageLoader with this config
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this)
-                .defaultDisplayImageOptions(defaultOptions)
-			.build();
-        ImageLoader.getInstance().init(config);
+
+
 
 
 
