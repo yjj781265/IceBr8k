@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -46,6 +47,8 @@ import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -56,6 +59,9 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -77,12 +83,14 @@ import com.zplesac.connectionbuddy.models.ConnectivityState;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
 
 import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
 import app.jayang.icebr8k.Fragments.PeopleNearby_Fragment;
 import app.jayang.icebr8k.Fragments.SurveyTab_Fragment;
 import app.jayang.icebr8k.Fragments.UserMessageDialog_Frag;
 import app.jayang.icebr8k.Fragments.me_frag;
+import app.jayang.icebr8k.Modle.SurveyQ;
 import app.jayang.icebr8k.Modle.UserComp;
 import app.jayang.icebr8k.Modle.UserQA;
 import app.jayang.icebr8k.Utility.ActivityCommunicator;
@@ -243,7 +251,52 @@ public class Homepage extends AppCompatActivity implements
             }
         });
 
+
+        // transfer data
+        final FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("Questions").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    for (DocumentSnapshot document : task.getResult()) {
+                     SurveyQ surveyQ =  document.toObject(SurveyQ.class);
+                     if(surveyQ.getQuestionId().equals("6a59f0b6-0ef0-45d0-91de-fd004597f8c1")){
+                            showToast(surveyQ+"");
+                        }
+
+                    }
+                } else {
+                    Log.w(TAG, "Error getting documents.", task.getException());
+                }
+            }
+        });
+//end transfer
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference()
+                .child("Questions_8");
+
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot childSnap: dataSnapshot.getChildren()){
+                    SurveyQ surveyQ = childSnap.getValue(SurveyQ.class);
+                    if(surveyQ!=null){
+                        db.collection("Questions").document(surveyQ.getQuestionId()).set(surveyQ);
+
+
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
     }
+
+
 
 
     @Override

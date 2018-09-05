@@ -30,6 +30,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -193,7 +194,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             // Incoming message
         } else if (holder instanceof IncomingTextMessageViewHolder) {
             ((IncomingTextMessageViewHolder) holder).text_in.setText(message.getText());
-            ((IncomingTextMessageViewHolder) holder).avatar_in.setOnTouchListener(this);
+
             if (message.getTimestamp() != null) {
                 ((IncomingTextMessageViewHolder) holder).date_in.setText(MyDateFormatter.
                         timeStampToDateConverter(message.getTimestamp(), false));
@@ -213,7 +214,6 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
             ((OutcomingTextMessageViewHolder) holder).text_out.setText(message.getText());
             ((OutcomingTextMessageViewHolder) holder).date_out.setVisibility(View.VISIBLE);
-            ((OutcomingTextMessageViewHolder) holder).avatar_out.setOnTouchListener(this);
             if (message.getMessagetype().equals(VIEWTYPE_TEXT_PENDING)) {
                 ((OutcomingTextMessageViewHolder) holder).date_out.setText("Sending...");
             } else {
@@ -386,17 +386,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
 
-    @Override
-    public boolean onTouch(View view, MotionEvent motionEvent) {
-        if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-            view.setAlpha(0.6f);
-        } else {
-            view.setAlpha(1f);
-        }
 
-        return false;
-
-    }
 
     public void setOnLoadMoreListener(OnLoadMoreListener onLoadMoreListener) {
         this.onLoadMoreListener = onLoadMoreListener;
@@ -404,6 +394,22 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     public void setLoaded() {
         loading = false;
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        switch (event.getAction())
+        {
+            case MotionEvent.ACTION_DOWN:
+                v.setAlpha(0.8f);
+                break;
+            case MotionEvent.ACTION_UP:
+                v.setAlpha(1f);
+            default :
+                v.setAlpha(1f);
+        }
+        return false;
+
     }
 
 
@@ -419,9 +425,9 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             date_in = itemView.findViewById(R.id.incoming_time);
             text_in = itemView.findViewById(R.id.incoming_text);
             text_container_in = itemView.findViewById(R.id.incoming_main);
-            text_container_in.setOnClickListener(this);
             text_container_in.setOnLongClickListener(this);
             avatar_in.setOnClickListener(this);
+            avatar_in.setOnTouchListener(UserMessageAdapter.this);
         }
 
         @Override
@@ -433,7 +439,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             lastClickTime = SystemClock.elapsedRealtime();
             if (view.getId() == text_container_in.getId()) {
                 // Toast.makeText(view.mContext, "clicked", Toast.LENGTH_SHORT).show();
-            } else if (view.getId() == avatar_in.getId()) {
+            } else if (view.equals(avatar_in)) {
                 int postion = getAdapterPosition();
                 if (postion != RecyclerView.NO_POSITION) {
                     UserMessage message = mMessages.get(postion);
@@ -472,9 +478,9 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             date_out = itemView.findViewById(R.id.outcoming_time);
             text_out = itemView.findViewById(R.id.outcoming_text);
             text_container_out = itemView.findViewById(R.id.outcoming_main);
-            text_container_out.setOnClickListener(this);
             text_container_out.setOnLongClickListener(this);
             avatar_out.setOnClickListener(this);
+            avatar_out.setOnTouchListener(UserMessageAdapter.this);
         }
 
         @Override
@@ -484,9 +490,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             }
             lastClickTime = SystemClock.elapsedRealtime();
 
-            if (view.getId() == text_container_out.getId()) {
-                // Toast.makeText(view.mContext, "clicked", Toast.LENGTH_SHORT).show();
-            } else if (view.getId() == avatar_out.getId()) {
+          if (view.equals(avatar_out)) {
                 int postion = getAdapterPosition();
                 if (postion != RecyclerView.NO_POSITION) {
                     UserMessage message = mMessages.get(postion);
@@ -548,9 +552,10 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             timeStamp = itemView.findViewById(R.id.outcoming_image_time);
             avatar = itemView.findViewById(R.id.outcoming_image_avatar);
             avatar.setOnClickListener(this);
-            image.setOnClickListener(this);
-            image.setOnTouchListener(UserMessageAdapter.this);
             avatar.setOnTouchListener(UserMessageAdapter.this);
+            image.setOnTouchListener(UserMessageAdapter.this);
+            image.setOnClickListener(this);
+
         }
 
         @Override
@@ -565,11 +570,12 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
                 if (v == image) {
                     if (message.getDoneNetWorking()) {
-                        toMediaGallary(message,v);
-                    } else if (v == avatar) {
-                        toUserProfilePage(message);
+                        toMediaGallary(message, v);
                     }
+                } else if (v == avatar) {
+                    toUserProfilePage(message);
                 }
+
             }
         }
     }
@@ -584,10 +590,11 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             image = itemView.findViewById(R.id.incoming_image_imageView);
             timeStamp = itemView.findViewById(R.id.outcoming_image_time);
             avatar = itemView.findViewById(R.id.outcoming_image_avatar);
+            avatar.setOnTouchListener(UserMessageAdapter.this);
+            image.setOnTouchListener(UserMessageAdapter.this);
             avatar.setOnClickListener(this);
             image.setOnClickListener(this);
-            image.setOnTouchListener(UserMessageAdapter.this);
-            avatar.setOnTouchListener(UserMessageAdapter.this);
+
         }
 
         @Override
@@ -607,6 +614,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
                 } else if (v == avatar) {
                     toUserProfilePage(message);
+
                 }
             }
         }
@@ -644,11 +652,6 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     private void toUserProfilePage(UserMessage message) {
-        // preventing double, using threshold of 1000 ms
-        if (SystemClock.elapsedRealtime() - lastClickTime < 1000) {
-            return;
-        }
-        lastClickTime = SystemClock.elapsedRealtime();
         final String uid = message.getSenderid();
         DatabaseReference infoRef = FirebaseDatabase.getInstance().getReference()
                 .child("Users").child(uid);
@@ -659,7 +662,6 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 Intent intent = new Intent(mContext, UserProfilePage.class);
                 intent.putExtra("userInfo", mUser);
                 intent.putExtra("userUid", uid);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 mContext.startActivity(intent);
             }
 

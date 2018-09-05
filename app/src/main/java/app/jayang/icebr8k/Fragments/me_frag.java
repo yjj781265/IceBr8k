@@ -48,23 +48,24 @@ import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
-import com.theartofdev.edmodo.cropper.CropImage;
-import com.theartofdev.edmodo.cropper.CropImageView;
+import com.luck.picture.lib.PictureSelector;
+import com.luck.picture.lib.config.PictureConfig;
+import com.luck.picture.lib.config.PictureMimeType;
+import com.luck.picture.lib.entity.LocalMedia;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
-import app.jayang.icebr8k.FullImageView;
+import app.jayang.icebr8k.MediaViewActivty;
 import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.Modle.UserMessage;
 import app.jayang.icebr8k.R;
-import app.jayang.icebr8k.Utility.ActivityCommunicator;
 import id.zelory.compressor.Compressor;
-import pl.aprilapps.easyphotopicker.DefaultCallback;
-import pl.aprilapps.easyphotopicker.EasyImage;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -246,9 +247,17 @@ public class me_frag extends Fragment {
                     return true;
                 } else {
                     // view photo
-                    Intent i = new Intent(getActivity(), FullImageView.class);
-                    i.putExtra("photoUrl", FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString());
-                    ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity(), avatar, "profile");
+                    Intent i = new Intent(getActivity(), MediaViewActivty.class);
+                    ArrayList<UserMessage> messages = new ArrayList<>();
+                    UserMessage message = new UserMessage();
+                    message.setGif(false);
+                    message.setMessageid(UUID.randomUUID().toString());
+                    message.setSenderid(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                    message.setText( FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString());
+                    messages.add(message);
+                    i.putExtra("photoViews", messages);
+                    i.putExtra("photoView", message);
+                    ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity(), avatar, "photoView");
                     startActivity(i, options.toBundle());
                     return true;
                 }
@@ -269,8 +278,15 @@ public class me_frag extends Fragment {
                         if( report.areAllPermissionsGranted()) {
 
                             //open camera or gallery
-                            EasyImage.openChooserWithGallery(me_frag.this,
-                                    "Take or Pick a photo for your avatar", 0);
+                            PictureSelector.create(me_frag.this)
+                                    .openGallery(PictureMimeType.ofImage())
+                                    .setOutputCameraPath("/Icebr8k_PIC")
+                                    .theme(R.style.picture_white_style)
+                                    .selectionMode(PictureConfig.SINGLE)
+                                    .enableCrop(true)
+                                    .isDragFrame(true)
+                                    .freeStyleCropEnabled(true)
+                                    .forResult(PictureConfig.CHOOSE_REQUEST);
                         }else{
                             Toast.makeText(getContext(), "Camera and Storage permission are " +
                                     "needed for your avatar", Toast.LENGTH_LONG).show();
@@ -292,40 +308,42 @@ public class me_frag extends Fragment {
 
 
         super.onActivityResult(requestCode, resultCode, data);
-        EasyImage.handleActivityResult(requestCode, resultCode, data,
-                getActivity(), new DefaultCallback() {
-                    @Override
-                    public void onImagePicked(File imageFile, EasyImage.ImageSource source, int type) {
-                        CropImage.activity(Uri.fromFile(imageFile)).setCropShape
-                                (CropImageView.CropShape.RECTANGLE).setFixAspectRatio(true).
-                                setAutoZoomEnabled(false)
-                                .start(getContext(), me_frag.this);
+
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case PictureConfig.CHOOSE_REQUEST:
+                    // 图片、视频、音频选择结果回调
+                    List<LocalMedia> selectList = PictureSelector.obtainMultipleResult(data);
+
+
+                    // 例如 LocalMedia 里面返回三种path
+                    // 1.media.getPath(); 为原图path
+                    // 2.media.getCutPath();为裁剪后path，需判断media.isCut();是否为true  注意：音视频除外
+                    // 3.media.getCompressPath();为压缩后path，需判断media.isCompressed();是否为true  注意：音视频除外
+                    // 如果裁剪并压缩了，以取压缩路径为准，因为是先裁剪后压缩的
+                    //uri to bitmap
+
+                    try {
+                        if (!selectList.isEmpty()) {
+                            String path = selectList.get(0).isCut() ? selectList.get(0).getCutPath() :selectList.get(0).getPath();
+                            File imageFile = new File(path);
+                            Bitmap   avatarBitmap = new Compressor(getActivity()).compressToBitmap(imageFile);
+
+                            mProgressDialog.show();
+                            uploadImage(avatarBitmap,FirebaseAuth.getInstance().getCurrentUser());
+                        }
+
+
+                    } catch (IOException e) {
+                        showToast(e.getMessage());
                     }
-
-                });
-        //add cropped image on avatar imageview
-        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-            CropImage.ActivityResult result = CropImage.getActivityResult(data);
-            if (resultCode == RESULT_OK) {
-                //uri to bitmap
-                try {
-
-
-                    File imageFile = new File(result.getUri().getPath());
-                    Bitmap avatarBitmap = new Compressor(getActivity()).compressToBitmap(imageFile);
-
-                    mProgressDialog.show();
-                    uploadImage(avatarBitmap,FirebaseAuth.getInstance().getCurrentUser());
-
-                } catch (IOException e) {
-                    showToast(e.getMessage());
-                }
-
-            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-                Exception error = result.getError();
-                showToast(error.getMessage());
+                    break;
             }
         }
+
+
+
+
     }
 
 

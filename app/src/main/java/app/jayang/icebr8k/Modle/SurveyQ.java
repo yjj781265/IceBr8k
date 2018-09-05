@@ -86,4 +86,13 @@ public class SurveyQ {
 
         return Objects.hash(questionId);
     }
+
+    @Override
+    public String toString() {
+        return "SurveyQ{" +
+                "question='" + question + '\'' +
+                ", questionId='" + questionId + '\'' +
+                ", answer=" + answer +
+                '}';
+    }
 }

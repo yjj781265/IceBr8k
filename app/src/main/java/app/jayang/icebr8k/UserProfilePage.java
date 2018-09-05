@@ -9,7 +9,6 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -18,7 +17,6 @@ import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
-import android.transition.Fade;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -34,7 +32,6 @@ import com.bumptech.glide.request.RequestOptions;
 import com.dd.processbutton.FlatButton;
 import com.dd.processbutton.iml.ActionProcessButton;
 import com.github.lzyzsd.circleprogress.ArcProgress;
-
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -50,13 +47,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.theartofdev.edmodo.cropper.CropImage;
-import com.theartofdev.edmodo.cropper.CropImageView;
-
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
@@ -66,11 +58,8 @@ import app.jayang.icebr8k.Modle.UserMessage;
 import app.jayang.icebr8k.Modle.UserQA;
 import app.jayang.icebr8k.Utility.Compatability;
 import app.jayang.icebr8k.Utility.SendNotification;
-import id.zelory.compressor.Compressor;
 import me.imid.swipebacklayout.lib.SwipeBackLayout;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
-import pl.aprilapps.easyphotopicker.DefaultCallback;
-import pl.aprilapps.easyphotopicker.EasyImage;
 
 
 public class UserProfilePage extends SwipeBackActivity implements View.OnClickListener,View.OnTouchListener {
@@ -482,36 +471,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        EasyImage.handleActivityResult(requestCode, resultCode, data,
-                this, new DefaultCallback() {
-                    @Override
-                    public void onImagePicked(File imageFile, EasyImage.ImageSource source, int type) {
-                        CropImage.activity(Uri.fromFile(imageFile)).setCropShape
-                                (CropImageView.CropShape.RECTANGLE).setFixAspectRatio(true).
-                                setAutoZoomEnabled(false)
-                                .start(UserProfilePage.this);
-                    }
-                });
-        //add cropped image on avatar imageview
-        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-            CropImage.ActivityResult result = CropImage.getActivityResult(data);
-            if (resultCode == RESULT_OK) {
-                //uri to bitmap
-                try {
-                    File imageFile = new File(result.getUri().getPath());
-                    Bitmap avatarBitmap = new Compressor(this).compressToBitmap(imageFile);
-                   mProgressDialog.show();
-                    uploadImage(avatarBitmap,currentUser);
 
-                } catch (IOException e) {
-                    showToast(e.getMessage());
-                }
-
-            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-                Exception error = result.getError();
-                showToast(error.getMessage());
-            }
-        }
     }
 
 
@@ -732,10 +692,18 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                         .show();
 
             }else if(id == R.id.profileButton ){
-                    Intent i = new Intent(getApplicationContext(),FullImageView.class);
-                    i.putExtra("photoUrl",mUser.getPhotourl());
+                    Intent i = new Intent(getApplicationContext(),MediaViewActivty.class);
+                ArrayList<UserMessage> messages = new ArrayList<>();
+                UserMessage message = new UserMessage();
+                message.setGif(false);
+                message.setMessageid(UUID.randomUUID().toString());
+                message.setSenderid(mUser.getId());
+                message.setText(mUser.getPhotourl());
+                messages.add(message);
+                i.putExtra("photoViews", messages);
+                i.putExtra("photoView", message);
                 ActivityOptionsCompat options = ActivityOptionsCompat.
-                        makeSceneTransitionAnimation(this, findViewById(R.id.profileButton), "profile");
+                        makeSceneTransitionAnimation(this, findViewById(R.id.profileButton), "photoView");
 
                     startActivity(i,options.toBundle());
 

@@ -78,7 +78,7 @@ public class Settings_Activity extends AppCompatActivity {
         new MaterialDialog.Builder(this)
                 .title("Reminder").canceledOnTouchOutside(false)
                 .content(R.string.location_reminder).
-                negativeColor(getResources().getColor(R.color.lightGray))
+                negativeColor(getResources().getColor(R.color.dark_gray))
                 .positiveText(R.string.ok).onPositive(new MaterialDialog.SingleButtonCallback() {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {

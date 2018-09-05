@@ -13,6 +13,7 @@
 
     <application
         android:name=".MyApplication"
+        android:resizeableActivity="false"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -55,10 +56,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity
-            android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
-            android:theme="@style/Base.Theme.AppCompat">
-        </activity>
+
 
         <meta-data
             android:name="com.onesignal.NotificationOpened.DEFAULT"
@@ -195,13 +193,12 @@
 
 
         <provider
-            tools:replace="android:authorities"
+
             android:name="android.support.v4.content.FileProvider"
             android:authorities="app.jayang.icebr8k.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
-                tools:replace="android:resource"
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/pick_file_paths" />
         </provider>

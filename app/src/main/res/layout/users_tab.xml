@@ -10,6 +10,19 @@
     android:layout_height="match_parent">
 
 
+    <Button
+        android:id="@+id/add_friend_frag"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
+        android:layout_centerInParent="true"
+        android:backgroundTint="@color/colorAccent"
+        android:text="Add Friend"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="12dp"
+        android:visibility="gone"/>
+
+
 <FrameLayout
     android:id="@id/search_layout"
     android:layout_width="match_parent"
@@ -81,17 +94,7 @@
     </android.support.v4.widget.SwipeRefreshLayout>
 
 
-    <Button
-        android:id="@+id/add_friend_frag"
-        android:layout_width="100dp"
-        android:layout_height="40dp"
-        android:layout_centerInParent="true"
-        android:backgroundTint="@color/colorAccent"
-        android:text="Add Friend"
-        android:textAllCaps="false"
-        android:textColor="@color/white"
-        android:textSize="12dp"
-        android:visibility="gone"/>
+
 
     <RelativeLayout
         android:id="@+id/loadingImg_userTab"

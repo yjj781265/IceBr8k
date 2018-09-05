@@ -89,6 +89,7 @@ public class MediaViewActivty extends AppCompatActivity implements MediaViewAdap
 
 
 
+
         decorView = getWindow().getDecorView();
         decorView.setOnSystemUiVisibilityChangeListener
                 (new View.OnSystemUiVisibilityChangeListener() {
@@ -134,17 +135,31 @@ public class MediaViewActivty extends AppCompatActivity implements MediaViewAdap
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setOrientation(DSVOrientation.HORIZONTAL);
         mRecyclerView.setItemTransformer(new ScaleTransformer.Builder()
-                .setMaxScale(1.05f)
-                .setMinScale(0.8f)
+
+                .setMaxScale(1.0f)
+                .setMinScale(0.6f)
                 .setPivotX(Pivot.X.CENTER) // CENTER is a default one
                 .setPivotY(Pivot.Y.CENTER) // CENTER is a default one
                 .build());
         mRecyclerView.setSlideOnFling(false);
-        mRecyclerView.setItemTransitionTimeMillis(200);
+        mRecyclerView.setItemTransitionTimeMillis(150);
       //  snapHelper.attachToRecyclerView(mRecyclerView);
         mToolbar = findViewById(R.id.media_toolbar);
+
+
+
+
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mToolbar.setVisibility(View.VISIBLE);
+                YoYo.with(Techniques.SlideInDown).duration(300).playOn(mToolbar);
+
+            }
+        },500);
 
 
         mRecyclerView.addScrollStateChangeListener(new DiscreteScrollView.ScrollStateChangeListener<RecyclerView.ViewHolder>() {
@@ -164,6 +179,7 @@ public class MediaViewActivty extends AppCompatActivity implements MediaViewAdap
 
             }
         });
+
 
 
 
@@ -213,7 +229,7 @@ public class MediaViewActivty extends AppCompatActivity implements MediaViewAdap
 
                             @Override
                             public void onPermissionDenied(PermissionDeniedResponse response) {
-                                showSnackbarWithSetting("Storage Permission needed for saveing images", mRecyclerView);
+                                showSnackbarWithSetting("Storage Permission needed for saving images", mRecyclerView);
                             }
 
                             @Override
@@ -238,7 +254,12 @@ public class MediaViewActivty extends AppCompatActivity implements MediaViewAdap
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        mHandler.postDelayed(mRunnable, 8000);
+        if(hasFocus){
+
+            mHandler.postDelayed(mRunnable, 8000);
+        }
+
+
 
     }
 
@@ -251,7 +272,6 @@ public class MediaViewActivty extends AppCompatActivity implements MediaViewAdap
                 InputStream inStream = new FileInputStream(oldPath); //读入原文件
                 FileOutputStream fs = new FileOutputStream(newPath);
                 byte[] buffer = new byte[1444];
-                int length;
                 while ((byteread = inStream.read(buffer)) != -1) {
                     bytesum += byteread; //字节数 文件大小
                     System.out.println(bytesum);
@@ -316,7 +336,10 @@ public class MediaViewActivty extends AppCompatActivity implements MediaViewAdap
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 getSupportActionBar().setTitle(dataSnapshot.getValue(String.class));
-                getSupportActionBar().setSubtitle(MyDateFormatter.timeStampToDateConverter(message.getTimestamp(), false));
+                if(message.getTimestamp()!=null){
+                    getSupportActionBar().setSubtitle(MyDateFormatter.timeStampToDateConverter(message.getTimestamp(), false));
+                }
+
             }
 
             @Override

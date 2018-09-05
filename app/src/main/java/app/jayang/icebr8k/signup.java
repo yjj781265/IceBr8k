@@ -46,8 +46,10 @@ import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
-import com.theartofdev.edmodo.cropper.CropImage;
-import com.theartofdev.edmodo.cropper.CropImageView;
+import com.luck.picture.lib.PictureSelector;
+import com.luck.picture.lib.config.PictureConfig;
+import com.luck.picture.lib.config.PictureMimeType;
+import com.luck.picture.lib.entity.LocalMedia;
 import com.tsongkha.spinnerdatepicker.DatePicker;
 import com.tsongkha.spinnerdatepicker.DatePickerDialog;
 import com.tsongkha.spinnerdatepicker.SpinnerDatePickerDialogBuilder;
@@ -65,20 +67,19 @@ import dmax.dialog.SpotsDialog;
 import id.zelory.compressor.Compressor;
 import me.imid.swipebacklayout.lib.SwipeBackLayout;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
-import pl.aprilapps.easyphotopicker.DefaultCallback;
-import pl.aprilapps.easyphotopicker.EasyImage;
+
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
 
-public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDateSetListener{
+public class signup extends SwipeBackActivity implements DatePickerDialog.OnDateSetListener {
     private final String DEFAULT_PHOTO_URL = "https://i.imgur.com/xUAsoWs.png";
     private ImageView avatar;
     private ScrollView sv;
-    private Boolean flag,defaultPhotoFlag;
-    private TextInputEditText email,password,username,password2,displayname,birthdate;
-    private TextInputLayout email_layout,username_layout,password_layout,displayname_layout,
-            password2_layout,birthdate_layout;
+    private Boolean flag, defaultPhotoFlag;
+    private TextInputEditText email, password, username, password2, displayname, birthdate;
+    private TextInputLayout email_layout, username_layout, password_layout, displayname_layout,
+            password2_layout, birthdate_layout;
     private Toolbar mToolbar;
     private SpotsDialog loadingdialog;
     private MaterialDialog reminderDialog;
@@ -87,8 +88,7 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
     private Bitmap avatarBitmap;
     private SwipeBackLayout mSwipeBackLayout;
     private DatabaseReference mRef;
-    private  Birthdate mBirthdate ;
-
+    private Birthdate mBirthdate;
 
 
     @Override
@@ -101,16 +101,16 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
         sv = (ScrollView) findViewById(R.id.sv_signup);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mIntent = new Intent(this,SplashScreen.class);
-        loadingdialog = new SpotsDialog(this,"Signing Up...");
+        mIntent = new Intent(this, SplashScreen.class);
+        loadingdialog = new SpotsDialog(this, "Signing Up...");
         mRef = FirebaseDatabase.getInstance().getReference();
-        defaultPhotoFlag =true;
+        defaultPhotoFlag = true;
         mSwipeBackLayout = getSwipeBackLayout();
         mSwipeBackLayout.setEdgeTrackingEnabled(SwipeBackLayout.EDGE_LEFT);
 
 
 
-         /*edittext*/
+        /*edittext*/
         email = (TextInputEditText) findViewById(R.id.email_signup);
         password = (TextInputEditText) findViewById(R.id.password_signup);
         password2 = (TextInputEditText) findViewById(R.id.confirmpwd_signup);
@@ -119,12 +119,11 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
         birthdate = (TextInputEditText) findViewById(R.id.birthdate_signup);
         //textinputlayout
         email_layout = (TextInputLayout) findViewById(R.id.email_layout_signup);
-        password_layout = (TextInputLayout)findViewById(R.id.password_layout_signup);
-        password2_layout = (TextInputLayout)findViewById(R.id.confirmpwd_layout_signup);
-        username_layout =(TextInputLayout) findViewById(R.id.username_layout_signup);
-        displayname_layout = (TextInputLayout)findViewById(R.id.fullname_layout_signup);
+        password_layout = (TextInputLayout) findViewById(R.id.password_layout_signup);
+        password2_layout = (TextInputLayout) findViewById(R.id.confirmpwd_layout_signup);
+        username_layout = (TextInputLayout) findViewById(R.id.username_layout_signup);
+        displayname_layout = (TextInputLayout) findViewById(R.id.fullname_layout_signup);
         birthdate_layout = (TextInputLayout) findViewById(R.id.birthdate_layout_signup);
-
 
 
         Calendar now = Calendar.getInstance();   // Gets the current date and time
@@ -156,7 +155,7 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
             @Override
             public void onFocusChange(View view, boolean b) {
                 if (b) {
-                    sv.smoothScrollBy(0,sv.getBottom());
+                    sv.smoothScrollBy(0, sv.getBottom());
                 }
             }
         });
@@ -164,7 +163,7 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
             @Override
             public void onFocusChange(View view, boolean b) {
                 if (b) {
-                    sv.smoothScrollBy(0,sv.getBottom());
+                    sv.smoothScrollBy(0, sv.getBottom());
                 }
             }
         });
@@ -185,25 +184,20 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
 
             }
         });
-       Glide.with(this).load(DEFAULT_PHOTO_URL).apply(RequestOptions.circleCropTransform()).into(avatar);
-       avatar.setOnTouchListener(new View.OnTouchListener() {
-           @Override
-           public boolean onTouch(View v, MotionEvent event) {
-               if(event.getAction() == MotionEvent.ACTION_DOWN)
-               {
-                   v.setAlpha(0.6f);
-               } else {
-                   v.setAlpha(1f);
-               }
+        Glide.with(this).load(DEFAULT_PHOTO_URL).apply(RequestOptions.circleCropTransform()).into(avatar);
+        avatar.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    v.setAlpha(0.6f);
+                } else {
+                    v.setAlpha(1f);
+                }
 
-               return false;
+                return false;
 
-           }
-       });
-
-
-
-
+            }
+        });
 
 
     }
@@ -219,71 +213,77 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
                 new MultiplePermissionsListener() {
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
-                       if( report.areAllPermissionsGranted()) {
+                        if (report.areAllPermissionsGranted()) {
+                            //open camera or gallery
+                            PictureSelector.create(signup.this)
+                                    .openGallery(PictureMimeType.ofImage())
+                                    .setOutputCameraPath("/Icebr8k_PIC")
+                                    .theme(R.style.picture_white_style)
+                                    .selectionMode(PictureConfig.SINGLE)
+                                    .enableCrop(true)
+                                    .isDragFrame(true)
+                                    .freeStyleCropEnabled(true)
+                                    .forResult(PictureConfig.CHOOSE_REQUEST);
 
-                           //open camera or gallery
-                           EasyImage.openChooserWithGallery(signup.this,
-                                   "Take or Pick a photo for your avatar", 0);
-                       }else{
-                          showSnackbarWithSetting("Camera and Storage permission are " +
-                                  "needed for your avatar",view);
-                       }
+                        } else {
+                            showSnackbarWithSetting("Camera and Storage permission are " +
+                                    "needed for your avatar", view);
+                        }
                     }
 
                     @Override
                     public void onPermissionRationaleShouldBeShown
                             (List<PermissionRequest> permissions, PermissionToken token) {
                         //asker user for permission again if user denied(not ask again is unchecked)
-                     token.continuePermissionRequest();
+                        token.continuePermissionRequest();
                     }
-                }). check();
+                }).check();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        EasyImage.handleActivityResult(requestCode, resultCode, data,
-                this, new DefaultCallback() {
-            @Override
-            public void onImagePicked(File imageFile, EasyImage.ImageSource source, int type) {
-                                        CropImage.activity(Uri.fromFile(imageFile)).setCropShape
-                                                (CropImageView.CropShape.RECTANGLE).setFixAspectRatio(true).
-                                                setAutoZoomEnabled(false)
-                                                .start(signup.this);
-            }
+
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case PictureConfig.CHOOSE_REQUEST:
+                    // 图片、视频、音频选择结果回调
+                    List<LocalMedia> selectList = PictureSelector.obtainMultipleResult(data);
 
 
+                    // 例如 LocalMedia 里面返回三种path
+                    // 1.media.getPath(); 为原图path
+                    // 2.media.getCutPath();为裁剪后path，需判断media.isCut();是否为true  注意：音视频除外
+                    // 3.media.getCompressPath();为压缩后path，需判断media.isCompressed();是否为true  注意：音视频除外
+                    // 如果裁剪并压缩了，以取压缩路径为准，因为是先裁剪后压缩的
+                    //uri to bitmap
+
+                    try {
+                        if (!selectList.isEmpty()) {
+                            String path = selectList.get(0).isCut() ? selectList.get(0).getCutPath() :selectList.get(0).getPath();
+                            File imageFile = new File(path);
+                            avatarBitmap = new Compressor(this).compressToBitmap(imageFile);
+                            Glide.with(signup.this).load(selectList.get(0).getPath()).
+                                    apply(RequestOptions.circleCropTransform()).into(avatar);
+                            defaultPhotoFlag = false;
+                        }
 
 
-        });
-        //add cropped image on avatar imageview
-        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-            CropImage.ActivityResult result = CropImage.getActivityResult(data);
-            if (resultCode == RESULT_OK) {
-                //uri to bitmap
-                try {
-                    File imageFile = new File(result.getUri().getPath());
-                     avatarBitmap = new Compressor(this).compressToBitmap(imageFile);
-                    Glide.with(getApplicationContext()).load(result.getUri()).
-                            apply(RequestOptions.circleCropTransform()).into(avatar);
-                    defaultPhotoFlag = false;
-
-                } catch (IOException e) {
-                    showToast(e.getMessage());
-                }
-
-            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-                Exception error = result.getError();
-                showToast(error.getMessage());
+                    } catch (IOException e) {
+                        showToast(e.getMessage());
+                    }
+                    break;
             }
         }
+
+
     }
 
-    public void showToast(String str){
-        Toast.makeText(getApplicationContext(),str,Toast.LENGTH_LONG).show();
+    public void showToast(String str) {
+        Toast.makeText(getApplicationContext(), str, Toast.LENGTH_LONG).show();
     }
 
-    public void showSnackbarWithSetting(String str, View view){
+    public void showSnackbarWithSetting(String str, View view) {
         Snackbar snackbar = Snackbar
                 .make(view, str, Snackbar.LENGTH_LONG)
                 .setAction("Setting", new View.OnClickListener() {
@@ -323,7 +323,6 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
     }*/
 
 
-
     public void onClickSignUp(View view) {
         clearFocusAndError();
         //Toast.makeText(this, datePickerFragment.getBirthdate().toString(), Toast.LENGTH_SHORT).show();
@@ -331,7 +330,7 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
 
     }
 
-    public void CheckUserInput(){
+    public void CheckUserInput() {
         DatabaseReference mref = FirebaseDatabase.getInstance().getReference("Usernames");
         mref.addListenerForSingleValueEvent(new ValueEventListener() {
             String emailstr = email.getText().toString();
@@ -340,8 +339,6 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
             String passwordStr2 = password2.getText().toString();
             String fullname = displayname.getText().toString();
             String birthdateStr = birthdate.getText().toString();
-
-
 
 
             @Override
@@ -358,9 +355,9 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
                     displayname_layout.setError(getString(R.string.emptyfieldError));
                     displayname.requestFocus();
                 } else if (fullname.trim().matches("")) {
-                        displayname_layout.setErrorEnabled(true);
-                        displayname_layout.setError(getString(R.string.emptyfieldError));
-                        displayname.requestFocus();
+                    displayname_layout.setErrorEnabled(true);
+                    displayname_layout.setError(getString(R.string.emptyfieldError));
+                    displayname.requestFocus();
                 } else if (flag) {
                     username_layout.setErrorEnabled(true);
                     username_layout.setError(getString(R.string.usernameError));
@@ -369,15 +366,15 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
                     username_layout.setErrorEnabled(true);
                     username_layout.setError(getString(R.string.emptyfieldError));
                     username.requestFocus();
-                }else if (usernameStr.contains(" ")) {
+                } else if (usernameStr.contains(" ")) {
                     username_layout.setErrorEnabled(true);
                     username_layout.setError(getString(R.string.usernameError3));
                     username.requestFocus();
                 } else if (checkFirebasePathError(usernameStr)) {
-                        username_layout.setErrorEnabled(true);
-                        username_layout.setError(getString(R.string.firebase_path_error));
-                        username.requestFocus();
-                } else if (usernameStr.length() < 3 ||usernameStr.length() > 20) {
+                    username_layout.setErrorEnabled(true);
+                    username_layout.setError(getString(R.string.firebase_path_error));
+                    username.requestFocus();
+                } else if (usernameStr.length() < 3 || usernameStr.length() > 20) {
                     username_layout.setErrorEnabled(true);
                     username_layout.setError(getString(R.string.usernameError2));
                     username.requestFocus();
@@ -402,11 +399,11 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
                     password_layout.setErrorEnabled(true);
                     password_layout.setError(getString(R.string.pwdError2));
                     password.requestFocus();
-                }else if (birthdateStr.isEmpty()) {
+                } else if (birthdateStr.isEmpty()) {
                     birthdate_layout.setErrorEnabled(true);
                     birthdate_layout.setError(getString(R.string.emptyfieldError));
                     birthdate_layout.requestFocus();
-                }else if (!checkAge(mBirthdate)) {
+                } else if (!checkAge(mBirthdate)) {
                     birthdate_layout.setErrorEnabled(true);
                     birthdate_layout.setError(getString(R.string.ageError));
                     birthdate_layout.requestFocus();
@@ -421,20 +418,20 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-            showDismissDialog(databaseError.getMessage());
+                showDismissDialog(databaseError.getMessage());
             }
         });
 
 
     }
 
-    public Boolean checkAge(Birthdate birthdate){
-        int currentYear =  Calendar.getInstance().get(Calendar.YEAR);
+    public Boolean checkAge(Birthdate birthdate) {
+        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
 
-        return currentYear -birthdate.getYear()>=13;
+        return currentYear - birthdate.getYear() >= 13;
     }
 
-    public void showReminderDialog(){
+    public void showReminderDialog() {
 
         reminderDialog = new MaterialDialog.Builder(this)
                 .content("Because you didn't choose your own avatar photo, " +
@@ -445,31 +442,39 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                         dialog.dismiss();
-                       showPrivacyPolicy(
-                       );
+                        showPrivacyPolicy(
+                        );
 
 
                     }
                 }).onNegative(new MaterialDialog.SingleButtonCallback() {
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        EasyImage.openChooserWithGallery(signup.this,
-                                "Take or Pick a photo for your avatar", 0);
+                        //open camera or gallery
+                        PictureSelector.create(signup.this)
+                                .openGallery(PictureMimeType.ofImage())
+                                .setOutputCameraPath("/Icebr8k_PIC")
+                                .theme(R.style.picture_white_style)
+                                .selectionMode(PictureConfig.SINGLE)
+                                .enableCrop(true)
+                                .isDragFrame(true)
+                                .freeStyleCropEnabled(true)
+                                .forResult(PictureConfig.CHOOSE_REQUEST);
                     }
                 }).build();
 
         reminderDialog.show();
     }
 
-    public void showDismissDialog(String Str){
-               new MaterialDialog.Builder(this)
+    public void showDismissDialog(String Str) {
+        new MaterialDialog.Builder(this)
                 .title("Error").titleColor(getResources().getColor(R.color.red_error))
                 .content(Str)
                 .positiveText("okay")
                 .show();
     }
 
-    public void clearFocusAndError(){
+    public void clearFocusAndError() {
         displayname.clearFocus();
         username.clearFocus();
         email.clearFocus();
@@ -490,10 +495,10 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
 
     }
 
-    public boolean checkFirebasePathError(String str){
-        char[] strArr = {'.','#','$','[',']','/'};
-        for(char s :strArr){
-            if(str.contains(String.valueOf(s))){
+    public boolean checkFirebasePathError(String str) {
+        char[] strArr = {'.', '#', '$', '[', ']', '/'};
+        for (char s : strArr) {
+            if (str.contains(String.valueOf(s))) {
                 return true;
             }
 
@@ -503,10 +508,10 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
     }
 
 
-    public void uploadImage(Bitmap bitmap, final User user, final FirebaseUser currentUser){
-        String filename = UUID.randomUUID().toString()+".JPEG";
+    public void uploadImage(Bitmap bitmap, final User user, final FirebaseUser currentUser) {
+        String filename = UUID.randomUUID().toString() + ".JPEG";
         FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference avatarRef = storage.getReference().child("UserAvatars/"+filename);
+        StorageReference avatarRef = storage.getReference().child("UserAvatars/" + filename);
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 75, stream);
@@ -515,7 +520,7 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
-               showDismissDialog(exception.getMessage());
+                showDismissDialog(exception.getMessage());
             }
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
@@ -523,7 +528,7 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
                 // taskSnapshot.getMetadata() contains file metadata such as size, content-type,
                 // and download URL.
                 Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                updateDatabaseAndCurrentUser(user,currentUser,downloadUrl.toString());
+                updateDatabaseAndCurrentUser(user, currentUser, downloadUrl.toString());
             }
         });
 
@@ -531,7 +536,7 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
     }
 
     public void SignUp(final String email, String password, final String displayname,
-                       final String username,final Birthdate birthdate){
+                       final String username, final Birthdate birthdate) {
         loadingdialog.show();
 
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
@@ -547,13 +552,13 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
                             user.setEmail(email);
                             user.setBirthdate(birthdate);
                             user.setPrivacy("private");
-                            if(defaultPhotoFlag) {
-                                updateDatabaseAndCurrentUser(user,currentUser,DEFAULT_PHOTO_URL);
-                            }else{
-                               uploadImage(avatarBitmap,user,currentUser);
+                            if (defaultPhotoFlag) {
+                                updateDatabaseAndCurrentUser(user, currentUser, DEFAULT_PHOTO_URL);
+                            } else {
+                                uploadImage(avatarBitmap, user, currentUser);
                             }
                         } else {
-                          showDismissDialog(task.getException().getMessage());
+                            showDismissDialog(task.getException().getMessage());
                             loadingdialog.dismiss();
                         }
 
@@ -561,12 +566,11 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
                 });
     }
 
-    public void updateDatabaseAndCurrentUser(User user, final FirebaseUser currentUser,String photoUrl){
+    public void updateDatabaseAndCurrentUser(User user, final FirebaseUser currentUser, String photoUrl) {
 
         user.setPhotourl(photoUrl);
         mRef.child("Users").child(currentUser.getUid()).setValue(user);
         mRef.child("Usernames").child(user.getUsername()).setValue(currentUser.getUid());
-
 
 
         UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
@@ -584,7 +588,7 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
 
-                                    if(task.isSuccessful()){
+                                    if (task.isSuccessful()) {
 
                                         new MaterialDialog.Builder(signup.this)
                                                 .content("Sign up successful, a verification email sent to " + currentUser.getEmail()
@@ -597,7 +601,7 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
                                             }
                                         }).show();
 
-                                    }else{
+                                    } else {
                                         Toast.makeText(signup.this,
                                                 "Failed to send verification email.",
                                                 Toast.LENGTH_SHORT).show();
@@ -606,7 +610,7 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
                                 }
                             });
 
-                        }else{
+                        } else {
                             loadingdialog.dismiss();
                             showDismissDialog(task.getException().getMessage());
                         }
@@ -616,15 +620,15 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
 
     }
 
-    public void showPrivacyPolicy(){
+    public void showPrivacyPolicy() {
 
         // if user agreed with the privacy already
-        if(agreedPolicySharedPreference()){
-            if(birthdate!=null){
-                SignUp(email.getText().toString(),password.getText().toString(),
-                        displayname.getText().toString(),username.getText().toString(),mBirthdate);
+        if (agreedPolicySharedPreference()) {
+            if (birthdate != null) {
+                SignUp(email.getText().toString(), password.getText().toString(),
+                        displayname.getText().toString(), username.getText().toString(), mBirthdate);
             }
-        }else{
+        } else {
             new MaterialDialog.Builder(this)
                     .iconRes(R.mipmap.ic_launcher)
                     .limitIconToDefaultSize()
@@ -634,9 +638,9 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
                     .negativeText("Disagree").onPositive(new MaterialDialog.SingleButtonCallback() {
                 @Override
                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                    if(mBirthdate!=null){
-                        SignUp(email.getText().toString(),password.getText().toString(),
-                                displayname.getText().toString(),username.getText().toString(),mBirthdate);
+                    if (mBirthdate != null) {
+                        SignUp(email.getText().toString(), password.getText().toString(),
+                                displayname.getText().toString(), username.getText().toString(), mBirthdate);
                     }
 
                     addPolicySharedPreference();
@@ -648,8 +652,8 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
     }
 
 
-// policy pop up
-    public void addPolicySharedPreference(){
+    // policy pop up
+    public void addPolicySharedPreference() {
 
         SharedPreferences prefs = getDefaultSharedPreferences(getApplicationContext());
         SharedPreferences.Editor editor = prefs.edit();
@@ -657,7 +661,8 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
         editor.commit();
 
     }
-    private  boolean agreedPolicySharedPreference() {
+
+    private boolean agreedPolicySharedPreference() {
         SharedPreferences prefs = getDefaultSharedPreferences(getApplicationContext());
         boolean defaultValue = false;
         boolean agreedPolicy = prefs.getBoolean("policy", defaultValue);
@@ -668,23 +673,23 @@ public class signup extends SwipeBackActivity  implements DatePickerDialog.OnDat
     @Override
     public void onBackPressed() {
         finish();
-        overridePendingTransition(R.anim.slide_from_left,R.anim.slide_to_right);
+        overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
     }
 
     @Override
     public boolean onSupportNavigateUp() {
         finish();
-        overridePendingTransition(R.anim.slide_from_left,R.anim.slide_to_right);
+        overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
         return true;
     }
 
-   //callback for the datepicker
+    //callback for the datepicker
     @Override
     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
 
-        birthdate.setText((++monthOfYear)+"/"+dayOfMonth+"/"+year);
+        birthdate.setText((++monthOfYear) + "/" + dayOfMonth + "/" + year);
         // monthofyear has already incremented
-        mBirthdate = new Birthdate(year,monthOfYear,dayOfMonth);
+        mBirthdate = new Birthdate(year, monthOfYear, dayOfMonth);
         //Toast.makeText(this, ""+ mBirthdate.getYear() + " "+ mBirthdate.getMonth() + " " + mBirthdate.getDay(), Toast.LENGTH_SHORT).show();
     }
 }

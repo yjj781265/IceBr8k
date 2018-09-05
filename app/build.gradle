@@ -107,9 +107,9 @@ dependencies {
     compile 'cat.ereza:customactivityoncrash:2.1.0'
     implementation 'com.onesignal:OneSignal:[3.9.0, 3.99.99]'
 
-    compile 'com.github.jkwiecien:EasyImage:1.3.1'
+    // request permission
     implementation 'com.karumi:dexter:5.0.0'
-    implementation 'com.theartofdev.edmodo:android-image-cropper:2.6.+'
+    // image gallery slider
     implementation 'com.yarolegovich:discrete-scrollview:1.4.9'
 
 

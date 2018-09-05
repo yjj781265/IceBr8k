@@ -4,16 +4,12 @@ import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -28,16 +24,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-
-import com.daimajia.androidanimations.library.Techniques;
-import com.daimajia.androidanimations.library.YoYo;
-import com.google.android.gms.common.api.Scope;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -52,19 +41,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 
-
-import app.jayang.icebr8k.Homepage;
+import app.jayang.icebr8k.Adapter.RecyclerAdapter;
 import app.jayang.icebr8k.Modle.User;
 import app.jayang.icebr8k.Modle.UserDialog;
-
 import app.jayang.icebr8k.Modle.UserQA;
 import app.jayang.icebr8k.R;
-import app.jayang.icebr8k.Adapter.RecyclerAdapter;
 import app.jayang.icebr8k.SearchName;
 import app.jayang.icebr8k.SearchUser;
-import app.jayang.icebr8k.Utility.ActivityCommunicator;
 import app.jayang.icebr8k.Utility.Compatability;
-import app.jayang.icebr8k.Utility.MyDateFormatter;
 
 
 /**
@@ -91,7 +75,6 @@ public class Userstab_Fragment extends Fragment {
     Button filter_btn;
     Boolean isVisiable = false;
     int count = 0;
-    private BroadcastReceiver tickReceiver;
     private SharedPreferences sharedPref;
     private Boolean sortByScore, done;
     private String sortByScoreStr;
@@ -596,6 +579,8 @@ public class Userstab_Fragment extends Fragment {
         super.onStart();
     }
 
+
+
     @Override
     public void onStop() {
         super.onStop();
@@ -605,13 +590,7 @@ public class Userstab_Fragment extends Fragment {
 
     @Override
     public void onDestroy() {
-        try {
-            if (tickReceiver != null) {
-                getActivity().unregisterReceiver(tickReceiver);
-            }
-        } catch (IllegalArgumentException e) {
-            tickReceiver = null;
-        }
+
         super.onDestroy();
     }
 
