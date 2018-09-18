@@ -67,7 +67,7 @@
             app:srcCompat="@drawable/default_avatar3"/>
 
 
-        <app.jayang.icebr8k.Modle.MyEditText
+        <app.jayang.icebr8k.Model.MyEditText
             android:id="@+id/reply_input"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

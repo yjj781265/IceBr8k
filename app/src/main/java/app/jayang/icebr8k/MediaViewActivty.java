@@ -1,13 +1,9 @@
 package app.jayang.icebr8k;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -15,8 +11,6 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
@@ -24,20 +18,16 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.transition.ChangeBounds;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.request.transition.Transition;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 import com.google.firebase.database.DataSnapshot;
@@ -64,7 +54,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import app.jayang.icebr8k.Adapter.MediaViewAdapter;
-import app.jayang.icebr8k.Modle.UserMessage;
+import app.jayang.icebr8k.Model.UserMessage;
 import app.jayang.icebr8k.Utility.MyDateFormatter;
 
 
@@ -87,8 +77,8 @@ public class MediaViewActivty extends AppCompatActivity implements MediaViewAdap
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_media_view_activty);
 
-
-
+        getWindow().setSharedElementEnterTransition(new ChangeBounds().setDuration(200));
+        supportPostponeEnterTransition();
 
         decorView = getWindow().getDecorView();
         decorView.setOnSystemUiVisibilityChangeListener
@@ -129,9 +119,9 @@ public class MediaViewActivty extends AppCompatActivity implements MediaViewAdap
         }
 
         mRecyclerView = findViewById(R.id.media_recylerview);
-       // manager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        // manager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         mAdapter = new MediaViewAdapter(mMessages, this);
-       // mRecyclerView.setLayoutManager(manager);
+        // mRecyclerView.setLayoutManager(manager);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setOrientation(DSVOrientation.HORIZONTAL);
         mRecyclerView.setItemTransformer(new ScaleTransformer.Builder()
@@ -143,10 +133,14 @@ public class MediaViewActivty extends AppCompatActivity implements MediaViewAdap
                 .build());
         mRecyclerView.setSlideOnFling(false);
         mRecyclerView.setItemTransitionTimeMillis(150);
-      //  snapHelper.attachToRecyclerView(mRecyclerView);
+        mRecyclerView.post(new Runnable() {
+            @Override
+            public void run() {
+                supportStartPostponedEnterTransition();
+            }
+        });
+        //  snapHelper.attachToRecyclerView(mRecyclerView);
         mToolbar = findViewById(R.id.media_toolbar);
-
-
 
 
         setSupportActionBar(mToolbar);
@@ -159,7 +153,7 @@ public class MediaViewActivty extends AppCompatActivity implements MediaViewAdap
                 YoYo.with(Techniques.SlideInDown).duration(300).playOn(mToolbar);
 
             }
-        },500);
+        }, 500);
 
 
         mRecyclerView.addScrollStateChangeListener(new DiscreteScrollView.ScrollStateChangeListener<RecyclerView.ViewHolder>() {
@@ -176,19 +170,15 @@ public class MediaViewActivty extends AppCompatActivity implements MediaViewAdap
 
             @Override
             public void onScroll(float scrollPosition, int currentPosition, int newPosition, @Nullable RecyclerView.ViewHolder currentHolder, @Nullable RecyclerView.ViewHolder newCurrent) {
-
+                ;
             }
         });
-
-
 
 
         if (currentMessage != null && mMessages.contains(currentMessage)) {
             mRecyclerView.scrollToPosition(mMessages.indexOf(currentMessage));
         }
     }
-
-
 
 
     @Override
@@ -254,11 +244,10 @@ public class MediaViewActivty extends AppCompatActivity implements MediaViewAdap
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        if(hasFocus){
+        if (hasFocus) {
 
             mHandler.postDelayed(mRunnable, 8000);
         }
-
 
 
     }
@@ -294,8 +283,6 @@ public class MediaViewActivty extends AppCompatActivity implements MediaViewAdap
         }
 
     }
-
-
 
 
     private void galleryAddPic(String imagePath) {
@@ -336,7 +323,7 @@ public class MediaViewActivty extends AppCompatActivity implements MediaViewAdap
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 getSupportActionBar().setTitle(dataSnapshot.getValue(String.class));
-                if(message.getTimestamp()!=null){
+                if (message.getTimestamp() != null) {
                     getSupportActionBar().setSubtitle(MyDateFormatter.timeStampToDateConverter(message.getTimestamp(), false));
                 }
 
@@ -390,10 +377,12 @@ public class MediaViewActivty extends AppCompatActivity implements MediaViewAdap
     @Override
     public void onBackPressed() {
         showSystemUI();
-        if (currentMessage.equals(firstMessage)) {
+        if (currentMessage.equals(firstMessage) && !currentMessage.getGif()) {
             supportFinishAfterTransition();
         } else {
             finish();
+            mToolbar.setVisibility(View.GONE);
+            overridePendingTransition(0, R.anim.a3);
         }
 
     }
@@ -401,11 +390,13 @@ public class MediaViewActivty extends AppCompatActivity implements MediaViewAdap
     @Override
     public boolean onSupportNavigateUp() {
         showSystemUI();
-        if (currentMessage.equals(firstMessage)) {
+        if (currentMessage.equals(firstMessage) && !currentMessage.getGif()) {
             supportFinishAfterTransition();
         } else {
             finish();
-        }
+            mToolbar.setVisibility(View.GONE);
+            overridePendingTransition(0, R.anim.a3);
+            }
         return true;
     }
 
@@ -452,7 +443,7 @@ public class MediaViewActivty extends AppCompatActivity implements MediaViewAdap
             String savedImagePath;
 
 
-            String imageFileName = currentMessage.getGif() ?  "GIF_" + UUID.randomUUID().toString().substring(0, 8) + ".gif" :"IMG_" + UUID.randomUUID().toString().substring(0, 8) + ".jpg";
+            String imageFileName = currentMessage.getGif() ? "GIF_" + UUID.randomUUID().toString().substring(0, 8) + ".gif" : "IMG_" + UUID.randomUUID().toString().substring(0, 8) + ".jpg";
             File storageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
                     + "/Icebr8k_PIC");
             File imageFile = new File(storageDir, imageFileName);
@@ -493,8 +484,8 @@ public class MediaViewActivty extends AppCompatActivity implements MediaViewAdap
             String savedImagePath;
             Uri fileUri = null;
 
-            String imgtype = currentMessage.getGif()? "gif" :"jpg";
-            String imageFileName = "Img_" + UUID.randomUUID().toString().substring(0, 8) +"." +imgtype;
+            String imgtype = currentMessage.getGif() ? "gif" : "jpg";
+            String imageFileName = "Img_" + UUID.randomUUID().toString().substring(0, 8) + "." + imgtype;
             File storageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
                     + "/Icebr8k_PIC");
             File imageFile = new File(storageDir, imageFileName);
@@ -538,7 +529,7 @@ public class MediaViewActivty extends AppCompatActivity implements MediaViewAdap
                 // Grant temporary read permission to the content URI
                 mResultIntent.setAction(Intent.ACTION_SEND);
                 mResultIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
-                mResultIntent.setType("image/"+imgtype);
+                mResultIntent.setType("image/" + imgtype);
                 startActivity(Intent.createChooser(mResultIntent, "Share image using"));
             } else {
                 mResultIntent.setDataAndType(null, "");

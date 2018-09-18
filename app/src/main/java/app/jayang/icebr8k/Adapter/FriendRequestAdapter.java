@@ -20,10 +20,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.Model.User;
 import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.UserProfilePage;
 import app.jayang.icebr8k.Utility.SendNotification;

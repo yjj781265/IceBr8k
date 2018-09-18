@@ -1,6 +1,5 @@
-package app.jayang.icebr8k.Modle;
+package app.jayang.icebr8k.Model;
 
-import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,7 +11,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
-import android.widget.Toast;
 
 import app.jayang.icebr8k.Utility.GifSelectedListener;
 

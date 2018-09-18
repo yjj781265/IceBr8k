@@ -63,9 +63,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
 
-import app.jayang.icebr8k.Modle.Birthdate;
-import app.jayang.icebr8k.Utility.OnDoneListener;
-import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.Model.Birthdate;
+import app.jayang.icebr8k.Model.User;
 import dmax.dialog.SpotsDialog;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;

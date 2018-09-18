@@ -8,17 +8,12 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
-import android.text.SpannableString;
-import android.text.Spanned;
 import android.text.TextWatcher;
-import android.text.style.BackgroundColorSpan;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
@@ -45,10 +40,10 @@ import java.util.Date;
 import java.util.UUID;
 
 import app.jayang.icebr8k.Adapter.ReplyAdapter;
-import app.jayang.icebr8k.Modle.Comment;
+import app.jayang.icebr8k.Model.Comment;
 
-import app.jayang.icebr8k.Modle.MyEditText;
-import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.Model.MyEditText;
+import app.jayang.icebr8k.Model.User;
 
 import app.jayang.icebr8k.Utility.SendNotification;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;

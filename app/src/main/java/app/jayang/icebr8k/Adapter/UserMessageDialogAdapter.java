@@ -35,7 +35,7 @@ import java.util.Comparator;
 
 import app.jayang.icebr8k.Homepage;
 
-import app.jayang.icebr8k.Modle.UserMessageDialog;
+import app.jayang.icebr8k.Model.UserMessageDialog;
 import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.UserChatActvity;
 import app.jayang.icebr8k.Utility.MyDateFormatter;

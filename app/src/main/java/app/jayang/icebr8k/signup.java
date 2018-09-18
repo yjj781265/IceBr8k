@@ -61,8 +61,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
-import app.jayang.icebr8k.Modle.Birthdate;
-import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.Model.Birthdate;
+import app.jayang.icebr8k.Model.User;
 import dmax.dialog.SpotsDialog;
 import id.zelory.compressor.Compressor;
 import me.imid.swipebacklayout.lib.SwipeBackLayout;

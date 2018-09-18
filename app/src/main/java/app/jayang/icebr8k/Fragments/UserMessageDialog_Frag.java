@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.transition.Fade;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,7 +15,6 @@ import android.widget.TextView;
 
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
-import com.google.android.gms.common.data.DataBufferObserverSet;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -25,9 +23,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.onesignal.OneSignal;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,8 +30,8 @@ import java.util.Comparator;
 
 import app.jayang.icebr8k.Adapter.UserMessageDialogAdapter;
 import app.jayang.icebr8k.Homepage;
-import app.jayang.icebr8k.Modle.UserMessage;
-import app.jayang.icebr8k.Modle.UserMessageDialog;
+import app.jayang.icebr8k.Model.UserMessage;
+import app.jayang.icebr8k.Model.UserMessageDialog;
 import app.jayang.icebr8k.R;
 
 /**

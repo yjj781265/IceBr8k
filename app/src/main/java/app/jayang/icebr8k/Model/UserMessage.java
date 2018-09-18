@@ -1,9 +1,8 @@
-package app.jayang.icebr8k.Modle;
+package app.jayang.icebr8k.Model;
 
 import android.support.annotation.NonNull;
 
 import java.io.Serializable;
-import java.util.Comparator;
 
 /**
  * Created by Jayang on 2/16/2018.

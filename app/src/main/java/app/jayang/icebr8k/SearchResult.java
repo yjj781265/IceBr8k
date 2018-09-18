@@ -16,10 +16,8 @@ import android.view.inputmethod.InputMethodManager;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import app.jayang.icebr8k.Adapter.RecyclerAdapter;
 import app.jayang.icebr8k.Adapter.ResultItemAdapter;
-import app.jayang.icebr8k.Modle.ResultItem;
-import app.jayang.icebr8k.Modle.UserDialog;
+import app.jayang.icebr8k.Model.ResultItem;
 
 public class SearchResult extends AppCompatActivity implements SearchView.OnQueryTextListener{
     android.support.v7.widget.Toolbar mToolbar;

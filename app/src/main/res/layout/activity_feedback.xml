@@ -72,6 +72,8 @@
             android:layout_marginBottom="10dp"
             android:id="@+id/feedback_button"
             android:textAllCaps="false"
+            android:elevation="0dp"
+            android:stateListAnimator="@null"
 
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />

@@ -7,7 +7,7 @@ import com.google.firebase.database.DatabaseReference;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import app.jayang.icebr8k.Modle.SurveyQ;
+import app.jayang.icebr8k.Model.SurveyQ;
 
 /**
  * Created by yjj781265 on 10/25/2017.

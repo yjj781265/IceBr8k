@@ -53,9 +53,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
-import app.jayang.icebr8k.Modle.User;
-import app.jayang.icebr8k.Modle.UserMessage;
-import app.jayang.icebr8k.Modle.UserQA;
+import app.jayang.icebr8k.Model.User;
+import app.jayang.icebr8k.Model.UserMessage;
+import app.jayang.icebr8k.Model.UserQA;
 import app.jayang.icebr8k.Utility.Compatability;
 import app.jayang.icebr8k.Utility.SendNotification;
 import me.imid.swipebacklayout.lib.SwipeBackLayout;

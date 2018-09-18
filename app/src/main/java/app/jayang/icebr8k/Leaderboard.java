@@ -2,11 +2,9 @@ package app.jayang.icebr8k;
 
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -19,7 +17,7 @@ import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
 import app.jayang.icebr8k.Fragments.Leaderboard_Fragment_friends;
 import app.jayang.icebr8k.Fragments.Leaderboard_Fragment_global;
 
-import app.jayang.icebr8k.Modle.LeaderboardDialog;
+import app.jayang.icebr8k.Model.LeaderboardDialog;
 import app.jayang.icebr8k.Utility.ActivityCommunicator;
 import me.imid.swipebacklayout.lib.SwipeBackLayout;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;

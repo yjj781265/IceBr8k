@@ -18,6 +18,7 @@
      />
 
     <ProgressBar
+        android:alpha="0.6"
         android:layout_centerInParent="true"
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"

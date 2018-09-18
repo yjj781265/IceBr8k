@@ -1,6 +1,5 @@
 package app.jayang.icebr8k;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
@@ -11,7 +10,6 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
@@ -47,10 +45,8 @@ import java.util.Date;
 import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
 import app.jayang.icebr8k.Fragments.Comment_Fragment;
 import app.jayang.icebr8k.Fragments.Result_fragment;
-import app.jayang.icebr8k.Fragments.commonFrag;
-import app.jayang.icebr8k.Fragments.diffFrag;
-import app.jayang.icebr8k.Modle.SurveyQ;
-import app.jayang.icebr8k.Modle.UserQA;
+import app.jayang.icebr8k.Model.SurveyQ;
+import app.jayang.icebr8k.Model.UserQA;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 
 public class QuestionActivity extends SwipeBackActivity {

@@ -1,6 +1,5 @@
 package app.jayang.icebr8k.Fragments;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -26,8 +25,8 @@ import java.util.Collections;
 import java.util.HashMap;
 
 import app.jayang.icebr8k.Adapter.ResultItemAdapter;
-import app.jayang.icebr8k.Modle.ResultItem;
-import app.jayang.icebr8k.Modle.UserQA;
+import app.jayang.icebr8k.Model.ResultItem;
+import app.jayang.icebr8k.Model.UserQA;
 import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.Utility.ActivityCommunicator;
 import app.jayang.icebr8k.Utility.Compatability;

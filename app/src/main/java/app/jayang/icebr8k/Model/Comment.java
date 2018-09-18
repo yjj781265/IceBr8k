@@ -1,6 +1,4 @@
-package app.jayang.icebr8k.Modle;
-
-import android.support.annotation.NonNull;
+package app.jayang.icebr8k.Model;
 
 import java.io.Serializable;
 import java.util.Objects;

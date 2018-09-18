@@ -1,4 +1,4 @@
-package app.jayang.icebr8k.Modle;
+package app.jayang.icebr8k.Model;
 
 import app.jayang.icebr8k.Utility.Compatability;
 

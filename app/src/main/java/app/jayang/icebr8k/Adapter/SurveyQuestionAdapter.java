@@ -1,14 +1,11 @@
 package app.jayang.icebr8k.Adapter;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -36,8 +33,14 @@ import com.daimajia.androidanimations.library.YoYo;
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.github.javiersantos.materialstyleddialogs.enums.Style;
 import com.github.mikephil.charting.animation.Easing;
+import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
@@ -51,23 +54,23 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.MutableData;
-import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.xw.repo.BubbleSeekBar;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import app.jayang.icebr8k.Modle.SurveyQ;
-import app.jayang.icebr8k.Modle.UserDialog;
-import app.jayang.icebr8k.Modle.UserQA;
+import app.jayang.icebr8k.Model.SurveyQ;
+import app.jayang.icebr8k.Model.UserQA;
 import app.jayang.icebr8k.QuestionActivity;
 import app.jayang.icebr8k.R;
-import app.jayang.icebr8k.Utility.Compatability;
-import app.jayang.icebr8k.Utility.DimmedPromptBackground;
+import app.jayang.icebr8k.Utility.MyToolBox;
+import app.jayang.icebr8k.Utility.MyXAxisValueFormatter;
 import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;
 import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetSequence;
 
@@ -244,8 +247,8 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     }
 
     class McViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView question, confirm, skip, comment;
-        ImageView check, pieChart, stamp;
+        TextView question, confirm, skip, comment,pieChart;
+        ImageView check, stamp;
         RadioGroup mRadioGroup;
         ProgressBar mProgressBar;
         SurveyQ mSurveyQ;
@@ -285,7 +288,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 public void onClick(View v) {
                     if (getAdapterPosition() != RecyclerView.NO_POSITION) {
                         mSurveyQ = mQArrayList.get(getAdapterPosition());
-                        showPieChart(mSurveyQ, pieChart);
+                        showPieChart(mSurveyQ);
                     }
 
                 }
@@ -354,11 +357,11 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     }
 
     class ScViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView question, confirm, skip;
+        TextView question, confirm, skip,pieChart;
         BubbleSeekBar mSeekBar;
         ProgressBar mProgressBar;
         TextView comment;
-        ImageView pieChart, check, stamp;
+        ImageView  check, stamp;
         SurveyQ mSurveyQ;
 
         public ScViewHolder(View itemView) {
@@ -395,7 +398,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 public void onClick(View v) {
                     if (getAdapterPosition() != RecyclerView.NO_POSITION) {
                         mSurveyQ = mQArrayList.get(getAdapterPosition());
-                        showPieChart(mSurveyQ, pieChart);
+                        showPieChart(mSurveyQ);
                     }
 
                 }
@@ -449,10 +452,10 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
 
     class SpViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView question, confirm, skip;
+        TextView question, confirm, skip,pieChart;
         ProgressBar mProgressBar;
         TextView comment;
-        ImageView pieChart, check, stamp;
+        ImageView check, stamp;
         SurveyQ mSurveyQ;
         Spinner mSpinner;
 
@@ -491,7 +494,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 public void onClick(View v) {
                     if (getAdapterPosition() != RecyclerView.NO_POSITION) {
                         mSurveyQ = mQArrayList.get(getAdapterPosition());
-                        showPieChart(mSurveyQ, pieChart);
+                        showPieChart(mSurveyQ);
                     }
 
                 }
@@ -552,7 +555,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
 
     void uploadtoDatabase(final SurveyQ surveyQ, final TextView skip, final TextView confirm, final String answer, final ProgressBar progressBar,
-                          final ImageView check, final TextView comment, final ImageView pieChart, final ImageView stamp) {
+                          final ImageView check, final TextView comment, final TextView pieChart, final ImageView stamp) {
 
 
         SharedPreferences sharedPref = mContext.getSharedPreferences("SurveyDsk", Context.MODE_PRIVATE);
@@ -727,22 +730,23 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         });
     }
 
-    void showPieChart(final SurveyQ surveyQ, final ImageView pieChartBtn) {
+    void showPieChart(final SurveyQ surveyQ) {
         final Dialog pieDialg = new Dialog(mContext);
-        ;
+
         pieDialg.setCanceledOnTouchOutside(true);
         pieDialg.setContentView(R.layout.result_dialog);
+        TextView textView = pieDialg.findViewById(R.id.centerText);
 
 
-        PieChart mPieChart = pieDialg.findViewById(R.id.chart);
+        BarChart mChart = pieDialg.findViewById(R.id.chart);
         ImageView close = pieDialg.findViewById(R.id.result_dialog_close);
         ProgressBar mProgressBar = pieDialg.findViewById(R.id.result_dialog_progressBar);
         mProgressBar.setVisibility(View.VISIBLE);
         pieDialg.show();
 
 
-        mPieChart.setVisibility(View.GONE);
-        loadPieChart(mPieChart, mProgressBar, surveyQ);
+        mChart.setVisibility(View.GONE);
+        loadPieChart(mChart, mProgressBar, surveyQ,textView);
 
         close.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -763,48 +767,51 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     }
 
 
-    void loadPieChart(final PieChart mPieChart, final ProgressBar mProgressBar, final SurveyQ surveyQ) {
+    // if is SC question we will group them
+    public void setSCMap(String answer,HashMap<String,Integer> answersMap){
+        if(Integer.valueOf(answer)>=1 &&Integer.valueOf(answer)<=2){
+            String key = "(1-2)";
+            if(answersMap.containsKey(answer)){
+                int count = answersMap.get(answer);
+
+                answersMap.put(key, ++count );
+            }else{
+                answersMap.put(key, 1 );
+            }
+        }else if(Integer.valueOf(answer)>=3 &&Integer.valueOf(answer)<=5){
+            String key = "(3-5)";
+            if(answersMap.containsKey(answer)){
+                int count = answersMap.get(answer);
+
+                answersMap.put(key, ++count );
+            }else{
+                answersMap.put(key, 1 );
+            }
+        }else if(Integer.valueOf(answer)>=6 &&Integer.valueOf(answer)<=8){
+            String key = "(6-8)";
+            if(answersMap.containsKey(answer)){
+                int count = answersMap.get(answer);
+
+                answersMap.put(key, ++count );
+            }else{
+                answersMap.put(key, 1 );
+            }
+        }else if(Integer.valueOf(answer)>=9 &&Integer.valueOf(answer)<=10){
+            String key = "(9-10)";
+            if(answersMap.containsKey(answer)){
+                int count = answersMap.get(answer);
+
+                answersMap.put(key, ++count );
+            }else{
+                answersMap.put(key, 1 );
+            }
+        }
+    }
 
 
-        mPieChart.setUsePercentValues(true);
-        mPieChart.animateY(1400, Easing.EasingOption.EaseInOutQuad);
-        mPieChart.setUsePercentValues(true);
-
-        mPieChart.getDescription().setEnabled(false);
-        mPieChart.setExtraOffsets(5, 10, 5, 5);
-
-        mPieChart.setDragDecelerationFrictionCoef(0.95f);
+    void loadPieChart(final BarChart mChart, final ProgressBar mProgressBar, final SurveyQ surveyQ, final TextView textView) {
 
 
-        mPieChart.setDrawHoleEnabled(true);
-        mPieChart.setHoleColor(Color.WHITE);
-
-        mPieChart.setTransparentCircleColor(Color.WHITE);
-        mPieChart.setTransparentCircleAlpha(110);
-
-        mPieChart.setHoleRadius(58f);
-        mPieChart.setTransparentCircleRadius(51f);
-
-        mPieChart.setDrawCenterText(true);
-
-        mPieChart.setRotationAngle(0);
-
-        mPieChart.setRotationEnabled(true);
-        mPieChart.setHighlightPerTapEnabled(false);
-
-        Legend l = mPieChart.getLegend();
-        l.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
-        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
-        l.setOrientation(Legend.LegendOrientation.HORIZONTAL);
-        l.setDrawInside(false);
-        l.setWordWrapEnabled(true);
-        l.setXEntrySpace(7f);
-        l.setYEntrySpace(1f);
-        l.setYOffset(8f);
-
-        // entry label styling
-        mPieChart.setEntryLabelColor(ContextCompat.getColor(mContext, R.color.dark_gray));
-        mPieChart.setEntryLabelTextSize(12f);
 
 
         final HashMap<String, Integer> answersMap = new HashMap<>();
@@ -828,16 +835,22 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                                 child(questionId).
                                 child("answer").getValue(String.class);
 
-                        // set up answer map default value is 0 else increment by 1
+                        // is sc question
+                        if(MyToolBox.isInteger(answer)){
+                            setSCMap(answer,answersMap);
+                        }else{
+                            // set up answer map default value is 0 else increment by 1
 
-                        if (answersMap.containsKey(answer)) {
-                            int count = answersMap.get(answer);
-                            answersMap.put(answer, ++count);
-                        } else {
-                            answersMap.put(answer, 1);
+                            if(answersMap.containsKey(answer)){
+                                int count = answersMap.get(answer);
+                                answersMap.put(answer, ++count );
+                            }else{
+                                answersMap.put(answer, 1 );
+                            }
                         }
                     }
                 }
+
                 Integer total = 0;
                 for (String str : answersMap.keySet()) {
                     total += answersMap.get(str);
@@ -848,31 +861,11 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
                 CharSequence string = Html.fromHtml("<font color=\"#3c3e42\">" + numText + "</font>");
                 String centerText = question + "\n" + string;
-                mPieChart.setCenterText(centerText);
+                textView.setText(centerText);
 
 
-                List<PieEntry> entries = new ArrayList<>();
-                if (total > 0) {
-                    PieEntry pieEntry;
-                    Integer count;
-                    Float result;
-                    for (String str : answersMap.keySet()) {
-                        count = answersMap.get(str);
-                        Log.d("Result_Frag", " count is " + count);
-                        result = ((float) count) / (float) total;
-                        Log.d("Result_Frag", " result is " + result);
 
-                        pieEntry = new PieEntry(result, str);
-                        entries.add(pieEntry);
-
-                    }
-                }
-
-
-                Log.d("Result_Frag", "" + entries.size());
-
-                // add a lot of colors
-
+              // add a lot of colors
                 ArrayList<Integer> colors = new ArrayList<Integer>();
 
                 for (int c : ColorTemplate.VORDIPLOM_COLORS)
@@ -892,26 +885,65 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 colors.add(ColorTemplate.getHoloBlue());
 
 
-                PieDataSet dataSet = new PieDataSet(entries, "");
-                dataSet.setColors(colors);
-                dataSet.setDrawIcons(false);
-
-                dataSet.setSliceSpace(3f);
-                dataSet.setIconsOffset(new MPPointF(0, 40));
-                dataSet.setSelectionShift(5f);
 
 
-                PieData data = new PieData(dataSet);
-                data.setValueFormatter(new PercentFormatter());
-                data.setValueTextSize(11f);
-                data.setValueTextColor(Color.BLACK);
-                data.setValueTextSize(11f);
+                List<BarEntry> entries = new ArrayList<>();
+                ArrayList<String> xAxisStrings = new ArrayList<>();
+
+                if(total>0){
+                    BarEntry barEntry;
+                    Integer count,index =0 ;
+                    Float result;
+                    ArrayList<String> answerList=new ArrayList(answersMap.keySet());
+                    Collections.sort(answerList);
+
+                    for(String str: answerList){
+                        xAxisStrings.add(str);
+                        count = answersMap.get(str);
+                        Log.d("Result_Frag"," count is "+ count);
+                        result = (((float)count)/(float)total)*100;
+                        Log.d("Result_Frag"," result is "+ result);
+
+                        barEntry = new BarEntry((float)index,result);
+                        index++;
+                        entries.add(barEntry);
+
+
+                    }
+                }
+
+                XAxis xAxis = mChart.getXAxis();
+
+                xAxis.setValueFormatter(new MyXAxisValueFormatter(xAxisStrings));
+                xAxis.setDrawAxisLine(true);
+                xAxis.setDrawGridLines(false);
+                xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+                xAxis.setGranularity(1f);
+
+                YAxis yAxis = mChart.getAxisLeft();
+
+                yAxis.setValueFormatter(new PercentFormatter());
+                yAxis.setDrawGridLines(false);
+                BarDataSet set = new BarDataSet(entries, "BarDataSet");
+                set.setColors(colors);
+                set.setValueFormatter(new PercentFormatter());
+                set.setValueTextSize(8f);
+                BarData data = new BarData(set);
+                data.setBarWidth(0.9f); // set custom bar width
+                mChart.setData(data);
+                mChart.setScaleEnabled(false);
+                mChart.setDrawGridBackground(false);
+                mChart.setDrawValueAboveBar(true);
+                mChart.setFitBars(true); // make the x-axis fit exactly all bars
+                mChart.getAxisRight().setEnabled(false);
+                mChart.getDescription().setEnabled(false);
+                mChart.getLegend().setEnabled(false);
+                mChart.setTouchEnabled(false);
+                mChart.animateXY(1000, 1000);
                 mProgressBar.setVisibility(View.GONE);
+                mChart.setVisibility(View.VISIBLE);
+                mChart.invalidate(); // refresh
 
-                mPieChart.setData(data);
-                mPieChart.setVisibility(View.VISIBLE);
-                mPieChart.animateY(1400, Easing.EasingOption.EaseInOutQuad);
-                mPieChart.invalidate(); // refresh
             }
 
             @Override

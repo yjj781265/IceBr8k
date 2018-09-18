@@ -26,11 +26,10 @@ import java.util.Collections;
 import java.util.HashMap;
 
 import app.jayang.icebr8k.Adapter.ResultItemAdapter;
-import app.jayang.icebr8k.Modle.ResultItem;
-import app.jayang.icebr8k.Modle.User;
-import app.jayang.icebr8k.Modle.UserQA;
+import app.jayang.icebr8k.Model.ResultItem;
+import app.jayang.icebr8k.Model.User;
+import app.jayang.icebr8k.Model.UserQA;
 import app.jayang.icebr8k.R;
-import app.jayang.icebr8k.ResultActivity;
 import app.jayang.icebr8k.Utility.ActivityCommunicator;
 import app.jayang.icebr8k.Utility.Compatability;
 

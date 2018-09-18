@@ -4,7 +4,7 @@ import android.support.v7.util.DiffUtil;
 
 import java.util.ArrayList;
 
-import app.jayang.icebr8k.Modle.ResultItem;
+import app.jayang.icebr8k.Model.ResultItem;
 
 public class ResultDiffCallBack extends DiffUtil.Callback {
 

@@ -7,14 +7,12 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
@@ -33,9 +31,9 @@ import java.util.Collection;
 import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
 import app.jayang.icebr8k.Fragments.commonFrag;
 import app.jayang.icebr8k.Fragments.diffFrag;
-import app.jayang.icebr8k.Modle.ResultItem;
-import app.jayang.icebr8k.Modle.User;
-import app.jayang.icebr8k.Modle.UserQA;
+import app.jayang.icebr8k.Model.ResultItem;
+import app.jayang.icebr8k.Model.User;
+import app.jayang.icebr8k.Model.UserQA;
 import app.jayang.icebr8k.Utility.ActivityCommunicator;
 import app.jayang.icebr8k.Utility.Compatability;
 

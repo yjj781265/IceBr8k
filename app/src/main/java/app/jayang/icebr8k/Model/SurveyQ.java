@@ -1,4 +1,4 @@
-package app.jayang.icebr8k.Modle;
+package app.jayang.icebr8k.Model;
 
 import java.util.ArrayList;
 import java.util.Objects;

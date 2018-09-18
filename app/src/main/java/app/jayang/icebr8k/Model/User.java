@@ -1,8 +1,5 @@
-package app.jayang.icebr8k.Modle;
+package app.jayang.icebr8k.Model;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.support.annotation.InterpolatorRes;
 import android.support.annotation.NonNull;
 
 import java.io.Serializable;

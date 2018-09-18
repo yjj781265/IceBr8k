@@ -1,12 +1,4 @@
-package app.jayang.icebr8k.Modle;
-
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.support.annotation.NonNull;
-import android.support.v7.util.SortedList;
-import android.support.v7.widget.util.SortedListAdapterCallback;
-
-import com.github.wrdlbrnft.sortedlistadapter.SortedListAdapter;
+package app.jayang.icebr8k.Model;
 
 import java.io.Serializable;
 import java.util.Objects;

@@ -4,17 +4,8 @@ package app.jayang.icebr8k.Adapter;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
-import android.graphics.RectF;
-import android.net.Uri;
 import android.os.SystemClock;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -24,13 +15,11 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -50,14 +39,12 @@ import java.util.Collections;
 import java.util.HashMap;
 
 import app.jayang.icebr8k.MediaViewActivty;
-import app.jayang.icebr8k.Modle.User;
-import app.jayang.icebr8k.Modle.UserMessage;
+import app.jayang.icebr8k.Model.User;
+import app.jayang.icebr8k.Model.UserMessage;
 import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.UserProfilePage;
 import app.jayang.icebr8k.Utility.MyDateFormatter;
 import app.jayang.icebr8k.Utility.OnLoadMoreListener;
-
-import static app.jayang.icebr8k.MyApplication.getContext;
 
 /**
  * Created by yjj781265 on 2/19/2018.
@@ -689,6 +676,7 @@ public class UserMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 makeSceneTransitionAnimation(mContext,view, "photoView");
         if(message.getGif()){
             mContext.startActivity(intent);
+            mContext.overridePendingTransition(R.anim.a5,0);
         }else{
             mContext.startActivity (intent, options.toBundle());
         }

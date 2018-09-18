@@ -1,6 +1,5 @@
 package app.jayang.icebr8k;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -11,7 +10,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -24,7 +22,6 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.util.Log;
@@ -39,7 +36,6 @@ import android.widget.Toast;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
-import com.bumptech.glide.Glide;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 
@@ -82,22 +78,19 @@ import com.zplesac.connectionbuddy.models.ConnectivityEvent;
 import com.zplesac.connectionbuddy.models.ConnectivityState;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.UUID;
 
 import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
 import app.jayang.icebr8k.Fragments.PeopleNearby_Fragment;
 import app.jayang.icebr8k.Fragments.SurveyTab_Fragment;
 import app.jayang.icebr8k.Fragments.UserMessageDialog_Frag;
 import app.jayang.icebr8k.Fragments.me_frag;
-import app.jayang.icebr8k.Modle.SurveyQ;
-import app.jayang.icebr8k.Modle.UserComp;
-import app.jayang.icebr8k.Modle.UserQA;
+import app.jayang.icebr8k.Model.SurveyQ;
+import app.jayang.icebr8k.Model.UserComp;
+import app.jayang.icebr8k.Model.UserQA;
 import app.jayang.icebr8k.Utility.ActivityCommunicator;
-import app.jayang.icebr8k.Modle.myViewPager;
+import app.jayang.icebr8k.Model.myViewPager;
 import app.jayang.icebr8k.Utility.Compatability;
 import app.jayang.icebr8k.Utility.DimmedPromptBackground;
-import app.jayang.icebr8k.Utility.MyJobService;
 import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;
 
 
@@ -252,46 +245,8 @@ public class Homepage extends AppCompatActivity implements
         });
 
 
-        // transfer data
-        final FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("Questions").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    for (DocumentSnapshot document : task.getResult()) {
-                     SurveyQ surveyQ =  document.toObject(SurveyQ.class);
-                     if(surveyQ.getQuestionId().equals("6a59f0b6-0ef0-45d0-91de-fd004597f8c1")){
-                            showToast(surveyQ+"");
-                        }
-
-                    }
-                } else {
-                    Log.w(TAG, "Error getting documents.", task.getException());
-                }
-            }
-        });
-//end transfer
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference()
-                .child("Questions_8");
-
-        reference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for(DataSnapshot childSnap: dataSnapshot.getChildren()){
-                    SurveyQ surveyQ = childSnap.getValue(SurveyQ.class);
-                    if(surveyQ!=null){
-                        db.collection("Questions").document(surveyQ.getQuestionId()).set(surveyQ);
 
 
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
 
 
     }
@@ -537,7 +492,7 @@ public class Homepage extends AppCompatActivity implements
         badgeStyle.withTextColor(ContextCompat.getColor(this, R.color.white));
 
         friendRequest = new PrimaryDrawerItem().withName("Friend Request").
-                withIcon(R.drawable.user_icon).withBadge("").withBadgeStyle(badgeStyle);
+                withIcon(R.drawable.user_icon).withBadgeStyle(badgeStyle);
         addFriend = new PrimaryDrawerItem().withName("Add Friend").withIcon(R.drawable.ic_action_addfriend);
         feedback = new PrimaryDrawerItem().withName(getString(R.string.feedback)).withIcon(R.drawable.ic_action_feedback);
         logOut = new PrimaryDrawerItem().withName("Log Out").withIcon(R.drawable.ic_action_exit);

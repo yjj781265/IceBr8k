@@ -30,12 +30,11 @@ import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.UUID;
 
-import app.jayang.icebr8k.Modle.Comment;
+import app.jayang.icebr8k.Model.Comment;
 
-import app.jayang.icebr8k.Modle.MyEditText;
-import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.Model.MyEditText;
+import app.jayang.icebr8k.Model.User;
 import app.jayang.icebr8k.R;
-import app.jayang.icebr8k.UserChatActvity;
 
 public class CommentBottomSheetFrag extends BottomSheetDialogFragment {
 

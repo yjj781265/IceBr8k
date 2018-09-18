@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import app.jayang.icebr8k.Adapter.LeaderboardAdapter;
-import app.jayang.icebr8k.Modle.LeaderboardDialog;
-import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.Model.LeaderboardDialog;
+import app.jayang.icebr8k.Model.User;
 import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.Utility.ActivityCommunicator;
 

@@ -22,9 +22,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-import app.jayang.icebr8k.Fragments.CommentBottomSheetFrag;
-import app.jayang.icebr8k.Modle.Comment;
-import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.Model.Comment;
+import app.jayang.icebr8k.Model.User;
 import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.UserProfilePage;
 import app.jayang.icebr8k.Utility.MyDateFormatter;

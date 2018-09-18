@@ -25,18 +25,6 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true">
 
-            <ImageView
-                android:visibility="gone"
-                android:id="@+id/survey_sc_piechart"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginTop="8dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                app:srcCompat="@drawable/piechart"/>
-
 
             <TextView
                 android:id="@+id/survey_sc_question"
@@ -45,14 +33,14 @@
 
                 android:layout_marginEnd="16dp"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="16dp"
 
                 android:text="Question"
                 android:textColor="@color/black"
                 android:textSize="18sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/survey_sc_piechart"/>
+                app:layout_constraintTop_toTopOf="parent"/>
 
 
             <TextView
@@ -129,16 +117,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="bottom"
+                    android:layout_centerVertical="true"
                     android:orientation="horizontal">
 
 
                     <TextView
                         android:id="@+id/survey_sc_comment"
+                        android:padding="3dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="3dp"
-                        android:background="?attr/selectableItemBackground"
+                        android:foreground="?attr/selectableItemBackground"
                         android:text="Comment"
+                        android:background="@drawable/round_rectangle_lightblue"
+
                         android:textSize="14sp"
                         android:visibility="gone"/>
                 </LinearLayout>
@@ -148,9 +140,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:background="?attr/selectableItemBackground"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:padding="3dp"
                     android:text="@string/confirm"
-                    android:textColor="@color/colorPrimary"
+                    android:background="@drawable/rounded_rec_green"
+                    android:textColor="@color/white"
                     android:textSize="16sp"/>
 
                 <ProgressBar
@@ -171,15 +165,30 @@
                     android:visibility="gone"/>
 
                 <TextView
-
+                    android:padding="3dp"
                     android:id="@+id/survey_sc_skip"
+                    android:textColor="@color/white"
+                    android:background="@drawable/rounded_rec_blue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    android:background="?attr/selectableItemBackground"
+                    android:layout_centerVertical="true"
+                    android:foreground="?attr/selectableItemBackground"
                     android:text="@string/skip"
                     android:textSize="14sp"/>
 
+                <TextView
+                    android:padding="3dp"
+                    android:visibility="gone"
+                    android:text="@string/result"
+                    android:background="@drawable/rounded_rec_orange"
+                    android:textColor="@color/white"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:id="@+id/survey_sc_piechart"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:foreground="?attr/selectableItemBackgroundBorderless"/>
 
             </RelativeLayout>
 

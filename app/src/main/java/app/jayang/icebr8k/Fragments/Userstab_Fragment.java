@@ -1,7 +1,6 @@
 package app.jayang.icebr8k.Fragments;
 
 import android.annotation.SuppressLint;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -42,9 +41,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 
 import app.jayang.icebr8k.Adapter.RecyclerAdapter;
-import app.jayang.icebr8k.Modle.User;
-import app.jayang.icebr8k.Modle.UserDialog;
-import app.jayang.icebr8k.Modle.UserQA;
+import app.jayang.icebr8k.Model.User;
+import app.jayang.icebr8k.Model.UserDialog;
+import app.jayang.icebr8k.Model.UserQA;
 import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.SearchName;
 import app.jayang.icebr8k.SearchUser;

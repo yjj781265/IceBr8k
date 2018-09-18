@@ -17,7 +17,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 
-import app.jayang.icebr8k.Modle.LeaderboardDialog;
+import app.jayang.icebr8k.Model.LeaderboardDialog;
 import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.UserProfilePage;
 

@@ -51,7 +51,7 @@
             android:layout_weight="1"
             android:src="@drawable/ic_action_add_chat_selector"/>
 
-        <app.jayang.icebr8k.Modle.MyEditText
+        <app.jayang.icebr8k.Model.MyEditText
             android:id="@+id/userChat_input"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

@@ -44,7 +44,7 @@ public class Feedback extends AppCompatActivity {
 
                 //This will show prompts of email intent
                 email.setType("message/rfc822");
-                startActivity(Intent.createChooser(email, "Choose an Email sender :"));
+                startActivity(Intent.createChooser(email, "Choose an Email sender:"));
             }
 
         });

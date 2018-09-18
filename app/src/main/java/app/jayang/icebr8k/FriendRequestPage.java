@@ -21,8 +21,8 @@ import com.onesignal.OneSignal;
 import java.util.ArrayList;
 
 import app.jayang.icebr8k.Adapter.FriendRequestAdapter;
-import app.jayang.icebr8k.Modle.User;
-import app.jayang.icebr8k.Modle.UserQA;
+import app.jayang.icebr8k.Model.User;
+import app.jayang.icebr8k.Model.UserQA;
 import app.jayang.icebr8k.Utility.Compatability;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 

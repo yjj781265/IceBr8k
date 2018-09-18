@@ -1,14 +1,10 @@
-package app.jayang.icebr8k.Modle;
+package app.jayang.icebr8k.Model;
 
-import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-
-import java.util.Comparator;
 
 /**
  * Created by yjj781265 on 1/25/2018.

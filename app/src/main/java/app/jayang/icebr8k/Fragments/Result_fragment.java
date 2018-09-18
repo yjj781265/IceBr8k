@@ -2,7 +2,6 @@ package app.jayang.icebr8k.Fragments;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -13,11 +12,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.github.mikephil.charting.animation.Easing;
+import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
@@ -28,16 +33,18 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
-import app.jayang.icebr8k.Modle.SurveyQ;
 import app.jayang.icebr8k.QuestionActivity;
 import app.jayang.icebr8k.R;
+import app.jayang.icebr8k.Utility.MyToolBox;
+import app.jayang.icebr8k.Utility.MyXAxisValueFormatter;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -56,8 +63,9 @@ public class Result_fragment extends Fragment {
 
     private String questionId,question;
     private ProgressBar mProgressBar;
+    private TextView centerText;
     private  DatabaseReference titleRef;
-    private PieChart mPieChart;
+    private BarChart mChart;
     private QuestionActivity mQuestionActivity;
     private View mView;
     private boolean firstTime = true;
@@ -113,47 +121,13 @@ public class Result_fragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         mView = inflater.inflate(R.layout.fragment_result_fragment, container, false);
-        mPieChart = mView.findViewById(R.id.chart);
+        mChart = mView.findViewById(R.id.chart);
         mProgressBar =mView.findViewById(R.id.result_progressBar);
-        mPieChart.setUsePercentValues(true);
-        mPieChart.animateY(1400, Easing.EasingOption.EaseInOutQuad);
-        mPieChart.setUsePercentValues(true);
-        mPieChart.getDescription().setEnabled(false);
-        mPieChart.setExtraOffsets(5, 10, 5, 5);
-
-        mPieChart.setDragDecelerationFrictionCoef(0.95f);
+        centerText = mView.findViewById(R.id.centerText);
 
 
 
-        mPieChart.setDrawHoleEnabled(true);
-        mPieChart.setHoleColor(Color.WHITE);
 
-        mPieChart.setTransparentCircleColor(Color.WHITE);
-        mPieChart.setTransparentCircleAlpha(110);
-
-        mPieChart.setHoleRadius(58f);
-        mPieChart.setTransparentCircleRadius(51f);
-
-        mPieChart.setDrawCenterText(true);
-
-        mPieChart.setRotationAngle(0);
-
-        mPieChart.setRotationEnabled(false);
-        mPieChart.setHighlightPerTapEnabled(false);
-
-        Legend l = mPieChart.getLegend();
-        l.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
-        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
-        l.setOrientation(Legend.LegendOrientation.HORIZONTAL);
-        l.setDrawInside(false);
-        l.setWordWrapEnabled(true);
-        l.setXEntrySpace(7f);
-        l.setYEntrySpace(1f);
-        l.setYOffset(8f);
-
-        // entry label styling
-        mPieChart.setEntryLabelColor(ContextCompat.getColor(getActivity(),R.color.dark_gray));
-        mPieChart.setEntryLabelTextSize(12f);
 
 
 
@@ -214,14 +188,21 @@ public class Result_fragment extends Fragment {
                                         child(questionId).
                                         child("answer").getValue(String.class);
 
-                                // set up answer map default value is 0 else increment by 1
-
-                                if(answersMap.containsKey(answer)){
-                                    int count = answersMap.get(answer);
-                                    answersMap.put(answer, ++count );
+                                // is sc question
+                                if(MyToolBox.isInteger(answer)){
+                                    setSCMap(answer);
                                 }else{
-                                    answersMap.put(answer, 1 );
+                                    // set up answer map default value is 0 else increment by 1
+
+                                    if(answersMap.containsKey(answer)){
+                                        int count = answersMap.get(answer);
+                                        answersMap.put(answer, ++count );
+                                    }else{
+                                        answersMap.put(answer, 1 );
+                                    }
                                 }
+
+
                             }
                         }
                         Log.d("Result_Frag",answersMap.toString());
@@ -243,6 +224,47 @@ public class Result_fragment extends Fragment {
         titleRef.addListenerForSingleValueEvent(piechatListener);
     }
 
+    // if is SC question we will group them
+    public void setSCMap(String answer){
+        if(Integer.valueOf(answer)>=1 &&Integer.valueOf(answer)<=2){
+            String key = "(1-2)";
+            if(answersMap.containsKey(answer)){
+                int count = answersMap.get(answer);
+
+                answersMap.put(key, ++count );
+            }else{
+                answersMap.put(key, 1 );
+            }
+        }else if(Integer.valueOf(answer)>=3 &&Integer.valueOf(answer)<=5){
+            String key = "(3-5)";
+            if(answersMap.containsKey(answer)){
+                int count = answersMap.get(answer);
+
+                answersMap.put(key, ++count );
+            }else{
+                answersMap.put(key, 1 );
+            }
+        }else if(Integer.valueOf(answer)>=6 &&Integer.valueOf(answer)<=8){
+            String key = "(6-8)";
+            if(answersMap.containsKey(answer)){
+                int count = answersMap.get(answer);
+
+                answersMap.put(key, ++count );
+            }else{
+                answersMap.put(key, 1 );
+            }
+        }else if(Integer.valueOf(answer)>=9 &&Integer.valueOf(answer)<=10){
+            String key = "(9-10)";
+            if(answersMap.containsKey(answer)){
+                int count = answersMap.get(answer);
+
+                answersMap.put(key, ++count );
+            }else{
+                answersMap.put(key, 1 );
+            }
+        }
+    }
+
 
     void setPieChart(HashMap<String,Integer> map){
 
@@ -256,37 +278,13 @@ public class Result_fragment extends Fragment {
         String numText = "\n(" + total + user+" have answered this question)";
 
         CharSequence string  = Html.fromHtml("<font color=\"#3c3e42\">" + numText+ "</font>");
-        String centerText = question +"\n"+ string;
-        mPieChart.setCenterText(centerText);
+        String text = question +"\n"+ string;
+        centerText.setText(text);
 
 
-        List<PieEntry> entries = new ArrayList<>();
-        if(total>0){
-            PieEntry pieEntry;
-            Integer count ;
-            Float result;
-            for(String str: map.keySet()){
-                count = map.get(str);
-                Log.d("Result_Frag"," count is "+ count);
-                result = ((float)count)/(float)total;
-                Log.d("Result_Frag"," result is "+ result);
-
-                pieEntry = new PieEntry(result,str);
-                entries.add(pieEntry);
-
-            }
-        }
 
 
-/*
-        entries.add(new PieEntry(18.5f, "Hey"));
-        entries.add(new PieEntry(26.7f, "123"));
-        entries.add(new PieEntry(24.0f, "21313"));
-        entries.add(new PieEntry(30.8f, "12313"));*/
-        Log.d("Result_Frag",""+entries.size());
-
-        // add a lot of colors
-
+// add a lot of colors
         ArrayList<Integer> colors = new ArrayList<Integer>();
 
         for (int c : ColorTemplate.VORDIPLOM_COLORS)
@@ -306,27 +304,66 @@ public class Result_fragment extends Fragment {
         colors.add(ColorTemplate.getHoloBlue());
 
 
-        PieDataSet dataSet = new PieDataSet(entries, "");
-        dataSet.setColors(colors);
-        dataSet.setDrawIcons(false);
-
-        dataSet.setSliceSpace(3f);
-        dataSet.setIconsOffset(new MPPointF(0, 40));
-        dataSet.setSelectionShift(5f);
 
 
+        List<BarEntry> entries = new ArrayList<>();
+        ArrayList<String> xAxisStrings = new ArrayList<>();
 
-        PieData data = new PieData(dataSet);
-        data.setValueFormatter(new PercentFormatter());
-        data.setValueTextSize(11f);
-        data.setValueTextColor(Color.BLACK);
-        data.setValueTextSize(11f);
-        mProgressBar.setVisibility(View.GONE);
+        if(total>0){
+            BarEntry barEntry;
+            Integer count,index =0 ;
+            Float result;
+            ArrayList<String> answerList=new ArrayList(map.keySet());
+            Collections.sort(answerList);
 
-        mPieChart.setData(data);
-        mPieChart.setVisibility(View.VISIBLE);
-        mPieChart.animateY(1400, Easing.EasingOption.EaseInOutQuad);
-        mPieChart.invalidate(); // refresh
+            for(String str: answerList){
+                xAxisStrings.add(str);
+                count = map.get(str);
+                Log.d("Result_Frag"," count is "+ count);
+                result = (((float)count)/(float)total)*100;
+                Log.d("Result_Frag"," result is "+ result);
+
+                barEntry = new BarEntry((float)index,result);
+                index++;
+                entries.add(barEntry);
+
+
+            }
+        }
+        /*entries.add(new BarEntry(0f, 30f));
+        entries.add(new BarEntry(1f, 80f));
+        entries.add(new BarEntry(2f, 60f));*/
+        XAxis xAxis = mChart.getXAxis();
+
+        xAxis.setValueFormatter(new MyXAxisValueFormatter(xAxisStrings));
+        xAxis.setDrawGridLines(false);
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setGranularity(1f);
+
+        YAxis yAxis = mChart.getAxisLeft();
+
+        yAxis.setValueFormatter(new PercentFormatter());
+        yAxis.setDrawGridLines(false);
+        BarDataSet set = new BarDataSet(entries, "BarDataSet");
+        set.setColors(colors);
+        set.setValueFormatter(new PercentFormatter());
+        set.setValueTextSize(8f);
+        BarData data = new BarData(set);
+        data.setBarWidth(0.9f); // set custom bar width
+        mChart.setData(data);
+        mChart.setScaleEnabled(false);
+        mChart.setDrawGridBackground(false);
+        mChart.setDrawValueAboveBar(true);
+        mChart.setFitBars(true); // make the x-axis fit exactly all bars
+        mChart.getAxisRight().setEnabled(false);
+       mChart.getDescription().setEnabled(false);
+       mChart.getLegend().setEnabled(false);
+       mChart.setTouchEnabled(false);
+       mChart.animateXY(3000, 3000);
+       mProgressBar.setVisibility(View.GONE);
+       mChart.setVisibility(View.VISIBLE);
+        mChart.invalidate(); // refresh
+
 
     }
 

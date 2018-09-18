@@ -88,7 +88,7 @@
 
 
 
-        <app.jayang.icebr8k.Modle.myViewPager
+        <app.jayang.icebr8k.Model.myViewPager
             android:id="@+id/homepage_viewpager"
             android:layout_below="@id/noConnection_tv"
             android:layout_width="match_parent"
@@ -98,7 +98,7 @@
             android:layout_alignParentStart="true"
             android:background="@android:color/white">
 
-        </app.jayang.icebr8k.Modle.myViewPager>
+        </app.jayang.icebr8k.Model.myViewPager>
 
 
 

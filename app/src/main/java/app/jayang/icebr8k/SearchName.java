@@ -16,9 +16,7 @@ import android.view.inputmethod.InputMethodManager;
 import java.util.ArrayList;
 
 import app.jayang.icebr8k.Adapter.RecyclerAdapter;
-import app.jayang.icebr8k.Modle.UserDialog;
-import me.imid.swipebacklayout.lib.SwipeBackLayout;
-import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
+import app.jayang.icebr8k.Model.UserDialog;
 
 public class SearchName extends AppCompatActivity implements SearchView.OnQueryTextListener {
     android.support.v7.widget.Toolbar mToolbar;

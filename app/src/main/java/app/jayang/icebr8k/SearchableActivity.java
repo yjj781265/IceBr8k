@@ -1,8 +1,6 @@
 package app.jayang.icebr8k;
 
-import android.app.SearchManager;
 import android.content.Context;
-import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -13,13 +11,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
 import app.jayang.icebr8k.Adapter.QuestionAnsweredAdapter;
-import app.jayang.icebr8k.Modle.UserDialog;
-import app.jayang.icebr8k.Modle.UserQA;
+import app.jayang.icebr8k.Model.UserQA;
 
 public class SearchableActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
     private Toolbar mToolbar;

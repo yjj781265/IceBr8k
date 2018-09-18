@@ -17,17 +17,13 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
-import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
-import com.github.javiersantos.materialstyleddialogs.enums.Style;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -42,7 +38,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import app.jayang.icebr8k.Adapter.SurveyQuestionAdapter;
-import app.jayang.icebr8k.Modle.SurveyQ;
+import app.jayang.icebr8k.Model.SurveyQ;
 import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.Utility.DimmedPromptBackground;
 import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;

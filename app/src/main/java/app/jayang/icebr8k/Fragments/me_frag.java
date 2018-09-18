@@ -62,8 +62,8 @@ import java.util.UUID;
 
 import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
 import app.jayang.icebr8k.MediaViewActivty;
-import app.jayang.icebr8k.Modle.User;
-import app.jayang.icebr8k.Modle.UserMessage;
+import app.jayang.icebr8k.Model.User;
+import app.jayang.icebr8k.Model.UserMessage;
 import app.jayang.icebr8k.R;
 import id.zelory.compressor.Compressor;
 

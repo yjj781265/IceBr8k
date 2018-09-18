@@ -13,6 +13,7 @@ import android.widget.ProgressBar;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
@@ -20,7 +21,7 @@ import com.github.chrisbanes.photoview.PhotoView;
 
 import java.util.ArrayList;
 
-import app.jayang.icebr8k.Modle.UserMessage;
+import app.jayang.icebr8k.Model.UserMessage;
 import app.jayang.icebr8k.R;
 
 public class MediaViewAdapter extends RecyclerView.Adapter<MediaViewAdapter.MediaViewVH> {
@@ -46,8 +47,21 @@ public class MediaViewAdapter extends RecyclerView.Adapter<MediaViewAdapter.Medi
     @Override
     public void onBindViewHolder(@NonNull final MediaViewVH holder, int position) {
         UserMessage message = mMessages.get(position);
-        Glide.with(mActivity).load(message.getText()).apply(new RequestOptions().error(R.drawable.noimage)) .into(holder.mPhotoView).clearOnDetach();
-        holder.mProgressBar.setVisibility(View.GONE);
+        holder.mProgressBar.setVisibility(View.VISIBLE);
+        Glide.with(mActivity).load(message.getText()).apply(new RequestOptions().error(R.drawable.noimage))
+                .listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        holder.mProgressBar.setVisibility(View.GONE);
+                        return false;
+                    }
+                }) .transition(DrawableTransitionOptions.withCrossFade()).into(holder.mPhotoView).clearOnDetach();
+
     }
 
     @Override
@@ -67,7 +81,8 @@ public class MediaViewAdapter extends RecyclerView.Adapter<MediaViewAdapter.Medi
 
         @Override
         public void onClick(View v) {
-           mListener.onPhotoViewClicked();
+           // user interface to communicate with parent activity to show the toolbar or hide
+            mListener.onPhotoViewClicked();
         }
     }
 

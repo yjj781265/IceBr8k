@@ -17,7 +17,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import app.jayang.icebr8k.Modle.User;
+import app.jayang.icebr8k.Model.User;
 import cn.bingoogolapple.qrcode.core.QRCodeView;
 
 

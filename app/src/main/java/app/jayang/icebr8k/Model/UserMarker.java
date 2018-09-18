@@ -1,6 +1,4 @@
-package app.jayang.icebr8k.Modle;
-
-import com.google.firebase.auth.FirebaseUser;
+package app.jayang.icebr8k.Model;
 
 /**
  * Created by yjj781265 on 1/22/2018.

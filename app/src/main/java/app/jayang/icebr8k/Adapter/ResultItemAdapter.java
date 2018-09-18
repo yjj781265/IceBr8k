@@ -2,9 +2,7 @@ package app.jayang.icebr8k.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -17,8 +15,6 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
-import com.daimajia.androidanimations.library.Techniques;
-import com.daimajia.androidanimations.library.YoYo;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -27,15 +23,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
-import app.jayang.icebr8k.Modle.ResultItem;
-import app.jayang.icebr8k.Modle.User;
-import app.jayang.icebr8k.Modle.UserQA;
+import app.jayang.icebr8k.Model.ResultItem;
 import app.jayang.icebr8k.QuestionActivity;
 import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.SearchResult;
-import app.jayang.icebr8k.Utility.ResultDiffCallBack;
 
 /**
  * Created by LoLJay on 11/2/2017.
