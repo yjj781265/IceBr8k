@@ -17,4 +17,5 @@ public class MyXAxisValueFormatter implements IAxisValueFormatter {
 
         return mValues.get((int) value);
     }
+
 }

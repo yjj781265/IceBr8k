@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="Gradle: me.imid.swipebacklayout.lib:library-1.1.0">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/library-1.1.0.aar/670c71dce77cdeb433679bbd0770f788/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/library-1.1.0.aar/670c71dce77cdeb433679bbd0770f788/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/library-1.1.0.aar/203231a64a6dc40451b1e1760dbef469/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/library-1.1.0.aar/203231a64a6dc40451b1e1760dbef469/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

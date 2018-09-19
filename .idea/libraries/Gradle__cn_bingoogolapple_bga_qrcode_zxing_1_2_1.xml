@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="Gradle: cn.bingoogolapple:bga-qrcode-zxing-1.2.1">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/bga-qrcode-zxing-1.2.1.aar/b203ac142c0f0d33c5461e659514659b/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/bga-qrcode-zxing-1.2.1.aar/b203ac142c0f0d33c5461e659514659b/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/bga-qrcode-zxing-1.2.1.aar/d18b330eebb91d68958014efede716e4/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/bga-qrcode-zxing-1.2.1.aar/d18b330eebb91d68958014efede716e4/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

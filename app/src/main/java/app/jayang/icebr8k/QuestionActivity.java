@@ -45,6 +45,7 @@ import java.util.Date;
 import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
 import app.jayang.icebr8k.Fragments.Comment_Fragment;
 import app.jayang.icebr8k.Fragments.Result_fragment;
+import app.jayang.icebr8k.Fragments.TagFragment;
 import app.jayang.icebr8k.Model.SurveyQ;
 import app.jayang.icebr8k.Model.UserQA;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
@@ -127,10 +128,12 @@ public class QuestionActivity extends SwipeBackActivity {
             getCommentCounts();
             viewPagerAdapter.addFragment(Comment_Fragment.newInstance(questionId));
             viewPagerAdapter.addFragment(Result_fragment.newInstance(questionId));
+            viewPagerAdapter.addFragment(TagFragment.newInstance(questionId));
             mViewPager.setAdapter(viewPagerAdapter);
             mLayout.setupWithViewPager(mViewPager);
             mLayout.getTabAt(0).setText("Comments");
             mLayout.getTabAt(1).setText("Result");
+            mLayout.getTabAt(2).setText("Tags");
         }
 
 

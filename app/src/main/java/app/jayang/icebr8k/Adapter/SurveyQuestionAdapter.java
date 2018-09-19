@@ -939,6 +939,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 mChart.getDescription().setEnabled(false);
                 mChart.getLegend().setEnabled(false);
                 mChart.setTouchEnabled(false);
+                xAxis.setLabelRotationAngle(-60f);
                 mChart.animateXY(1000, 1000);
                 mProgressBar.setVisibility(View.GONE);
                 mChart.setVisibility(View.VISIBLE);

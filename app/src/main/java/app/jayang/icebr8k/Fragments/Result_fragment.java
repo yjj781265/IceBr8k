@@ -9,6 +9,7 @@ import android.support.v4.content.ContextCompat;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
@@ -27,6 +28,8 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
+import com.github.mikephil.charting.listener.ChartTouchListener;
+import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.github.mikephil.charting.utils.MPPointF;
 import com.google.firebase.database.DataSnapshot;
@@ -334,6 +337,7 @@ public class Result_fragment extends Fragment {
         entries.add(new BarEntry(1f, 80f));
         entries.add(new BarEntry(2f, 60f));*/
         XAxis xAxis = mChart.getXAxis();
+        xAxis.setLabelRotationAngle(-60f);
 
         xAxis.setValueFormatter(new MyXAxisValueFormatter(xAxisStrings));
         xAxis.setDrawGridLines(false);
@@ -359,9 +363,11 @@ public class Result_fragment extends Fragment {
        mChart.getDescription().setEnabled(false);
        mChart.getLegend().setEnabled(false);
        mChart.setTouchEnabled(false);
+       mChart.setHighlightPerTapEnabled(false);
        mChart.animateXY(3000, 3000);
        mProgressBar.setVisibility(View.GONE);
        mChart.setVisibility(View.VISIBLE);
+
         mChart.invalidate(); // refresh
 
 
