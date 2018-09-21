@@ -3,15 +3,21 @@ package app.jayang.icebr8k.Utility;
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 
 public class MyToolBox {
 
 
-    public static int convertPixelsToDp(float px, Context context){
-        Resources resources = context.getResources();
-        DisplayMetrics metrics = resources.getDisplayMetrics();
-        float dp = px / ((float)metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
-        return  Integer.valueOf((int)dp);
+    public static int convertDptoPixel(float dp, Context context){
+        // Converts 14 dip into its equivalent px
+        float dip = dp;
+        Resources r = context.getResources();
+        float px = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                dip,
+                r.getDisplayMetrics()
+        );
+        return (int)px;
     }
 
 

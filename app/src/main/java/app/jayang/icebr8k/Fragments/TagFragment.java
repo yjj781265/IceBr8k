@@ -3,12 +3,20 @@ package app.jayang.icebr8k.Fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
+import app.jayang.icebr8k.Adapter.TagAdapter;
+import app.jayang.icebr8k.Model.TagModel;
 import app.jayang.icebr8k.R;
 
 /**
@@ -21,6 +29,10 @@ public class TagFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private String questionId;
+    private RecyclerView recyclerView;
+    private TagAdapter adapter;
+    private GridLayoutManager gridLayoutManager;
+    private ArrayList<TagModel>tagModels = new ArrayList<>();
     private TextView tag;
     private View view;
 
@@ -63,19 +75,27 @@ public class TagFragment extends Fragment {
         // Inflate the layout for this fragment
        view =inflater.inflate(R.layout.fragment_tag, container, false);
        tag = view.findViewById(R.id.text_view);
-       tag.setOnTouchListener(new View.OnTouchListener() {
-           @Override
-           public boolean onTouch(View view, MotionEvent motionEvent) {
-               if(motionEvent.getAction() == MotionEvent.ACTION_DOWN){
-                   tag.setSelected(true);
-               }else{
-                   tag.setSelected(false);
-               }
+       recyclerView = view.findViewById(R.id.tag_recyclerView);
+       gridLayoutManager = new GridLayoutManager(getContext(),2,
+               GridLayoutManager.VERTICAL, false);
+       adapter = new TagAdapter(tagModels,getActivity());
+       recyclerView.setLayoutManager(gridLayoutManager);
+       recyclerView.setAdapter(adapter);
+       getData();
 
-               return false;
-           }
-       });
         return view;
+    }
+
+    private void getData(){
+        tagModels.add(new TagModel("abc"));
+        tagModels.add(new TagModel("123abc"));
+        tagModels.add(new TagModel("ab123123c"));
+        tagModels.add(new TagModel("ab342424c"));
+        tagModels.add(new TagModel("abrwerc"));
+        tagModels.add(new TagModel("abdsffsdfc"));
+        tagModels.add(new TagModel("ab1c"));
+        adapter.notifyDataSetChanged();
+
     }
 
 }

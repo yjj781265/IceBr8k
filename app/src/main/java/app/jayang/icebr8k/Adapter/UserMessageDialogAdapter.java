@@ -35,6 +35,7 @@ import java.util.Comparator;
 
 import app.jayang.icebr8k.Homepage;
 
+import app.jayang.icebr8k.Model.UserDialog;
 import app.jayang.icebr8k.Model.UserMessageDialog;
 import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.UserChatActvity;
@@ -112,6 +113,8 @@ public class UserMessageDialogAdapter extends RecyclerView.Adapter<RecyclerView.
     };
 
 
+
+
     public UserMessageDialogAdapter(ArrayList<UserMessageDialog> dialogs, Activity context) {
         this.dialogs = dialogs;
         mContext =context;
@@ -129,7 +132,16 @@ public class UserMessageDialogAdapter extends RecyclerView.Adapter<RecyclerView.
 
 
         UserMessageDialog messageDialog = dialogs.get(position);
-       holder.itemView.setBackgroundColor(mContext.getResources().getColor(R.color.white));
+        if(actionMode!=null){
+            holder.itemView.setBackgroundColor(holder.itemView.isSelected()?
+                    mContext.getResources().getColor(R.color.ripple):
+                    mContext.getResources().getColor(R.color.white));
+        }else{
+            holder.itemView.setSelected(false);
+            holder.itemView.setBackgroundColor(
+                    mContext.getResources().getColor(R.color.white));
+        }
+
         if(holder instanceof UserMessageDialogViewHolder){
             //check mute
             if(messageDialog.getMuted()){
@@ -209,6 +221,7 @@ public class UserMessageDialogAdapter extends RecyclerView.Adapter<RecyclerView.
             date = itemView.findViewById(R.id.messageDialog_date);
             avatar =itemView.findViewById(R.id.messageDialog_avatar);
             muted = itemView.findViewById(R.id.messageDialog_notification_off);
+
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
         }

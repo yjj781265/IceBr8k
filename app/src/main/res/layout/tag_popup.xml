@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/rounded_rectangle_white"
+    android:padding="6dp">
+
+    <ImageView
+        android:id="@+id/tag_thumbup"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_action_thumbup_selector" />
+
+    <TextView
+        android:id="@+id/tag_likes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:text="6" />
+
+    <ImageView
+        android:id="@+id/tag_thumbdown"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginLeft="8dp"
+        android:src="@drawable/ic_action_thumbdown_selector" />
+
+    <TextView
+        android:id="@+id/tag_dislikes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:text="8" />
+
+</LinearLayout>

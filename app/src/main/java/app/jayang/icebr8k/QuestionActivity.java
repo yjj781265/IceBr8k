@@ -130,6 +130,7 @@ public class QuestionActivity extends SwipeBackActivity {
             viewPagerAdapter.addFragment(Result_fragment.newInstance(questionId));
             viewPagerAdapter.addFragment(TagFragment.newInstance(questionId));
             mViewPager.setAdapter(viewPagerAdapter);
+            mViewPager.setOffscreenPageLimit(2);
             mLayout.setupWithViewPager(mViewPager);
             mLayout.getTabAt(0).setText("Comments");
             mLayout.getTabAt(1).setText("Result");
