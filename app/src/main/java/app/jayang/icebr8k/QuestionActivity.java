@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
@@ -70,9 +71,11 @@ public class QuestionActivity extends SwipeBackActivity {
     private final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
     private final DatabaseReference userQARef = FirebaseDatabase.getInstance().getReference()
             .child("UserQA").child(currentUser.getUid());
+    private FloatingActionButton mActionButton;
     private ValueEventListener skipListener;
     private DatabaseReference commentRef,question8Ref;
     private ValueEventListener commentRefListener,isScListener,isMcListener,isSpListener;
+
 
 
     @Override
@@ -93,6 +96,8 @@ public class QuestionActivity extends SwipeBackActivity {
         mProgressBar = (ProgressBar) findViewById(R.id.question_progressBar);
         mCardView = (CardView) findViewById(R.id.cardView);
         mAppBarLayout = (AppBarLayout) findViewById(R.id.question_appBar);
+        mActionButton = (FloatingActionButton) findViewById(R.id.tag_add);
+        mActionButton.hide();
 
         loadingDialog = new MaterialDialog.Builder(this)
                 .content("Submitting your answer....")
@@ -135,6 +140,28 @@ public class QuestionActivity extends SwipeBackActivity {
             mLayout.getTabAt(0).setText("Comments");
             mLayout.getTabAt(1).setText("Result");
             mLayout.getTabAt(2).setText("Tags");
+
+            mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+                }
+
+                @Override
+                public void onPageSelected(int position) {
+                    if(position == 2){
+                        mActionButton.show();
+                    }else{
+                        mActionButton.hide();
+                    }
+
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+
+                }
+            });
         }
 
 

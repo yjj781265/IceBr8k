@@ -17,11 +17,11 @@
         android:layout_width="120dp"
         android:layout_height="35dp"
         android:gravity="center"
-        android:text="123123123131213133123113"
+        android:text="12345678901 +1.1k"
         android:paddingLeft="8dp"
         android:singleLine="true"
         android:textColor="@color/white"
-        android:textSize="14dp" />
+        android:textSize="12dp" />
     </FrameLayout>
 
 </RelativeLayout>
