@@ -65,8 +65,6 @@ public class TagFragment extends android.support.v4.app.Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_tag, container, false);
         tag = view.findViewById(R.id.text_view);
@@ -97,14 +95,12 @@ public class TagFragment extends android.support.v4.app.Fragment {
         tagModels.add(new TagModel("abrwerc"));
         tagModels.add(new TagModel("abdsffsdfc"));
         tagModels.add(new TagModel("ab1c"));
-
         tagModels.add(new TagModel("abc"));
         tagModels.add(new TagModel("123abc"));
         tagModels.add(new TagModel("ab123123c"));
         tagModels.add(new TagModel("ab342424c"));
-        tagModels.add(new TagModel("abrwerc"));
-        tagModels.add(new TagModel("abdsffsdfc"));
-        tagModels.add(new TagModel("ab1c"));
+       // tagModels.add(new TagModel("abrwerc"));
+        tagModels.add(new TagModel(null));
 
         adapter.notifyDataSetChanged();
 

@@ -20,9 +20,10 @@ import app.jayang.icebr8k.Utility.MyToolBox;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
-public class TagAdapter extends RecyclerView.Adapter<TagAdapter.TagViewHolder> {
+public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     ArrayList<TagModel> tagModels;
     Activity activity;
+    final int EMPTY_VH = 0,TAG_VH =1;
 
     public TagAdapter(ArrayList<TagModel> tagModels, Activity activity) {
         this.tagModels = tagModels;
@@ -31,15 +32,33 @@ public class TagAdapter extends RecyclerView.Adapter<TagAdapter.TagViewHolder> {
 
     @NonNull
     @Override
-    public TagViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(activity).inflate(R.layout.item_tag, parent, false);
-        return new TagViewHolder(view);
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view;
+        if(viewType == EMPTY_VH){
+            view = LayoutInflater.from(activity).inflate(R.layout.item_empty_placeholder, parent, false);
+            return  new EmptyViewHolder(view);
+        }else {
+            view = LayoutInflater.from(activity).inflate(R.layout.item_tag, parent, false);
+            return new TagViewHolder(view);
+        }
+
 
     }
 
     @Override
-    public void onBindViewHolder(@NonNull TagViewHolder holder, int position) {
-        holder.bindView(tagModels.get(position));
+    public int getItemViewType(int position) {
+        TagModel tagModel = tagModels.get(position);
+        return tagModel.getTagtxt()==null ?
+                EMPTY_VH:
+                TAG_VH;
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        TagModel tagModel = tagModels.get(position);
+        if(holder instanceof TagViewHolder){
+            ((TagViewHolder) holder).bindView(tagModel);
+        }
     }
 
     @Override
@@ -61,29 +80,38 @@ public class TagAdapter extends RecyclerView.Adapter<TagAdapter.TagViewHolder> {
 
         public TagViewHolder(View itemView) {
             super(itemView);
-            tagName = itemView.findViewById(R.id.tag_txt);
-            // Initialize a new instance of LayoutInflater service
-            LayoutInflater inflater = (LayoutInflater) activity.getSystemService(LAYOUT_INFLATER_SERVICE);
 
-            // Inflate the custom layout/view
-            customView = inflater.inflate(R.layout.tag_popup, null);
-            thumbUp = customView.findViewById(R.id.tag_thumbup);
-            thumbDown = customView.findViewById(R.id.tag_thumbdown);
-            likes = customView.findViewById(R.id.tag_likes);
-            dislikes = customView.findViewById(R.id.tag_dislikes);
+                tagName = itemView.findViewById(R.id.tag_txt);
+                container = itemView.findViewById(R.id.tag_container);
+                // Initialize a new instance of LayoutInflater service
+                LayoutInflater inflater = (LayoutInflater) activity.getSystemService(LAYOUT_INFLATER_SERVICE);
 
-            mPopupWindow = new PopupWindow(
-                    customView,
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT);
-            container = itemView.findViewById(R.id.tag_container);
+                // Inflate the custom layout/view
+                customView = inflater.inflate(R.layout.tag_popup, null);
+                thumbUp = customView.findViewById(R.id.tag_thumbup);
+                thumbDown = customView.findViewById(R.id.tag_thumbdown);
+                likes = customView.findViewById(R.id.tag_likes);
+                dislikes = customView.findViewById(R.id.tag_dislikes);
 
-            container.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    showPopup(view);
+                mPopupWindow = new PopupWindow(
+                        customView,
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+
+
+                container.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        showPopup(view);
                     }
-            });
+                });
+
+
+
+
+
+
+
         }
 
         private void bindView(TagModel tagModel) {

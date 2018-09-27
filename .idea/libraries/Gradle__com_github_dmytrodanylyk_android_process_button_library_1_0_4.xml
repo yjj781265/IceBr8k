@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="Gradle: com.github.dmytrodanylyk.android-process-button:library-1.0.4">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/library-1.0.4.aar/7f4f1765a27b3b1ab8445246e78c6a82/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/library-1.0.4.aar/7f4f1765a27b3b1ab8445246e78c6a82/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/library-1.0.4.aar/4a0a63de4d7e896273129ec28bf9348f/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/library-1.0.4.aar/4a0a63de4d7e896273129ec28bf9348f/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

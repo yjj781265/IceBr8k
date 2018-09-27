@@ -8,6 +8,7 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
@@ -52,6 +53,10 @@ import app.jayang.icebr8k.Model.UserQA;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 
 public class QuestionActivity extends SwipeBackActivity {
+    private final int COMMENTS_TAB = 0,
+    TAGS_TAB =1, RESULTS_TAG =2;
+
+
     private TextView questionTV, subQuestion,confirmBtn,skipBtn ;
     private TabLayout mLayout;
     private AppBarLayout mAppBarLayout;
@@ -97,7 +102,7 @@ public class QuestionActivity extends SwipeBackActivity {
         mCardView = (CardView) findViewById(R.id.cardView);
         mAppBarLayout = (AppBarLayout) findViewById(R.id.question_appBar);
         mActionButton = (FloatingActionButton) findViewById(R.id.tag_add);
-        mActionButton.hide();
+
 
         loadingDialog = new MaterialDialog.Builder(this)
                 .content("Submitting your answer....")
@@ -115,6 +120,13 @@ public class QuestionActivity extends SwipeBackActivity {
 
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
 
+        mActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(mAppBarLayout, R.string.ok, Snackbar.LENGTH_LONG)
+                        .show();
+            }
+        });
 
 
 
@@ -132,28 +144,36 @@ public class QuestionActivity extends SwipeBackActivity {
 
             getCommentCounts();
             viewPagerAdapter.addFragment(Comment_Fragment.newInstance(questionId));
-            viewPagerAdapter.addFragment(Result_fragment.newInstance(questionId));
             viewPagerAdapter.addFragment(TagFragment.newInstance(questionId));
+            viewPagerAdapter.addFragment(Result_fragment.newInstance(questionId));
+
             mViewPager.setAdapter(viewPagerAdapter);
             mViewPager.setOffscreenPageLimit(2);
             mLayout.setupWithViewPager(mViewPager);
-            mLayout.getTabAt(0).setText("Comments");
-            mLayout.getTabAt(1).setText("Result");
-            mLayout.getTabAt(2).setText("Tags");
+            mLayout.getTabAt(COMMENTS_TAB).setText("Comments");
+            mLayout.getTabAt(TAGS_TAB).setText("Tags");
+            mLayout.getTabAt(RESULTS_TAG).setText("Results");
+
 
             mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override
                 public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
+                  switch (position){
+                      case RESULTS_TAG: mAppBarLayout.setExpanded(false);
+                      break;
+                      default: mAppBarLayout.setExpanded(true);
+                  }
                 }
 
                 @Override
                 public void onPageSelected(int position) {
-                    if(position == 2){
+                    if(position == TAGS_TAB){
                         mActionButton.show();
                     }else{
                         mActionButton.hide();
                     }
+
+
 
                 }
 

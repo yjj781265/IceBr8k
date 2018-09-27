@@ -140,35 +140,20 @@ public class Result_fragment extends Fragment {
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        if(isVisibleToUser && getView()!=null && firstTime){
-            if(mQuestionActivity!=null){
-                mQuestionActivity.getAppBarLayout().setExpanded(false,true);
-            }
+        if (isVisibleToUser && getView() != null && firstTime) {
+
             mProgressBar.setVisibility(View.VISIBLE);
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     getDataFromDatabase();
                 }
-            },666);
-
-            firstTime =false;
-
+            }, 666);
+            firstTime = false;
 
 
-        }else if (isVisibleToUser && !firstTime){
-            if(mQuestionActivity!=null){
-                mQuestionActivity.getAppBarLayout().setExpanded(false,true);
-            }
-
-        }else{
-            if(mQuestionActivity!=null){
-                mQuestionActivity.getAppBarLayout().setExpanded(true,true);
-            }
         }
-
     }
-
     void getDataFromDatabase(){
 
 
