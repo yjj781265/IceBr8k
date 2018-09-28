@@ -5,7 +5,7 @@ package app.jayang.icebr8k.Utility;
  */
 
 public interface OnDoneListener  {
-    void isDone();
+    void isDone(String string);
 
 
 }

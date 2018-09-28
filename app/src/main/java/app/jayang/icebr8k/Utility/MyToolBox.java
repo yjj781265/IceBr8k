@@ -2,8 +2,15 @@ package app.jayang.icebr8k.Utility;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Looper;
+import android.support.design.widget.Snackbar;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.View;
+import android.widget.Toast;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MyToolBox {
 
@@ -36,5 +43,37 @@ public class MyToolBox {
         }
         return true;
     }
+
+    public static boolean isOneWord(String string){
+        Pattern wordPattern = Pattern.compile("\\w+");
+        Matcher wordMatcher = wordPattern.matcher(string);
+        if (!wordMatcher.matches()) {
+            // discard user input
+            return false;
+        }
+        return  true;
+    }
+
+    public static void showSnackBar(String text , View view, boolean isShort){
+        Snackbar snackbar;
+        if(isShort){
+            snackbar = Snackbar
+                    .make(view, text, Snackbar.LENGTH_LONG);
+        }else {
+            snackbar = Snackbar.make(view,text,Snackbar.LENGTH_LONG);
+        }
+
+
+        snackbar.show();
+    }
+
+    public static void showToast(String text,Context context){
+        Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
+    }
+
+    public static boolean isMainThread() {
+        return Looper.myLooper() == Looper.getMainLooper();
+    }
+
 
 }

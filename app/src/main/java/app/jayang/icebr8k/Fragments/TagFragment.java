@@ -13,22 +13,24 @@ import java.util.ArrayList;
 
 import app.jayang.icebr8k.Adapter.TagAdapter;
 import app.jayang.icebr8k.Model.TagModel;
+import app.jayang.icebr8k.QuestionActivity;
 import app.jayang.icebr8k.R;
+import app.jayang.icebr8k.Utility.OnDoneListener;
 
 
 /**
  * Use the {@link TagFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class TagFragment extends android.support.v4.app.Fragment {
+public class TagFragment extends android.support.v4.app.Fragment{
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private String questionId;
     private RecyclerView recyclerView;
-    private TagAdapter adapter;
+    public TagAdapter adapter;
     private GridLayoutManager gridLayoutManager;
-    private ArrayList<TagModel> tagModels = new ArrayList<>();
+    public  ArrayList<TagModel> tagModels = new ArrayList<>();
     private TextView tag;
     private View view;
 
@@ -80,30 +82,10 @@ public class TagFragment extends android.support.v4.app.Fragment {
     }
 
     private void getData() {
-        tagModels.add(new TagModel("abc"));
-        tagModels.add(new TagModel("123abc"));
-        tagModels.add(new TagModel("ab123123c"));
-        tagModels.add(new TagModel("ab342424c"));
-        tagModels.add(new TagModel("abrwerc"));
-        tagModels.add(new TagModel("abdsffsdfc"));
-        tagModels.add(new TagModel("ab1c"));
 
-        tagModels.add(new TagModel("abc"));
-        tagModels.add(new TagModel("123abc"));
-        tagModels.add(new TagModel("ab123123c"));
-        tagModels.add(new TagModel("ab342424c"));
-        tagModels.add(new TagModel("abrwerc"));
-        tagModels.add(new TagModel("abdsffsdfc"));
-        tagModels.add(new TagModel("ab1c"));
-        tagModels.add(new TagModel("abc"));
-        tagModels.add(new TagModel("123abc"));
-        tagModels.add(new TagModel("ab123123c"));
-        tagModels.add(new TagModel("ab342424c"));
-       // tagModels.add(new TagModel("abrwerc"));
-        tagModels.add(new TagModel(null));
 
-        adapter.notifyDataSetChanged();
 
     }
+
 
 }
