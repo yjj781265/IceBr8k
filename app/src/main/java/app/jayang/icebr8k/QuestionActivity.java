@@ -38,10 +38,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.xw.repo.BubbleSeekBar;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.UUID;
 
 import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
 import app.jayang.icebr8k.Fragments.Comment_Fragment;
@@ -52,12 +55,14 @@ import app.jayang.icebr8k.Model.TagModel;
 import app.jayang.icebr8k.Model.UserQA;
 import app.jayang.icebr8k.Utility.MyToolBox;
 import app.jayang.icebr8k.Utility.OnDoneListener;
+import app.jayang.icebr8k.Utility.StringConstant;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 
 public class QuestionActivity extends SwipeBackActivity{
     private final int COMMENTS_TAB = 0,
             TAGS_TAB = 1, RESULTS_TAG = 2;
     private final long DAYS = 60 * 60 * 48 * 1000;  // 2 DAYS
+    private final String COLLECTION_PARENT_NODE ="TagQueue";
     private final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
     private final DatabaseReference userQARef = FirebaseDatabase.getInstance().getReference()
             .child("UserQA").child(currentUser.getUid());
@@ -81,6 +86,7 @@ public class QuestionActivity extends SwipeBackActivity{
     private ValueEventListener skipListener;
     private DatabaseReference commentRef, question8Ref;
     private ValueEventListener commentRefListener, isScListener, isMcListener, isSpListener;
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();;
 
 
     @Override
@@ -262,8 +268,7 @@ public class QuestionActivity extends SwipeBackActivity{
                     @Override
                     public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
                         if (MyToolBox.isOneWord(input.toString())) {
-                           tagFragment.tagModels.add(new TagModel(input.toString()));
-                           tagFragment.adapter.notifyDataSetChanged();
+                            addTagToDatabase( input.toString());
                         } else {
                             MyToolBox.showToast(getString(R.string.tag_dialog_one_word_error), QuestionActivity.this);
                             showInputDialog();
@@ -275,6 +280,19 @@ public class QuestionActivity extends SwipeBackActivity{
         materialDialog.show();
     }
 
+    private void addTagToDatabase(final String text) {
+
+        TagModel tagModel = new TagModel(text, UUID.randomUUID().toString(),currentUser.getUid(),
+                new Date().getTime(),questionId, StringConstant.PENDING_STATUS);
+        db.collection(COLLECTION_PARENT_NODE).add(tagModel).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+            @Override
+            public void onSuccess(DocumentReference documentReference) {
+                Toast.makeText(QuestionActivity.this, text +" tag is uploaded for review", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+    }
 
 
     @Override
