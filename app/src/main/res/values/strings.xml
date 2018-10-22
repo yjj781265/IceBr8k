@@ -116,6 +116,8 @@ This Service does not use these “cookies” explicitly. However, the app may u
     <string name="tag_dialog_title">Upload your own tag</string>
     <string name="tag_dialog_hint">Enter your tag here...</string>
     <string name="tag_dialog_one_word_error">Tag can only be one word</string>
+    <string name="tag_add_success">Tag Added</string>
+    <string name="tag_add_failed">Adding Tag Failed</string>
 
 
 </resources>

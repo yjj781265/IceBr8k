@@ -90,7 +90,8 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable  ViewGroup container, @Nullable final Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable  ViewGroup container,
+                             @Nullable final Bundle savedInstanceState) {
 
       mview = inflater.inflate(R.layout.survey_tab,container,false);
       surveyNav = mview.findViewById(R.id.survey_nav);
@@ -141,8 +142,6 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
                 }else{
                     mRecyclerView.smoothScrollToPosition(currentPosition);
                 }
-
-
             }
         });
 
@@ -159,18 +158,13 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
 
                 }
 
-
             }
         });
-
-
 
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-
                 loadingGif.setVisibility(View.VISIBLE);
                 noMoreQLayout.setVisibility(View.GONE);
 
@@ -207,10 +201,6 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
 
             }
         });
-
-
-
-
         return  mview;
     }
 
@@ -225,11 +215,9 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
                    mHandler.postDelayed(new Runnable() {
                        @Override
                        public void run() {
-
                            fab.show();
                        }
                    },300);
-
                 }
             }else{
                 fab.hide();
@@ -254,12 +242,6 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
     @Override
     public void onResume() {
         super.onResume();
-
-
-
-
-
-
     }
 
     void hideView(){
@@ -330,7 +312,6 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
                     if(!answeredList.contains(child.getKey())){
                         answeredList.add(child.getKey());
                     }
-
                 }
                 // get first 8 questions
                 DatabaseReference questionRef = FirebaseDatabase.getInstance().getReference()
@@ -397,10 +378,6 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
                             surveyNav.setVisibility(View.VISIBLE);
                             fab.show();
                           /*  mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-
-
-
-
                                 @Override
                                 public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                                     super.onScrollStateChanged(recyclerView, newState);
@@ -409,11 +386,11 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
                                         currentPosition = mLayoutManager.getPosition(centerView);
                                         currentSurveyQ = mList.get(currentPosition);
                                         btnAction(currentSurveyQ);
-
                                     }
 
                                 }
                             });*/
+
                           if(mRecyclerView.getLayoutManager() instanceof LinearLayoutManager) {
                                 final LinearLayoutManager linearLayoutManager = (LinearLayoutManager) mRecyclerView
                                         .getLayoutManager();
@@ -422,10 +399,11 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
                                     @Override
                                     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                                         super.onScrolled(recyclerView, dx, dy);
-
-                                        Log.d("Survey123", "first visable"+ String.valueOf(linearLayoutManager.findFirstVisibleItemPosition()) +"last Visiable"+ linearLayoutManager.findLastVisibleItemPosition());
-
-                                        currentPosition = (linearLayoutManager.findFirstVisibleItemPosition() + linearLayoutManager.findLastVisibleItemPosition())/2;
+                                        Log.d("Survey123", "first visable"+
+                                                String.valueOf(linearLayoutManager.findFirstVisibleItemPosition())
+                                                +"last Visiable"+ linearLayoutManager.findLastVisibleItemPosition());
+                                        currentPosition = (linearLayoutManager.findFirstVisibleItemPosition()
+                                                + linearLayoutManager.findLastVisibleItemPosition())/2;
                                         currentSurveyQ = mList.get(currentPosition);
                                         btnAction(currentSurveyQ);
                                     }

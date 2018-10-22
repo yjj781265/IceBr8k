@@ -29,6 +29,7 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -38,7 +39,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.xw.repo.BubbleSeekBar;
 
@@ -54,18 +54,18 @@ import app.jayang.icebr8k.Model.SurveyQ;
 import app.jayang.icebr8k.Model.TagModel;
 import app.jayang.icebr8k.Model.UserQA;
 import app.jayang.icebr8k.Utility.MyToolBox;
-import app.jayang.icebr8k.Utility.OnDoneListener;
 import app.jayang.icebr8k.Utility.StringConstant;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 
-public class QuestionActivity extends SwipeBackActivity{
+public class QuestionActivity extends SwipeBackActivity {
     private final int COMMENTS_TAB = 0,
             TAGS_TAB = 1, RESULTS_TAG = 2;
     private final long DAYS = 60 * 60 * 48 * 1000;  // 2 DAYS
-    private final String COLLECTION_PARENT_NODE ="TagQueue";
+    private final String COLLECTION_PARENT_NODE = "Tags";
     private final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
     private final DatabaseReference userQARef = FirebaseDatabase.getInstance().getReference()
             .child("UserQA").child(currentUser.getUid());
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private TextView questionTV, subQuestion, confirmBtn, skipBtn;
     private TabLayout mLayout;
     private AppBarLayout mAppBarLayout;
@@ -86,8 +86,6 @@ public class QuestionActivity extends SwipeBackActivity{
     private ValueEventListener skipListener;
     private DatabaseReference commentRef, question8Ref;
     private ValueEventListener commentRefListener, isScListener, isMcListener, isSpListener;
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,8 +106,6 @@ public class QuestionActivity extends SwipeBackActivity{
         mCardView = (CardView) findViewById(R.id.cardView);
         mAppBarLayout = (AppBarLayout) findViewById(R.id.question_appBar);
         mActionButton = (FloatingActionButton) findViewById(R.id.tag_add);
-       
-
 
         loadingDialog = new MaterialDialog.Builder(this)
                 .content("Submitting your answer....")
@@ -121,6 +117,7 @@ public class QuestionActivity extends SwipeBackActivity{
                 .content("Answer Submitted")
                 .positiveText(R.string.ok)
                 .build();
+
         getSwipeBackLayout().setEdgeSize(36);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -142,7 +139,6 @@ public class QuestionActivity extends SwipeBackActivity{
         if (questionId != null) {
             question8Ref = FirebaseDatabase.getInstance().getReference("Questions_8")
                     .child(questionId);
-
             getCommentCounts();
             viewPagerAdapter.addFragment(Comment_Fragment.newInstance(questionId));
             tagFragment = TagFragment.newInstance(questionId);
@@ -155,7 +151,6 @@ public class QuestionActivity extends SwipeBackActivity{
             mLayout.getTabAt(COMMENTS_TAB).setText("Comments");
             mLayout.getTabAt(TAGS_TAB).setText("Tags");
             mLayout.getTabAt(RESULTS_TAG).setText("Results");
-
 
             mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override
@@ -176,19 +171,13 @@ public class QuestionActivity extends SwipeBackActivity{
                     } else {
                         mActionButton.hide();
                     }
-
-
                 }
 
                 @Override
                 public void onPageScrollStateChanged(int state) {
-
                 }
             });
         }
-
-
-        // Toast.makeText(this, questionId, Toast.LENGTH_SHORT).show();
 
         // extras for reply Page
         String topCommentId = getIntent().getExtras().getString("topCommentId");
@@ -256,8 +245,6 @@ public class QuestionActivity extends SwipeBackActivity{
             }
         };
         userQARef.child(questionId).addValueEventListener(skipListener);
-
-
     }
 
     private void showInputDialog() {
@@ -268,7 +255,7 @@ public class QuestionActivity extends SwipeBackActivity{
                     @Override
                     public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
                         if (MyToolBox.isOneWord(input.toString())) {
-                            addTagToDatabase( input.toString());
+                            addTagToDatabase(input.toString());
                         } else {
                             MyToolBox.showToast(getString(R.string.tag_dialog_one_word_error), QuestionActivity.this);
                             showInputDialog();
@@ -282,16 +269,22 @@ public class QuestionActivity extends SwipeBackActivity{
 
     private void addTagToDatabase(final String text) {
 
-        TagModel tagModel = new TagModel(text, UUID.randomUUID().toString(),currentUser.getUid(),
-                new Date().getTime(),questionId, StringConstant.PENDING_STATUS);
-        db.collection(COLLECTION_PARENT_NODE).add(tagModel).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+        TagModel tagModel = new TagModel(text, UUID.randomUUID().toString(), currentUser.getUid(),
+                new Date().getTime(), questionId, StringConstant.ACCEPTED_STATUS);
+        db.collection(COLLECTION_PARENT_NODE).document(questionId).collection(questionId).document(tagModel.getTagId())
+                .set(tagModel).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
-            public void onSuccess(DocumentReference documentReference) {
-                Toast.makeText(QuestionActivity.this, text +" tag is uploaded for review", Toast.LENGTH_SHORT).show();
+            public void onSuccess(Void aVoid) {
+                Toast.makeText(QuestionActivity.this, getString(R.string.tag_add_success),
+                        Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(QuestionActivity.this, getString(R.string.tag_add_failed)
+                        + " " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-
-
     }
 
 
@@ -323,7 +316,6 @@ public class QuestionActivity extends SwipeBackActivity{
     }
 
     void setUI(final boolean answered) {
-
         final DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
                 .child("Questions_8")
                 .child(questionId)
@@ -341,7 +333,8 @@ public class QuestionActivity extends SwipeBackActivity{
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             UserQA userQA = dataSnapshot.getValue(UserQA.class);
-                            skipBtn.setVisibility(userQA.getAnswer() != null && "skipped".equals(userQA.getAnswer()) ? View.GONE : View.VISIBLE);
+                            skipBtn.setVisibility(userQA.getAnswer() != null
+                                    && "skipped".equals(userQA.getAnswer()) ? View.GONE : View.VISIBLE);
                             switch (type) {
                                 case "mc":
                                     isMultipleChoice(userQA);
@@ -387,8 +380,6 @@ public class QuestionActivity extends SwipeBackActivity{
 
                     }
                 }
-
-
             }
 
             @Override
@@ -413,9 +404,7 @@ public class QuestionActivity extends SwipeBackActivity{
 
         //handle skipped answer
         mSeekBar.setProgress(userQA != null && !"skipped".equals(userQA.getAnswer()) ? Float.valueOf(userQA.getAnswer()) : 5f);
-
         // set question text
-
 
         isScListener = new ValueEventListener() {
             @Override
@@ -427,7 +416,7 @@ public class QuestionActivity extends SwipeBackActivity{
                 ;
                 userQA.setQuestion(surveyQ.getQuestion());
 
-//reset button click
+                //reset button click
                 confirmBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -439,7 +428,8 @@ public class QuestionActivity extends SwipeBackActivity{
                         resetRef.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                // if timestamp less than cuurent time question is resetable
+                                // if timestamp less than current time question is resettable
+
                                 if (dataSnapshot.getValue(Long.class) == null
                                         || new Date().getTime() > dataSnapshot.getValue(Long.class)) {
                                     userQA.setAnswer(String.valueOf(mSeekBar.getProgress()));
@@ -554,7 +544,6 @@ public class QuestionActivity extends SwipeBackActivity{
                 userQA.setQuestion(question);
                 userQA.setFavorite(false);
 
-
                 // reset click listener
                 confirmBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -568,7 +557,7 @@ public class QuestionActivity extends SwipeBackActivity{
                         resetRef.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                // if timestamp less than cuurent time question is resetable
+                                // if timestamp less than cuurent time question is resettable
                                 if (dataSnapshot.getValue(Long.class) == null
                                         || new Date().getTime() > dataSnapshot.getValue(Long.class)) {
 
@@ -743,7 +732,7 @@ public class QuestionActivity extends SwipeBackActivity{
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                                // if timestamp less than cuurent time question is resetable
+                                // if timestamp less than current time question is resettable
                                 if (dataSnapshot.getValue(Long.class) == null
                                         || new Date().getTime() > dataSnapshot.getValue(Long.class)) {
 
@@ -859,7 +848,6 @@ public class QuestionActivity extends SwipeBackActivity{
     }
 
 
-
     public class updateToDatabase extends AsyncTask<UserQA, Void, Void> {
         @Override
         protected void onPreExecute() {
@@ -889,10 +877,8 @@ public class QuestionActivity extends SwipeBackActivity{
             loadingDialog.dismiss();
             submittedDialog.show();
 
-
         }
     }
-
 
 
 }

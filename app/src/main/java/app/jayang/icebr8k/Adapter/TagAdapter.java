@@ -3,6 +3,7 @@ package app.jayang.icebr8k.Adapter;
 import android.app.Activity;
 import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +12,15 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Transaction;
 
 import java.util.ArrayList;
 
@@ -24,6 +34,10 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     ArrayList<TagModel> tagModels;
     Activity activity;
     final int EMPTY_VH = 0,TAG_VH =1;
+
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final String COLLECTION_PARENT_NODE = "Tags";
+    private final String COLLECTION_TAG_LIKED = "TagsLiked";
 
     public TagAdapter(ArrayList<TagModel> tagModels, Activity activity) {
         this.tagModels = tagModels;
@@ -41,8 +55,6 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             view = LayoutInflater.from(activity).inflate(R.layout.item_tag, parent, false);
             return new TagViewHolder(view);
         }
-
-
     }
 
     @Override
@@ -84,6 +96,7 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 tagName = itemView.findViewById(R.id.tag_txt);
                 container = itemView.findViewById(R.id.tag_container);
                 // Initialize a new instance of LayoutInflater service
+
                 LayoutInflater inflater = (LayoutInflater) activity.getSystemService(LAYOUT_INFLATER_SERVICE);
 
                 // Inflate the custom layout/view
@@ -98,19 +111,20 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT);
 
-
                 container.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        showPopup(view);
+                        if(getAdapterPosition()!=RecyclerView.NO_POSITION){
+                            TagModel tagModel = tagModels.get(getAdapterPosition());
+                            showPopup(view,tagModel);
+                        }
+
+
+
+
+
                     }
                 });
-
-
-
-
-
-
 
         }
 
@@ -118,38 +132,56 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             tagName.setText(tagModel.getTagtxt());
         }
 
-        private void showPopup(View parentView) {
+        private void showPopup(View parentView, final TagModel tagModel) {
 
+           final Long likeCount = tagModel.getLikes()== null ? 0 :tagModel.getLikes();
+           final Long dislikeCount = tagModel.getLikes()== null ? 0 :tagModel.getLikes();
             mPopupWindow.setBackgroundDrawable(new ColorDrawable());
             mPopupWindow.setOutsideTouchable(true);
-
+            likes.setText(String.valueOf(tagModel.getLikes() == null ? 0 : tagModel.getLikes())  );
+            dislikes.setText(String.valueOf(tagModel.getDislikes() == null ? 0 : tagModel.getDislikes()) );
 
             thumbUp.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    int count = 2;
-                    if (view.isSelected()) {
-                        likes.setText("44");
+                    if (view.isSelected() && !thumbDown.isSelected()) {
                         view.setSelected(false);
-                    } else {
-                        likes.setText("7");
+                    } else if(!view.isSelected() && !thumbDown.isSelected()) {
                         view.setSelected(true);
+
+                        thumbDown.setSelected(false);
+                    } else if(view.isSelected() && thumbDown.isSelected()){
+                        view.setSelected(false);
+                        thumbDown.setSelected(false);
+
+                    }else{
+                        view.setSelected(true);
+
                         thumbDown.setSelected(false);
                     }
+                    liked(tagModel,view.isSelected());
                 }
             });
             thumbDown.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    int count = 6;
-                    if (view.isSelected()) {
-                        dislikes.setText("123");
+
+                    if (view.isSelected() && !thumbUp.isSelected()) {
                         view.setSelected(false);
-                    } else {
-                        dislikes.setText("4324");
+
+
+                    } else if(!view.isSelected() && !thumbUp.isSelected()) {
+                        view.setSelected(true);
+                        thumbUp.setSelected(false);
+                    } else if(view.isSelected() && thumbUp.isSelected()){
+                        view.setSelected(false);
+                        thumbUp.setSelected(false);
+
+                    }else{
                         view.setSelected(true);
                         thumbUp.setSelected(false);
                     }
+                    disliked(tagModel,view.isSelected());
                 }
             });
 
@@ -157,6 +189,72 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     MyToolBox.convertDptoPixel(16f, parentView.getContext()), 0);
 
         }
+
+        public void liked(TagModel tagModel, final Boolean selected){
+            final DocumentReference sfDocRef = db.collection(COLLECTION_PARENT_NODE).document(tagModel.getQuestionId()).collection(tagModel.getQuestionId())
+                    .document(tagModel.getTagId());
+            db.runTransaction(new Transaction.Function<Void>() {
+                @Nullable
+                @Override
+                public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
+                    DocumentSnapshot snapshot = transaction.get(sfDocRef);
+                    Long count = snapshot.getLong("likes") ==null ? 0 :snapshot.getLong("likes");
+                    if(selected){
+                        count++;
+                    }else{
+                        count  = (count -1) <0 ? 0 :snapshot.getLong("likes") -1;
+                    }
+
+                    transaction.update(sfDocRef, "likes", count);
+                    return null;
+                }
+            }).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Toast.makeText(activity, "Liked", Toast.LENGTH_SHORT).show();
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(activity, "Failed" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        }
+
+        public void disliked(TagModel tagModel, final Boolean selected){
+            final DocumentReference sfDocRef = db.collection(COLLECTION_PARENT_NODE).document(tagModel.getQuestionId()).collection(tagModel.getQuestionId())
+                    .document(tagModel.getTagId());
+            db.runTransaction(new Transaction.Function<Void>() {
+                @Nullable
+                @Override
+                public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
+                    DocumentSnapshot snapshot = transaction.get(sfDocRef);
+                    Long count = snapshot.getLong("dislikes") ==null ? 0 :snapshot.getLong("dislikes");
+                    if(selected){
+                        count++;
+                    }else{
+                        count  = (count -1) <0 ? 0 :snapshot.getLong("dislikes") -1;
+                    }
+
+                    transaction.update(sfDocRef, "dislikes", count);
+                    return null;
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(activity, "Failed" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Toast.makeText(activity, "Disliked", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        }
+
 
 
     }
