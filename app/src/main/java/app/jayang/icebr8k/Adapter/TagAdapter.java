@@ -16,6 +16,8 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -23,6 +25,8 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Transaction;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import app.jayang.icebr8k.Model.TagModel;
 import app.jayang.icebr8k.R;
@@ -37,7 +41,7 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final String COLLECTION_PARENT_NODE = "Tags";
-    private final String COLLECTION_TAG_LIKED = "TagsLiked";
+    private final String SUB_COLLECTION_TAG_LIKED = "TagLiked";
 
     public TagAdapter(ArrayList<TagModel> tagModels, Activity activity) {
         this.tagModels = tagModels;
@@ -191,13 +195,17 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         public void liked(TagModel tagModel, final Boolean selected){
-            final DocumentReference sfDocRef = db.collection(COLLECTION_PARENT_NODE).document(tagModel.getQuestionId()).collection(tagModel.getQuestionId())
+            final DocumentReference likedDocRef = db.collection(COLLECTION_PARENT_NODE).document(tagModel.getQuestionId()).collection(tagModel.getQuestionId())
                     .document(tagModel.getTagId());
+            final CollectionReference likedColRef = db.collection(COLLECTION_PARENT_NODE).document(tagModel.getQuestionId()).collection(tagModel.getQuestionId())
+                    .document(tagModel.getTagId()).collection(SUB_COLLECTION_TAG_LIKED);
+            final Map<String ,Boolean> map = new HashMap<>();
+            map.put("liked",true);
             db.runTransaction(new Transaction.Function<Void>() {
                 @Nullable
                 @Override
                 public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
-                    DocumentSnapshot snapshot = transaction.get(sfDocRef);
+                    DocumentSnapshot snapshot = transaction.get(likedDocRef);
                     Long count = snapshot.getLong("likes") ==null ? 0 :snapshot.getLong("likes");
                     if(selected){
                         count++;
@@ -205,7 +213,7 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         count  = (count -1) <0 ? 0 :snapshot.getLong("likes") -1;
                     }
 
-                    transaction.update(sfDocRef, "likes", count);
+                    transaction.update(likedDocRef, "likes", count);
                     return null;
                 }
             }).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -220,6 +228,13 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     Toast.makeText(activity, "Failed" + e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
+
+            if(selected){
+                likedColRef.document(FirebaseAuth.getInstance().getCurrentUser().getUid()).set(map);
+            }else{
+                likedColRef.document(FirebaseAuth.getInstance().getCurrentUser().getUid()).delete();
+            }
+
 
         }
 
