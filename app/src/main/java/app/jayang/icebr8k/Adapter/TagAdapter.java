@@ -14,14 +14,17 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Transaction;
 
 import java.util.ArrayList;
@@ -35,13 +38,12 @@ import app.jayang.icebr8k.Utility.MyToolBox;
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
 public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    ArrayList<TagModel> tagModels;
-    Activity activity;
-    final int EMPTY_VH = 0,TAG_VH =1;
-
+    final int EMPTY_VH = 0, TAG_VH = 1;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final String COLLECTION_PARENT_NODE = "Tags";
     private final String SUB_COLLECTION_TAG_LIKED = "TagLiked";
+    ArrayList<TagModel> tagModels;
+    Activity activity;
 
     public TagAdapter(ArrayList<TagModel> tagModels, Activity activity) {
         this.tagModels = tagModels;
@@ -52,10 +54,10 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view;
-        if(viewType == EMPTY_VH){
+        if (viewType == EMPTY_VH) {
             view = LayoutInflater.from(activity).inflate(R.layout.item_empty_placeholder, parent, false);
-            return  new EmptyViewHolder(view);
-        }else {
+            return new EmptyViewHolder(view);
+        } else {
             view = LayoutInflater.from(activity).inflate(R.layout.item_tag, parent, false);
             return new TagViewHolder(view);
         }
@@ -64,15 +66,15 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public int getItemViewType(int position) {
         TagModel tagModel = tagModels.get(position);
-        return tagModel.getTagtxt()==null ?
-                EMPTY_VH:
+        return tagModel.getTagtxt() == null ?
+                EMPTY_VH :
                 TAG_VH;
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         TagModel tagModel = tagModels.get(position);
-        if(holder instanceof TagViewHolder){
+        if (holder instanceof TagViewHolder) {
             ((TagViewHolder) holder).bindView(tagModel);
         }
     }
@@ -97,95 +99,110 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         public TagViewHolder(View itemView) {
             super(itemView);
 
-                tagName = itemView.findViewById(R.id.tag_txt);
-                container = itemView.findViewById(R.id.tag_container);
-                // Initialize a new instance of LayoutInflater service
+            tagName = itemView.findViewById(R.id.tag_txt);
+            container = itemView.findViewById(R.id.tag_container);
+            // Initialize a new instance of LayoutInflater service
 
-                LayoutInflater inflater = (LayoutInflater) activity.getSystemService(LAYOUT_INFLATER_SERVICE);
+            LayoutInflater inflater = (LayoutInflater) activity.getSystemService(LAYOUT_INFLATER_SERVICE);
 
-                // Inflate the custom layout/view
-                customView = inflater.inflate(R.layout.tag_popup, null);
-                thumbUp = customView.findViewById(R.id.tag_thumbup);
-                thumbDown = customView.findViewById(R.id.tag_thumbdown);
-                likes = customView.findViewById(R.id.tag_likes);
-                dislikes = customView.findViewById(R.id.tag_dislikes);
+            // Inflate the custom layout/view
+            customView = inflater.inflate(R.layout.tag_popup, null);
+            thumbUp = customView.findViewById(R.id.tag_thumbup);
+            thumbDown = customView.findViewById(R.id.tag_thumbdown);
+            likes = customView.findViewById(R.id.tag_likes);
+            dislikes = customView.findViewById(R.id.tag_dislikes);
 
-                mPopupWindow = new PopupWindow(
-                        customView,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT);
+            mPopupWindow = new PopupWindow(
+                    customView,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
 
-                container.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if(getAdapterPosition()!=RecyclerView.NO_POSITION){
-                            TagModel tagModel = tagModels.get(getAdapterPosition());
-                            showPopup(view,tagModel);
-                        }
-
-
-
-
-
+            container.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (getAdapterPosition() != RecyclerView.NO_POSITION) {
+                        TagModel tagModel = tagModels.get(getAdapterPosition());
+                        showPopup(view, tagModel);
                     }
-                });
+
+
+                }
+            });
 
         }
 
         private void bindView(TagModel tagModel) {
             tagName.setText(tagModel.getTagtxt());
+            final DocumentReference sublikedDocRef = db.collection(COLLECTION_PARENT_NODE).document(tagModel.getQuestionId()).collection(tagModel.getQuestionId())
+                    .document(tagModel.getTagId()).collection(SUB_COLLECTION_TAG_LIKED).document(FirebaseAuth.getInstance().getCurrentUser().getUid());
+            sublikedDocRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot documentSnapshot = task.getResult();
+                        if (documentSnapshot.exists()) {
+                            boolean selected = documentSnapshot.getBoolean("liked");
+                            thumbUp.setSelected(selected);
+                            thumbDown.setSelected(!selected);
+                        }
+                    }
+                }
+            });
+
         }
 
         private void showPopup(View parentView, final TagModel tagModel) {
-
-           final Long likeCount = tagModel.getLikes()== null ? 0 :tagModel.getLikes();
-           final Long dislikeCount = tagModel.getLikes()== null ? 0 :tagModel.getLikes();
             mPopupWindow.setBackgroundDrawable(new ColorDrawable());
             mPopupWindow.setOutsideTouchable(true);
-            likes.setText(String.valueOf(tagModel.getLikes() == null ? 0 : tagModel.getLikes())  );
-            dislikes.setText(String.valueOf(tagModel.getDislikes() == null ? 0 : tagModel.getDislikes()) );
-
+            likes.setText(String.valueOf(tagModel.getLikes() == null ? 0 : tagModel.getLikes()));
+            dislikes.setText(String.valueOf(tagModel.getDislikes() == null ? 0 : tagModel.getDislikes()));
             thumbUp.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (view.isSelected() && !thumbDown.isSelected()) {
-                        view.setSelected(false);
-                    } else if(!view.isSelected() && !thumbDown.isSelected()) {
-                        view.setSelected(true);
+                    Integer likedCount = Integer.valueOf(likes.getText().toString());
+                    Integer dislikedCount = Integer.valueOf(dislikes.getText().toString());
 
+                    // check thumbDown is selected or not
+                    if (thumbDown.isSelected()) {
                         thumbDown.setSelected(false);
-                    } else if(view.isSelected() && thumbDown.isSelected()){
-                        view.setSelected(false);
-                        thumbDown.setSelected(false);
-
-                    }else{
-                        view.setSelected(true);
-
-                        thumbDown.setSelected(false);
+                        disliked(tagModel, false);
+                        dislikes.setText(String.valueOf(--dislikedCount < 0 ? 0 : dislikedCount));
                     }
-                    liked(tagModel,view.isSelected());
+
+                    if (thumbUp.isSelected()) {
+                        thumbUp.setSelected(false);
+                        likes.setText(String.valueOf(--likedCount < 0 ? 0 : likedCount));
+                    } else {
+                        thumbUp.setSelected(true);
+                        likes.setText(String.valueOf(++likedCount));
+
+                    }
+
+
+                    liked(tagModel, view.isSelected());
                 }
             });
             thumbDown.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
-                    if (view.isSelected() && !thumbUp.isSelected()) {
-                        view.setSelected(false);
-
-
-                    } else if(!view.isSelected() && !thumbUp.isSelected()) {
-                        view.setSelected(true);
+                    Integer likedCount = Integer.valueOf(likes.getText().toString());
+                    Integer dislikedCount = Integer.valueOf(dislikes.getText().toString());
+                    // check thumbUp is selected or not
+                    if (thumbUp.isSelected()) {
                         thumbUp.setSelected(false);
-                    } else if(view.isSelected() && thumbUp.isSelected()){
-                        view.setSelected(false);
-                        thumbUp.setSelected(false);
-
-                    }else{
-                        view.setSelected(true);
-                        thumbUp.setSelected(false);
+                        likes.setText(String.valueOf(--likedCount < 0 ? 0 : likedCount));
+                        liked(tagModel, false);
                     }
-                    disliked(tagModel,view.isSelected());
+
+                    if (thumbDown.isSelected()) {
+                        thumbDown.setSelected(false);
+                        dislikes.setText(String.valueOf(--dislikedCount < 0 ? 0 : dislikedCount));
+                    } else {
+                        thumbDown.setSelected(true);
+                        dislikes.setText(String.valueOf(++dislikedCount));
+
+                    }
+                    disliked(tagModel, view.isSelected());
                 }
             });
 
@@ -194,23 +211,23 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         }
 
-        public void liked(TagModel tagModel, final Boolean selected){
+        public void liked(TagModel tagModel, final Boolean selected) {
             final DocumentReference likedDocRef = db.collection(COLLECTION_PARENT_NODE).document(tagModel.getQuestionId()).collection(tagModel.getQuestionId())
                     .document(tagModel.getTagId());
             final CollectionReference likedColRef = db.collection(COLLECTION_PARENT_NODE).document(tagModel.getQuestionId()).collection(tagModel.getQuestionId())
                     .document(tagModel.getTagId()).collection(SUB_COLLECTION_TAG_LIKED);
-            final Map<String ,Boolean> map = new HashMap<>();
-            map.put("liked",true);
+            final Map<String, Boolean> map = new HashMap<>();
+            map.put("liked", true);
             db.runTransaction(new Transaction.Function<Void>() {
                 @Nullable
                 @Override
                 public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
                     DocumentSnapshot snapshot = transaction.get(likedDocRef);
-                    Long count = snapshot.getLong("likes") ==null ? 0 :snapshot.getLong("likes");
-                    if(selected){
+                    Long count = snapshot.getLong("likes") == null ? 0 : snapshot.getLong("likes");
+                    if (selected) {
                         count++;
-                    }else{
-                        count  = (count -1) <0 ? 0 :snapshot.getLong("likes") -1;
+                    } else {
+                        count = (count - 1) < 0 ? 0 : snapshot.getLong("likes") - 1;
                     }
 
                     transaction.update(likedDocRef, "likes", count);
@@ -219,7 +236,10 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }).addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
-                    Toast.makeText(activity, "Liked", Toast.LENGTH_SHORT).show();
+                    if (selected) {
+                        Toast.makeText(activity, "Liked", Toast.LENGTH_SHORT).show();
+                    }
+
 
                 }
             }).addOnFailureListener(new OnFailureListener() {
@@ -229,28 +249,31 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 }
             });
 
-            if(selected){
+            if (selected) {
                 likedColRef.document(FirebaseAuth.getInstance().getCurrentUser().getUid()).set(map);
-            }else{
+            } else {
                 likedColRef.document(FirebaseAuth.getInstance().getCurrentUser().getUid()).delete();
             }
-
-
         }
 
-        public void disliked(TagModel tagModel, final Boolean selected){
+        public void disliked(TagModel tagModel, final Boolean selected) {
             final DocumentReference sfDocRef = db.collection(COLLECTION_PARENT_NODE).document(tagModel.getQuestionId()).collection(tagModel.getQuestionId())
                     .document(tagModel.getTagId());
+            final CollectionReference disliiedColRef = db.collection(COLLECTION_PARENT_NODE).document(tagModel.getQuestionId()).collection(tagModel.getQuestionId())
+                    .document(tagModel.getTagId()).collection(SUB_COLLECTION_TAG_LIKED);
+            final Map<String, Boolean> map = new HashMap<>();
+            map.put("liked", false);
             db.runTransaction(new Transaction.Function<Void>() {
                 @Nullable
                 @Override
                 public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
                     DocumentSnapshot snapshot = transaction.get(sfDocRef);
-                    Long count = snapshot.getLong("dislikes") ==null ? 0 :snapshot.getLong("dislikes");
-                    if(selected){
+                    Long count = snapshot.getLong("dislikes") == null ? 0 : snapshot.getLong("dislikes");
+                    if (selected) {
                         count++;
-                    }else{
-                        count  = (count -1) <0 ? 0 :snapshot.getLong("dislikes") -1;
+                    } else {
+                        count = (count - 1) < 0 ? 0 : snapshot.getLong("dislikes") - 1;
+
                     }
 
                     transaction.update(sfDocRef, "dislikes", count);
@@ -264,12 +287,19 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }).addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
-                    Toast.makeText(activity, "Disliked", Toast.LENGTH_SHORT).show();
+                    if (selected) {
+                        Toast.makeText(activity, "Disliked", Toast.LENGTH_SHORT).show();
+                    }
+
                 }
             });
 
+            if (selected) {
+                disliiedColRef.document(FirebaseAuth.getInstance().getCurrentUser().getUid()).set(map);
+            } else {
+                disliiedColRef.document(FirebaseAuth.getInstance().getCurrentUser().getUid()).delete();
+            }
         }
-
 
 
     }

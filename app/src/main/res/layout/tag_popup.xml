@@ -15,7 +15,7 @@
         android:id="@+id/tag_likes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
+        android:layout_marginLeft="6dp"
         android:text="6" />
 
     <ImageView
@@ -29,7 +29,15 @@
         android:id="@+id/tag_dislikes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
+        android:layout_marginLeft="6dp"
         android:text="8" />
+    <ImageView
+        android:id="@+id/tag_report"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginLeft="8dp"
+        android:src="@drawable/ic_action_report" />
+
+
 
 </LinearLayout>

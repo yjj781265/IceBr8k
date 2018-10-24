@@ -7,6 +7,7 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
@@ -39,7 +40,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.xw.repo.BubbleSeekBar;
 
 import java.util.ArrayList;
@@ -83,9 +89,11 @@ public class QuestionActivity extends SwipeBackActivity {
     private String questionId;
     private TagFragment tagFragment;
     private FloatingActionButton mActionButton;
+    private CollectionReference  mCollectionReference;
     private ValueEventListener skipListener;
     private DatabaseReference commentRef, question8Ref;
     private ValueEventListener commentRefListener, isScListener, isMcListener, isSpListener;
+    private ListenerRegistration tagCountListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,6 +145,8 @@ public class QuestionActivity extends SwipeBackActivity {
 
         questionId = getIntent().getExtras().getString("questionId", null);
         if (questionId != null) {
+            mCollectionReference = FirebaseFirestore.getInstance().collection("Tags").document(questionId)
+                    .collection(questionId);
             question8Ref = FirebaseDatabase.getInstance().getReference("Questions_8")
                     .child(questionId);
             getCommentCounts();
@@ -190,6 +200,27 @@ public class QuestionActivity extends SwipeBackActivity {
             mIntent.putExtra("commentId", commentId);
             startActivity(mIntent);
         }
+
+        mCollectionReference = FirebaseFirestore.getInstance().collection("Tags").document(questionId)
+                .collection(questionId);
+
+
+
+     tagCountListener =  mCollectionReference.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    return;
+                }
+
+                if (queryDocumentSnapshots != null && queryDocumentSnapshots.size()>0 ) {
+                            mLayout.getTabAt(TAGS_TAB).setText("Tags (" +queryDocumentSnapshots.size()
+                             +")");
+                } else {
+                    mLayout.getTabAt(TAGS_TAB).setText("Tags");
+                }
+            }
+        });
 
 
         //if user has answered question the btn will be reset , else will be confirm
@@ -836,6 +867,7 @@ public class QuestionActivity extends SwipeBackActivity {
             question8Ref.removeEventListener(isMcListener);
             question8Ref.removeEventListener(isSpListener);
             question8Ref.removeEventListener(isScListener);
+            tagCountListener.remove();
         } catch (NullPointerException e) {
             Log.d("Question123", e.getMessage());
         }

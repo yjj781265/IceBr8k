@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -40,7 +42,8 @@ public class TagFragment extends android.support.v4.app.Fragment {
     private TextView tag;
     private View view;
     private CollectionReference mCollectionReference;
-
+    private ListenerRegistration mRegistration;
+    private final TagModel emptyTagModel = new TagModel(null,"1","1");
 
     public TagFragment() {
         // Required empty public constructor
@@ -91,8 +94,9 @@ public class TagFragment extends android.support.v4.app.Fragment {
 
 
     private void getData() {
+        tagModels.add(0,emptyTagModel);
         if (mCollectionReference != null) {
-            mCollectionReference.addSnapshotListener(new EventListener<QuerySnapshot>() {
+        mRegistration  = mCollectionReference.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
                 public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots,
                                     @Nullable FirebaseFirestoreException e) {
@@ -104,7 +108,7 @@ public class TagFragment extends android.support.v4.app.Fragment {
                         for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
                             TagModel tagModel = document.toObject(TagModel.class);
                             if (!tagModels.contains(tagModel)) {
-                                tagModels.add(tagModel);
+                                tagModels.add(0,tagModel);
                                 adapter.notifyDataSetChanged();
                             }else{
                                 tagModels.set(tagModels.indexOf(tagModel),tagModel);
@@ -117,7 +121,16 @@ public class TagFragment extends android.support.v4.app.Fragment {
             });
 
         }
+
     }
 
-
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        try {
+            mRegistration.remove();
+        } catch (NullPointerException e) {
+            Log.d("TagFragment123", e.getMessage());
+        }
+    }
 }

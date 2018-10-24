@@ -23,7 +23,7 @@
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/content/ic_add_black_24dp.xml" />
+                                                <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/content/ic_report_black_24dp.xml" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -34,7 +34,7 @@
                                   <option name="values">
                                     <map>
                                       <entry key="imageAsset" value="C:\Users\yjj781265\Pictures\Tab Icon IceBr8k\peoplenearby.png" />
-                                      <entry key="outputName" value="ic_action_add_dark" />
+                                      <entry key="outputName" value="ic_action_report" />
                                       <entry key="themeColor" value="d3d3d3" />
                                     </map>
                                   </option>

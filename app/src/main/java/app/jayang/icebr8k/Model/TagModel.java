@@ -4,10 +4,9 @@ import java.util.Objects;
 import java.util.Set;
 
 public class TagModel {
-    private String tagtxt, tagId, authorId, questionId;
+    private String tagtxt=null, tagId, authorId, questionId;
     private Long timestamp;
     private Long likes, dislikes;
-    private Set<String> liked, disliked;
     private String stats;
 
     public TagModel() {
@@ -24,6 +23,12 @@ public class TagModel {
         this.stats = stats;
     }
 
+    public TagModel(String tagtxt, String tagId, String questionId) {
+        this.tagtxt = tagtxt;
+        this.tagId = tagId;
+        this.questionId = questionId;
+    }
+
     public String getTagtxt() {
         return tagtxt;
     }
@@ -32,21 +37,6 @@ public class TagModel {
         this.tagtxt = tagtxt;
     }
 
-    public Set<String> getLiked() {
-        return liked;
-    }
-
-    public void setLiked(Set<String> liked) {
-        this.liked = liked;
-    }
-
-    public Set<String> getDisliked() {
-        return disliked;
-    }
-
-    public void setDisliked(Set<String> disliked) {
-        this.disliked = disliked;
-    }
 
     public String getStats() {
         return stats;
