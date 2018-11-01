@@ -31,5 +31,12 @@
     <color name="black">#000000</color>
     <color name="trasnlucentBlack">#7e000000</color>
 
+    <!-- TAG colors -->
+    <color name="tag_very_positive">#006400</color>
+    <color name="tag_little_positive">#228B22</color>
+    <color name="tag_neutral">@color/colorPrimary</color>
+    <color name="tag_light_red">#FF6666</color>
+    <color name="tag_dark_red">@color/darkRed</color>
+
 
 </resources>

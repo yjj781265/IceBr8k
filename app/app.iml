@@ -97,7 +97,6 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/incremental-verifier" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/instant-run-apk" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/instant-run-main-apk-res" />
-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/instant-run-resources" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/javaPrecompile" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/jniLibs" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/manifest-checker" />
@@ -150,8 +149,8 @@
     <orderEntry type="library" name="Gradle: com.squareup.leakcanary:leakcanary-analyzer-1.6.1" level="project" />
     <orderEntry type="library" name="Gradle: com.google.android.gms:play-services-tasks-15.0.1" level="project" />
     <orderEntry type="library" name="Gradle: com.xw.repo:bubbleseekbar-3.13-lite" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.google.firebase:firebase-messaging-12.0.1" level="project" />
     <orderEntry type="library" name="Gradle: com.android.support:gridlayout-v7-27.1.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Gradle: com.google.firebase:firebase-messaging-12.0.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: net.sf.kxml:kxml2:2.3.0@jar" level="project" />
     <orderEntry type="library" name="Gradle: android.arch.lifecycle:runtime-1.1.0" level="project" />
     <orderEntry type="library" name="Gradle: com.google.firebase:firebase-analytics-15.0.2" level="project" />
@@ -224,8 +223,8 @@
     <orderEntry type="library" name="Gradle: com.google.android.gms:play-services-base-15.0.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: com.android.support.test.espresso:espresso-intents-3.0.1" level="project" />
     <orderEntry type="library" name="Gradle: com.mikepenz:fastadapter-extensions-expandable-3.2.7" level="project" />
-    <orderEntry type="library" name="Gradle: com.onesignal:OneSignal-3.10.1" level="project" />
     <orderEntry type="library" name="Gradle: com.github.LuckSiege.PictureSelector:picture_library-v2.2.3" level="project" />
+    <orderEntry type="library" name="Gradle: com.onesignal:OneSignal-3.10.2" level="project" />
     <orderEntry type="library" name="Gradle: com.google.android.gms:play-services-gcm-15.0.0" level="project" />
     <orderEntry type="library" name="Gradle: com.google.firebase:firebase-iid-15.1.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: com.android.support.test.espresso:espresso-core-3.0.1" level="project" />
@@ -245,8 +244,8 @@
     <orderEntry type="library" name="Gradle: android.arch.core:common:1.1.0@jar" level="project" />
     <orderEntry type="library" name="Gradle: com.mikepenz:fastadapter-commons-3.2.7" level="project" />
     <orderEntry type="library" name="Gradle: com.squareup.haha:haha:2.0.4@jar" level="project" />
-    <orderEntry type="library" name="Gradle: com.android.support:support-v13-27.1.1" level="project" />
     <orderEntry type="library" name="Gradle: com.google.firebase:firebase-measurement-connector-impl-15.0.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.android.support:support-v13-27.1.1" level="project" />
     <orderEntry type="library" name="Gradle: com.daimajia.androidanimations:library-2.3" level="project" />
   </component>
 </module>

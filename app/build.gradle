@@ -47,9 +47,10 @@ android {
 }
 
 dependencies {
+
     implementation 'com.google.firebase:firebase-firestore:15.0.0'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.github.d-max:spots-dialog:0.7@aar'
+    api 'com.github.d-max:spots-dialog:0.7@aar'
     implementation 'com.android.support:support-v4:27.1.1'
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:support-v13:27.1.1'
@@ -90,21 +91,21 @@ dependencies {
 
     annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
     implementation 'com.github.lzyzsd:circleprogress:1.2.1'
-    compile 'com.github.javiersantos:MaterialStyledDialogs:2.1'
-    compile 'com.github.drawers:SpinnerDatePicker:1.0.6'
+    api 'com.github.javiersantos:MaterialStyledDialogs:2.1'
+    api 'com.github.drawers:SpinnerDatePicker:1.0.6'
 
     implementation 'com.github.faruktoptas:FancyShowCaseView:1.0.1'
     implementation 'com.android.support:recyclerview-v7:27.1.1'
     implementation 'com.android.support:gridlayout-v7:27.1.1'
     implementation 'com.android.support:cardview-v7:27.1.1'
-    compile 'com.simplecityapps:recyclerview-fastscroll:1.0.16'
+    api 'com.simplecityapps:recyclerview-fastscroll:1.0.16'
     implementation 'com.android.support:support-compat:27.1.1'
     implementation 'com.daimajia.easing:library:2.0@aar'
     implementation 'com.daimajia.androidanimations:library:2.3@aar'
-    compile 'me.grantland:autofittextview:0.2.+'
+    api 'me.grantland:autofittextview:0.2.+'
     testImplementation 'junit:junit:4.12'
 
-    compile 'cat.ereza:customactivityoncrash:2.1.0'
+    api 'cat.ereza:customactivityoncrash:2.1.0'
     implementation 'com.onesignal:OneSignal:[3.9.0, 3.99.99]'
 
     // request permission
@@ -116,28 +117,27 @@ dependencies {
     implementation 'id.zelory:compressor:2.1.0'
     implementation 'com.github.siyamed:android-shape-imageview:0.9.+@aar'
     implementation 'com.aurelhubert:ahbottomnavigation:2.1.0'
-    compile 'pl.droidsonroids.gif:android-gif-drawable:1.2.9'
+    api 'pl.droidsonroids.gif:android-gif-drawable:1.2.9'
     implementation 'com.zplesac:connectionbuddy:2.0.0-beta1'
-    compile 'com.github.SumiMakito:AwesomeQRCode:1.0.6'
-    compile 'com.github.chrisbanes:PhotoView:2.1.3'
-    compile 'com.xw.repo:bubbleseekbar:3.13-lite'
-    compile 'com.github.wrdlbrnft:sorted-list-adapter:0.2.0.1'
-    compile 'me.imid.swipebacklayout.lib:library:1.1.0'
-    compile 'us.belka:androidtoggleswitch:1.2.2'
-    compile 'com.firebase:geofire-android:2.2.0'
-    compile 'com.google.maps.android:android-maps-utils:0.5+'
-    compile 'com.github.silvestrpredko:dot-progress-bar:1.1'
+    api 'com.github.SumiMakito:AwesomeQRCode:1.0.6'
+    api 'com.github.chrisbanes:PhotoView:2.1.3'
+    api 'com.xw.repo:bubbleseekbar:3.13-lite'
+    api 'com.github.wrdlbrnft:sorted-list-adapter:0.2.0.1'
+    api 'me.imid.swipebacklayout.lib:library:1.1.0'
+    api 'us.belka:androidtoggleswitch:1.2.2'
+    api 'com.firebase:geofire-android:2.2.0'
+    api 'com.google.maps.android:android-maps-utils:0.5+'
+    api 'com.github.silvestrpredko:dot-progress-bar:1.1'
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
 
 
 
-    compile 'com.github.dmytrodanylyk.android-process-button:library:1.0.4'
+    api 'com.github.dmytrodanylyk.android-process-button:library:1.0.4'
 
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-intents:3.0.1'
     androidTestImplementation 'com.android.support.test:rules:1.0.1'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
-
 
 }
 

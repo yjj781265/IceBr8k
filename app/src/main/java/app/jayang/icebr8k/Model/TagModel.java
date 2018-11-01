@@ -1,12 +1,15 @@
 package app.jayang.icebr8k.Model;
 
+import android.support.annotation.NonNull;
+
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
 
-public class TagModel {
-    private String tagtxt=null, tagId, authorId, questionId;
+public class TagModel implements Comparable<TagModel> {
+    private String tagtxt = null, tagId, authorId, questionId;
     private Long timestamp;
-    private Long likes, dislikes;
+    private Long likes = 0L, dislikes = 0L;
     private String stats;
 
     public TagModel() {
@@ -107,6 +110,21 @@ public class TagModel {
     public int hashCode() {
 
         return Objects.hash(tagId, questionId);
+    }
+
+    @Override
+    public int compareTo(@NonNull TagModel tagModel) {
+        likes = likes == null ? 0 : likes;
+        dislikes = dislikes == null ? 0 : dislikes;
+        if (tagModel.getLikes() == null) {
+            tagModel.setLikes(0L);
+        }
+        if (tagModel.getDislikes() == null) {
+            tagModel.setDislikes(0L);
+        }
+        Long total = likes +dislikes;
+        Long total2 = tagModel.getLikes() + tagModel.getDislikes();
+        return total.compareTo(total2);
     }
 }
 

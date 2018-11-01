@@ -1,7 +1,6 @@
 package app.jayang.icebr8k.Adapter;
 
 import android.app.Activity;
-import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
@@ -24,7 +23,6 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Transaction;
 
 import java.util.ArrayList;
@@ -74,8 +72,40 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         TagModel tagModel = tagModels.get(position);
+
         if (holder instanceof TagViewHolder) {
             ((TagViewHolder) holder).bindView(tagModel);
+            FrameLayout container = ((TagViewHolder) holder).container;
+            container.setTag(tagModel.getTagId());
+            Long likes = tagModel.getLikes() == null ? 0 : tagModel.getLikes();
+            Long dislikes = tagModel.getDislikes() == null ? 0 : tagModel.getDislikes();
+            Long total = likes + dislikes;
+            double percentage = 0;
+            if (total > 0) {
+                percentage = ((double) likes / (double) total) * 100;
+            }
+
+            if (container.getTag().equals(tagModel.getTagId())) {
+                if (percentage > 80) {
+                    // container.getBackground().setColorFilter(ContextCompat.getColor(activity,R.color.tag_very_positive),PorterDuff.Mode.SRC_ATOP);
+                    Toast.makeText(activity, tagModel.getTagId() + " dark green", Toast.LENGTH_SHORT).show();
+                } else if (percentage > 69 && percentage < 79) {
+                    //container.getBackground().setColorFilter(ContextCompat.getColor(activity,R.color.tag_little_positive),PorterDuff.Mode.SRC_ATOP);
+                    Toast.makeText(activity, tagModel.getTagId() + " light green", Toast.LENGTH_SHORT).show();
+                } else if (percentage > 40 && percentage < 59) {
+                    //container.getBackground().setColorFilter(ContextCompat.getColor(activity,R.color.tag_neutral),PorterDuff.Mode.SRC_ATOP);
+                    Toast.makeText(activity, tagModel.getTagId() + " blue", Toast.LENGTH_SHORT).show();
+                } else if (percentage > 25 && percentage < 39) {
+                    //container.getBackground().setColorFilter(ContextCompat.getColor(activity,R.color.tag_light_red),PorterDuff.Mode.SRC_ATOP);
+                    Toast.makeText(activity, tagModel.getTagId() + " red", Toast.LENGTH_SHORT).show();
+                } else if (percentage < 25 && percentage >= 0) {
+                    //container.getBackground().setColorFilter(ContextCompat.getColor(activity,R.color.tag_dark_red),PorterDuff.Mode.SRC_ATOP);
+                    Toast.makeText(activity, tagModel.getTagId() + " dark red", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+
+
         }
     }
 
@@ -124,8 +154,6 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         TagModel tagModel = tagModels.get(getAdapterPosition());
                         showPopup(view, tagModel);
                     }
-
-
                 }
             });
 
@@ -151,8 +179,8 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         }
 
+
         private void showPopup(View parentView, final TagModel tagModel) {
-            mPopupWindow.setBackgroundDrawable(new ColorDrawable());
             mPopupWindow.setOutsideTouchable(true);
             likes.setText(String.valueOf(tagModel.getLikes() == null ? 0 : tagModel.getLikes()));
             dislikes.setText(String.valueOf(tagModel.getDislikes() == null ? 0 : tagModel.getDislikes()));
@@ -229,7 +257,6 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     } else {
                         count = (count - 1) < 0 ? 0 : snapshot.getLong("likes") - 1;
                     }
-
                     transaction.update(likedDocRef, "likes", count);
                     return null;
                 }

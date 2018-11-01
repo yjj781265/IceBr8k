@@ -20,6 +20,7 @@ import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import app.jayang.icebr8k.Adapter.TagAdapter;
 import app.jayang.icebr8k.Model.TagModel;
@@ -94,7 +95,6 @@ public class TagFragment extends android.support.v4.app.Fragment {
 
 
     private void getData() {
-        tagModels.add(0,emptyTagModel);
         if (mCollectionReference != null) {
         mRegistration  = mCollectionReference.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
@@ -108,12 +108,19 @@ public class TagFragment extends android.support.v4.app.Fragment {
                         for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
                             TagModel tagModel = document.toObject(TagModel.class);
                             if (!tagModels.contains(tagModel)) {
-                                tagModels.add(0,tagModel);
+                                tagModels.add(tagModel);
                                 adapter.notifyDataSetChanged();
                             }else{
                                 tagModels.set(tagModels.indexOf(tagModel),tagModel);
                                 adapter.notifyItemChanged(tagModels.indexOf(tagModel));
                             }
+                        }
+                        Collections.sort(tagModels);
+                        if(!tagModels.contains(emptyTagModel)){
+                            tagModels.add(emptyTagModel);
+                        }else{
+                            tagModels.remove(emptyTagModel);
+                            tagModels.add(emptyTagModel);
                         }
 
                     }
