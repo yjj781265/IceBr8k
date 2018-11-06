@@ -3,6 +3,7 @@ package app.jayang.icebr8k.Fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -42,9 +43,10 @@ public class TagFragment extends android.support.v4.app.Fragment {
     private GridLayoutManager gridLayoutManager;
     private TextView tag;
     private View view;
+    private boolean firstTime = true;
     private CollectionReference mCollectionReference;
     private ListenerRegistration mRegistration;
-    private final TagModel emptyTagModel = new TagModel(null,"1","1");
+    private final TagModel emptyTagModel = new TagModel(null,"6666","1");
 
     public TagFragment() {
         // Required empty public constructor
@@ -83,10 +85,12 @@ public class TagFragment extends android.support.v4.app.Fragment {
         view = inflater.inflate(R.layout.fragment_tag, container, false);
         tag = view.findViewById(R.id.text_view);
         recyclerView = view.findViewById(R.id.tag_recyclerView);
-        recyclerView.setItemAnimator(null);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+
         gridLayoutManager = new GridLayoutManager(getContext(), 2,
                 GridLayoutManager.VERTICAL, false);
         adapter = new TagAdapter(tagModels, getActivity());
+        adapter.setHasStableIds(true);
         recyclerView.setLayoutManager(gridLayoutManager);
         recyclerView.setAdapter(adapter);
         getData();
@@ -108,22 +112,26 @@ public class TagFragment extends android.support.v4.app.Fragment {
                         for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
                             TagModel tagModel = document.toObject(TagModel.class);
                             if (!tagModels.contains(tagModel)) {
-                                tagModels.add(tagModel);
-                                adapter.notifyDataSetChanged();
+                                tagModels.add(0,tagModel);
+                                if(!firstTime){
+                                    Collections.sort(tagModels);
+                                    adapter.notifyDataSetChanged();
+                                }
                             }else{
                                 tagModels.set(tagModels.indexOf(tagModel),tagModel);
-                                adapter.notifyItemChanged(tagModels.indexOf(tagModel));
+                                Collections.sort(tagModels);
+                                adapter.notifyDataSetChanged();
                             }
                         }
-                        Collections.sort(tagModels);
-                        if(!tagModels.contains(emptyTagModel)){
-                            tagModels.add(emptyTagModel);
-                        }else{
-                            tagModels.remove(emptyTagModel);
-                            tagModels.add(emptyTagModel);
+                        if(firstTime){
+                            Collections.sort(tagModels);
+                            tagModels.add(tagModels.size(),emptyTagModel);
+                            adapter.notifyDataSetChanged();
+                            firstTime = false;
                         }
 
                     }
+
                 }
             });
 

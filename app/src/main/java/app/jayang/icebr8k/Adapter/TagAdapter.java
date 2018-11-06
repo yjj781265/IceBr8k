@@ -64,7 +64,7 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public int getItemViewType(int position) {
         TagModel tagModel = tagModels.get(position);
-        return tagModel.getTagtxt() == null ?
+        return tagModel.getTagId().equals("6666") ?
                 EMPTY_VH :
                 TAG_VH;
     }
@@ -72,46 +72,19 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         TagModel tagModel = tagModels.get(position);
-
         if (holder instanceof TagViewHolder) {
             ((TagViewHolder) holder).bindView(tagModel);
-            FrameLayout container = ((TagViewHolder) holder).container;
-            container.setTag(tagModel.getTagId());
-            Long likes = tagModel.getLikes() == null ? 0 : tagModel.getLikes();
-            Long dislikes = tagModel.getDislikes() == null ? 0 : tagModel.getDislikes();
-            Long total = likes + dislikes;
-            double percentage = 0;
-            if (total > 0) {
-                percentage = ((double) likes / (double) total) * 100;
-            }
-
-            if (container.getTag().equals(tagModel.getTagId())) {
-                if (percentage > 80) {
-                    // container.getBackground().setColorFilter(ContextCompat.getColor(activity,R.color.tag_very_positive),PorterDuff.Mode.SRC_ATOP);
-                    Toast.makeText(activity, tagModel.getTagId() + " dark green", Toast.LENGTH_SHORT).show();
-                } else if (percentage > 69 && percentage < 79) {
-                    //container.getBackground().setColorFilter(ContextCompat.getColor(activity,R.color.tag_little_positive),PorterDuff.Mode.SRC_ATOP);
-                    Toast.makeText(activity, tagModel.getTagId() + " light green", Toast.LENGTH_SHORT).show();
-                } else if (percentage > 40 && percentage < 59) {
-                    //container.getBackground().setColorFilter(ContextCompat.getColor(activity,R.color.tag_neutral),PorterDuff.Mode.SRC_ATOP);
-                    Toast.makeText(activity, tagModel.getTagId() + " blue", Toast.LENGTH_SHORT).show();
-                } else if (percentage > 25 && percentage < 39) {
-                    //container.getBackground().setColorFilter(ContextCompat.getColor(activity,R.color.tag_light_red),PorterDuff.Mode.SRC_ATOP);
-                    Toast.makeText(activity, tagModel.getTagId() + " red", Toast.LENGTH_SHORT).show();
-                } else if (percentage < 25 && percentage >= 0) {
-                    //container.getBackground().setColorFilter(ContextCompat.getColor(activity,R.color.tag_dark_red),PorterDuff.Mode.SRC_ATOP);
-                    Toast.makeText(activity, tagModel.getTagId() + " dark red", Toast.LENGTH_SHORT).show();
-                }
-
-            }
-
-
         }
     }
 
     @Override
     public int getItemCount() {
         return tagModels.size();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return tagModels.get(position).getTagId().hashCode();
     }
 
     class TagViewHolder extends RecyclerView.ViewHolder {
@@ -161,6 +134,37 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private void bindView(TagModel tagModel) {
             tagName.setText(tagModel.getTagtxt());
+            if(mPopupWindow!=null){
+                mPopupWindow.dismiss();
+            }
+            Long likes = tagModel.getLikes() == null ? 0 : tagModel.getLikes();
+            Long dislikes = tagModel.getDislikes() == null ? 0 : tagModel.getDislikes();
+            Long total = likes + dislikes;
+            double percentage;
+            if (total > 0) {
+                percentage = ((double) likes / (double) total) * 100;
+                if (percentage > 80) {
+                    container.setBackground(activity.getDrawable(R.drawable.tag_darkgreen));
+                } else if (percentage > 69 && percentage < 79) {
+                    container.setBackground(activity.getDrawable(R.drawable.tag_lightgreen));
+                } else if (percentage > 40 && percentage < 59) {
+                    container.setBackground(activity.getDrawable(R.drawable.tag_blue));
+                } else if (percentage > 25 && percentage < 39) {
+                    container.setBackground(activity.getDrawable(R.drawable.tag_lightred));
+                } else if (percentage < 25 && percentage >= 0) {
+                    container.setBackground(activity.getDrawable(R.drawable.tag_darkred));
+                }
+            }else{
+                container.setBackground(activity.getDrawable(R.drawable.tag_blue));
+            }
+
+
+
+
+        }
+
+
+        private void showPopup(View parentView, final TagModel tagModel) {
             final DocumentReference sublikedDocRef = db.collection(COLLECTION_PARENT_NODE).document(tagModel.getQuestionId()).collection(tagModel.getQuestionId())
                     .document(tagModel.getTagId()).collection(SUB_COLLECTION_TAG_LIKED).document(FirebaseAuth.getInstance().getCurrentUser().getUid());
             sublikedDocRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -176,11 +180,6 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     }
                 }
             });
-
-        }
-
-
-        private void showPopup(View parentView, final TagModel tagModel) {
             mPopupWindow.setOutsideTouchable(true);
             likes.setText(String.valueOf(tagModel.getLikes() == null ? 0 : tagModel.getLikes()));
             dislikes.setText(String.valueOf(tagModel.getDislikes() == null ? 0 : tagModel.getDislikes()));

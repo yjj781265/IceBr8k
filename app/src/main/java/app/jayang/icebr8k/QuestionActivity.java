@@ -317,7 +317,9 @@ public class QuestionActivity extends SwipeBackActivity {
             }
         });
     }
+    private void checkDuplicates(){
 
+    }
 
     @Override
     public boolean onSupportNavigateUp() {

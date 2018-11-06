@@ -114,6 +114,10 @@ public class TagModel implements Comparable<TagModel> {
 
     @Override
     public int compareTo(@NonNull TagModel tagModel) {
+        int result;
+        if(tagModel.getTagId().equals("6666") ||  tagId.equals("6666")){
+            return 0;
+        }
         likes = likes == null ? 0 : likes;
         dislikes = dislikes == null ? 0 : dislikes;
         if (tagModel.getLikes() == null) {
@@ -122,9 +126,13 @@ public class TagModel implements Comparable<TagModel> {
         if (tagModel.getDislikes() == null) {
             tagModel.setDislikes(0L);
         }
-        Long total = likes +dislikes;
-        Long total2 = tagModel.getLikes() + tagModel.getDislikes();
-        return total.compareTo(total2);
+        Long diff = likes -dislikes;
+        Long diff2 = tagModel.getLikes() - tagModel.getDislikes();
+        result = diff2.compareTo(diff);
+        if(result == 0){
+            return  tagtxt.compareTo(tagModel.getTagtxt());
+        }
+        return result;
     }
 }
 

@@ -7,8 +7,8 @@
 
 
     <path
-        android:name="tag_darkGreen"
-        android:fillColor="@color/darkGreen"
+        android:name="tag_lightgreen"
+        android:fillColor="@color/tag_little_positive"
         android:strokeLineJoin="round"
         android:strokeLineCap="round"
         android:pathData="M0,300 L100,0 L800,0 L800,600 L100,600 Z"   />
