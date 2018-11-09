@@ -1,11 +1,8 @@
 <component name="libraryTable">
   <library name="Gradle: com.zplesac:connectionbuddy-2.0.0-beta1">
-    <ANNOTATIONS>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/connectionbuddy-2.0.0-beta1.aar/bd33fde29062bce04a1690346a2cd497/annotations.zip!/" />
-    </ANNOTATIONS>
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/connectionbuddy-2.0.0-beta1.aar/bd33fde29062bce04a1690346a2cd497/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/connectionbuddy-2.0.0-beta1.aar/bd33fde29062bce04a1690346a2cd497/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/connectionbuddy-2.0.0-beta1.aar/2df3cb8609f21c3caa8bd1108fb9c7ca/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/connectionbuddy-2.0.0-beta1.aar/2df3cb8609f21c3caa8bd1108fb9c7ca/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

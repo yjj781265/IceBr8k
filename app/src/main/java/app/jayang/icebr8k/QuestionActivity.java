@@ -30,8 +30,10 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -41,10 +43,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.xw.repo.BubbleSeekBar;
 
@@ -64,6 +68,7 @@ import app.jayang.icebr8k.Utility.StringConstant;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 
 public class QuestionActivity extends SwipeBackActivity {
+    private static final String TAG = QuestionActivity.class.getSimpleName();
     private final int COMMENTS_TAB = 0,
             TAGS_TAB = 1, RESULTS_TAG = 2;
     private final long DAYS = 60 * 60 * 48 * 1000;  // 2 DAYS
@@ -276,6 +281,8 @@ public class QuestionActivity extends SwipeBackActivity {
             }
         };
         userQARef.child(questionId).addValueEventListener(skipListener);
+
+        checkDuplicate("fgcueagle");
     }
 
     private void showInputDialog() {
@@ -317,7 +324,20 @@ public class QuestionActivity extends SwipeBackActivity {
             }
         });
     }
-    private void checkDuplicates(){
+    private void checkDuplicate(final String text){
+      Query query=  db.collection(COLLECTION_PARENT_NODE).document(questionId).collection(questionId). whereEqualTo("tagtxt",text);
+     query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+         @Override
+         public void onComplete(@NonNull Task<QuerySnapshot> task) {
+             if (task.isSuccessful()) {
+                 // Document found in the offline cache
+                QuerySnapshot snapshots = task.getResult();
+                 Log.d(TAG, "Cached document data: " + snapshots.getDocuments().size());
+             } else {
+                 Log.d(TAG, "Cached get failed: ", task.getException());
+             }
+         }
+     });
 
     }
 
