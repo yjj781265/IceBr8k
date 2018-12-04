@@ -86,7 +86,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     private final int SP = 2;
     private final String FEEDBACK_STR = "fb";
     private final int FEEDBACK = 3;
-    private Boolean tutorialConfirm, tutorialPieChart, tutorialForward, tutorialComment, tutorialFab, tutorialSkip, tutorialWelcome;
+    private Boolean tutorialConfirm, tutorialPieChart,  tutorialComment,  tutorialSkip, tutorialWelcome;
 
     private final long DAYS = 60 * 60 * 48 * 1000;  // 2 DAYS
 
@@ -338,6 +338,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                     skip.setVisibility(View.GONE);
                     confirm.setVisibility(View.GONE);
                     mProgressBar.setVisibility(View.VISIBLE);
+                    mListener.onSkip(getAdapterPosition()!= RecyclerView.NO_POSITION ? getAdapterPosition():0);
                     mHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -433,7 +434,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
                 } else if (v == skip) {
 
-
+                    mListener.onSkip(getAdapterPosition()!= RecyclerView.NO_POSITION ? getAdapterPosition():0);
                     mHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -527,7 +528,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
                 } else if (v == skip) {
 
-
+                    mListener.onSkip(getAdapterPosition()!= RecyclerView.NO_POSITION ? getAdapterPosition():0);
                     mHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -1084,15 +1085,16 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                                                 .addPrompt(new MaterialTapTargetPrompt.Builder(mActivity)
                                                         .setTarget(confirm)
                                                         .setBackgroundColour(ContextCompat.getColor(mContext,R.color.colorPrimary))
-                                                        .setPrimaryText("Answer Question")
-                                                        .setSecondaryText("Click here to confirm your answer")
-                                                        .create(), 4000)
+                                                        .setPrimaryText(mContext.getString(R.string.tutorial_confirm_questions_title))
+                                                        .setSecondaryText(mContext.getString(R.string.tutorial_confirm_questions_content))
+                                                        .create(), 8000)
                                                 .addPrompt(new MaterialTapTargetPrompt.Builder(mActivity)
                                                         .setTarget(skip)
                                                         .setBackgroundColour(ContextCompat.getColor(mContext,R.color.colorPrimary))
-                                                        .setPrimaryText("Skip Answer")
-                                                        .setSecondaryText("Click here to skip the question you don't want to answer")
-                                                        .setAnimationInterpolator(new LinearOutSlowInInterpolator()))
+                                                        .setPrimaryText(mContext.getString(R.string.tutorial_skip_questions_title))
+                                                        .setSecondaryText(mContext.getString(R.string.tutorial_skip_questions_content))
+                                                        .setAnimationInterpolator(new LinearOutSlowInInterpolator())
+                                                .create(),8000)
                                                         .show();
 
                                         editor.putBoolean("tutorialConfirm", false);
@@ -1127,15 +1129,16 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                                 .addPrompt(new MaterialTapTargetPrompt.Builder(mActivity)
                                         .setTarget(comment)
                                         .setBackgroundColour(ContextCompat.getColor(mContext,R.color.colorPrimary))
-                                        .setPrimaryText("Discuss Time")
-                                        .setSecondaryText("Click here to add your comment or view other users' comments")
-                                        .create(), 10000)
+                                        .setPrimaryText(mContext.getString(R.string.tutorial_discuss_title))
+                                        .setSecondaryText(mContext.getString(R.string.tutorial_discuss_content))
+                                        .create(), 8000)
                                 .addPrompt(new MaterialTapTargetPrompt.Builder(mActivity)
                                         .setTarget(pieChart)
                                         .setBackgroundColour(ContextCompat.getColor(mContext,R.color.colorPrimary))
-                                        .setPrimaryText("Want to see how other users answered?")
-                                        .setSecondaryText("Click here to see the result")
-                                        .setAnimationInterpolator(new LinearOutSlowInInterpolator()))
+                                        .setPrimaryText(mContext.getString(R.string.tutorial_result_title))
+                                        .setSecondaryText(mContext.getString(R.string.tutorial_result_content))
+                                        .setAnimationInterpolator(new LinearOutSlowInInterpolator())
+                                .create(),8000)
                                 .show();
 
                         editor.putBoolean("tutorialComment", false);
@@ -1153,6 +1156,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     public interface SubmitedListener {
         void onClick(SurveyQ surveyQ, String Answer);
+        void onSkip(int position);
 
 
     }

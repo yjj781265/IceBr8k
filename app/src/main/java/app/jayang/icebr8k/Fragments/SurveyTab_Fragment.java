@@ -277,7 +277,7 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
                                 .setPromptStateChangeListener(SurveyTab_Fragment.this)
                                 .setPromptBackground(new DimmedPromptBackground())
                                 .setBackgroundColour(ContextCompat.getColor(getActivity(), R.color.colorPrimary))
-                                .setSecondaryText("When you finish answering this set of 8 questions, click here to load 8 new questions")
+                                .setSecondaryText(getString(R.string.tutorial_finish_first_8_questions))
                                 .show();
                         editor.putBoolean("fabTutorial", true);
                         editor.apply();
@@ -377,19 +377,7 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
                             mRecyclerView.setVisibility(View.VISIBLE);
                             surveyNav.setVisibility(View.VISIBLE);
                             fab.show();
-                          /*  mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                                @Override
-                                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                                    super.onScrollStateChanged(recyclerView, newState);
-                                    if(newState == RecyclerView.SCROLL_STATE_IDLE){
-                                        View centerView = snapHelper.findSnapView(mLayoutManager);
-                                        currentPosition = mLayoutManager.getPosition(centerView);
-                                        currentSurveyQ = mList.get(currentPosition);
-                                        btnAction(currentSurveyQ);
-                                    }
 
-                                }
-                            });*/
 
                           if(mRecyclerView.getLayoutManager() instanceof LinearLayoutManager) {
                                 final LinearLayoutManager linearLayoutManager = (LinearLayoutManager) mRecyclerView
@@ -404,6 +392,7 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
                                                 +"last Visiable"+ linearLayoutManager.findLastVisibleItemPosition());
                                         currentPosition = (linearLayoutManager.findFirstVisibleItemPosition()
                                                 + linearLayoutManager.findLastVisibleItemPosition())/2;
+                                        Log.d("Survey123", "onScrolled: "+currentPosition);
                                         currentSurveyQ = mList.get(currentPosition);
                                         btnAction(currentSurveyQ);
                                     }
@@ -470,21 +459,33 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
 
 
 
-
+    //callback from SubmitedListener
     @Override
     public void onClick(SurveyQ surveyQ, String answer) {
         // answered questions counter
         indicatorMap.put(surveyQ,answer);
         btnAction(surveyQ);
+        if("skipped".equals(answer) &&mList.indexOf(surveyQ)!=mList.size()){
+            int position = mList.indexOf(surveyQ);
+            mRecyclerView.smoothScrollToPosition(++position);
+        }
         annsweredCounter ++;
         if(annsweredCounter == mList.size()){
-            fabAnimation = YoYo.with(Techniques.Pulse).repeat(8).playOn(fab);
+            fabAnimation = YoYo.with(Techniques.Pulse).repeat(-1).playOn(fab);
         }else{
             if(fabAnimation!=null){
                 fabAnimation.stop();
             }
 
         }
+
+
+    }
+
+    //callback from SubmitedListener
+    @Override
+    public void onSkip(int position) {
+
 
     }
 

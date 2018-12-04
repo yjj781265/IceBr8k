@@ -1,12 +1,14 @@
 package app.jayang.icebr8k;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.design.widget.TabLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,6 +40,7 @@ import app.jayang.icebr8k.Utility.ActivityCommunicator;
 import app.jayang.icebr8k.Utility.Compatability;
 
 public class ResultActivity extends AppCompatActivity implements ActivityCommunicator {
+    private static final String TAG = "ResultActivity";
     TabLayout mLayout;
     ViewPager mViewPager;
     Toolbar mToolbar;
@@ -94,7 +97,6 @@ public class ResultActivity extends AppCompatActivity implements ActivityCommuni
             userQARef.addValueEventListener(userQAListener);
 
 
-
         }
 
         // init arraylist
@@ -120,6 +122,48 @@ public class ResultActivity extends AppCompatActivity implements ActivityCommuni
 
         mLayout.getTabAt(0).setIcon(R.drawable.check_mark);
         mLayout.getTabAt(1).setIcon(R.drawable.axe_mark);
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                Log.d(TAG, "onPageScrolled: " + position + " ," + positionOffset);
+                if (position == 0) {
+                    if (positionOffset > 0.1 && positionOffset <= 0.2) {
+                        mLayout.setSelectedTabIndicatorColor(ContextCompat.getColor(ResultActivity.this, R.color.tab_process_1));
+                    } else if (positionOffset > 0.2 && positionOffset <= 0.3) {
+                        mLayout.setSelectedTabIndicatorColor(ContextCompat.getColor(ResultActivity.this, R.color.tab_process_2));
+                    } else if (positionOffset > 0.3 && positionOffset <= 0.4) {
+                        mLayout.setSelectedTabIndicatorColor(ContextCompat.getColor(ResultActivity.this, R.color.tab_process_3));
+                    } else if (positionOffset > 0.4 && positionOffset <= 0.5) {
+                        mLayout.setSelectedTabIndicatorColor(ContextCompat.getColor(ResultActivity.this, R.color.tab_process_4));
+                    } else if (positionOffset > 0.6 && positionOffset <= 0.7) {
+                        mLayout.setSelectedTabIndicatorColor(ContextCompat.getColor(ResultActivity.this, R.color.tab_process_5));
+                    } else if (positionOffset > 0.7 && positionOffset <= 0.8) {
+                        mLayout.setSelectedTabIndicatorColor(ContextCompat.getColor(ResultActivity.this, R.color.tab_process_6));
+                    } else if (positionOffset > 0.9 && positionOffset <= 0.99) {
+                        mLayout.setSelectedTabIndicatorColor(ContextCompat.getColor(ResultActivity.this, R.color.tab_process_7));
+                    }
+                }
+
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                switch (position) {
+                    case 0:
+                        mLayout.setSelectedTabIndicatorColor(ContextCompat.getColor(ResultActivity.this, R.color.tab_check_mark));
+                        break;
+                    case 1:
+                        mLayout.setSelectedTabIndicatorColor(ContextCompat.getColor(ResultActivity.this, R.color.tab_axe));
+                        break;
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
 
         searchLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -158,7 +202,7 @@ public class ResultActivity extends AppCompatActivity implements ActivityCommuni
         lastClickTime = SystemClock.elapsedRealtime();
 
         if (id == R.id.mybutton) {
-            Intent mIntent = new Intent(getBaseContext(), UserChatActvity.class);
+            Intent mIntent = new Intent(ResultActivity.this, UserChatActvity.class);
             mIntent.putExtra("chatName", user2.getDisplayname());
             mIntent.putExtra("chatId", user2Id);
             startActivity(mIntent);

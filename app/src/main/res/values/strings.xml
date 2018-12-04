@@ -118,6 +118,16 @@ This Service does not use these “cookies” explicitly. However, the app may u
     <string name="tag_dialog_one_word_error">Tag can only be one word</string>
     <string name="tag_add_success">Tag Added</string>
     <string name="tag_add_failed">Adding Tag Failed</string>
+    <!-- tutorial Strings -->
+    <string name="tutorial_finish_first_8_questions">When you finish answering this set of 8 questions, click here to load 8 new questions.</string>
+    <string name="tutorial_skip_questions_title">Skip Question</string>
+    <string name="tutorial_skip_questions_content">Click here to skip the question you don\'t want to answer.</string>
+    <string name="tutorial_confirm_questions_title">Answer Question</string>
+    <string name="tutorial_confirm_questions_content">Click here to confirm your answer.</string>
+    <string name="tutorial_discuss_title">Discuss Time</string>
+    <string name="tutorial_discuss_content">Click here to add your comment or view other users\' comments.</string>
+    <string name="tutorial_result_title">"Want to see how other users answered?</string>
+    <string name="tutorial_result_content">Click here to see the result.</string>
 
 
 </resources>

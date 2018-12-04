@@ -1,8 +1,11 @@
 <component name="libraryTable">
   <library name="Gradle: com.github.silvestrpredko:dot-progress-bar-1.1">
+    <ANNOTATIONS>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/dot-progress-bar-1.1.aar/3babd829b21fd4a82a339967a86342ff/annotations.zip!/" />
+    </ANNOTATIONS>
     <CLASSES>
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/dot-progress-bar-1.1.aar/9b199a0b30fecde6ffd787c584caf984/res" />
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/dot-progress-bar-1.1.aar/9b199a0b30fecde6ffd787c584caf984/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/dot-progress-bar-1.1.aar/3babd829b21fd4a82a339967a86342ff/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/dot-progress-bar-1.1.aar/3babd829b21fd4a82a339967a86342ff/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

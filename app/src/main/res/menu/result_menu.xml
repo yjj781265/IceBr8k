@@ -2,7 +2,8 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/mybutton"
-        android:icon="@drawable/message_airplane_selector"
+        android:iconTint="@color/md_white_1000"
+        android:icon="@drawable/chat_bubbles_white"
         android:title=""
         app:showAsAction="always"
         />

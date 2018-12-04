@@ -38,5 +38,16 @@
     <color name="tag_light_red">#FF6666</color>
     <color name="tag_dark_red">@color/darkRed</color>
 
+    <!-- Result Tab Indicator-->
+    <color name="tab_check_mark">#43EA33</color>
+    <color name="tab_process_1">#56D232</color>
+    <color name="tab_process_2">#6AB932</color>
+    <color name="tab_process_3">#7DA131</color>
+    <color name="tab_process_4">#908831</color>
+    <color name="tab_process_5">#A37030</color>
+    <color name="tab_process_6">#B7572F</color>
+    <color name="tab_process_7">#CA3F2F</color>
+    <color name="tab_axe">#DD262E</color>
+
 
 </resources>
