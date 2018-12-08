@@ -62,43 +62,40 @@ import me.imid.swipebacklayout.lib.SwipeBackLayout;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 
 
-public class UserProfilePage extends SwipeBackActivity implements View.OnClickListener,View.OnTouchListener {
+public class UserProfilePage extends SwipeBackActivity implements View.OnClickListener, View.OnTouchListener {
     Toolbar profileToolbar;
-    ImageView mImageView,qrImage;
-    ActionProcessButton  compare_btn;
+    ImageView mImageView, qrImage;
+    ActionProcessButton compare_btn;
     ArcProgress mArcProgress;
-    FlatButton message_btn,addFriend_btn,deleteFriend_btn,reset_btn;
+    FlatButton message_btn, addFriend_btn, deleteFriend_btn, reset_btn;
     TextView displayname_profile, username_profile;
     MaterialDialog mProgressDialog;
     SwipeBackLayout mSwipeBackLayout;
-    private long lastClickTime = 0;
-    DatabaseReference senderMessageRef, receiverMessageRef,mUserQARef,friendStatsRef,friendStatsRef2,
-    userQA2Ref;
-
+    DatabaseReference senderMessageRef, receiverMessageRef, mUserQARef, friendStatsRef, friendStatsRef2,
+            userQA2Ref;
     FirebaseDatabase database;
     FirebaseUser currentUser;
     DatabaseReference mRef;
     User mUser;
     String uid;
     Dialog dialog;
-    boolean firstTime  = true;
+    boolean firstTime = true;
     ProgressBar mProgressBar;
-
-
-    private Compatability mCompatability;
     int score;
-    private ValueEventListener userQARefListener,friendStatsRefListener, friendStatsRef2Listener;
+    private long lastClickTime = 0;
+    private Compatability mCompatability;
+    private ValueEventListener userQARefListener, friendStatsRefListener, friendStatsRef2Listener;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile_page);
-        mRef= FirebaseDatabase.getInstance().getReference();
-        mProgressDialog =  new MaterialDialog.Builder(this)
+        mRef = FirebaseDatabase.getInstance().getReference();
+        mProgressDialog = new MaterialDialog.Builder(this)
                 .content("Updating Avatar...")
                 .progress(true, 0).build();
-        mSwipeBackLayout =getSwipeBackLayout();
+        mSwipeBackLayout = getSwipeBackLayout();
         mSwipeBackLayout.setEdgeTrackingEnabled(SwipeBackLayout.EDGE_LEFT);
 
 
@@ -129,15 +126,9 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         mImageView.setOnClickListener(this);
 
 
-
-
-
-
-
-
         Intent i = getIntent();
         /*******Required extras *******************************/
-        if(i!=null) {
+        if (i != null) {
             mUser = (User) i.getSerializableExtra("userInfo"); //user2
             uid = i.getStringExtra("userUid");
             senderMessageRef = FirebaseDatabase.getInstance().getReference().child("UserMessages").child(currentUser.getUid()).child(uid);
@@ -145,43 +136,34 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         }
 
 
-
         // uid is not my self
-        if (mUser != null && uid!=null &&! uid.equals(currentUser.getUid())) {
+        if (mUser != null && uid != null && !uid.equals(currentUser.getUid())) {
             compare_btn.setVisibility(View.VISIBLE);
             reset_btn.setVisibility(View.GONE);
             qrImage.setVisibility(View.GONE);
             compare_btn.setMode(ActionProcessButton.Mode.PROGRESS);
             updateUI(mUser);
             checkFriendStats();
-           mUserQARef = FirebaseDatabase.getInstance().getReference("UserQA/" + currentUser.getUid());
-           userQA2Ref = FirebaseDatabase.getInstance().getReference("UserQA/" + uid);
-           userQARefListener = new ValueEventListener() {
-               @Override
-               public void onDataChange(DataSnapshot dataSnapshot) {
-                   compareWithUser2();
-               }
+            mUserQARef = FirebaseDatabase.getInstance().getReference("UserQA/" + currentUser.getUid());
+            userQA2Ref = FirebaseDatabase.getInstance().getReference("UserQA/" + uid);
+            userQARefListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    compareWithUser2();
+                }
 
-               @Override
-               public void onCancelled(DatabaseError databaseError) {
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
-               }
-           };
+                }
+            };
 
             mUserQARef.addValueEventListener(userQARefListener);
             userQA2Ref.addValueEventListener(userQARefListener);
 
 
-
-
-
-
-
-
-
-
             // uid is currentuser
-        }else if(mUser != null && uid!=null && uid.equals(currentUser.getUid())){
+        } else if (mUser != null && uid != null && uid.equals(currentUser.getUid())) {
             qrImage.setVisibility(View.GONE);
             compare_btn.setVisibility(View.GONE);
             addFriend_btn.setVisibility(View.GONE);
@@ -202,7 +184,6 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         updateUI(mUser);
 
 
-
     }
 
 
@@ -217,10 +198,6 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
     }
 
 
-
-
-
-
     @Override
     public boolean onSupportNavigateUp() {
         supportFinishAfterTransition();
@@ -229,7 +206,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
 
     public void compareWithUser2() {
-        if(firstTime){
+        if (firstTime) {
             mArcProgress.setVisibility(View.INVISIBLE);
         }
 
@@ -240,36 +217,35 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         mUserQARef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for(DataSnapshot child : dataSnapshot.getChildren()){
-                    if( !"skipped".equals(child.getValue(UserQA.class).getAnswer())){
+                for (DataSnapshot child : dataSnapshot.getChildren()) {
+                    if (!"skipped".equals(child.getValue(UserQA.class).getAnswer())) {
                         userQA1.add(child.getValue(UserQA.class));
                     }
 
                 }
 
                 userQA2Ref.addListenerForSingleValueEvent(new ValueEventListener() {
-                   @Override
-                   public void onDataChange(DataSnapshot dataSnapshot) {
-                       for(DataSnapshot child : dataSnapshot.getChildren()){
-                           if(!"skipped".equals(child.getValue(UserQA.class).getAnswer())){
-                               userQA2.add(child.getValue(UserQA.class));
-                           }
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot child : dataSnapshot.getChildren()) {
+                            if (!"skipped".equals(child.getValue(UserQA.class).getAnswer())) {
+                                userQA2.add(child.getValue(UserQA.class));
+                            }
 
 
-                       }
+                        }
 
-                       mCompatability = new Compatability(userQA1,userQA2);
-                       new setScore().execute(mCompatability);
+                        mCompatability = new Compatability(userQA1, userQA2);
+                        new setScore().execute(mCompatability);
 
 
+                    }
 
-                   }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
 
-                   @Override
-                   public void onCancelled(DatabaseError databaseError) {
-
-                   }
-               });
+                    }
+                });
             }
 
             @Override
@@ -279,30 +255,23 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         });
 
 
-
     }
 
 
-
-    private void toDetailPage(){
+    private void toDetailPage() {
         // send user QA data to the result details activity
-                    Intent i = new Intent(getApplicationContext(), ResultActivity.class);
-                    i.putExtra("user2", mUser);
-                    i.putExtra("user2Id" ,uid);
-                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.
-                            FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+        Intent i = new Intent(getApplicationContext(), ResultActivity.class);
+        i.putExtra("user2", mUser);
+        i.putExtra("user2Id", uid);
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.
+                FLAG_ACTIVITY_BROUGHT_TO_FRONT);
 
-                    startActivity(i);
-
-
-
-
-
+        startActivity(i);
     }
 
 
-    private void checkFriendStats(){
-       friendStatsRef = database.getReference().child("UserFriends").
+    private void checkFriendStats() {
+        friendStatsRef = database.getReference().child("UserFriends").
                 child(currentUser.getUid()).child(uid).child("stats");
         friendStatsRef.keepSynced(true);
 
@@ -310,7 +279,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 String stats = dataSnapshot.getValue(String.class);
-                if(stats ==null){
+                if (stats == null) {
                     addFriend_btn.setVisibility(View.VISIBLE);
                     addFriend_btn.setAlpha(1f);
                     addFriend_btn.setClickable(true);
@@ -319,18 +288,18 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
                     message_btn.setVisibility(View.VISIBLE);
                     deleteFriend_btn.setVisibility(View.GONE);
-                }else if(stats.equals("pending")){
+                } else if (stats.equals("pending")) {
                     deleteFriend_btn.setVisibility(View.GONE);
                     addFriend_btn.setVisibility(View.VISIBLE);
                     message_btn.setVisibility(View.VISIBLE);
                     addFriend_btn.setText("Respond to Friend Request");
                     addFriend_btn.setOnTouchListener(UserProfilePage.this);
                     addFriend_btn.setBackgroundColor(getResources().getColor(R.color.darkOrange));
-                }else if(stats.equals("accepted")){
+                } else if (stats.equals("accepted")) {
                     addFriend_btn.setVisibility(View.GONE);
                     message_btn.setVisibility(View.VISIBLE);
                     deleteFriend_btn.setVisibility(View.VISIBLE);
-                }else{
+                } else {
                     addFriend_btn.setVisibility(View.VISIBLE);
                     addFriend_btn.setClickable(true);
                     addFriend_btn.setText("Send Friend Request");
@@ -348,13 +317,13 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         };
         friendStatsRef.addValueEventListener(friendStatsRefListener);
 
-       friendStatsRef2 = database.getReference().child("UserFriends").
-              child(uid).child(currentUser.getUid()).child("stats");
+        friendStatsRef2 = database.getReference().child("UserFriends").
+                child(uid).child(currentUser.getUid()).child("stats");
         friendStatsRef2Listener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 String stats = dataSnapshot.getValue(String.class);
-                if(stats!=null &&  stats.equals("pending")){
+                if (stats != null && stats.equals("pending")) {
                     deleteFriend_btn.setVisibility(View.GONE);
                     addFriend_btn.setVisibility(View.VISIBLE);
                     message_btn.setVisibility(View.VISIBLE);
@@ -375,14 +344,14 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
     }
 
-    private void resetQuestions(){
+    private void resetQuestions() {
         DatabaseReference resetRef = database.getReference().child("UserQA").child(currentUser.getUid());
-        if(uid.equals(currentUser.getUid()) && reset_btn.getVisibility()==View.VISIBLE){
+        if (uid.equals(currentUser.getUid()) && reset_btn.getVisibility() == View.VISIBLE) {
             resetRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
-                    Intent intent = new Intent(getApplicationContext(),Homepage.class);
-                    Toast.makeText(getApplicationContext(),"Reset Success",Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(getApplicationContext(), Homepage.class);
+                    Toast.makeText(getApplicationContext(), "Reset Success", Toast.LENGTH_SHORT).show();
                     startActivity(intent);
                     finish();
                 }
@@ -398,7 +367,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
             setUser2FriendRef.setValue("pending").addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
-                    SendNotification.sendFriendRequestNotification(uid,"Friend Request",  currentUser.getDisplayName()+" send you a friend request.");
+                    SendNotification.sendFriendRequestNotification(uid, "Friend Request", currentUser.getDisplayName() + " send you a friend request.");
                     Toast.makeText(getApplicationContext(), "Request Sent", Toast.LENGTH_SHORT).show();
                 }
             });
@@ -407,8 +376,8 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         }
     }
 
-    private void deleteFriend(){
-        if(uid!=null && !uid.equals(currentUser.getUid())) {
+    private void deleteFriend() {
+        if (uid != null && !uid.equals(currentUser.getUid())) {
             DatabaseReference deleteRef = database.getReference().child("UserFriends").child(currentUser.getUid())
                     .child(uid);
             deleteRef.removeValue();
@@ -416,7 +385,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
             deleteRef2.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
-                    Toast.makeText(getApplicationContext(),"Friend Deleted",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Friend Deleted", Toast.LENGTH_SHORT).show();
                     addFriend_btn.setVisibility(View.VISIBLE);
 
                     addFriend_btn.setText("Send Friend Request");
@@ -430,20 +399,18 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         }
 
 
-
-
     }
 
 
     public void qrOnClick(View view) {
-     Intent intent = new Intent(getApplicationContext(),MyQR_Code.class);
+        Intent intent = new Intent(getApplicationContext(), MyQR_Code.class);
         ActivityOptionsCompat options = ActivityOptionsCompat.
                 makeSceneTransitionAnimation(this, findViewById(R.id.profile_QR), "qr_transition");
-        startActivity(intent,options.toBundle());
+        startActivity(intent, options.toBundle());
 
     }
 
-    private void showBasicDialog(String str){
+    private void showBasicDialog(String str) {
         new MaterialDialog.Builder(this)
                 .content(str).positiveColor(getResources().getColor(R.color.colorAccent))
                 .negativeColor(getResources().getColor(R.color.holo_red_light))
@@ -456,16 +423,13 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                 .show();
     }
 
-    public void showDismissDialog(String Str){
+    public void showDismissDialog(String Str) {
         new MaterialDialog.Builder(this)
                 .title("Error").titleColor(getResources().getColor(R.color.red_error))
                 .content(Str)
                 .positiveText("okay")
                 .show();
     }
-
-
-
 
 
     @Override
@@ -475,11 +439,10 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
     }
 
 
-
-    public void uploadImage(Bitmap bitmap, final FirebaseUser currentUser){
-        String filename = UUID.randomUUID().toString()+".JPEG";
+    public void uploadImage(Bitmap bitmap, final FirebaseUser currentUser) {
+        String filename = UUID.randomUUID().toString() + ".JPEG";
         FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference avatarRef = storage.getReference().child("UserAvatars/"+filename);
+        StorageReference avatarRef = storage.getReference().child("UserAvatars/" + filename);
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 75, stream);
@@ -503,7 +466,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
     }
 
-    public void updateDatabaseAndCurrentUser(final String photoUrl){
+    public void updateDatabaseAndCurrentUser(final String photoUrl) {
 
         mRef.child("Users").child(currentUser.getUid()).child("photourl").setValue(photoUrl);
         UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
@@ -520,7 +483,7 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
                                     apply(RequestOptions.circleCropTransform()).into(mImageView);
                             showToast("Avatar Updated ");
 
-                        }else{
+                        } else {
                             mProgressDialog.dismiss();
                             showDismissDialog(task.getException().getMessage());
                         }
@@ -530,24 +493,23 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
     }
 
 
-
-    public void showToast(String str){
-        Toast.makeText(getApplicationContext(),str,Toast.LENGTH_LONG).show();
+    public void showToast(String str) {
+        Toast.makeText(getApplicationContext(), str, Toast.LENGTH_LONG).show();
     }
 
-    public void showGreetingDialog(){
+    public void showGreetingDialog() {
         new MaterialDialog.Builder(this)
                 .title("Greeting Message")
-                .inputType(InputType.TYPE_CLASS_TEXT ).inputRange(0,30)
+                .inputType(InputType.TYPE_CLASS_TEXT).inputRange(0, 30)
                 .input("(Optional)", null, new MaterialDialog.InputCallback() {
                     @Override
                     public void onInput(MaterialDialog dialog, CharSequence input) {
-                        if(!input.toString().trim().isEmpty()){
+                        if (!input.toString().trim().isEmpty()) {
                             String text = input.toString();
-                          UserMessage message = new UserMessage(text, currentUser.getUid(),
+                            UserMessage message = new UserMessage(text, currentUser.getUid(),
                                     "text", UUID.randomUUID().toString().replaceAll("-", ""),
                                     new Date().getTime());
-                          updateMessagetoFirebase(message);
+                            updateMessagetoFirebase(message);
                         }
                         sendFriendRequest();
                     }
@@ -569,16 +531,16 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         });
     }
 
-    private void setUnread(){
+    private void setUnread() {
         final DatabaseReference checkUnreadRef = receiverMessageRef.child("unread");
         checkUnreadRef.keepSynced(true);
         checkUnreadRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Integer unRead = dataSnapshot.getValue(Integer.class);
-                if(unRead==null){
+                if (unRead == null) {
                     checkUnreadRef.setValue(1);
-                }else{
+                } else {
                     checkUnreadRef.setValue(++unRead);
                 }
             }
@@ -592,14 +554,127 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
 
     }
 
-    private void setLastMessageNode(UserMessage message){
+    private void setLastMessageNode(UserMessage message) {
         DatabaseReference lastMegNode = senderMessageRef.child("lastmessage");
         lastMegNode.setValue(message);
         DatabaseReference lastmessage2 = receiverMessageRef.child("lastmessage");
         lastmessage2.setValue(message);
     }
 
-    public class setScore extends AsyncTask<Compatability, Void,Integer>{
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+        // preventing double, using threshold of 1000 ms
+        if (SystemClock.elapsedRealtime() - lastClickTime < 1000) {
+            return;
+        }
+        lastClickTime = SystemClock.elapsedRealtime();
+        if (checkInternet()) {
+            if (id == R.id.reset_btn) {
+                showBasicDialog("Are you sure to reset all the questions ?");
+            } else if (id == R.id.compare_btn) {
+                if (mUser != null) {
+                    toDetailPage();
+                }
+            } else if (id == R.id.message_btn) {
+                if (!uid.equals(currentUser.getUid())) {
+                    Intent intent = new Intent(getApplicationContext(), UserChatActvity.class);
+                    intent.putExtra("chatId", uid);
+                    intent.putExtra("chatName", mUser.getDisplayname());
+                    startActivity(intent);
+                    overridePendingTransition(R.anim.slide_from_right, android.R.anim.fade_out);
+                }
+            } else if (id == R.id.addFriend_btn) {
+                if (addFriend_btn.getText().toString().equals("Send Friend Request")) {
+                    showGreetingDialog();
+                } else if (addFriend_btn.getText().toString().equals("Respond to Friend Request")) {
+                    Intent intent = new Intent(getApplicationContext(), FriendRequestPage.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                }
+            } else if (id == R.id.deleteFriend_btn) {
+                new MaterialDialog.Builder(this)
+                        .content("Are you sure to unfriend " + mUser.getDisplayname() + " ?").positiveColor(getResources().getColor(R.color.colorAccent))
+                        .negativeColor(getResources().getColor(R.color.holo_red_light))
+                        .positiveText("Yes").onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        deleteFriend();
+                    }
+                }).negativeText("No")
+                        .show();
+
+            } else if (id == R.id.profileButton) {
+                Intent i = new Intent(getApplicationContext(), MediaViewActivty.class);
+                ArrayList<UserMessage> messages = new ArrayList<>();
+                UserMessage message = new UserMessage();
+                message.setGif(false);
+                message.setMessageid(UUID.randomUUID().toString());
+                message.setSenderid(mUser.getId());
+                message.setText(mUser.getPhotourl());
+                messages.add(message);
+                i.putExtra("photoViews", messages);
+                i.putExtra("photoView", message);
+                ActivityOptionsCompat options = ActivityOptionsCompat.
+                        makeSceneTransitionAnimation(this, findViewById(R.id.profileButton), "photoView");
+
+                startActivity(i, options.toBundle());
+
+            }
+        } else {
+            Snackbar snackbar = Snackbar
+                    .make(profileToolbar, "No Internet Connection", Snackbar.LENGTH_LONG)
+                    .setAction("Setting", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            startActivity(new Intent(Settings.ACTION_SETTINGS));
+                        }
+                    });
+            snackbar.show();
+        }
+
+
+    }
+
+    public boolean checkInternet() {
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        if (null != activeNetwork) {
+            return true;
+        } else {
+            return false;
+
+
+        }
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+            view.setAlpha(.6f);
+        } else {
+            view.setAlpha(1f);
+        }
+        return false;
+    }
+
+    @Override
+    protected void onDestroy() {
+
+
+        try {
+            userQA2Ref.removeEventListener(userQARefListener);
+            mUserQARef.removeEventListener(userQARefListener);
+            friendStatsRef.removeEventListener(friendStatsRefListener);
+            friendStatsRef2.removeEventListener(friendStatsRef2Listener);
+        } catch (NullPointerException e) {
+            Log.d("UserProfilePage,", e.getMessage());
+        }
+        super.onDestroy();
+    }
+
+    public class setScore extends AsyncTask<Compatability, Void, Integer> {
 
         @Override
         protected void onPreExecute() {
@@ -617,18 +692,18 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         @Override
         protected void onPostExecute(Integer integer) {
             score = integer;
-            if(score<20){
-                mArcProgress.setTextColor(ContextCompat.getColor(UserProfilePage.this,R.color.holo_red_light));
-                mArcProgress.setFinishedStrokeColor(ContextCompat.getColor(UserProfilePage.this,R.color.holo_red_light));
-            }else if(score<50){
-                mArcProgress.setTextColor(ContextCompat.getColor(UserProfilePage.this,R.color.orange_500));
-                mArcProgress.setFinishedStrokeColor(ContextCompat.getColor(UserProfilePage.this,R.color.orange_500));
-            }else if(score<80) {
+            if (score < 20) {
+                mArcProgress.setTextColor(ContextCompat.getColor(UserProfilePage.this, R.color.holo_red_light));
+                mArcProgress.setFinishedStrokeColor(ContextCompat.getColor(UserProfilePage.this, R.color.holo_red_light));
+            } else if (score < 50) {
+                mArcProgress.setTextColor(ContextCompat.getColor(UserProfilePage.this, R.color.orange_500));
+                mArcProgress.setFinishedStrokeColor(ContextCompat.getColor(UserProfilePage.this, R.color.orange_500));
+            } else if (score < 80) {
                 mArcProgress.setTextColor(ContextCompat.getColor(UserProfilePage.this, R.color.colorPrimary));
-                mArcProgress.setFinishedStrokeColor(ContextCompat.getColor(UserProfilePage.this,R.color.colorPrimary));
-            }else if (score >=80){
+                mArcProgress.setFinishedStrokeColor(ContextCompat.getColor(UserProfilePage.this, R.color.colorPrimary));
+            } else if (score >= 80) {
                 mArcProgress.setTextColor(ContextCompat.getColor(UserProfilePage.this, R.color.colorAccent));
-                mArcProgress.setFinishedStrokeColor(ContextCompat.getColor(UserProfilePage.this,R.color.colorAccent));
+                mArcProgress.setFinishedStrokeColor(ContextCompat.getColor(UserProfilePage.this, R.color.colorAccent));
             }
             mArcProgress.setProgress(score);
             mProgressBar.setVisibility(View.INVISIBLE);
@@ -637,134 +712,6 @@ public class UserProfilePage extends SwipeBackActivity implements View.OnClickLi
         }
 
 
-    }
-
-
-
-
-
-
-
-
-
-
-    @Override
-    public void onClick(View view) {
-        int id =view.getId();
-        // preventing double, using threshold of 1000 ms
-        if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
-            return;
-        }
-        lastClickTime = SystemClock.elapsedRealtime();
-        if(checkInternet()) {
-            if (id == R.id.reset_btn) {
-             showBasicDialog("Are you sure to reset all the questions ?");
-            } else if (id == R.id.compare_btn) {
-                if (mUser != null) {
-                   toDetailPage();
-                }
-            } else if (id == R.id.message_btn) {
-                if (!uid.equals(currentUser.getUid())) {
-                    Intent intent = new Intent(getApplicationContext(), UserChatActvity.class);
-                    intent.putExtra("chatId", uid);
-                    intent.putExtra("chatName", mUser.getDisplayname());
-                    startActivity(intent);
-                    overridePendingTransition(R.anim.slide_from_right,android.R.anim.fade_out);
-                }
-            } else if (id == R.id.addFriend_btn) {
-                if (addFriend_btn.getText().toString().equals("Send Friend Request")) {
-                     showGreetingDialog();
-                }else if(addFriend_btn.getText().toString().equals("Respond to Friend Request")){
-                    Intent intent = new Intent(getApplicationContext(),FriendRequestPage.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT|Intent.FLAG_ACTIVITY_NEW_TASK );
-                    startActivity(intent);
-                }
-            }else if(id==R.id.deleteFriend_btn){
-                new MaterialDialog.Builder(this)
-                        .content("Are you sure to unfriend "+mUser.getDisplayname()+" ?").positiveColor(getResources().getColor(R.color.colorAccent))
-                        .negativeColor(getResources().getColor(R.color.holo_red_light))
-                        .positiveText("Yes").onPositive(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        deleteFriend();
-                    }
-                }).negativeText("No")
-                        .show();
-
-            }else if(id == R.id.profileButton ){
-                    Intent i = new Intent(getApplicationContext(),MediaViewActivty.class);
-                ArrayList<UserMessage> messages = new ArrayList<>();
-                UserMessage message = new UserMessage();
-                message.setGif(false);
-                message.setMessageid(UUID.randomUUID().toString());
-                message.setSenderid(mUser.getId());
-                message.setText(mUser.getPhotourl());
-                messages.add(message);
-                i.putExtra("photoViews", messages);
-                i.putExtra("photoView", message);
-                ActivityOptionsCompat options = ActivityOptionsCompat.
-                        makeSceneTransitionAnimation(this, findViewById(R.id.profileButton), "photoView");
-
-                    startActivity(i,options.toBundle());
-
-            }
-        }else{
-            Snackbar snackbar = Snackbar
-                    .make(profileToolbar, "No Internet Connection", Snackbar.LENGTH_LONG)
-                    .setAction("Setting", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            startActivity(new Intent(Settings.ACTION_SETTINGS));
-                        }
-                    });
-            snackbar.show();
-        }
-
-
-    }
-
-
-
-
-
-
-    public boolean checkInternet() {
-        ConnectivityManager cm = (ConnectivityManager) getApplicationContext()
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        if (null != activeNetwork) {
-            return true;
-        } else {
-            return false;
-
-
-        }
-    }
-
-    @Override
-    public boolean onTouch(View view, MotionEvent motionEvent) {
-        if(motionEvent.getAction() == MotionEvent.ACTION_DOWN){
-           view.setAlpha(.6f);
-        }else{
-            view.setAlpha(1f);
-        }
-        return false;
-    }
-
-
-    @Override
-    protected void onDestroy() {
-
-
-        try {
-            userQA2Ref.removeEventListener(userQARefListener);
-            mUserQARef.removeEventListener(userQARefListener);
-            friendStatsRef.removeEventListener(friendStatsRefListener);
-            friendStatsRef2.removeEventListener(friendStatsRef2Listener);
-        }catch (NullPointerException e){
-            Log.d("UserProfilePage,", e.getMessage());
-        }
-        super.onDestroy();
     }
 }
 

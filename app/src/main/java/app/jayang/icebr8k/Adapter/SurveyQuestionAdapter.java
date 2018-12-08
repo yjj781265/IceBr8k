@@ -5,11 +5,11 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.util.Log;
@@ -30,23 +30,14 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
-import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
-import com.github.javiersantos.materialstyleddialogs.enums.Style;
-import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.data.PieData;
-import com.github.mikephil.charting.data.PieDataSet;
-import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
-import com.github.mikephil.charting.utils.MPPointF;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -56,8 +47,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.xw.repo.BubbleSeekBar;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -86,11 +75,8 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     private final int SP = 2;
     private final String FEEDBACK_STR = "fb";
     private final int FEEDBACK = 3;
-    private Boolean tutorialConfirm, tutorialPieChart,  tutorialComment,  tutorialSkip, tutorialWelcome;
-
     private final long DAYS = 60 * 60 * 48 * 1000;  // 2 DAYS
-
-
+    private Boolean tutorialConfirm, tutorialPieChart, tutorialComment, tutorialSkip, tutorialWelcome;
     private ArrayList<SurveyQ> mQArrayList;
     private Context mContext;
     private Activity mActivity;
@@ -158,7 +144,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             String answer = null;
             if (mHashMap.get(surveyQ) != null) {
                 answer = mHashMap.get(surveyQ);
-                ((McViewHolder) holder).stamp.setVisibility("skipped" .equals(answer) ? View.VISIBLE : View.GONE);
+                ((McViewHolder) holder).stamp.setVisibility("skipped".equals(answer) ? View.VISIBLE : View.GONE);
 
             }
             //Ui Stuff add radio buttons
@@ -166,7 +152,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 RadioButton button = new RadioButton(mContext);
                 button.setText(surveyQ.getAnswer().get(i));
                 ((McViewHolder) holder).mRadioGroup.addView(button);
-                if (answer != null && !"skipped" .equals(answer) && surveyQ.getAnswer().get(i).toString().equals(answer)) {
+                if (answer != null && !"skipped".equals(answer) && surveyQ.getAnswer().get(i).toString().equals(answer)) {
                     ((RadioButton) mRadioGroup.getChildAt(i)).setChecked(true);
                 }
             }
@@ -178,10 +164,10 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
             String answer = mHashMap.get(surveyQ);
             if (answer != null) {
-                ((ScViewHolder) holder).stamp.setVisibility("skipped" .equals(answer) ? View.VISIBLE : View.GONE);
+                ((ScViewHolder) holder).stamp.setVisibility("skipped".equals(answer) ? View.VISIBLE : View.GONE);
             }
 
-            if (answer != null && !"skipped" .equals(answer)) {
+            if (answer != null && !"skipped".equals(answer)) {
                 Float f = Float.valueOf(mHashMap.get(surveyQ));
                 ((ScViewHolder) holder).mSeekBar.setProgress(f);
             } else {
@@ -199,9 +185,9 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             ((SpViewHolder) holder).mSpinner.setVisibility(View.VISIBLE);
             String answer = mHashMap.get(surveyQ);
 
-            ((SpViewHolder) holder).stamp.setVisibility("skipped" .equals(answer) ? View.VISIBLE : View.GONE);
+            ((SpViewHolder) holder).stamp.setVisibility("skipped".equals(answer) ? View.VISIBLE : View.GONE);
 
-            if (answer != null && !"skipped" .equals(answer)) {
+            if (answer != null && !"skipped".equals(answer)) {
                 for (int i = 0; i < surveyQ.getAnswer().size(); i++) {
                     if (surveyQ.getAnswer().get(i).equals(answer)) {
                         ((SpViewHolder) holder).mSpinner.setSelection(i);
@@ -246,315 +232,6 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         return -1;
     }
 
-    class McViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView question, confirm, skip, comment,pieChart;
-        ImageView check, stamp;
-        RadioGroup mRadioGroup;
-        ProgressBar mProgressBar;
-        SurveyQ mSurveyQ;
-
-
-        public McViewHolder(View itemView) {
-            super(itemView);
-            question = itemView.findViewById(R.id.survey_mc_question);
-            stamp = itemView.findViewById(R.id.survey_mc_stamp);
-            confirm = itemView.findViewById(R.id.survey_mc_confirm);
-            comment = itemView.findViewById(R.id.survey_mc_comment);
-            pieChart = itemView.findViewById(R.id.survey_mc_result);
-            mRadioGroup = itemView.findViewById(R.id.survey_mc_radioGroup);
-            check = itemView.findViewById(R.id.checked);
-            skip = itemView.findViewById(R.id.survey_mc_skip);
-            mProgressBar = itemView.findViewById(R.id.survey_mc_progressBar);
-
-            mProgressBar.setVisibility(View.GONE);
-            skip.setVisibility(View.VISIBLE);
-            confirm.setVisibility(View.VISIBLE);
-            check.setVisibility(View.GONE);
-            comment.setVisibility(View.GONE);
-            pieChart.setVisibility(View.GONE);
-            stamp.setVisibility(View.GONE);
-
-
-            // check to show tutorial or not
-            Log.d("surveyTab123", ""+getAdapterPosition());
-            showfirstLoginPrompt(confirm,skip);
-
-
-
-            confirm.setOnClickListener(this);
-            skip.setOnClickListener(this);
-            pieChart.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (getAdapterPosition() != RecyclerView.NO_POSITION) {
-                        mSurveyQ = mQArrayList.get(getAdapterPosition());
-                        showPieChart(mSurveyQ);
-                    }
-
-                }
-            });
-            Log.d("surveyTab123", "MC view ");
-
-
-        }
-
-
-        @Override
-        public void onClick(View v) {
-
-            if (getAdapterPosition() != RecyclerView.NO_POSITION) {
-                mSurveyQ = mQArrayList.get(getAdapterPosition());
-            }
-            if (mSurveyQ != null) {
-
-                if (v == confirm) {
-                    if (mRadioGroup.getCheckedRadioButtonId() == -1) {
-                        Toast.makeText(getContext(), "Make a selection", Toast.LENGTH_SHORT).show();
-
-                    } else if (mRadioGroup.getCheckedRadioButtonId() != -1) {
-                        skip.setVisibility(View.GONE);
-                        confirm.setVisibility(View.GONE);
-                        mProgressBar.setVisibility(View.VISIBLE);
-                        int id = mRadioGroup.getCheckedRadioButtonId();
-                        View radioButton = mRadioGroup.findViewById(id);
-                        int radioId = mRadioGroup.indexOfChild(radioButton);
-                        RadioButton btn = (RadioButton) mRadioGroup.getChildAt(radioId);
-                        final String selection = (String) btn.getText();
-
-
-                        mHandler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                uploadtoDatabase(mSurveyQ, skip, confirm, selection,
-                                        mProgressBar, check,
-                                        comment, pieChart, stamp);
-
-                            }
-                        }, 300);
-
-                    }
-                } else if (v == skip) {
-
-                    skip.setVisibility(View.GONE);
-                    confirm.setVisibility(View.GONE);
-                    mProgressBar.setVisibility(View.VISIBLE);
-                    mListener.onSkip(getAdapterPosition()!= RecyclerView.NO_POSITION ? getAdapterPosition():0);
-                    mHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            uploadtoDatabase(mSurveyQ, skip, confirm, "skipped",
-                                    mProgressBar, check,
-                                    comment, pieChart, stamp
-                            );
-
-                        }
-                    }, 300);
-
-                }
-            }
-        }
-
-
-    }
-
-    class ScViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView question, confirm, skip,pieChart;
-        BubbleSeekBar mSeekBar;
-        ProgressBar mProgressBar;
-        TextView comment;
-        ImageView  check, stamp;
-        SurveyQ mSurveyQ;
-
-        public ScViewHolder(View itemView) {
-            super(itemView);
-            question = itemView.findViewById(R.id.survey_sc_question);
-            confirm = itemView.findViewById(R.id.survey_sc_confirm);
-            skip = itemView.findViewById(R.id.survey_sc_skip);
-            mProgressBar = itemView.findViewById(R.id.survey_sc_progressBar);
-            comment = itemView.findViewById(R.id.survey_sc_comment);
-            pieChart = itemView.findViewById(R.id.survey_sc_piechart);
-            mSeekBar = itemView.findViewById(R.id.survey_sc_seekBar);
-            stamp = itemView.findViewById(R.id.survey_sc_stamp);
-            check = itemView.findViewById(R.id.checked);
-
-            mProgressBar.setVisibility(View.GONE);
-            skip.setVisibility(View.VISIBLE);
-            confirm.setVisibility(View.VISIBLE);
-            check.setVisibility(View.GONE);
-            comment.setVisibility(View.GONE);
-            pieChart.setVisibility(View.GONE);
-            stamp.setVisibility(View.GONE);
-
-
-            // check to show tutorial or not
-            Log.d("surveyTab123", ""+getAdapterPosition());
-            showfirstLoginPrompt(confirm,skip);
-
-
-
-            confirm.setOnClickListener(this);
-            skip.setOnClickListener(this);
-            pieChart.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (getAdapterPosition() != RecyclerView.NO_POSITION) {
-                        mSurveyQ = mQArrayList.get(getAdapterPosition());
-                        showPieChart(mSurveyQ);
-                    }
-
-                }
-            });
-            Log.d("SurveyAdapter123r", "SC view ");
-
-
-        }
-
-        @Override
-        public void onClick(View v) {
-            if (getAdapterPosition() != RecyclerView.NO_POSITION) {
-                mSurveyQ = mQArrayList.get(getAdapterPosition());
-            }
-            if (mSurveyQ != null) {
-                skip.setVisibility(View.GONE);
-                confirm.setVisibility(View.GONE);
-                mProgressBar.setVisibility(View.VISIBLE);
-                if (v == confirm) {
-
-
-                    mHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            uploadtoDatabase(mSurveyQ, skip, confirm, "" + mSeekBar.getProgress(),
-                                    mProgressBar, check,
-                                    comment, pieChart, stamp);
-
-                        }
-                    }, 300);
-
-
-                } else if (v == skip) {
-
-                    mListener.onSkip(getAdapterPosition()!= RecyclerView.NO_POSITION ? getAdapterPosition():0);
-                    mHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            uploadtoDatabase(mSurveyQ, skip, confirm, "skipped",
-                                    mProgressBar, check,
-                                    comment, pieChart, stamp
-                            );
-
-                        }
-                    }, 300);
-
-                }
-            }
-        }
-    }
-
-
-    class SpViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView question, confirm, skip,pieChart;
-        ProgressBar mProgressBar;
-        TextView comment;
-        ImageView check, stamp;
-        SurveyQ mSurveyQ;
-        Spinner mSpinner;
-
-        public SpViewHolder(View itemView) {
-            super(itemView);
-            question = itemView.findViewById(R.id.survey_sp_question);
-            mSpinner = itemView.findViewById(R.id.survey_sp_spinner);
-            confirm = itemView.findViewById(R.id.survey_sp_confirm);
-            skip = itemView.findViewById(R.id.survey_sp_skip);
-            mProgressBar = itemView.findViewById(R.id.survey_sp_progressBar);
-            comment = itemView.findViewById(R.id.survey_sp_commentNum);
-            pieChart = itemView.findViewById(R.id.survey_sp_result);
-            check = itemView.findViewById(R.id.checked);
-            stamp = itemView.findViewById(R.id.survey_sp_stamp);
-
-
-            mProgressBar.setVisibility(View.GONE);
-            skip.setVisibility(View.VISIBLE);
-            confirm.setVisibility(View.VISIBLE);
-            check.setVisibility(View.GONE);
-            comment.setVisibility(View.GONE);
-            pieChart.setVisibility(View.GONE);
-            stamp.setVisibility(View.GONE);
-
-
-            // check to show tutorial or not
-            Log.d("surveyTab123", ""+getAdapterPosition());
-            showfirstLoginPrompt(confirm,skip);
-
-
-
-            confirm.setOnClickListener(this);
-            skip.setOnClickListener(this);
-            pieChart.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (getAdapterPosition() != RecyclerView.NO_POSITION) {
-                        mSurveyQ = mQArrayList.get(getAdapterPosition());
-                        showPieChart(mSurveyQ);
-                    }
-
-                }
-            });
-            Log.d("surveyTab123", "SP view ");
-
-        }
-
-        @Override
-        public void onClick(View v) {
-            if (getAdapterPosition() != RecyclerView.NO_POSITION) {
-                mSurveyQ = mQArrayList.get(getAdapterPosition());
-            }
-            if (mSurveyQ != null) {
-                skip.setVisibility(View.GONE);
-                confirm.setVisibility(View.GONE);
-                mProgressBar.setVisibility(View.VISIBLE);
-                if (v == confirm) {
-
-
-                    mHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            uploadtoDatabase(mSurveyQ, skip, confirm, mSpinner.getSelectedItem().toString(),
-                                    mProgressBar, check,
-                                    comment, pieChart, stamp);
-
-                        }
-                    }, 300);
-
-                } else if (v == skip) {
-
-                    mListener.onSkip(getAdapterPosition()!= RecyclerView.NO_POSITION ? getAdapterPosition():0);
-                    mHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-
-                            uploadtoDatabase(mSurveyQ, skip, confirm, "skipped",
-                                    mProgressBar, check,
-                                    comment, pieChart, stamp);
-
-                        }
-                    }, 300);
-
-                }
-            }
-        }
-    }
-
-    class FeedbackViewHolder extends RecyclerView.ViewHolder {
-        TextView question;
-
-        public FeedbackViewHolder(View itemView) {
-            super(itemView);
-
-        }
-    }
-
-
     void uploadtoDatabase(final SurveyQ surveyQ, final TextView skip, final TextView confirm, final String answer, final ProgressBar progressBar,
                           final ImageView check, final TextView comment, final TextView pieChart, final ImageView stamp) {
 
@@ -590,51 +267,39 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
 
 
+                            // upload the answer
+                            final UserQA userQA = new UserQA();
+                            userQA.setQuestionId(surveyQ.getQuestionId());
+                            userQA.setQuestion(surveyQ.getQuestion());
+                            userQA.setAnswer(answer);
+                            userQA.setReset(new Date().getTime() +
+                                    (DAYS));
 
 
-                                    // upload the answer
-                                    final UserQA userQA = new UserQA();
-                                    userQA.setQuestionId(surveyQ.getQuestionId());
-                                    userQA.setQuestion(surveyQ.getQuestion());
-                                    userQA.setAnswer(answer);
-                                    userQA.setReset(new Date().getTime() +
-                                            (DAYS));
+                            final DatabaseReference userQARef = FirebaseDatabase.getInstance().getReference()
+                                    .child("UserQA")
+                                    .child(currentUser.getUid())
+                                    .child(userQA.getQuestionId());
+
+                            userQARef.setValue(userQA).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    progressBar.setVisibility(View.GONE);
+                                    comment.setVisibility(View.VISIBLE);
+                                    pieChart.setVisibility(View.VISIBLE);
+                                    check.setVisibility(View.VISIBLE);
+                                    progressBar.setVisibility(View.GONE);
+                                    YoYo.with(Techniques.FadeIn).playOn(comment);
+                                    YoYo.with(Techniques.FadeIn).playOn(pieChart);
+                                    stamp.setVisibility("skipped".equals(answer) ? View.VISIBLE : View.GONE);
+                                    mHashMap.put(surveyQ, answer);
+                                    mListener.onClick(surveyQ, answer);
+                                    //show tutorial for piechart and comments
+                                    showPieChartCommentPrompt(comment, pieChart);
 
 
-
-
-                                    final DatabaseReference userQARef = FirebaseDatabase.getInstance().getReference()
-                                            .child("UserQA")
-                                            .child(currentUser.getUid())
-                                            .child(userQA.getQuestionId());
-
-                                    userQARef.setValue(userQA).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void aVoid) {
-                                            progressBar.setVisibility(View.GONE);
-                                            comment.setVisibility(View.VISIBLE);
-                                            pieChart.setVisibility(View.VISIBLE);
-                                            check.setVisibility(View.VISIBLE);
-                                            progressBar.setVisibility(View.GONE);
-                                            YoYo.with(Techniques.FadeIn).playOn(comment);
-                                            YoYo.with(Techniques.FadeIn).playOn(pieChart);
-                                            stamp.setVisibility("skipped" .equals(answer) ? View.VISIBLE : View.GONE);
-                                            mHashMap.put(surveyQ, answer);
-                                            mListener.onClick(surveyQ,answer);
-                                            //show tutorial for piechart and comments
-                                            showPieChartCommentPrompt(comment,pieChart);
-
-
-                                        }
-                                    });
-
-
-
-
-
-
-
-
+                                }
+                            });
 
 
                         }
@@ -656,50 +321,44 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         } else {
 
 
-
-                    // upload the answer
-                    final UserQA userQA = new UserQA();
-                    userQA.setQuestionId(surveyQ.getQuestionId());
-                    userQA.setQuestion(surveyQ.getQuestion());
-                    userQA.setAnswer(answer);
-                    userQA.setReset(new Date().getTime() +
-                            (DAYS));
-
+            // upload the answer
+            final UserQA userQA = new UserQA();
+            userQA.setQuestionId(surveyQ.getQuestionId());
+            userQA.setQuestion(surveyQ.getQuestion());
+            userQA.setAnswer(answer);
+            userQA.setReset(new Date().getTime() +
+                    (DAYS));
 
 
+            final DatabaseReference userQARef = FirebaseDatabase.getInstance().getReference()
+                    .child("UserQA")
+                    .child(currentUser.getUid())
+                    .child(userQA.getQuestionId());
 
-                    final DatabaseReference userQARef = FirebaseDatabase.getInstance().getReference()
-                            .child("UserQA")
-                            .child(currentUser.getUid())
-                            .child(userQA.getQuestionId());
+            userQARef.setValue(userQA).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    mHashMap.put(surveyQ, answer);
+                    mListener.onClick(surveyQ, answer);
+                    comment.setVisibility(View.VISIBLE);
+                    pieChart.setVisibility(View.VISIBLE);
+                    YoYo.with(Techniques.FadeIn).playOn(comment);
+                    YoYo.with(Techniques.FadeIn).playOn(pieChart);
+                    check.setVisibility(View.VISIBLE);
+                    progressBar.setVisibility(View.GONE);
+                    stamp.setVisibility("skipped".equals(answer) ? View.VISIBLE : View.GONE);
 
-                    userQARef.setValue(userQA).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            mHashMap.put(surveyQ, answer);
-                            mListener.onClick(surveyQ,answer);
-                            comment.setVisibility(View.VISIBLE);
-                            pieChart.setVisibility(View.VISIBLE);
-                            YoYo.with(Techniques.FadeIn).playOn(comment);
-                            YoYo.with(Techniques.FadeIn).playOn(pieChart);
-                            check.setVisibility(View.VISIBLE);
-                            progressBar.setVisibility(View.GONE);
-                            stamp.setVisibility("skipped" .equals(answer) ? View.VISIBLE : View.GONE);
+                    //show tutorial for piechart and comments
+                    showPieChartCommentPrompt(comment, pieChart);
 
-                            //show tutorial for piechart and comments
-                            showPieChartCommentPrompt(comment,pieChart);
-
-
-                        }
-                    });
 
                 }
-
+            });
 
         }
 
 
-
+    }
 
     void getComments(final SurveyQ surveyq, final TextView comment) {
         final String questionId = surveyq.getQuestionId();
@@ -747,7 +406,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
 
         mChart.setVisibility(View.GONE);
-        loadPieChart(mChart, mProgressBar, surveyQ,textView);
+        loadPieChart(mChart, mProgressBar, surveyQ, textView);
 
         close.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -767,52 +426,48 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     }
 
-
     // if is SC question we will group them
-    public void setSCMap(String answer,HashMap<String,Integer> answersMap){
-        if(Integer.valueOf(answer)>=1 &&Integer.valueOf(answer)<=2){
+    public void setSCMap(String answer, HashMap<String, Integer> answersMap) {
+        if (Integer.valueOf(answer) >= 1 && Integer.valueOf(answer) <= 2) {
             String key = "(1-2)";
-            if(answersMap.containsKey(answer)){
+            if (answersMap.containsKey(answer)) {
                 int count = answersMap.get(answer);
 
-                answersMap.put(key, ++count );
-            }else{
-                answersMap.put(key, 1 );
+                answersMap.put(key, ++count);
+            } else {
+                answersMap.put(key, 1);
             }
-        }else if(Integer.valueOf(answer)>=3 &&Integer.valueOf(answer)<=5){
+        } else if (Integer.valueOf(answer) >= 3 && Integer.valueOf(answer) <= 5) {
             String key = "(3-5)";
-            if(answersMap.containsKey(answer)){
+            if (answersMap.containsKey(answer)) {
                 int count = answersMap.get(answer);
 
-                answersMap.put(key, ++count );
-            }else{
-                answersMap.put(key, 1 );
+                answersMap.put(key, ++count);
+            } else {
+                answersMap.put(key, 1);
             }
-        }else if(Integer.valueOf(answer)>=6 &&Integer.valueOf(answer)<=8){
+        } else if (Integer.valueOf(answer) >= 6 && Integer.valueOf(answer) <= 8) {
             String key = "(6-8)";
-            if(answersMap.containsKey(answer)){
+            if (answersMap.containsKey(answer)) {
                 int count = answersMap.get(answer);
 
-                answersMap.put(key, ++count );
-            }else{
-                answersMap.put(key, 1 );
+                answersMap.put(key, ++count);
+            } else {
+                answersMap.put(key, 1);
             }
-        }else if(Integer.valueOf(answer)>=9 &&Integer.valueOf(answer)<=10){
+        } else if (Integer.valueOf(answer) >= 9 && Integer.valueOf(answer) <= 10) {
             String key = "(9-10)";
-            if(answersMap.containsKey(answer)){
+            if (answersMap.containsKey(answer)) {
                 int count = answersMap.get(answer);
 
-                answersMap.put(key, ++count );
-            }else{
-                answersMap.put(key, 1 );
+                answersMap.put(key, ++count);
+            } else {
+                answersMap.put(key, 1);
             }
         }
     }
 
-
     void loadPieChart(final BarChart mChart, final ProgressBar mProgressBar, final SurveyQ surveyQ, final TextView textView) {
-
-
 
 
         final HashMap<String, Integer> answersMap = new HashMap<>();
@@ -837,16 +492,16 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                                 child("answer").getValue(String.class);
 
                         // is sc question
-                        if(MyToolBox.isInteger(answer)){
-                            setSCMap(answer,answersMap);
-                        }else{
+                        if (MyToolBox.isInteger(answer)) {
+                            setSCMap(answer, answersMap);
+                        } else {
                             // set up answer map default value is 0 else increment by 1
 
-                            if(answersMap.containsKey(answer)){
+                            if (answersMap.containsKey(answer)) {
                                 int count = answersMap.get(answer);
-                                answersMap.put(answer, ++count );
-                            }else{
-                                answersMap.put(answer, 1 );
+                                answersMap.put(answer, ++count);
+                            } else {
+                                answersMap.put(answer, 1);
                             }
                         }
                     }
@@ -865,8 +520,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 textView.setText(centerText);
 
 
-
-              // add a lot of colors
+                // add a lot of colors
                 ArrayList<Integer> colors = new ArrayList<Integer>();
 
                 for (int c : ColorTemplate.VORDIPLOM_COLORS)
@@ -886,26 +540,24 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 colors.add(ColorTemplate.getHoloBlue());
 
 
-
-
                 List<BarEntry> entries = new ArrayList<>();
                 ArrayList<String> xAxisStrings = new ArrayList<>();
 
-                if(total>0){
+                if (total > 0) {
                     BarEntry barEntry;
-                    Integer count,index =0 ;
+                    Integer count, index = 0;
                     Float result;
-                    ArrayList<String> answerList=new ArrayList(answersMap.keySet());
+                    ArrayList<String> answerList = new ArrayList(answersMap.keySet());
                     Collections.sort(answerList);
 
-                    for(String str: answerList){
+                    for (String str : answerList) {
                         xAxisStrings.add(str);
                         count = answersMap.get(str);
-                        Log.d("Result_Frag"," count is "+ count);
-                        result = (((float)count)/(float)total)*100;
-                        Log.d("Result_Frag"," result is "+ result);
+                        Log.d("Result_Frag", " count is " + count);
+                        result = (((float) count) / (float) total) * 100;
+                        Log.d("Result_Frag", " result is " + result);
 
-                        barEntry = new BarEntry((float)index,result);
+                        barEntry = new BarEntry((float) index, result);
                         index++;
                         entries.add(barEntry);
 
@@ -955,7 +607,6 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         });
 
     }
-
 
     void bindView(final RecyclerView.ViewHolder holder, final String questionId) {
 
@@ -1056,59 +707,59 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     void showfirstLoginPrompt(final View confirm, final View skip) {
 
         // welcome message
-        if ( tutorialWelcome) {
-            Log.d("surveyTab123","tutorialWelcome");
-            MaterialStyledDialog materialStyledDialog = new MaterialStyledDialog.Builder(mContext)
-                    .setIcon(R.mipmap.ic_launcher)
-                    .setHeaderColor(R.color.lightBlue)
-                    .withDialogAnimation(true)
-                    .setDescription(mContext.getString(R.string.first_login_message))
-                    .setStyle(Style.HEADER_WITH_ICON)
-                    .autoDismiss(true)
-                    .setCancelable(false)
-                    .setPositiveText(mContext.getString(R.string.ok))
-                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+        if (tutorialWelcome) {
+            Log.d("surveyTab123", "tutorialWelcome");
+
+            AlertDialog.Builder mBuilder = new AlertDialog.Builder(mActivity);
+            View mView = mActivity.getLayoutInflater().inflate(R.layout.dialog_welcome,null);
+            mBuilder.setView(mView);
+            final AlertDialog dialog = mBuilder.create();
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.show();
+            mView.findViewById(R.id.welcome_dialog_okay).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    dialog.dismiss();
+                    editor.putBoolean("tutorialWelcome", false);
+                    editor.commit();
+                    tutorialWelcome = false;
+                    //show  tutorial basic
+                    new Handler().postDelayed(new Runnable() {
                         @Override
-                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            Log.d("surveyTab123","tutorialWelcome is done");
+                        public void run() {
+                            if (tutorialConfirm && tutorialSkip) {
+                                // show tutorial if necessary
+                                new MaterialTapTargetSequence()
+                                        .addPrompt(new MaterialTapTargetPrompt.Builder(mActivity)
+                                                .setTarget(confirm)
+                                                .setBackgroundColour(ContextCompat.getColor(mContext, R.color.colorPrimary))
+                                                .setPrimaryText(mContext.getString(R.string.tutorial_confirm_questions_title))
+                                                .setSecondaryText(mContext.getString(R.string.tutorial_confirm_questions_content))
+                                                .create(), 8000)
+                                        .addPrompt(new MaterialTapTargetPrompt.Builder(mActivity)
+                                                .setTarget(skip)
+                                                .setBackgroundColour(ContextCompat.getColor(mContext, R.color.colorPrimary))
+                                                .setPrimaryText(mContext.getString(R.string.tutorial_skip_questions_title))
+                                                .setSecondaryText(mContext.getString(R.string.tutorial_skip_questions_content))
+                                                .setAnimationInterpolator(new LinearOutSlowInInterpolator())
+                                                .create(), 8000)
+                                        .show();
 
-                            editor.putBoolean("tutorialWelcome", false);
-                            editor.commit();
-                            tutorialWelcome = false;
-                            //show  tutorial basic
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (tutorialConfirm && tutorialSkip) {
-                                        // show tutorial if necessary
-                                        new MaterialTapTargetSequence()
-                                                .addPrompt(new MaterialTapTargetPrompt.Builder(mActivity)
-                                                        .setTarget(confirm)
-                                                        .setBackgroundColour(ContextCompat.getColor(mContext,R.color.colorPrimary))
-                                                        .setPrimaryText(mContext.getString(R.string.tutorial_confirm_questions_title))
-                                                        .setSecondaryText(mContext.getString(R.string.tutorial_confirm_questions_content))
-                                                        .create(), 8000)
-                                                .addPrompt(new MaterialTapTargetPrompt.Builder(mActivity)
-                                                        .setTarget(skip)
-                                                        .setBackgroundColour(ContextCompat.getColor(mContext,R.color.colorPrimary))
-                                                        .setPrimaryText(mContext.getString(R.string.tutorial_skip_questions_title))
-                                                        .setSecondaryText(mContext.getString(R.string.tutorial_skip_questions_content))
-                                                        .setAnimationInterpolator(new LinearOutSlowInInterpolator())
-                                                .create(),8000)
-                                                        .show();
+                                editor.putBoolean("tutorialConfirm", false);
+                                editor.putBoolean("tutorialSkip", false);
+                                editor.commit();
+                                tutorialConfirm = false;
+                                tutorialSkip = false;
+                            }
 
-                                        editor.putBoolean("tutorialConfirm", false);
-                                        editor.putBoolean("tutorialSkip", false);
-                                        editor.commit();
-                                        tutorialConfirm = false;
-                                        tutorialSkip = false;
-                                    }
-
-                                }
-                            }, 666);
                         }
-                    }) .build();
-            materialStyledDialog.show();
+                    }, 666);
+                }
+            });
+
+
+
+
 
 
 
@@ -1118,34 +769,34 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     }
 
-    void showPieChartCommentPrompt(final View comment, final View pieChart){
-        if(tutorialComment && tutorialPieChart){
+    void showPieChartCommentPrompt(final View comment, final View pieChart) {
+        if (tutorialComment && tutorialPieChart) {
             //show  tutorial basic
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     // show tutorial if necessary
-                        new MaterialTapTargetSequence()
-                                .addPrompt(new MaterialTapTargetPrompt.Builder(mActivity)
-                                        .setTarget(comment)
-                                        .setBackgroundColour(ContextCompat.getColor(mContext,R.color.colorPrimary))
-                                        .setPrimaryText(mContext.getString(R.string.tutorial_discuss_title))
-                                        .setSecondaryText(mContext.getString(R.string.tutorial_discuss_content))
-                                        .create(), 8000)
-                                .addPrompt(new MaterialTapTargetPrompt.Builder(mActivity)
-                                        .setTarget(pieChart)
-                                        .setBackgroundColour(ContextCompat.getColor(mContext,R.color.colorPrimary))
-                                        .setPrimaryText(mContext.getString(R.string.tutorial_result_title))
-                                        .setSecondaryText(mContext.getString(R.string.tutorial_result_content))
-                                        .setAnimationInterpolator(new LinearOutSlowInInterpolator())
-                                .create(),8000)
-                                .show();
+                    new MaterialTapTargetSequence()
+                            .addPrompt(new MaterialTapTargetPrompt.Builder(mActivity)
+                                    .setTarget(comment)
+                                    .setBackgroundColour(ContextCompat.getColor(mContext, R.color.colorPrimary))
+                                    .setPrimaryText(mContext.getString(R.string.tutorial_discuss_title))
+                                    .setSecondaryText(mContext.getString(R.string.tutorial_discuss_content))
+                                    .create(), 8000)
+                            .addPrompt(new MaterialTapTargetPrompt.Builder(mActivity)
+                                    .setTarget(pieChart)
+                                    .setBackgroundColour(ContextCompat.getColor(mContext, R.color.colorPrimary))
+                                    .setPrimaryText(mContext.getString(R.string.tutorial_result_title))
+                                    .setSecondaryText(mContext.getString(R.string.tutorial_result_content))
+                                    .setAnimationInterpolator(new LinearOutSlowInInterpolator())
+                                    .create(), 8000)
+                            .show();
 
-                        editor.putBoolean("tutorialComment", false);
-                        editor.putBoolean("tutorialPieChart", false);
-                        editor.commit();
-                        tutorialComment = false;
-                        tutorialPieChart = false;
+                    editor.putBoolean("tutorialComment", false);
+                    editor.putBoolean("tutorialPieChart", false);
+                    editor.commit();
+                    tutorialComment = false;
+                    tutorialPieChart = false;
 
 
                 }
@@ -1156,9 +807,307 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     public interface SubmitedListener {
         void onClick(SurveyQ surveyQ, String Answer);
-        void onSkip(int position);
 
 
+    }
+
+    class McViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        TextView question, confirm, skip, comment, pieChart;
+        ImageView check, stamp;
+        RadioGroup mRadioGroup;
+        ProgressBar mProgressBar;
+        SurveyQ mSurveyQ;
+
+
+        public McViewHolder(View itemView) {
+            super(itemView);
+            question = itemView.findViewById(R.id.survey_mc_question);
+            stamp = itemView.findViewById(R.id.survey_mc_stamp);
+            confirm = itemView.findViewById(R.id.survey_mc_confirm);
+            comment = itemView.findViewById(R.id.survey_mc_comment);
+            pieChart = itemView.findViewById(R.id.survey_mc_result);
+            mRadioGroup = itemView.findViewById(R.id.survey_mc_radioGroup);
+            check = itemView.findViewById(R.id.checked);
+            skip = itemView.findViewById(R.id.survey_mc_skip);
+            mProgressBar = itemView.findViewById(R.id.survey_mc_progressBar);
+
+            mProgressBar.setVisibility(View.GONE);
+            skip.setVisibility(View.VISIBLE);
+            confirm.setVisibility(View.VISIBLE);
+            check.setVisibility(View.GONE);
+            comment.setVisibility(View.GONE);
+            pieChart.setVisibility(View.GONE);
+            stamp.setVisibility(View.GONE);
+
+
+            // check to show tutorial or not
+            Log.d("surveyTab123", "" + getAdapterPosition());
+            showfirstLoginPrompt(confirm, skip);
+
+
+            confirm.setOnClickListener(this);
+            skip.setOnClickListener(this);
+            pieChart.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (getAdapterPosition() != RecyclerView.NO_POSITION) {
+                        mSurveyQ = mQArrayList.get(getAdapterPosition());
+                        showPieChart(mSurveyQ);
+                    }
+
+                }
+            });
+            Log.d("surveyTab123", "MC view ");
+
+
+        }
+
+
+        @Override
+        public void onClick(View v) {
+
+            if (getAdapterPosition() != RecyclerView.NO_POSITION) {
+                mSurveyQ = mQArrayList.get(getAdapterPosition());
+            }
+            if (mSurveyQ != null) {
+
+                if (v == confirm) {
+                    if (mRadioGroup.getCheckedRadioButtonId() == -1) {
+                        Toast.makeText(getContext(), "Make a selection", Toast.LENGTH_SHORT).show();
+
+                    } else if (mRadioGroup.getCheckedRadioButtonId() != -1) {
+                        skip.setVisibility(View.GONE);
+                        confirm.setVisibility(View.GONE);
+                        mProgressBar.setVisibility(View.VISIBLE);
+                        int id = mRadioGroup.getCheckedRadioButtonId();
+                        View radioButton = mRadioGroup.findViewById(id);
+                        int radioId = mRadioGroup.indexOfChild(radioButton);
+                        RadioButton btn = (RadioButton) mRadioGroup.getChildAt(radioId);
+                        final String selection = (String) btn.getText();
+
+
+                        mHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                uploadtoDatabase(mSurveyQ, skip, confirm, selection,
+                                        mProgressBar, check,
+                                        comment, pieChart, stamp);
+
+                            }
+                        }, 300);
+
+                    }
+                } else if (v == skip) {
+
+                    skip.setVisibility(View.GONE);
+                    confirm.setVisibility(View.GONE);
+                    mProgressBar.setVisibility(View.VISIBLE);
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            uploadtoDatabase(mSurveyQ, skip, confirm, "skipped",
+                                    mProgressBar, check,
+                                    comment, pieChart, stamp
+                            );
+
+                        }
+                    }, 300);
+
+                }
+            }
+        }
+
+
+    }
+
+    class ScViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        TextView question, confirm, skip, pieChart;
+        BubbleSeekBar mSeekBar;
+        ProgressBar mProgressBar;
+        TextView comment;
+        ImageView check, stamp;
+        SurveyQ mSurveyQ;
+
+        public ScViewHolder(View itemView) {
+            super(itemView);
+            question = itemView.findViewById(R.id.survey_sc_question);
+            confirm = itemView.findViewById(R.id.survey_sc_confirm);
+            skip = itemView.findViewById(R.id.survey_sc_skip);
+            mProgressBar = itemView.findViewById(R.id.survey_sc_progressBar);
+            comment = itemView.findViewById(R.id.survey_sc_comment);
+            pieChart = itemView.findViewById(R.id.survey_sc_piechart);
+            mSeekBar = itemView.findViewById(R.id.survey_sc_seekBar);
+            stamp = itemView.findViewById(R.id.survey_sc_stamp);
+            check = itemView.findViewById(R.id.checked);
+
+            mProgressBar.setVisibility(View.GONE);
+            skip.setVisibility(View.VISIBLE);
+            confirm.setVisibility(View.VISIBLE);
+            check.setVisibility(View.GONE);
+            comment.setVisibility(View.GONE);
+            pieChart.setVisibility(View.GONE);
+            stamp.setVisibility(View.GONE);
+
+
+            // check to show tutorial or not
+            Log.d("surveyTab123", "" + getAdapterPosition());
+            showfirstLoginPrompt(confirm, skip);
+
+
+            confirm.setOnClickListener(this);
+            skip.setOnClickListener(this);
+            pieChart.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (getAdapterPosition() != RecyclerView.NO_POSITION) {
+                        mSurveyQ = mQArrayList.get(getAdapterPosition());
+                        showPieChart(mSurveyQ);
+                    }
+
+                }
+            });
+            Log.d("SurveyAdapter123r", "SC view ");
+
+
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (getAdapterPosition() != RecyclerView.NO_POSITION) {
+                mSurveyQ = mQArrayList.get(getAdapterPosition());
+            }
+            if (mSurveyQ != null) {
+                skip.setVisibility(View.GONE);
+                confirm.setVisibility(View.GONE);
+                mProgressBar.setVisibility(View.VISIBLE);
+                if (v == confirm) {
+
+
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            uploadtoDatabase(mSurveyQ, skip, confirm, "" + mSeekBar.getProgress(),
+                                    mProgressBar, check,
+                                    comment, pieChart, stamp);
+
+                        }
+                    }, 300);
+
+
+                } else if (v == skip) {
+
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            uploadtoDatabase(mSurveyQ, skip, confirm, "skipped",
+                                    mProgressBar, check,
+                                    comment, pieChart, stamp
+                            );
+
+                        }
+                    }, 300);
+
+                }
+            }
+        }
+    }
+
+    class SpViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        TextView question, confirm, skip, pieChart;
+        ProgressBar mProgressBar;
+        TextView comment;
+        ImageView check, stamp;
+        SurveyQ mSurveyQ;
+        Spinner mSpinner;
+
+        public SpViewHolder(View itemView) {
+            super(itemView);
+            question = itemView.findViewById(R.id.survey_sp_question);
+            mSpinner = itemView.findViewById(R.id.survey_sp_spinner);
+            confirm = itemView.findViewById(R.id.survey_sp_confirm);
+            skip = itemView.findViewById(R.id.survey_sp_skip);
+            mProgressBar = itemView.findViewById(R.id.survey_sp_progressBar);
+            comment = itemView.findViewById(R.id.survey_sp_commentNum);
+            pieChart = itemView.findViewById(R.id.survey_sp_result);
+            check = itemView.findViewById(R.id.checked);
+            stamp = itemView.findViewById(R.id.survey_sp_stamp);
+
+
+            mProgressBar.setVisibility(View.GONE);
+            skip.setVisibility(View.VISIBLE);
+            confirm.setVisibility(View.VISIBLE);
+            check.setVisibility(View.GONE);
+            comment.setVisibility(View.GONE);
+            pieChart.setVisibility(View.GONE);
+            stamp.setVisibility(View.GONE);
+
+
+            // check to show tutorial or not
+            Log.d("surveyTab123", "" + getAdapterPosition());
+            showfirstLoginPrompt(confirm, skip);
+
+
+            confirm.setOnClickListener(this);
+            skip.setOnClickListener(this);
+            pieChart.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (getAdapterPosition() != RecyclerView.NO_POSITION) {
+                        mSurveyQ = mQArrayList.get(getAdapterPosition());
+                        showPieChart(mSurveyQ);
+                    }
+
+                }
+            });
+            Log.d("surveyTab123", "SP view ");
+
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (getAdapterPosition() != RecyclerView.NO_POSITION) {
+                mSurveyQ = mQArrayList.get(getAdapterPosition());
+            }
+            if (mSurveyQ != null) {
+                skip.setVisibility(View.GONE);
+                confirm.setVisibility(View.GONE);
+                mProgressBar.setVisibility(View.VISIBLE);
+                if (v == confirm) {
+
+
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            uploadtoDatabase(mSurveyQ, skip, confirm, mSpinner.getSelectedItem().toString(),
+                                    mProgressBar, check,
+                                    comment, pieChart, stamp);
+
+                        }
+                    }, 300);
+
+                } else if (v == skip) {
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            uploadtoDatabase(mSurveyQ, skip, confirm, "skipped",
+                                    mProgressBar, check,
+                                    comment, pieChart, stamp);
+
+                        }
+                    }, 300);
+
+                }
+            }
+        }
+    }
+
+    class FeedbackViewHolder extends RecyclerView.ViewHolder {
+
+        public FeedbackViewHolder(View itemView) {
+            super(itemView);
+
+        }
     }
 
 

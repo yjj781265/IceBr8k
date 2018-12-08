@@ -107,10 +107,6 @@ public class PeopleNearby_Fragment extends Fragment {
     private int index = 0;
     private FrameLayout searchLayout;
     private final String Job_TaG = "MY_JOB_TAG";
-    private final String locationDisabledText = "\"Share My Location\" is disabled, click on the hamburger icon  "
-            + getEmojiByUnicode(0x2630) + "  at the top left and go to Settings  " + getEmojiByUnicode(0x02699)
-            + "  to turn on \"Share My Location\"";
-
     private FusedLocationProviderClient mFusedLocationClient;
     private com.google.android.gms.location.LocationCallback mLocationCallback;
     private LocationRequest locationRequest = new LocationRequest();
@@ -804,48 +800,7 @@ public class PeopleNearby_Fragment extends Fragment {
             return null;
         }
     }
-
-
-    private class updateAll extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected void onPreExecute() {
-
-
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                // Permission is not granted
-                // No explanation needed; request the permission
-                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        MY_PERMISSIONS_LOCATION);
-            } else {
-                if (mLocation != null && radius != null) {
-                    for(UserLocationDialog dialog : mLocationDialogs){
-                        updateDistance(dialog);
-                        compareWithUser2(dialog);
-                    }
-
-                }
-                Log.d("pplnby", "" + "currentLocation got it");
-
-
-            }
-
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            Collections.sort(mLocationDialogs);
-            mAdapter.notifyDataSetChanged();
-            mRecyclerView.setVisibility(View.VISIBLE);
-            loadingGif.setVisibility(View.GONE);
-        }
-    }
+    
 
     private class getScore extends AsyncTask<UserComp, Void, Void> {
         @Override

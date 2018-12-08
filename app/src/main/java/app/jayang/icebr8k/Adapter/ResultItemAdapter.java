@@ -147,11 +147,6 @@ public class ResultItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         }
     }
 
-   /* public void updateList(ArrayList<ResultItem> newList) {
-        Collections.sort(newList);
-        Collections.sort(newList);
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new ResultDiffCallBack(mResultItems, newList));
-        diffResult.dispatchUpdatesTo(this);
-    }*/
+
 
 }

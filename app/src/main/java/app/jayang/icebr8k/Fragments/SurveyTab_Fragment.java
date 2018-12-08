@@ -482,12 +482,7 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
 
     }
 
-    //callback from SubmitedListener
-    @Override
-    public void onSkip(int position) {
 
-
-    }
 
 
     @Override
