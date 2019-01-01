@@ -43,6 +43,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -52,23 +53,29 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.xw.repo.BubbleSeekBar;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 
 import app.jayang.icebr8k.Adapter.ViewPagerAdapter;
 import app.jayang.icebr8k.Fragments.Comment_Fragment;
 import app.jayang.icebr8k.Fragments.Result_fragment;
 import app.jayang.icebr8k.Fragments.TagFragment;
+import app.jayang.icebr8k.Model.BadWordException;
 import app.jayang.icebr8k.Model.SurveyQ;
 import app.jayang.icebr8k.Model.TagModel;
 import app.jayang.icebr8k.Model.UserQA;
+import app.jayang.icebr8k.Utility.EmailUtil;
+import app.jayang.icebr8k.Utility.EmailUtilListener;
+import app.jayang.icebr8k.Utility.Icebr8kLanguageFilter;
 import app.jayang.icebr8k.Utility.MyToolBox;
 import app.jayang.icebr8k.Utility.StringConstant;
 import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
 
-public class QuestionActivity extends SwipeBackActivity {
-    private static final String TAG = QuestionActivity.class.getSimpleName();
+public class QuestionActivity extends SwipeBackActivity implements EmailUtilListener {
+    private static final String TAG = "Icebr8k QuestionActi";
     private final int COMMENTS_TAB = 0,
             TAGS_TAB = 1, RESULTS_TAG = 2;
     private final long DAYS = 60 * 60 * 48 * 1000;  // 2 DAYS
@@ -292,12 +299,15 @@ public class QuestionActivity extends SwipeBackActivity {
                 .input("Enter your tag here...", null, new MaterialDialog.InputCallback() {
                     @Override
                     public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
-                        if (MyToolBox.isOneWord(input.toString())) {
-                            addTagToDatabase(input.toString());
-                        } else {
-                            MyToolBox.showToast(getString(R.string.tag_dialog_one_word_error), QuestionActivity.this);
-                            showInputDialog();
-
+                        try {
+                            if (MyToolBox.isOneWord(input.toString()) && !Icebr8kLanguageFilter.containBadWord(input.toString())) {
+                                addTagToDatabase(input.toString());
+                            } else {
+                                MyToolBox.showToast(getString(R.string.tag_dialog_one_word_error), QuestionActivity.this);
+                                showInputDialog();
+                            }
+                        } catch (BadWordException e) {
+                            Toast.makeText(QuestionActivity.this, R.string.tag_has_badword, Toast.LENGTH_SHORT).show();
                         }
 
                     }
@@ -899,6 +909,49 @@ public class QuestionActivity extends SwipeBackActivity {
 
     public boolean isMainThread() {
         return Looper.myLooper() == Looper.getMainLooper();
+    }
+
+    // EmailUtilListener Call back
+    @Override
+    public void onCompleted(final Object object) {
+        Log.d(TAG, "EmailUtil Report onCompleted: ");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(object instanceof TagModel){
+                    setTagReported((TagModel) object);
+                }
+
+            }
+        });
+    
+    }
+
+    @Override
+    public void onFailed() {
+        Log.d(TAG, "onFailed: ");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(QuestionActivity.this, getString(R.string.tag_report_failed), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    private void setTagReported(TagModel tagReported){
+        db.collection("TagReported").document(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .collection("Tag_Reported_By_"+FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .add(tagReported).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+            @Override
+            public void onSuccess(DocumentReference documentReference) {
+                Toast.makeText(QuestionActivity.this, getString(R.string.tag_report_success), Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(QuestionActivity.this,
+                        getString(R.string.tag_report_failed)+" "+e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 

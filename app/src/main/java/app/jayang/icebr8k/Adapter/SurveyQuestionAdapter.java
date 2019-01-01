@@ -117,11 +117,6 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                     R.layout.item_survey_sp, parent, false);
 
             return new SpViewHolder(v);
-        } else if (viewType == FEEDBACK) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(
-                    R.layout.item_survey_feedback, parent, false);
-
-            return new FeedbackViewHolder(v);
         }
 
 
@@ -1102,13 +1097,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         }
     }
 
-    class FeedbackViewHolder extends RecyclerView.ViewHolder {
 
-        public FeedbackViewHolder(View itemView) {
-            super(itemView);
-
-        }
-    }
 
 
 }

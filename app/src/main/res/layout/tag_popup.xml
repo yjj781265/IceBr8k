@@ -36,6 +36,7 @@
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:layout_marginLeft="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_action_report" />
 
 

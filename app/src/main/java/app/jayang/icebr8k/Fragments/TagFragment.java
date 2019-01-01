@@ -41,7 +41,7 @@ public class TagFragment extends android.support.v4.app.Fragment {
     private String questionId;
     private RecyclerView recyclerView;
     private GridLayoutManager gridLayoutManager;
-    private TextView tag;
+    private TextView no_tag;
     private View view;
     private boolean firstTime = true;
     private CollectionReference mCollectionReference;
@@ -76,7 +76,7 @@ public class TagFragment extends android.support.v4.app.Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_tag, container, false);
-        tag = view.findViewById(R.id.text_view);
+        no_tag = view.findViewById(R.id.tag_no_tag_text);
         recyclerView = view.findViewById(R.id.tag_recyclerView);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
@@ -123,7 +123,10 @@ public class TagFragment extends android.support.v4.app.Fragment {
                             firstTime = false;
                         }
 
+
+
                     }
+                    no_tag.setVisibility(tagModels.contains(emptyTagModel) && tagModels.size() ==1 ? View.VISIBLE :View.GONE);
 
                 }
             });

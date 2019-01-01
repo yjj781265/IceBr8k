@@ -11,6 +11,7 @@ apply plugin: 'com.onesignal.androidsdk.onesignal-gradle-plugin'
 
 repositories {
     maven { url 'https://maven.google.com' }
+    mavenCentral()
 }
 
 apply plugin: 'com.android.application'
@@ -44,6 +45,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+    }
+    configurations {
+        all*.exclude group: 'org.glassfish.hk2.external', module: 'javax.inject'
+    }
+
 }
 
 dependencies {
@@ -127,6 +136,10 @@ dependencies {
     api 'com.firebase:geofire-android:2.2.0'
     api 'com.google.maps.android:android-maps-utils:0.5+'
     api 'com.github.silvestrpredko:dot-progress-bar:1.1'
+    // maigun email services api START
+    implementation 'net.sargue:mailgun:1.9.0'
+
+    // sendgrid api END
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
 
 

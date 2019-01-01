@@ -2,9 +2,7 @@ package app.jayang.icebr8k.Model;
 
 import android.support.annotation.NonNull;
 
-import java.io.Serializable;
 import java.util.Objects;
-import java.util.Set;
 
 public class TagModel implements Comparable<TagModel> {
     private String tagtxt = null, tagId, authorId, questionId;
@@ -115,7 +113,7 @@ public class TagModel implements Comparable<TagModel> {
     @Override
     public int compareTo(@NonNull TagModel tagModel) {
         int result;
-        if(tagModel.getTagId().equals("6666") ||  tagId.equals("6666")){
+        if (tagModel.getTagId().equals("6666") || tagId.equals("6666")) {
             return 0;
         }
         likes = likes == null ? 0 : likes;
@@ -126,13 +124,26 @@ public class TagModel implements Comparable<TagModel> {
         if (tagModel.getDislikes() == null) {
             tagModel.setDislikes(0L);
         }
-        Long diff = likes -dislikes;
+        Long diff = likes - dislikes;
         Long diff2 = tagModel.getLikes() - tagModel.getDislikes();
         result = diff2.compareTo(diff);
-        if(result == 0){
-            return  tagtxt.compareTo(tagModel.getTagtxt());
+        if (result == 0) {
+            return tagtxt.compareTo(tagModel.getTagtxt());
         }
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "TagModel{" +
+                "tagtxt='" + tagtxt + '\'' +
+                ", \ntagId='" + tagId + '\'' +
+                ", \nauthorId='" + authorId + '\'' +
+                ", \nquestionId='" + questionId + '\'' +
+                ", \ntimestamp=" + timestamp +
+                ",\nlikes=" + likes +
+                ", \ndislikes=" + dislikes +
+                '}';
     }
 }
 

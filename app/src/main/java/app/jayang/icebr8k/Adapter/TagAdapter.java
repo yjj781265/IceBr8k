@@ -1,9 +1,12 @@
 package app.jayang.icebr8k.Adapter;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,20 +26,27 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Transaction;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import app.jayang.icebr8k.Model.TagModel;
+import app.jayang.icebr8k.QuestionActivity;
 import app.jayang.icebr8k.R;
+import app.jayang.icebr8k.Utility.EmailUtil;
+import app.jayang.icebr8k.Utility.EmailUtilListener;
 import app.jayang.icebr8k.Utility.MyToolBox;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
 public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    final int EMPTY_VH = 0, TAG_VH = 1;
+        private static final String TAG = "Icebr8k TagAdapter";
+final int EMPTY_VH = 0, TAG_VH = 1;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final String COLLECTION_PARENT_NODE = "Tags";
     private final String SUB_COLLECTION_TAG_LIKED = "TagLiked";
@@ -97,6 +107,7 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         ImageView thumbDown;
         TextView likes;
         TextView dislikes;
+        ImageView tagReport;
 
 
         public TagViewHolder(View itemView) {
@@ -114,6 +125,7 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             thumbDown = customView.findViewById(R.id.tag_thumbdown);
             likes = customView.findViewById(R.id.tag_likes);
             dislikes = customView.findViewById(R.id.tag_dislikes);
+            tagReport = customView.findViewById(R.id.tag_report);
 
             mPopupWindow = new PopupWindow(
                     customView,
@@ -134,7 +146,7 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private void bindView(TagModel tagModel) {
             tagName.setText(tagModel.getTagtxt());
-            if(mPopupWindow!=null){
+            if (mPopupWindow != null) {
                 mPopupWindow.dismiss();
             }
             Long likes = tagModel.getLikes() == null ? 0 : tagModel.getLikes();
@@ -154,11 +166,9 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 } else if (percentage < 25 && percentage >= 0) {
                     container.setBackground(activity.getDrawable(R.drawable.tag_darkred));
                 }
-            }else{
+            } else {
                 container.setBackground(activity.getDrawable(R.drawable.tag_blue));
             }
-
-
 
 
         }
@@ -233,10 +243,79 @@ public class TagAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 }
             });
 
+            tagReport.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    checkTagReported(tagModel);
+
+                }
+            });
+
             mPopupWindow.showAsDropDown(parentView,
-                    MyToolBox.convertDptoPixel(16f, parentView.getContext()), 0);
+                    MyToolBox.convertDptoPixel(8f, parentView.getContext()), 0);
 
         }
+
+        private void showTagReportDialog(final TagModel tagModel){
+            AlertDialog.Builder builder = new AlertDialog.Builder(activity,R.style.Icebr8kAlertDialogTheme);
+
+            builder.setTitle(R.string.tag_report_dialog_title)
+            .setPositiveButton(R.string.tag_report_dialog_pos_btn, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    if (FirebaseAuth.getInstance().getCurrentUser() != null && tagModel != null) {
+                        new EmailUtil(activity).sendTagReport(FirebaseAuth.getInstance().getCurrentUser()
+                                , tagModel);
+
+
+                    } else {
+                        Toast.makeText(activity, activity.getString(R.string.tag_report_failed), Toast.LENGTH_SHORT).show();
+                    }
+                    notifyDataSetChanged();
+                }
+            }).setNegativeButton(R.string.tag_report_dialog_neg_btn, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.dismiss();
+                }
+            }).show();
+
+        }
+
+        private void checkTagReported(final TagModel tagModel) {
+            db.collection("TagReported").document(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                    .collection("Tag_Reported_By_" + FirebaseAuth.getInstance().getCurrentUser().getUid())
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                boolean duplicateFlag = false;
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                   if(document.toObject(TagModel.class).equals(tagModel)){
+                                       duplicateFlag =true;
+                                       break;
+                                   }
+                                }
+
+                                if(duplicateFlag){
+                                    Toast.makeText(activity, R.string.tag_report_duplicated, Toast.LENGTH_SHORT).show();
+                                }else{
+                                    showTagReportDialog(tagModel);
+                                }
+
+                            } else {
+                                Toast.makeText(activity, R.string.tag_report_failed, Toast.LENGTH_SHORT).show();
+                                Log.w(TAG, "Error getting documents.", task.getException());
+                            }
+                        }
+                    });
+        }
+
+
+
+
+
 
         public void liked(TagModel tagModel, final Boolean selected) {
             final DocumentReference likedDocRef = db.collection(COLLECTION_PARENT_NODE).document(tagModel.getQuestionId()).collection(tagModel.getQuestionId())

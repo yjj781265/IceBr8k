@@ -26,21 +26,44 @@
 
 
 
-            <TextView
-                android:id="@+id/survey_sp_question"
-                android:layout_width="0dp"
+
+            <LinearLayout
+                android:id="@+id/survey_sp_question_header"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:layout_marginEnd="16dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
-                android:text="Question"
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                app:layout_constraintBottom_toTopOf="@+id/survey_sp_spinner"
+                android:gravity="top"
+                android:orientation="horizontal"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/survey_sp_question"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="16"
+
+                    android:text="Question"
+                    android:textColor="@color/black"
+                    android:textSize="18sp"
+                    app:layout_constraintBottom_toTopOf="@+id/survey_sp_spinner"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:id="@+id/survey_report"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_action_report"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/survey_mc_question"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </LinearLayout>
 
             <ImageView
                 android:visibility="gone"
@@ -50,7 +73,7 @@
                 android:layout_marginEnd="16dp"
                 android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/survey_sp_question"
+                app:layout_constraintTop_toBottomOf="@+id/survey_sp_question_header"
                 app:srcCompat="@drawable/skipped_stamp"/>
 
             <Spinner
@@ -62,7 +85,7 @@
                 android:spinnerMode="dropdown"
                 android:visibility="visible"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/survey_sp_question"/>
+                app:layout_constraintTop_toBottomOf="@+id/survey_sp_question_header"/>
 
 
             <RelativeLayout

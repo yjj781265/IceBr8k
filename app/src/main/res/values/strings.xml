@@ -133,7 +133,7 @@ This Service does not use these “cookies” explicitly. However, the app may u
     <string name="icebr8k_s_privacy_policy_agreement"><u>Icebr8k\'s Privacy Policy Agreement</u></string>
     <string name="pick_birthdate">"Choose your birthdate</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
+
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="share_my_location">Share My Location</string>
     <string name="make_my_profile_public">Make My Profile Public</string>
@@ -145,12 +145,20 @@ This Service does not use these “cookies” explicitly. However, the app may u
     <string name="connect">Connect</string>
     <string name="leave_feedback">Leave Feedback</string>
     <string name="title_activity_search_people_nearby">SearchPeopleNearby</string>
-
+    <!-- tag  text-->
     <string name="tag_dialog_title">Upload your own tag</string>
     <string name="tag_dialog_hint">Enter your tag here...</string>
     <string name="tag_dialog_one_word_error">Tag can only be one word</string>
+    <string name="tag_report_dialog_title">Do you want to report this Tag?</string>
+    <string name="tag_report_dialog_pos_btn">Yes</string>
+    <string name="tag_report_dialog_neg_btn">No</string>
     <string name="tag_add_success">Tag Added</string>
     <string name="tag_add_failed">Adding Tag Failed</string>
+    <string name="tag_no_tag_text">Be the first to add a Tag.  Click the + on the bottom right.</string>
+    <string name="tag_report_success">The Icebr8k Team has been notified.</string>
+    <string name="tag_report_duplicated">You have already reported this Tag.</string>
+    <string name="tag_has_badword">This Tag contains vulgar language and cannot be submitted.</string>
+    <string name="tag_report_failed">Report Failed.</string>
     <!-- tutorial Strings -->
     <string name="tutorial_finish_first_8_questions">When you finish answering this set of 8 questions, click here to load 8 new questions.</string>
     <string name="tutorial_skip_questions_title">Skip Question</string>
@@ -162,5 +170,11 @@ This Service does not use these “cookies” explicitly. However, the app may u
     <string name="tutorial_result_title">"Want to see how other users answered?</string>
     <string name="tutorial_result_content">Click here to see the result.</string>
     <string name="dialog_welcome_title">Welcome to Icebr8k</string>
+
+    <!--api key-->
+    <string name="maigun_api_key">95a05568ceba5b1f46046e3822410ea7-49a2671e-483596da</string>
+
+
+
 
 </resources>

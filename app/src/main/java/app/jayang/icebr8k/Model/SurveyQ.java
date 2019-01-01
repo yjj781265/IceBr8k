@@ -8,9 +8,9 @@ import java.util.Objects;
  */
 
 public class SurveyQ {
-    private String type, question,questionId;
+    private String type, question, questionId;
     private ArrayList<String> answer;
-    private  Integer likes , dislikes;
+    private Integer likes, dislikes;
 
     public SurveyQ() {
 
@@ -90,9 +90,9 @@ public class SurveyQ {
     @Override
     public String toString() {
         return "SurveyQ{" +
-                "question='" + question + '\'' +
-                ", questionId='" + questionId + '\'' +
-                ", answer=" + answer +
+                "\nquestion='" + question + '\'' +
+                ",\nquestionId='" + questionId + '\'' +
+                ",\nanswer=" + answer +
                 '}';
     }
 }
