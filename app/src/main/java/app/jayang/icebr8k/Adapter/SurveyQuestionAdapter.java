@@ -3,9 +3,11 @@ package app.jayang.icebr8k.Adapter;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
@@ -58,6 +60,7 @@ import app.jayang.icebr8k.Model.SurveyQ;
 import app.jayang.icebr8k.Model.UserQA;
 import app.jayang.icebr8k.QuestionActivity;
 import app.jayang.icebr8k.R;
+import app.jayang.icebr8k.Utility.EmailUtil;
 import app.jayang.icebr8k.Utility.MyToolBox;
 import app.jayang.icebr8k.Utility.MyXAxisValueFormatter;
 import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;
@@ -803,12 +806,29 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     public interface SubmitedListener {
         void onClick(SurveyQ surveyQ, String Answer);
 
+    }
 
+    private void showQuestionReportDialog(final SurveyQ surveyQ){
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext,R.style.Icebr8kAlertDialogTheme);
+       AlertDialog dialog =  builder.setTitle(R.string.question_report_dialog_title)
+                .setPositiveButton(R.string.question_report_dialog_pos_btn, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        new EmailUtil(mContext).sendQuestionReport(FirebaseAuth.getInstance().getCurrentUser(),surveyQ);
+                    }
+                }).setNegativeButton(R.string.question_report_dialog_neg_btn, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        }).create();
+       dialog.setCanceledOnTouchOutside(true);
+       dialog.show();
     }
 
     class McViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView question, confirm, skip, comment, pieChart;
-        ImageView check, stamp;
+        ImageView check, stamp,report;
         RadioGroup mRadioGroup;
         ProgressBar mProgressBar;
         SurveyQ mSurveyQ;
@@ -825,6 +845,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             check = itemView.findViewById(R.id.checked);
             skip = itemView.findViewById(R.id.survey_mc_skip);
             mProgressBar = itemView.findViewById(R.id.survey_mc_progressBar);
+            report = itemView.findViewById(R.id.survey_mc_report);
 
             mProgressBar.setVisibility(View.GONE);
             skip.setVisibility(View.VISIBLE);
@@ -842,6 +863,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
             confirm.setOnClickListener(this);
             skip.setOnClickListener(this);
+            report.setOnClickListener(this);
             pieChart.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -908,6 +930,8 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                         }
                     }, 300);
 
+                }else if(v == report){
+                   showQuestionReportDialog(mSurveyQ);
                 }
             }
         }
@@ -920,7 +944,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         BubbleSeekBar mSeekBar;
         ProgressBar mProgressBar;
         TextView comment;
-        ImageView check, stamp;
+        ImageView check, stamp,report;
         SurveyQ mSurveyQ;
 
         public ScViewHolder(View itemView) {
@@ -934,6 +958,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             mSeekBar = itemView.findViewById(R.id.survey_sc_seekBar);
             stamp = itemView.findViewById(R.id.survey_sc_stamp);
             check = itemView.findViewById(R.id.checked);
+            report = itemView.findViewById(R.id.survey_sc_report);
 
             mProgressBar.setVisibility(View.GONE);
             skip.setVisibility(View.VISIBLE);
@@ -950,6 +975,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
 
             confirm.setOnClickListener(this);
+            report.setOnClickListener(this);
             skip.setOnClickListener(this);
             pieChart.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -972,12 +998,10 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 mSurveyQ = mQArrayList.get(getAdapterPosition());
             }
             if (mSurveyQ != null) {
-                skip.setVisibility(View.GONE);
-                confirm.setVisibility(View.GONE);
-                mProgressBar.setVisibility(View.VISIBLE);
                 if (v == confirm) {
-
-
+                    skip.setVisibility(View.GONE);
+                    confirm.setVisibility(View.GONE);
+                    mProgressBar.setVisibility(View.VISIBLE);
                     mHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -990,7 +1014,9 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
 
                 } else if (v == skip) {
-
+                    skip.setVisibility(View.GONE);
+                    confirm.setVisibility(View.GONE);
+                    mProgressBar.setVisibility(View.VISIBLE);
                     mHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -1002,6 +1028,8 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                         }
                     }, 300);
 
+                }else if(v == report){
+                    showQuestionReportDialog(mSurveyQ);
                 }
             }
         }
@@ -1011,7 +1039,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         TextView question, confirm, skip, pieChart;
         ProgressBar mProgressBar;
         TextView comment;
-        ImageView check, stamp;
+        ImageView check, stamp,report;
         SurveyQ mSurveyQ;
         Spinner mSpinner;
 
@@ -1026,6 +1054,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             pieChart = itemView.findViewById(R.id.survey_sp_result);
             check = itemView.findViewById(R.id.checked);
             stamp = itemView.findViewById(R.id.survey_sp_stamp);
+            report = itemView.findViewById(R.id.survey_sp_report);
 
 
             mProgressBar.setVisibility(View.GONE);
@@ -1043,6 +1072,7 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
 
             confirm.setOnClickListener(this);
+            report.setOnClickListener(this);
             skip.setOnClickListener(this);
             pieChart.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1064,12 +1094,11 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 mSurveyQ = mQArrayList.get(getAdapterPosition());
             }
             if (mSurveyQ != null) {
-                skip.setVisibility(View.GONE);
-                confirm.setVisibility(View.GONE);
-                mProgressBar.setVisibility(View.VISIBLE);
+
                 if (v == confirm) {
-
-
+                    skip.setVisibility(View.GONE);
+                    confirm.setVisibility(View.GONE);
+                    mProgressBar.setVisibility(View.VISIBLE);
                     mHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -1081,6 +1110,9 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                     }, 300);
 
                 } else if (v == skip) {
+                    skip.setVisibility(View.GONE);
+                    confirm.setVisibility(View.GONE);
+                    mProgressBar.setVisibility(View.VISIBLE);
                     mHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -1092,6 +1124,8 @@ public class SurveyQuestionAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                         }
                     }, 300);
 
+                }else if(v == report){
+                    showQuestionReportDialog(mSurveyQ);
                 }
             }
         }

@@ -54,7 +54,7 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageView
-                    android:id="@+id/survey_report"
+                    android:id="@+id/survey_sc_report"
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:layout_weight="1"
@@ -85,7 +85,7 @@
                 android:layout_width="75dp"
                 android:layout_height="30dp"
                 android:layout_marginEnd="16dp"
-                android:visibility="visible"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toEndOf="@+id/textView4"

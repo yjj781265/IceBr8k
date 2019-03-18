@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="Gradle: com.github.wrdlbrnft:sorted-list-adapter-0.2.0.1">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/sorted-list-adapter-0.2.0.1.aar/b0256c0437409ab3a49c15a2b056f30e/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/sorted-list-adapter-0.2.0.1.aar/b0256c0437409ab3a49c15a2b056f30e/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/sorted-list-adapter-0.2.0.1.aar/11782f3faba29e08500882b8ce871886/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/sorted-list-adapter-0.2.0.1.aar/11782f3faba29e08500882b8ce871886/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

@@ -10,7 +10,7 @@ public class Icebr8kLanguageFilter {
 
     public static boolean containBadWord(String string) throws BadWordException {
 
-        for(String word:Arrays.asList(badWords)){
+        for(String word: badWords){
             if(string.toLowerCase().contains(word)){
                 throw new BadWordException();
             }

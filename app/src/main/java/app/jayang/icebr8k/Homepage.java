@@ -91,17 +91,18 @@ import app.jayang.icebr8k.Utility.ActivityCommunicator;
 import app.jayang.icebr8k.Model.myViewPager;
 import app.jayang.icebr8k.Utility.Compatability;
 import app.jayang.icebr8k.Utility.DimmedPromptBackground;
+import app.jayang.icebr8k.Utility.EmailUtilListener;
 import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;
 
 
 public class Homepage extends AppCompatActivity implements
         OSSubscriptionObserver,
+        EmailUtilListener,
         ConnectivityChangeListener{
     private AHBottomNavigation homepageTab;
 
 
     private ImageView menu;
-    private ActivityCommunicator mCommunicator;
     private TextView menuBadge;
     private ViewPagerAdapter mViewPagerAdapter;
     private TextView noConnection_tv;
@@ -1251,7 +1252,25 @@ public class Homepage extends AppCompatActivity implements
         return isConnected;
     }
 
+    @Override
+    public void onCompleted(Object object) {
+        Log.d(TAG, "report onCompleted: ");
+        if(object instanceof SurveyQ){
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getApplicationContext(), R.string.tag_report_success, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
 
+
+    }
+
+    @Override
+    public void onFailed() {
+
+    }
 
 
     public class ScreenStateReceiver extends BroadcastReceiver {

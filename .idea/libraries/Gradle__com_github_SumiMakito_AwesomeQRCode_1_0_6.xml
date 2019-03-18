@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="Gradle: com.github.SumiMakito:AwesomeQRCode-1.0.6">
     <CLASSES>
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/AwesomeQRCode-1.0.6.aar/9cb96dd89fcb1b1864407f7ff7eaa68a/res" />
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/AwesomeQRCode-1.0.6.aar/9cb96dd89fcb1b1864407f7ff7eaa68a/jars/classes.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/AwesomeQRCode-1.0.6.aar/2937e50aa319c496896d635be74e7d0e/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/AwesomeQRCode-1.0.6.aar/2937e50aa319c496896d635be74e7d0e/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

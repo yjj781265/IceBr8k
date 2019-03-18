@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/lightBlue">
 
 
@@ -117,15 +117,41 @@
             android:layout_height="wrap_content"/>
 
     </RelativeLayout>
+     <LinearLayout
+         android:id="@+id/survey_fab_container"
+         android:orientation="horizontal"
+         android:animateLayoutChanges="true"
+         android:layout_gravity="end|bottom"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content">
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/survey_fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_margin="16dp"
-        android:src="@drawable/ic_action_refresh"
-        android:tooltipText="Refresh Questions"
-        android:visibility="invisible"/>
+         <android.support.design.widget.FloatingActionButton
+             android:id="@+id/survey_create_fab"
+             android:layout_marginBottom="16dp"
+             android:layout_marginEnd="8dp"
+             app:fabSize="auto"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             app:elevation="1dp"
+             android:src="@drawable/ic_action_edit"
+             android:tooltipText="Add Questions"
+             android:visibility="visible"/>
+
+         <android.support.design.widget.FloatingActionButton
+             android:id="@+id/survey_fab"
+             android:layout_marginBottom="16dp"
+             android:layout_marginEnd="8dp"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             app:fabSize="auto"
+             app:elevation="1dp"
+             android:src="@drawable/ic_action_refresh"
+             android:tooltipText="Refresh Questions"
+             android:visibility="visible"/>
+
+
+
+
+     </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>

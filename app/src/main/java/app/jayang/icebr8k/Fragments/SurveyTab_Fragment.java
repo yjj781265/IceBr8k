@@ -1,6 +1,8 @@
 package app.jayang.icebr8k.Fragments;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -38,6 +40,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import app.jayang.icebr8k.Adapter.SurveyQuestionAdapter;
+import app.jayang.icebr8k.CreateQuestionActivities.CreateQuestionHomePage;
 import app.jayang.icebr8k.Model.SurveyQ;
 import app.jayang.icebr8k.R;
 import app.jayang.icebr8k.Utility.DimmedPromptBackground;
@@ -63,7 +66,7 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
             .getCurrentUser();
     final PagerSnapHelper snapHelper = new PagerSnapHelper();
     private final SurveyQ feedbackCard = new SurveyQ();
-    private FloatingActionButton fab;
+    private FloatingActionButton fab,createQuestionFab;
     private  SharedPreferences sharedPref;
     private SharedPreferences.Editor editor;
     private final Handler mHandler = new Handler();
@@ -99,6 +102,7 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
         back =  mview.findViewById(R.id.back);
         forward = mview.findViewById(R.id.forward);
         fab =  mview.findViewById(R.id.survey_fab);
+        createQuestionFab = mview.findViewById(R.id.survey_create_fab);
         mLinearLayout = mview.findViewById(R.id.dot);
         loadingGif = mview.findViewById(R.id.survey_loading);
         loadingGif.setVisibility(View.VISIBLE);
@@ -175,6 +179,15 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
                       getSurveyQ();
                    }
                },666);
+
+            }
+        });
+
+        createQuestionFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(),CreateQuestionHomePage.class);
+                startActivity(intent);
 
             }
         });
@@ -397,12 +410,8 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
                                         btnAction(currentSurveyQ);
                                     }
                                 });
-
                             }
-
                         }
-
-
                     }
 
                     @Override
@@ -410,7 +419,6 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
 
                     }
                 });
-
             }
 
             @Override
@@ -418,13 +426,6 @@ public class SurveyTab_Fragment extends Fragment implements SurveyQuestionAdapte
 
             }
         });
-
-
-
-
-
-
-
     }
     private void btnAction(SurveyQ surveyQ) {
         for(int i = 0; i < mList.size(); i++){

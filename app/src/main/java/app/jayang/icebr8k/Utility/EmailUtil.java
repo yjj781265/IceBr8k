@@ -1,10 +1,8 @@
 package app.jayang.icebr8k.Utility;
 
-import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseUser;
 
@@ -12,9 +10,6 @@ import net.sargue.mailgun.Configuration;
 import net.sargue.mailgun.Mail;
 import net.sargue.mailgun.MailRequestCallback;
 import net.sargue.mailgun.Response;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import app.jayang.icebr8k.Model.SurveyQ;
 import app.jayang.icebr8k.Model.TagModel;
@@ -36,8 +31,8 @@ public class EmailUtil {
         // Build a new authorized API client service.
         configuration = new Configuration()
                 .domain("sandboxdb4c40b7d5cf4c458e7689fda789fd97.mailgun.org")
-                .apiKey(context.getString(R.string.maigun_api_key))
-        .from("postmaster@sandboxdb4c40b7d5cf4c458e7689fda789fd97.mailgun.org");
+                .apiKey(context.getString(R.string.mailgun_api_key))
+                .from("postmaster@sandboxdb4c40b7d5cf4c458e7689fda789fd97.mailgun.org");
     }
 
 
@@ -46,7 +41,7 @@ public class EmailUtil {
                 .text(createTagReportContent(user, tag)).build().sendAsync(new MailRequestCallback() {
             @Override
             public void completed(Response response) {
-                Log.d(TAG, "completed: "+response.responseMessage());
+                Log.d(TAG, "completed: " + response.responseMessage());
                 listener.onCompleted(tag);
 
 
@@ -64,7 +59,7 @@ public class EmailUtil {
                 .text(createQuestionReportContent(user, surveyQ)).build().sendAsync(new MailRequestCallback() {
             @Override
             public void completed(Response response) {
-                Log.d(TAG, "completed: "+response.responseMessage());
+                Log.d(TAG, "completed: " + response.responseMessage());
                 listener.onCompleted(surveyQ);
             }
 

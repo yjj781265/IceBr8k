@@ -54,7 +54,7 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageView
-                    android:id="@+id/survey_report"
+                    android:id="@+id/survey_sp_report"
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:layout_weight="1"

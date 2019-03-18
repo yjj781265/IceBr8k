@@ -159,6 +159,11 @@ This Service does not use these “cookies” explicitly. However, the app may u
     <string name="tag_report_duplicated">You have already reported this Tag.</string>
     <string name="tag_has_badword">This Tag contains vulgar language and cannot be submitted.</string>
     <string name="tag_report_failed">Report Failed.</string>
+    <!--question report dialog-->
+    <string name="question_report_dialog_title">Do you want to report this question as offensive?</string>
+    <string name="question_report_dialog_pos_btn">Yes</string>
+    <string name="question_report_dialog_neg_btn">No</string>
+
     <!-- tutorial Strings -->
     <string name="tutorial_finish_first_8_questions">When you finish answering this set of 8 questions, click here to load 8 new questions.</string>
     <string name="tutorial_skip_questions_title">Skip Question</string>
@@ -172,9 +177,17 @@ This Service does not use these “cookies” explicitly. However, the app may u
     <string name="dialog_welcome_title">Welcome to Icebr8k</string>
 
     <!--api key-->
-    <string name="maigun_api_key">95a05568ceba5b1f46046e3822410ea7-49a2671e-483596da</string>
-
-
+    <string name="mailgun_api_key">95a05568ceba5b1f46046e3822410ea7-49a2671e-483596da</string>
+    <string name="search_user_avatar_description">search user avatar</string>
+    <string name="search_user_title">Users</string>
+    <string name="what_type_of_question">What type of question?</string>
+    <string name="multiple_choice">Multiple Choice</string>
+    <string name="scaled">Scaled</string>
+    <string name="type_your_question_here">Type your question here...</string>
+    <string name="go_to_answers">Go to answers</string>
+    <string name="type_the_answer_here">Type the answer here</string>
+    <string name="view_final_layout">View Final Layout</string>
+    <string name="submit">Submit</string>
 
 
 </resources>

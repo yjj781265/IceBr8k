@@ -1,5 +1,6 @@
 package app.jayang.icebr8k.Model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -7,7 +8,9 @@ import java.util.Objects;
  * Created by LoLJay on 10/22/2017.
  */
 
-public class SurveyQ {
+public class SurveyQ implements Serializable {
+    public static final String MULTIPLE_CHOICE = "mc";
+    public static final String SCALE = "sc";
     private String type, question, questionId;
     private ArrayList<String> answer;
     private Integer likes, dislikes;
